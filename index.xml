@@ -1518,7 +1518,7 @@
   window.onload = function () {
     
     
-    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;.\/pdf\/202209241626966.pdf&#39;;
+    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;\/pdf\/202209241626966.pdf&#39;;
 
     var hidePaginator = &#34;&#34; === &#34;true&#34;;
     var hideLoader = &#34;&#34; === &#34;true&#34;;
@@ -6168,7 +6168,7 @@ Enjoy it!&lt;/p&gt;
   window.onload = function () {
     
     
-    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;.\/pdf\/202209241047269.pdf&#39;;
+    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;\/pdf\/202209241047269.pdf&#39;;
 
     var hidePaginator = &#34;&#34; === &#34;true&#34;;
     var hideLoader = &#34;&#34; === &#34;true&#34;;
@@ -12944,7 +12944,7 @@ Enjoy it!&lt;/p&gt;
   window.onload = function () {
     
     
-    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;.\/pdf\/202207011702216.pdf&#39;;
+    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;\/pdf\/202207011702216.pdf&#39;;
 
     var hidePaginator = &#34;&#34; === &#34;true&#34;;
     var hideLoader = &#34;&#34; === &#34;true&#34;;
