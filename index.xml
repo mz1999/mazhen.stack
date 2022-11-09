@@ -7,11 +7,11 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-CN</language>
         <lastBuildDate>Wed, 12 Oct 2022 09:14:10 +0800</lastBuildDate><atom:link href="https://mazhen.tech/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Pin-Box-Future解析</title>
-        <link>https://mazhen.tech/p/pin-box-future%E8%A7%A3%E6%9E%90/</link>
+        <title>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析</title>
+        <link>https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/</link>
         <pubDate>Wed, 12 Oct 2022 09:14:10 +0800</pubDate>
         
-        <guid>https://mazhen.tech/p/pin-box-future%E8%A7%A3%E6%9E%90/</guid>
+        <guid>https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/</guid>
         <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/tower-rs/tower&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Tower&lt;/a&gt;  是一个专注于对网络编程进行抽象的框架，最核心的抽象为 &lt;a class=&#34;link&#34; href=&#34;https://docs.rs/tower/latest/tower/trait.Service.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Service&lt;/a&gt; trait。&lt;code&gt;Service::call&lt;/code&gt; 接受一个 request 进行处理，成功则返回 response，否则返回 error。&lt;/p&gt;
@@ -439,7 +439,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;所以，如果你的 &lt;code&gt;Future&lt;/code&gt; 是 &lt;code&gt;Unpin&lt;/code&gt;，那么即使&lt;code&gt;Future::poll&lt;/code&gt; 要求传入的是 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，对你也没有任何影响。&lt;/p&gt;
-&lt;h2 id=&#34;boxdyn-futrue-的问题&#34;&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;raquo; 的问题&lt;/h2&gt;
+&lt;h2 id=&#34;boxdyn-futrue-的问题&#34;&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt; 的问题&lt;/h2&gt;
 &lt;p&gt;回到上面的问题，我们想让 &lt;code&gt;Service::call&lt;/code&gt; 返回 &lt;code&gt;trait object&lt;/code&gt;，也就是 &lt;code&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt;&lt;/code&gt;，会编译不过，为什么呢？&lt;/p&gt;
 &lt;p&gt;因为标准库为 Box 实现了 Future，但要求 Box 包装的 Future 必须同时实现了 Unpin ：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -514,7 +514,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;这回终于可以了。事实上，在异步场景下，我们经常会看到使用 &lt;code&gt;Box::pin&lt;/code&gt; 去包装 &lt;code&gt;async block&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;pinboxdyn-future&#34;&gt;Pin&amp;lt;Box&amp;lt;dyn Future&lt;/h2&gt;
+&lt;h2 id=&#34;pinboxdyn-future&#34;&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 除了实现了Future，也实现了 Unpin。&lt;/p&gt;
 &lt;p&gt;因为 Pin 实现了 Unpin，只要 P 是 Unpin 的：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -546,7 +546,7 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;因此 &lt;code&gt;Pin&amp;lt;Box&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt;是 Unpin 的。可以这么理解，Pin 钉住了 T，但 Pin 本身是 Unpin的，可以安全的 move。&lt;/p&gt;
 &lt;p&gt;很多异步方法需要你的 &lt;code&gt;Future&lt;/code&gt; 同时实现了 &lt;code&gt;Unpin&lt;/code&gt; ，例如&lt;a class=&#34;link&#34; href=&#34;https://docs.rs/tokio/latest/tokio/macro.select.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt; tokio::select!()&lt;/a&gt;，而 &lt;code&gt;async fn&lt;/code&gt; 返回的 &lt;code&gt;Future&lt;/code&gt; 显然不满足 &lt;code&gt;Unpin&lt;/code&gt;，这个时候仍然可以用 &lt;code&gt;Box::pin&lt;/code&gt;把 Future pin 住，得到的&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;...&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 同时实现了 Future 和 Unpin，满足你的要求。&lt;/p&gt;
+    &gt;tokio::select!()&lt;/a&gt;，而 &lt;code&gt;async fn&lt;/code&gt; 返回的 &lt;code&gt;Future&lt;/code&gt; 显然不满足 &lt;code&gt;Unpin&lt;/code&gt;，这个时候仍然可以用 &lt;code&gt;Box::pin&lt;/code&gt;把 Future pin 住，得到的&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;...&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 同时实现了 Future 和 Unpin，满足你的要求。&lt;/p&gt;
 &lt;p&gt;简单总结，在异步编程场景，我们经常会用&lt;code&gt;Box::pin&lt;/code&gt; 包装 &lt;code&gt;async block&lt;/code&gt;，获得同时实现了 Future 和 Unpin 的&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;。&lt;/p&gt;
 </description>
         </item>
@@ -801,16 +801,16 @@
         <guid>https://mazhen.tech/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/</guid>
         <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://twitter.com/iximiuz/status/1560977903227383810&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;原文链接&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Linux 是内核，由Linus在90年代创造。不包括驱动程序，内核本身在编译时只有几兆字节。&lt;/p&gt;
-&lt;p&gt;GNU是一个自由软件的大集合，可以和操作系统一起使用，包括你非常熟悉的grep、sed、gcc等等。GNU还包括glibc，C语言标准库的实现。&lt;/p&gt;
-&lt;p&gt;GNU/Linux是任何基于GNU集合的Linux发行版（内核+用户态应用）。Debian、Ubuntu、CentOS，甚至RHEL在技术上都是GNU/Linux。因为有共同的C语言标准库和系统工具，通常你可以在GNU/Linux发行版之间跳来跳去，不会有什么麻烦。&lt;/p&gt;
-&lt;p&gt;Alpine Linux是另一类Linux发行版，它不是基于 GNU 集合。&lt;/p&gt;
-&lt;p&gt;代替 GNU，Alpine 使用：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Linux&lt;/strong&gt; 是内核，由Linus在90年代创造。不包括驱动程序，内核本身在编译时只有几兆字节。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GNU&lt;/strong&gt;是一个自由软件的大集合，可以和操作系统一起使用，包括你非常熟悉的 &lt;code&gt;grep&lt;/code&gt;、&lt;code&gt;sed&lt;/code&gt;、&lt;code&gt;gcc&lt;/code&gt;等等。&lt;strong&gt;GNU&lt;/strong&gt; 还包括 &lt;code&gt;glibc&lt;/code&gt;，C 语言标准库的实现。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GNU/Linux&lt;/strong&gt; 是任何基于 GNU 集合的Linux发行版（内核+用户态应用）。Debian、Ubuntu、CentOS，甚至RHEL在技术上都是 &lt;strong&gt;GNU/Linux&lt;/strong&gt;。因为有共同的C语言标准库和系统工具，通常你可以在 GNU/Linux 发行版之间跳来跳去，不会有什么麻烦。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alpine Linux&lt;/strong&gt; 是另一个类型 Linux 发行版，它不是基于 GNU 集合。&lt;/p&gt;
+&lt;p&gt;为了替代 GNU，Alpine 使用：&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;BusyBox：一个小型软件套件 (~2MB)，在单个可执行文件中提供了多个 Unix 实用程序。&lt;/li&gt;
-&lt;li&gt;musl：一种现代且更强大的 C 标准库实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BusyBox&lt;/strong&gt;：一个小型软件套件 (~2MB)，在单个可执行文件中提供了多个 Unix 实用程序。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;musl&lt;/strong&gt;：一种现代且更强大的 C 标准库实现&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;因此，Alpine Linux 不是 Debian 或 CentOS 等 GNU/Linux 发行版的直接替代品，musl 的行为可能与 glibc 不同！&lt;/p&gt;
+&lt;p&gt;因此，&lt;strong&gt;Alpine Linux&lt;/strong&gt; 不是 Debian 或 CentOS 等 GNU/Linux 发行版的直接替代品，&lt;code&gt;musl&lt;/code&gt; 的行为可能与 &lt;code&gt;glibc&lt;/code&gt; 不同！&lt;/p&gt;
 </description>
         </item>
         <item>

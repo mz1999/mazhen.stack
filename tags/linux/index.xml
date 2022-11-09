@@ -14,16 +14,16 @@
         <guid>https://mazhen.tech/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/</guid>
         <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://twitter.com/iximiuz/status/1560977903227383810&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;原文链接&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Linux 是内核，由Linus在90年代创造。不包括驱动程序，内核本身在编译时只有几兆字节。&lt;/p&gt;
-&lt;p&gt;GNU是一个自由软件的大集合，可以和操作系统一起使用，包括你非常熟悉的grep、sed、gcc等等。GNU还包括glibc，C语言标准库的实现。&lt;/p&gt;
-&lt;p&gt;GNU/Linux是任何基于GNU集合的Linux发行版（内核+用户态应用）。Debian、Ubuntu、CentOS，甚至RHEL在技术上都是GNU/Linux。因为有共同的C语言标准库和系统工具，通常你可以在GNU/Linux发行版之间跳来跳去，不会有什么麻烦。&lt;/p&gt;
-&lt;p&gt;Alpine Linux是另一类Linux发行版，它不是基于 GNU 集合。&lt;/p&gt;
-&lt;p&gt;代替 GNU，Alpine 使用：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Linux&lt;/strong&gt; 是内核，由Linus在90年代创造。不包括驱动程序，内核本身在编译时只有几兆字节。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GNU&lt;/strong&gt;是一个自由软件的大集合，可以和操作系统一起使用，包括你非常熟悉的 &lt;code&gt;grep&lt;/code&gt;、&lt;code&gt;sed&lt;/code&gt;、&lt;code&gt;gcc&lt;/code&gt;等等。&lt;strong&gt;GNU&lt;/strong&gt; 还包括 &lt;code&gt;glibc&lt;/code&gt;，C 语言标准库的实现。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GNU/Linux&lt;/strong&gt; 是任何基于 GNU 集合的Linux发行版（内核+用户态应用）。Debian、Ubuntu、CentOS，甚至RHEL在技术上都是 &lt;strong&gt;GNU/Linux&lt;/strong&gt;。因为有共同的C语言标准库和系统工具，通常你可以在 GNU/Linux 发行版之间跳来跳去，不会有什么麻烦。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alpine Linux&lt;/strong&gt; 是另一个类型 Linux 发行版，它不是基于 GNU 集合。&lt;/p&gt;
+&lt;p&gt;为了替代 GNU，Alpine 使用：&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;BusyBox：一个小型软件套件 (~2MB)，在单个可执行文件中提供了多个 Unix 实用程序。&lt;/li&gt;
-&lt;li&gt;musl：一种现代且更强大的 C 标准库实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BusyBox&lt;/strong&gt;：一个小型软件套件 (~2MB)，在单个可执行文件中提供了多个 Unix 实用程序。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;musl&lt;/strong&gt;：一种现代且更强大的 C 标准库实现&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;因此，Alpine Linux 不是 Debian 或 CentOS 等 GNU/Linux 发行版的直接替代品，musl 的行为可能与 glibc 不同！&lt;/p&gt;
+&lt;p&gt;因此，&lt;strong&gt;Alpine Linux&lt;/strong&gt; 不是 Debian 或 CentOS 等 GNU/Linux 发行版的直接替代品，&lt;code&gt;musl&lt;/code&gt; 的行为可能与 &lt;code&gt;glibc&lt;/code&gt; 不同！&lt;/p&gt;
 </description>
         </item>
         <item>

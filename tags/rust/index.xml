@@ -7,11 +7,11 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-CN</language>
         <lastBuildDate>Wed, 12 Oct 2022 09:14:10 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/rust/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Pin-Box-Future解析</title>
-        <link>https://mazhen.tech/p/pin-box-future%E8%A7%A3%E6%9E%90/</link>
+        <title>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析</title>
+        <link>https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/</link>
         <pubDate>Wed, 12 Oct 2022 09:14:10 +0800</pubDate>
         
-        <guid>https://mazhen.tech/p/pin-box-future%E8%A7%A3%E6%9E%90/</guid>
+        <guid>https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/</guid>
         <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/tower-rs/tower&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Tower&lt;/a&gt;  是一个专注于对网络编程进行抽象的框架，最核心的抽象为 &lt;a class=&#34;link&#34; href=&#34;https://docs.rs/tower/latest/tower/trait.Service.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Service&lt;/a&gt; trait。&lt;code&gt;Service::call&lt;/code&gt; 接受一个 request 进行处理，成功则返回 response，否则返回 error。&lt;/p&gt;
@@ -439,7 +439,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;所以，如果你的 &lt;code&gt;Future&lt;/code&gt; 是 &lt;code&gt;Unpin&lt;/code&gt;，那么即使&lt;code&gt;Future::poll&lt;/code&gt; 要求传入的是 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，对你也没有任何影响。&lt;/p&gt;
-&lt;h2 id=&#34;boxdyn-futrue-的问题&#34;&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;raquo; 的问题&lt;/h2&gt;
+&lt;h2 id=&#34;boxdyn-futrue-的问题&#34;&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt; 的问题&lt;/h2&gt;
 &lt;p&gt;回到上面的问题，我们想让 &lt;code&gt;Service::call&lt;/code&gt; 返回 &lt;code&gt;trait object&lt;/code&gt;，也就是 &lt;code&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt;&lt;/code&gt;，会编译不过，为什么呢？&lt;/p&gt;
 &lt;p&gt;因为标准库为 Box 实现了 Future，但要求 Box 包装的 Future 必须同时实现了 Unpin ：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -514,7 +514,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;这回终于可以了。事实上，在异步场景下，我们经常会看到使用 &lt;code&gt;Box::pin&lt;/code&gt; 去包装 &lt;code&gt;async block&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;pinboxdyn-future&#34;&gt;Pin&amp;lt;Box&amp;lt;dyn Future&lt;/h2&gt;
+&lt;h2 id=&#34;pinboxdyn-future&#34;&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 除了实现了Future，也实现了 Unpin。&lt;/p&gt;
 &lt;p&gt;因为 Pin 实现了 Unpin，只要 P 是 Unpin 的：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -546,7 +546,7 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;因此 &lt;code&gt;Pin&amp;lt;Box&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt;是 Unpin 的。可以这么理解，Pin 钉住了 T，但 Pin 本身是 Unpin的，可以安全的 move。&lt;/p&gt;
 &lt;p&gt;很多异步方法需要你的 &lt;code&gt;Future&lt;/code&gt; 同时实现了 &lt;code&gt;Unpin&lt;/code&gt; ，例如&lt;a class=&#34;link&#34; href=&#34;https://docs.rs/tokio/latest/tokio/macro.select.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt; tokio::select!()&lt;/a&gt;，而 &lt;code&gt;async fn&lt;/code&gt; 返回的 &lt;code&gt;Future&lt;/code&gt; 显然不满足 &lt;code&gt;Unpin&lt;/code&gt;，这个时候仍然可以用 &lt;code&gt;Box::pin&lt;/code&gt;把 Future pin 住，得到的&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;...&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 同时实现了 Future 和 Unpin，满足你的要求。&lt;/p&gt;
+    &gt;tokio::select!()&lt;/a&gt;，而 &lt;code&gt;async fn&lt;/code&gt; 返回的 &lt;code&gt;Future&lt;/code&gt; 显然不满足 &lt;code&gt;Unpin&lt;/code&gt;，这个时候仍然可以用 &lt;code&gt;Box::pin&lt;/code&gt;把 Future pin 住，得到的&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;...&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 同时实现了 Future 和 Unpin，满足你的要求。&lt;/p&gt;
 &lt;p&gt;简单总结，在异步编程场景，我们经常会用&lt;code&gt;Box::pin&lt;/code&gt; 包装 &lt;code&gt;async block&lt;/code&gt;，获得同时实现了 Future 和 Unpin 的&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;。&lt;/p&gt;
 </description>
         </item>

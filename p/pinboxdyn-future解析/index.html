@@ -2,17 +2,17 @@
 <html lang="zh-CN" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response'>
-<title>Pin-Box-Future解析</title>
+<title>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析</title>
 
-<link rel='canonical' href='https://mazhen.tech/p/pin-box-future%E8%A7%A3%E6%9E%90/'>
+<link rel='canonical' href='https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Pin-Box-Future解析'>
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析'>
 <meta property='og:description' content='Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response'>
-<meta property='og:url' content='https://mazhen.tech/p/pin-box-future%E8%A7%A3%E6%9E%90/'>
+<meta property='og:url' content='https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='rust' /><meta property='article:published_time' content='2022-10-12T09:14:10&#43;08:00'/><meta property='article:modified_time' content='2022-10-12T09:14:10&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
-    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Pin-Box-Future解析">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析">
 <meta name="twitter:description" content="Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response">
     <link rel="shortcut icon" href="/favicon.png" />
 
@@ -340,9 +340,9 @@ if (!doNotTrack) {
     <li><a href="#async-fn">async fn</a></li>
     <li><a href="#future-都是-unpin-的吗">Future 都是 !Unpin 的吗</a></li>
     <li><a href="#实现了-unpin-的-future">实现了 Unpin 的 Future</a></li>
-    <li><a href="#boxdyn-futrue-的问题">Box&lt;dyn Futrue&lt;&raquo; 的问题</a></li>
+    <li><a href="#boxdyn-futrue-的问题">Box&lt;dyn Futrue&lt;&gt;&gt; 的问题</a></li>
     <li><a href="#pin-实现了-future">Pin 实现了 Future</a></li>
-    <li><a href="#pinboxdyn-future">Pin&lt;Box&lt;dyn Future</a></li>
+    <li><a href="#pinboxdyn-future">Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</a></li>
   </ol>
 </nav>
         </div>
@@ -370,7 +370,7 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/pin-box-future%E8%A7%A3%E6%9E%90/">Pin-Box-Future解析</a>
+            <a href="/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/">Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析</a>
         </h2>
     
         
@@ -849,7 +849,7 @@ if (!doNotTrack) {
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>所以，如果你的 <code>Future</code> 是 <code>Unpin</code>，那么即使<code>Future::poll</code> 要求传入的是 <code>Pin&lt;&amp;mut Self&gt;</code>，对你也没有任何影响。</p>
-<h2 id="boxdyn-futrue-的问题">Box&lt;dyn Futrue&lt;&raquo; 的问题</h2>
+<h2 id="boxdyn-futrue-的问题">Box&lt;dyn Futrue&lt;&gt;&gt; 的问题</h2>
 <p>回到上面的问题，我们想让 <code>Service::call</code> 返回 <code>trait object</code>，也就是 <code>Box&lt;dyn Futrue&lt;&gt;&gt;</code>，会编译不过，为什么呢？</p>
 <p>因为标准库为 Box 实现了 Future，但要求 Box 包装的 Future 必须同时实现了 Unpin ：</p>
 <div class="highlight"><div class="chroma">
@@ -924,7 +924,7 @@ if (!doNotTrack) {
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>这回终于可以了。事实上，在异步场景下，我们经常会看到使用 <code>Box::pin</code> 去包装 <code>async block</code>。</p>
-<h2 id="pinboxdyn-future">Pin&lt;Box&lt;dyn Future</h2>
+<h2 id="pinboxdyn-future">Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</h2>
 <p><code>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</code> 除了实现了Future，也实现了 Unpin。</p>
 <p>因为 Pin 实现了 Unpin，只要 P 是 Unpin 的：</p>
 <div class="highlight"><div class="chroma">
@@ -956,7 +956,7 @@ if (!doNotTrack) {
 </div>
 </div><p>因此 <code>Pin&lt;Box&lt;T&gt;&gt;</code>是 Unpin 的。可以这么理解，Pin 钉住了 T，但 Pin 本身是 Unpin的，可以安全的 move。</p>
 <p>很多异步方法需要你的 <code>Future</code> 同时实现了 <code>Unpin</code> ，例如<a class="link" href="https://docs.rs/tokio/latest/tokio/macro.select.html"  target="_blank" rel="noopener"
-    > tokio::select!()</a>，而 <code>async fn</code> 返回的 <code>Future</code> 显然不满足 <code>Unpin</code>，这个时候仍然可以用 <code>Box::pin</code>把 Future pin 住，得到的<code>Pin&lt;Box&lt;dyn Future&lt;...&gt;&gt;&gt;</code> 同时实现了 Future 和 Unpin，满足你的要求。</p>
+    >tokio::select!()</a>，而 <code>async fn</code> 返回的 <code>Future</code> 显然不满足 <code>Unpin</code>，这个时候仍然可以用 <code>Box::pin</code>把 Future pin 住，得到的<code>Pin&lt;Box&lt;dyn Future&lt;...&gt;&gt;&gt;</code> 同时实现了 Future 和 Unpin，满足你的要求。</p>
 <p>简单总结，在异步编程场景，我们经常会用<code>Box::pin</code> 包装 <code>async block</code>，获得同时实现了 Future 和 Unpin 的<code>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</code>。</p>
 
 </section>
