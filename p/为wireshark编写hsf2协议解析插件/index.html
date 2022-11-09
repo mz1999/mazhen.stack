@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Wireshark是排查网络问题最常用的工具，它已经内置支持了上百种通用协议，同时它的扩展性也很好，对于自定义的应用层网络协议，你可以使用c'>
+<title>为Wireshark编写HSF2协议解析插件</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%B8%BAwireshark%E7%BC%96%E5%86%99hsf2%E5%8D%8F%E8%AE%AE%E8%A7%A3%E6%9E%90%E6%8F%92%E4%BB%B6/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='为Wireshark编写HSF2协议解析插件'>
+<meta property='og:description' content='Wireshark是排查网络问题最常用的工具，它已经内置支持了上百种通用协议，同时它的扩展性也很好，对于自定义的应用层网络协议，你可以使用c'>
+<meta property='og:url' content='https://mazhen.tech/p/%E4%B8%BAwireshark%E7%BC%96%E5%86%99hsf2%E5%8D%8F%E8%AE%AE%E8%A7%A3%E6%9E%90%E6%8F%92%E4%BB%B6/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2014-12-21T14:15:17&#43;08:00'/><meta property='article:modified_time' content='2014-12-21T14:15:17&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="为Wireshark编写HSF2协议解析插件">
+<meta name="twitter:description" content="Wireshark是排查网络问题最常用的工具，它已经内置支持了上百种通用协议，同时它的扩展性也很好，对于自定义的应用层网络协议，你可以使用c">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%B8%BAwireshark%E7%BC%96%E5%86%99hsf2%E5%8D%8F%E8%AE%AE%E8%A7%A3%E6%9E%90%E6%8F%92%E4%BB%B6/">为Wireshark编写HSF2协议解析插件</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2014-12-21</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><code>Wireshark</code>是排查网络问题最常用的工具，它已经内置支持了上百种通用协议，同时它的扩展性也很好，对于自定义的应用层网络协议，你可以使用<code>c</code>或者<code>lua</code>编写协议解析插件，这样你就可以在<code>Wireshark</code>中观察到协议的内容而不是二进制流，为排查问题带来一定的便利性。</p>
+<p>最近在排查一个<code>HSF</code>超时的问题，顺便花了些时间为<code>Wireshark</code>写了一个<code>HSF2</code>协议解析插件，目前支持<code>HSF2</code>的<code>request</code>、<code>response</code>和<code>heart beat</code>协议，支持将多个<code>packet</code>还原为上层<code>PDU</code>。暂不支持HSF原先的TB Remoting协议。先看效果。</p>
+<p>首先在Packet List区域已经能识别HSF2协议：</p>
+<p>HSF的请求和响应</p>
+<p><img src="https://cdn.mazhen.tech/images/202207011417781.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>HSF的心跳协议</p>
+<p><img src="https://cdn.mazhen.tech/images/202207011417651.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>点击某个数据包，可以在Packet details区域查看详细的协议内容：
+HSF请求</p>
+<p><img src="https://cdn.mazhen.tech/images/202207011418183.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>可以看到很多协议的重要信息，包括序列化方式，超时时间，服务名称、方法及参数</p>
+<p>HSF响应</p>
+<p><img src="https://cdn.mazhen.tech/images/202207011418163.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>HeartBeat请求</p>
+<p><img src="https://cdn.mazhen.tech/images/202207011419145.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>心跳协议比较简单，响应就不看了。</p>
+<p>插件是使用lua开发的，安装比较简单，以OS X平台为例：</p>
+<ol>
+<li>
+<p>将协议解析脚本copy到<code>/Applications/Wireshark.app/Contents/Resources/share/wireshark/</code> 目录</p>
+</li>
+<li>
+<p>编辑<code>init.lua</code>文件，设置<code>disable_lua = false</code>，确保lua支持打开</p>
+</li>
+<li>
+<p>在<code>init.lua</code>文件末尾增加</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">dofile(&#34;hsf2.lua&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<p>再次启动<code>Wireshark</code>，会对12200端口的数据流使用脚本解析，已经可以识别<code>HSF</code>协议了。</p>
+<p><strong>备注</strong></p>
+<p>附上<code>hsf2.lua</code>，边翻<code>HSF</code>代码边写的，写完眼已经花了，错误难免，欢迎试用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span><span class="lnt">212
+</span><span class="lnt">213
+</span><span class="lnt">214
+</span><span class="lnt">215
+</span><span class="lnt">216
+</span><span class="lnt">217
+</span><span class="lnt">218
+</span><span class="lnt">219
+</span><span class="lnt">220
+</span><span class="lnt">221
+</span><span class="lnt">222
+</span><span class="lnt">223
+</span><span class="lnt">224
+</span><span class="lnt">225
+</span><span class="lnt">226
+</span><span class="lnt">227
+</span><span class="lnt">228
+</span><span class="lnt">229
+</span><span class="lnt">230
+</span><span class="lnt">231
+</span><span class="lnt">232
+</span><span class="lnt">233
+</span><span class="lnt">234
+</span><span class="lnt">235
+</span><span class="lnt">236
+</span><span class="lnt">237
+</span><span class="lnt">238
+</span><span class="lnt">239
+</span><span class="lnt">240
+</span><span class="lnt">241
+</span><span class="lnt">242
+</span><span class="lnt">243
+</span><span class="lnt">244
+</span><span class="lnt">245
+</span><span class="lnt">246
+</span><span class="lnt">247
+</span><span class="lnt">248
+</span><span class="lnt">249
+</span><span class="lnt">250
+</span><span class="lnt">251
+</span><span class="lnt">252
+</span><span class="lnt">253
+</span><span class="lnt">254
+</span><span class="lnt">255
+</span><span class="lnt">256
+</span><span class="lnt">257
+</span><span class="lnt">258
+</span><span class="lnt">259
+</span><span class="lnt">260
+</span><span class="lnt">261
+</span><span class="lnt">262
+</span><span class="lnt">263
+</span><span class="lnt">264
+</span><span class="lnt">265
+</span><span class="lnt">266
+</span><span class="lnt">267
+</span><span class="lnt">268
+</span><span class="lnt">269
+</span><span class="lnt">270
+</span><span class="lnt">271
+</span><span class="lnt">272
+</span><span class="lnt">273
+</span><span class="lnt">274
+</span><span class="lnt">275
+</span><span class="lnt">276
+</span><span class="lnt">277
+</span><span class="lnt">278
+</span><span class="lnt">279
+</span><span class="lnt">280
+</span><span class="lnt">281
+</span><span class="lnt">282
+</span><span class="lnt">283
+</span><span class="lnt">284
+</span><span class="lnt">285
+</span><span class="lnt">286
+</span><span class="lnt">287
+</span><span class="lnt">288
+</span><span class="lnt">289
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-- declare the protocol
+</span></span><span class="line"><span class="cl">hsf2_proto = Proto(&#34;hsf2&#34;, &#34;Taobao HSF2 Protocol&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-- declare the value strings
+</span></span><span class="line"><span class="cl">local vs_id = {
+</span></span><span class="line"><span class="cl">    [12] = &#34;HSF2 Heart Beat&#34;,
+</span></span><span class="line"><span class="cl">    [13] = &#34;HSF2 TB Remoting&#34;,
+</span></span><span class="line"><span class="cl">    [14] = &#34;HSF2 HSF Remoting&#34;  
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">local vs_version = {
+</span></span><span class="line"><span class="cl">    [1] = &#34;HSF2&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">local vs_op = {
+</span></span><span class="line"><span class="cl">    [0] = &#34;request&#34;,
+</span></span><span class="line"><span class="cl">    [1] = &#34;response&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">local vs_codectype = {
+</span></span><span class="line"><span class="cl">    [1] = &#34;HESSIAN_CODEC&#34;,
+</span></span><span class="line"><span class="cl">    [2] = &#34;JAVA_CODEC&#34;,
+</span></span><span class="line"><span class="cl">    [3] = &#34;TOP_CODEC&#34;,
+</span></span><span class="line"><span class="cl">    [4] = &#34;HESSIAN2_CODEC&#34;,
+</span></span><span class="line"><span class="cl">    [5] = &#34;KRYO_CODEC&#34;,
+</span></span><span class="line"><span class="cl">    [6] = &#34;JSON_CODEC&#34;,
+</span></span><span class="line"><span class="cl">    [7] = &#34;CUSTOMIZED_CODEC&#34;,
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">local vs_responsestatus = {
+</span></span><span class="line"><span class="cl">    [20] = &#34;OK&#34;,
+</span></span><span class="line"><span class="cl">    [30] = &#34;client timeout&#34;,
+</span></span><span class="line"><span class="cl">    [31] = &#34;server timeout&#34;,
+</span></span><span class="line"><span class="cl">    [40] = &#34;bad request&#34;,
+</span></span><span class="line"><span class="cl">    [50] = &#34;bad response&#34;,
+</span></span><span class="line"><span class="cl">    [60] = &#34;service not found&#34;,
+</span></span><span class="line"><span class="cl">    [70] = &#34;service error&#34;,
+</span></span><span class="line"><span class="cl">    [80] = &#34;server error&#34;,
+</span></span><span class="line"><span class="cl">    [90] = &#34;client error&#34;,
+</span></span><span class="line"><span class="cl">    [91] = &#34;Unknow error&#34;,
+</span></span><span class="line"><span class="cl">    [81] = &#34;Thread pool is busy&#34;,
+</span></span><span class="line"><span class="cl">    [82] = &#34;Communication error&#34;,
+</span></span><span class="line"><span class="cl">    [88] = &#34;server will close soon&#34;,
+</span></span><span class="line"><span class="cl">    [10] = &#34;server send coders&#34;,
+</span></span><span class="line"><span class="cl">    [83] = &#34;Unkown code&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-- declare the fields
+</span></span><span class="line"><span class="cl">local f_id = ProtoField.uint8(&#34;hsf2.id&#34;, &#34;Identification&#34;, base.Dec, vs_id)
+</span></span><span class="line"><span class="cl">local f_version = ProtoField.uint8(&#34;hsf2.version&#34;, &#34;version&#34;, base.Dec, vs_version)
+</span></span><span class="line"><span class="cl">local f_op = ProtoField.uint8(&#34;hsf2.op&#34;, &#34;operation&#34;, base.DEC, vs_op)
+</span></span><span class="line"><span class="cl">local f_codectype = ProtoField.uint8(&#34;hsf2.codectype&#34;, &#34;codectype&#34;, base.DEC, vs_codectype)
+</span></span><span class="line"><span class="cl">local f_reserved = ProtoField.uint8(&#34;hsf2.reserved&#34;, &#34;reserved&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_req_id = ProtoField.uint64(&#34;hsf2.req_id&#34;, &#34;RequestID&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_timeout = ProtoField.uint32(&#34;hsf2.timeout&#34;, &#34;timeout&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_service_name_len = ProtoField.uint32(&#34;hsf2.service_name_len&#34;, &#34;Service Name length&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_method_name_len = ProtoField.uint32(&#34;hsf2.method_name_len&#34;, &#34;Method Name length&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_arg_count = ProtoField.uint32(&#34;hsf2.arg.count&#34;, &#34;Argument Count&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_arg_type_len = ProtoField.uint32(&#34;hsf2.arg.type.len&#34;, &#34;Argument Type length&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_arg_obj_len = ProtoField.uint32(&#34;hsf2.arg.obj.len&#34;, &#34;Argument Object length&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_req_prop_len = ProtoField.uint32(&#34;hsf2.req.prop.len&#34;, &#34;Request Prop Length&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_service_name = ProtoField.string(&#34;hsf2.service.name&#34;, &#34;Service Name&#34;)
+</span></span><span class="line"><span class="cl">local f_method_name = ProtoField.string(&#34;hsf2.method.name&#34;, &#34;Method Name&#34;)
+</span></span><span class="line"><span class="cl">local f_arg_type = ProtoField.string(&#34;hsf2.arg.type&#34;, &#34;Argument Type&#34;)
+</span></span><span class="line"><span class="cl">local f_arg_obj = ProtoField.bytes(&#34;hsf2.arg.obj&#34;, &#34;Argument Object&#34;)
+</span></span><span class="line"><span class="cl">local f_req_prop = ProtoField.bytes(&#34;hsf2.req.prop&#34;, &#34;Request Prop&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">local f_response_status = ProtoField.uint32(&#34;hsf2.response.status&#34;, &#34;Response Status&#34;, base.DEC, vs_responsestatus)
+</span></span><span class="line"><span class="cl">local f_response_body_len = ProtoField.uint32(&#34;hsf2.response.body.len&#34;, &#34;Response Body Length&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">local f_response_body = ProtoField.bytes(&#34;hsf2.response.body&#34;, &#34;Response Body&#34;, base.DEC)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">hsf2_proto.fields = { f_id, f_version, f_op, f_codectype, f_reserved, f_req_id, f_timeout, 
+</span></span><span class="line"><span class="cl">                      f_service_name_len, f_method_name_len, f_arg_count, f_arg_type_len, f_arg_obj_len, f_req_prop_len,
+</span></span><span class="line"><span class="cl">                      f_service_name, f_method_name, f_arg_type, f_arg_obj, f_req_prop, 
+</span></span><span class="line"><span class="cl">                      f_response_status, f_response_body_len, f_response_body
+</span></span><span class="line"><span class="cl">                    }
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">function get_pdu_length(buffer)
+</span></span><span class="line"><span class="cl">    local offset =  0
+</span></span><span class="line"><span class="cl">    local id = buffer(offset, 1):uint()
+</span></span><span class="line"><span class="cl">    offset = offset + 1
+</span></span><span class="line"><span class="cl">    -- heart beat
+</span></span><span class="line"><span class="cl">    if id  == 12 then
+</span></span><span class="line"><span class="cl">        return 18 
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">    -- TB REMOTING
+</span></span><span class="line"><span class="cl">    if id == 13 then
+</span></span><span class="line"><span class="cl">      -- TODO
+</span></span><span class="line"><span class="cl">        return 18
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">    -- HSF REMOTING
+</span></span><span class="line"><span class="cl">    if id == 14 then
+</span></span><span class="line"><span class="cl">        local version = buffer(offset, 1):uint()
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        local op = buffer(offset, 1):uint()
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        -- request
+</span></span><span class="line"><span class="cl">        if op == 0 then
+</span></span><span class="line"><span class="cl">          local service_name_len = buffer(19, 4):uint()
+</span></span><span class="line"><span class="cl">          local method_name_len = buffer(23,4):uint()
+</span></span><span class="line"><span class="cl">          local arg_count = buffer(27,4):uint()
+</span></span><span class="line"><span class="cl">          
+</span></span><span class="line"><span class="cl">          offset = 27 + 4
+</span></span><span class="line"><span class="cl">          local arg_content_len = 0
+</span></span><span class="line"><span class="cl">          for i = 1, arg_count do 
+</span></span><span class="line"><span class="cl">              arg_content_len = arg_content_len + buffer(offset,4):uint()
+</span></span><span class="line"><span class="cl">              offset = offset + 4
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">          for i = 1, arg_count  do 
+</span></span><span class="line"><span class="cl">              arg_content_len = arg_content_len + buffer(offset,4):uint()
+</span></span><span class="line"><span class="cl">              offset = offset + 4
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">          local req_prop_len = buffer(offset,4):uint()
+</span></span><span class="line"><span class="cl">          
+</span></span><span class="line"><span class="cl">          local len = 30 + arg_count*4*2 + 5 + service_name_len + method_name_len + arg_content_len + req_prop_len
+</span></span><span class="line"><span class="cl">          return len
+</span></span><span class="line"><span class="cl">        end
+</span></span><span class="line"><span class="cl">        -- response
+</span></span><span class="line"><span class="cl">        if op == 1 then
+</span></span><span class="line"><span class="cl">            local body_len = buffer(16, 4):uint()
+</span></span><span class="line"><span class="cl">            return 20 + body_len
+</span></span><span class="line"><span class="cl">        end
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-- create the dissection function
+</span></span><span class="line"><span class="cl">function hsf2_proto.dissector(buffer, pinfo, tree)
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    -- check the protocol
+</span></span><span class="line"><span class="cl">    -- TODO support TB Remoting
+</span></span><span class="line"><span class="cl">    local check_proto = buffer(0, 1):uint()
+</span></span><span class="line"><span class="cl">    if check_proto &lt; 12 or check_proto &gt; 14 or check_proto == 13 then
+</span></span><span class="line"><span class="cl">        return
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    -- Set the protocol column
+</span></span><span class="line"><span class="cl">    pinfo.cols[&#39;protocol&#39;] = &#34;HSF2&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    -- Reassembling packets into one PDU
+</span></span><span class="line"><span class="cl">    local pdu_len = get_pdu_length(buffer)
+</span></span><span class="line"><span class="cl">    if pdu_len &gt; buffer:len() then
+</span></span><span class="line"><span class="cl">        pinfo.desegment_len = pdu_len - buffer:len()
+</span></span><span class="line"><span class="cl">        pinfo.desegment_offset = 0
+</span></span><span class="line"><span class="cl">        return
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    -- create the HSF2 protocol tree item
+</span></span><span class="line"><span class="cl">    local t_hsf2 = tree:add(hsf2_proto, buffer())
+</span></span><span class="line"><span class="cl">    local offset = 0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    local id = buffer(offset, 1):uint()
+</span></span><span class="line"><span class="cl">    offset = offset + 1
+</span></span><span class="line"><span class="cl">    t_hsf2:add(f_id, id)
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    -- heart beat
+</span></span><span class="line"><span class="cl">    if id  == 12 then
+</span></span><span class="line"><span class="cl">        local op = buffer(offset, 1):uint()
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_op, op)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        -- Set the info column to the name of the function
+</span></span><span class="line"><span class="cl">        local info = vs_id[id]..&#34;:&#34;..vs_op[op]
+</span></span><span class="line"><span class="cl">        pinfo.cols[&#39;info&#39;] = info
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_version, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_req_id, buffer(offset, 8))
+</span></span><span class="line"><span class="cl">        offset = offset + 8
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_timeout, buffer(offset, 4))
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">    -- TB REMOTING
+</span></span><span class="line"><span class="cl">    if id == 13 then
+</span></span><span class="line"><span class="cl">      -- TODO        
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">    -- HSF REMOTING
+</span></span><span class="line"><span class="cl">    if id == 14 then        
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_version, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        local op = buffer(offset, 1):uint()
+</span></span><span class="line"><span class="cl">        offset = offset + 1
+</span></span><span class="line"><span class="cl">        t_hsf2:add(f_op, op)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        -- Set the info column to the name of the function
+</span></span><span class="line"><span class="cl">        local info = vs_id[id]..&#34;:&#34;..vs_op[op]
+</span></span><span class="line"><span class="cl">        pinfo.cols[&#39;info&#39;] = info
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        -- request
+</span></span><span class="line"><span class="cl">        if op == 0 then
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_codectype, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">          offset = offset + 1
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">          offset = offset + 1
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">          offset = offset + 1
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">          offset = offset + 1
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_req_id, buffer(offset, 8))
+</span></span><span class="line"><span class="cl">          offset = offset + 8
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_timeout, buffer(offset, 4))
+</span></span><span class="line"><span class="cl">          offset = offset + 4
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          local service_name_len = buffer(offset, 4):uint()
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_service_name_len, service_name_len)
+</span></span><span class="line"><span class="cl">          offset = offset +  4
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          local method_name_len = buffer(offset,4):uint()
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_method_name_len, method_name_len)
+</span></span><span class="line"><span class="cl">          offset = offset +  4
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          local arg_count = buffer(offset,4):uint()
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_arg_count, arg_count)
+</span></span><span class="line"><span class="cl">          offset = offset +  4
+</span></span><span class="line"><span class="cl">          
+</span></span><span class="line"><span class="cl">          local arg_type_len_array = {}
+</span></span><span class="line"><span class="cl">          for i = 1, arg_count do
+</span></span><span class="line"><span class="cl">              arg_type_len_array[i] = buffer(offset, 4):uint();
+</span></span><span class="line"><span class="cl">              offset = offset +  4
+</span></span><span class="line"><span class="cl">              t_hsf2:add(f_arg_type_len, arg_type_len_array[i])
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          local arg_obj_len_array = {}
+</span></span><span class="line"><span class="cl">          for i = 1, arg_count do
+</span></span><span class="line"><span class="cl">              arg_obj_len_array[i] = buffer(offset, 4):uint();
+</span></span><span class="line"><span class="cl">              offset = offset +  4
+</span></span><span class="line"><span class="cl">              t_hsf2:add(f_arg_obj_len, arg_obj_len_array[i])
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          local prop_len = buffer(offset, 4):uint();
+</span></span><span class="line"><span class="cl">          offset = offset +  4
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_req_prop_len, prop_len)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_service_name, buffer(offset, service_name_len))
+</span></span><span class="line"><span class="cl">          offset = offset +  service_name_len
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          t_hsf2:add(f_method_name, buffer(offset, method_name_len))
+</span></span><span class="line"><span class="cl">          offset = offset +  method_name_len
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          for i = 1, #arg_type_len_array do
+</span></span><span class="line"><span class="cl">              t_hsf2:add(f_arg_type, buffer(offset, arg_type_len_array[i]))
+</span></span><span class="line"><span class="cl">              offset = offset +  arg_type_len_array[i]
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          for i = 1, #arg_obj_len_array do
+</span></span><span class="line"><span class="cl">              t_hsf2:add(f_arg_obj, buffer(offset, arg_obj_len_array[i]))
+</span></span><span class="line"><span class="cl">              offset = offset +  arg_obj_len_array[i]
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          if prop_len &gt; 0 then
+</span></span><span class="line"><span class="cl">              t_hsf2:add(f_req_prop, buffer(offset, prop_len))
+</span></span><span class="line"><span class="cl">          end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        -- response
+</span></span><span class="line"><span class="cl">        if op == 1 then
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_response_status, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">            offset = offset + 1
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_codectype, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">            offset = offset + 1
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">            offset = offset + 1
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">            offset = offset + 1
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_reserved, buffer(offset, 1))
+</span></span><span class="line"><span class="cl">            offset = offset + 1
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_req_id, buffer(offset, 8))
+</span></span><span class="line"><span class="cl">            offset = offset +  8
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            local body_len = buffer(offset, 4):uint()
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_response_body_len, body_len)
+</span></span><span class="line"><span class="cl">            offset = offset +  4
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            t_hsf2:add(f_response_body, buffer(offset, body_len))
+</span></span><span class="line"><span class="cl">        end
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">end
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-- load the tcp port table
+</span></span><span class="line"><span class="cl">tcp_table = DissectorTable.get(&#34;tcp.port&#34;)
+</span></span><span class="line"><span class="cl">-- register the protocol to port 12200
+</span></span><span class="line"><span class="cl">tcp_table:add(12200, hsf2_proto)
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">java</a>
+        
+            <a href="/tags/networking/">networking</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/tcp-so_linger-%E9%80%89%E9%A1%B9%E5%AF%B9socket.close%E7%9A%84%E5%BD%B1%E5%93%8D/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">TCP `SO_LINGER` 选项对Socket.close的影响</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">BookKeeper实现分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/atomikos%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E4%BD%BF%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Atomikos在微服务场景下的使用</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">应用服务器的分布式事务支持和Seata的对比分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用火焰图进行Java性能分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

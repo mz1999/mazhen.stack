@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='进程ID 进程相关的 ID 有多种，除了进程标识 PID 外，还包括：线程组标识 TGID，进程组标识 PGID，回话标识 SID。TGID/PGID/SID 分别'>
+<title>进程ID及进程间的关系</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E8%BF%9B%E7%A8%8Bid%E5%8F%8A%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='进程ID及进程间的关系'>
+<meta property='og:description' content='进程ID 进程相关的 ID 有多种，除了进程标识 PID 外，还包括：线程组标识 TGID，进程组标识 PGID，回话标识 SID。TGID/PGID/SID 分别'>
+<meta property='og:url' content='https://mazhen.tech/p/%E8%BF%9B%E7%A8%8Bid%E5%8F%8A%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2021-11-14T16:02:22&#43;08:00'/><meta property='article:modified_time' content='2021-11-14T16:02:22&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="进程ID及进程间的关系">
+<meta name="twitter:description" content="进程ID 进程相关的 ID 有多种，除了进程标识 PID 外，还包括：线程组标识 TGID，进程组标识 PGID，回话标识 SID。TGID/PGID/SID 分别">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#进程id">进程ID</a>
+      <ol>
+        <li><a href="#pid">PID</a></li>
+        <li><a href="#tgid">TGID</a></li>
+        <li><a href="#pgid">PGID</a></li>
+        <li><a href="#sid">SID</a></li>
+        <li><a href="#pidtgidpgidsid总结"><strong>PID/TGID/PGID/SID</strong>总结</a></li>
+      </ol>
+    </li>
+    <li><a href="#进程间关系">进程间关系</a>
+      <ol>
+        <li><a href="#亲属关系">亲属关系</a></li>
+        <li><a href="#会话进程组关系">会话、进程组关系</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%BF%9B%E7%A8%8Bid%E5%8F%8A%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/">进程ID及进程间的关系</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2021-11-14</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 7 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="进程id">进程ID</h2>
+<p>进程相关的 <code>ID</code> 有多种，除了进程标识 <strong>PID</strong> 外，还包括：线程组标识 <strong>TGID</strong>，进程组标识 <strong>PGID</strong>，回话标识 <strong>SID</strong>。<strong>TGID/PGID/SID</strong> 分别是相关线程组长/进程组长/回话 leader 进程的 <strong>PID</strong>。</p>
+<p>下面分别介绍这几种ID。</p>
+<h3 id="pid">PID</h3>
+<ul>
+<li>
+<p>进程总是会被分配一个唯一标识它们的进程ID号，简称 <strong>PID</strong>。</p>
+</li>
+<li>
+<p>用 <code>fork</code> 或 <code>clone</code> 产生的每个进程都由内核自动地分配了一个唯一的 <strong>PID</strong> 。</p>
+</li>
+<li>
+<p><strong>PID</strong> 保存在 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L943"  target="_blank" rel="noopener"
+    >task_struct-&gt;pid</a>中。</p>
+</li>
+</ul>
+<h3 id="tgid">TGID</h3>
+<ul>
+<li>
+<p>进程以 <code>CLONE_THREAD</code> 标志调用 <code>clone</code> 方法，创建与该进程共享资源的线程。线程有独立的<a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L723"  target="_blank" rel="noopener"
+    >task_struct</a>，但它 <code>task_struct</code>内的 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L1070"  target="_blank" rel="noopener"
+    >files_struct</a>、<a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L1067"  target="_blank" rel="noopener"
+    >fs_struct</a> 、<a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L1081"  target="_blank" rel="noopener"
+    >sighand_struct</a>、<a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L1080"  target="_blank" rel="noopener"
+    >signal_struct</a>和<a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L857"  target="_blank" rel="noopener"
+    >mm_struct</a> 等数据结构仅仅是对进程相应数据结构的引用。</p>
+</li>
+<li>
+<p>由进程创建的所有线程都有相同的线程组ID(<strong>TGID</strong>)。线程有自己的 <strong>PID</strong>，它的<strong>TGID</strong> 就是进程的主线程的 <strong>PID</strong>。如果进程没有使用线程，则其 <strong>PID</strong> 和 <strong>TGID</strong> 相同。</p>
+</li>
+<li>
+<p>在内核中进程和线程都用 <code>task_struct</code>表示，而有了 <strong>TGID</strong>，我们就可以知道 <code>task_struct</code> 代表的是一个进程还是一个线程。</p>
+</li>
+<li>
+<p><strong>TGID</strong> 保存在 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L944"  target="_blank" rel="noopener"
+    >task_struct-&gt;tgid</a> 中。</p>
+</li>
+<li>
+<p>当 <code>task_struct</code> 代表一个线程时，<a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L967"  target="_blank" rel="noopener"
+    >task_struct-&gt;group_leader</a> 指向主线程的 <code>task_struct</code>。</p>
+</li>
+</ul>
+<h3 id="pgid">PGID</h3>
+<ul>
+<li>
+<p>如果 <code>shell</code> 具有作业管理能力，则它所创建的相关进程构成一个进程组，同一进程组的进程都有相同的 <strong>PGID</strong>。例如，用管道连接的进程包含在同一个进程组中。</p>
+</li>
+<li>
+<p>进程组简化了向组的所有成员发送信号的操作。进程组提供了一种机制，让信号可以发送给组内的所有进程，这使得作业控制变得简单。</p>
+</li>
+<li>
+<p>当 <code>task_struct</code> 代表一个进程，且该进程属于某一个进程组，则 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L967"  target="_blank" rel="noopener"
+    >task_struct-&gt;group_leader</a> 指向组长进程的 <code>task_struct</code>。</p>
+</li>
+<li>
+<p><strong>PGID</strong> 保存在 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched/signal.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L153"  target="_blank" rel="noopener"
+    >task_struct-&gt;signal-&gt;pids[PIDTYPE_PGID].pid</a>中。 <code>pids[]</code> 的数组下标是枚举类型，在 <a class="link" href="https://github.com/torvalds/linux/blob/v5.15/include/linux/pid.h"  target="_blank" rel="noopener"
+    >include/linux/pid.h</a> 中定义了 <code>PID</code> 的类型：</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">enum</span> <span class="n">pid_type</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">PIDTYPE_PID</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="n">PIDTYPE_TGID</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="n">PIDTYPE_PGID</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="n">PIDTYPE_SID</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="n">PIDTYPE_MAX</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>task_struce-&gt;signal</code> 是 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched/signal.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L82"  target="_blank" rel="noopener"
+    >signal_struct</a> 类型，维护了进程收到的信号，<code>task_struce-&gt;signal</code> 被该进程的所有线程共享。从 <strong>PGID</strong> 保存在 <code>task_struct-&gt;signal-&gt;pids[PIDTYPE_PGID]</code>中可以看出进程组和信号处理相关。</li>
+</ul>
+<h3 id="sid">SID</h3>
+<ul>
+<li>
+<p>用户一次登录所涉及所有活动称为一个会话（<strong>session</strong>），其间产生的所有进程都有相同的会话ID（<strong>SID</strong>），等于会话 leader 进程的  <strong>PID</strong>。</p>
+</li>
+<li>
+<p><strong>SID</strong> 保存在 <a class="link" href="https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched/signal.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L153"  target="_blank" rel="noopener"
+    >task_struct-&gt;signal-&gt;pids[PIDTYPE_SID].pid</a>中。</p>
+</li>
+</ul>
+<h3 id="pidtgidpgidsid总结"><strong>PID/TGID/PGID/SID</strong>总结</h3>
+<p>用一幅图来总结 <strong>PID/TGID/PGID/SID</strong> ：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241603321.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="pid"
+	
+	
+></p>
+<h2 id="进程间关系">进程间关系</h2>
+<p>内核中所有进程的 <code>task_struct</code> 会形成多种组织关系。根据进程的创建过程会有亲属关系，进程间的父子关系组织成一个进程树；根据用户登录活动会有会话和进程组关系。</p>
+<h3 id="亲属关系">亲属关系</h3>
+<p>进程通过 <code>fork()</code> 创建出一个子进程，就形成来父子关系，如果创建出多个子进程，那么这些子进程间属于兄弟关系。可以用 <code>pstree</code> 命令查看当前系统的进程树。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ pstree -p
+</span></span><span class="line"><span class="cl">systemd(1)─┬─ModemManager(759)─┬─{ModemManager}(802)
+</span></span><span class="line"><span class="cl">           │                   └─{ModemManager}(806)
+</span></span><span class="line"><span class="cl">           ├─NetworkManager(685)─┬─{NetworkManager}(743)
+</span></span><span class="line"><span class="cl">           │                     └─{NetworkManager}(750)
+</span></span><span class="line"><span class="cl">           ├─acpid(675)
+</span></span><span class="line"><span class="cl">           ├─agetty(814)
+</span></span><span class="line"><span class="cl">           ├─avahi-daemon(679)───avahi-daemon(712)
+</span></span><span class="line"><span class="cl">           ├─bluetoothd(680)
+</span></span><span class="line"><span class="cl">           ├─canonical-livep(754)─┬─{canonical-livep}(1224)
+</span></span><span class="line"><span class="cl">           │                      ├─{canonical-livep}(1225)
+</span></span><span class="line"><span class="cl">           │                      ├─{canonical-livep}(1226)
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>进程描述符 <code>task_struct</code> 的 <code>parent</code> 指向父进程，<code>children</code>指向子进程链表的头部，<code>sibling</code> 把当前进程插入到兄弟链表中。</p>
+<p>通常情况下，<code>real_parent</code> 和 <code>parent</code> 是一样的。如果在 <code>bash</code> 上使用 <code>GDB</code> 来 debug 一个进程，这时候进程的 <code>parent</code> 是  <code>GDB</code> ，进程的 <code>real_parent</code> 是 <code>bash</code>。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241605683.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="pstree"
+	
+	
+></p>
+<p>当一个进程创建了子进程后，它应该通过系统调用 <code>wait()</code> 或者 <code>waitpid()</code> 等待子进程结束，回收子进程的资源。而子进程在结束时，会向它的父进程发送 <code>SIGCHLD</code> 信号。因此父进程还可以注册 <code>SIGCHLD</code> 信号的处理函数，异步回收资源。</p>
+<p>如果父进程提前结束，那么子进程将把1号进程 <code>init</code> 作为父进程。总之，进程都有父进程，负责进程结束后的资源回收。在子进程退出且父进程完成回收前，子进程变成僵尸进程。僵尸进程持续的时间通常比较短，在父进程回收它的资源后就会消亡。如果父进程没有处理子进程的终止，那么子进程就会一直处于僵尸状态。</p>
+<h3 id="会话进程组关系">会话、进程组关系</h3>
+<p>Linux 系统中可以有多个会话（<strong>session</strong>），每个会话可以包含多个进程组，每个进程组可以包含多个进程。</p>
+<p>会话是用户登录系统到退出的所有活动，从登录到结束前创建的所有进程都属于这次会话。登录后第一个被创建的进程（通常是 <code>shell</code>），被称为 <strong>会话 leader</strong>。</p>
+<p>进程组用于作业控制。一个终端上可以启动多个作业，也就是进程组，并能控制哪个作业在前台，前台作业可以访问终端，哪些作业运行在后台，不能读写终端。</p>
+<p>我们来看一个会话和进程组的例子。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat | head
+</span></span><span class="line"><span class="cl">hello
+</span></span><span class="line"><span class="cl">hello
+</span></span><span class="line"><span class="cl">^Z
+</span></span><span class="line"><span class="cl">[1]+  已停止               cat | head
+</span></span><span class="line"><span class="cl">$ ps j | more
+</span></span><span class="line"><span class="cl">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND
+</span></span><span class="line"><span class="cl">   1522    1532    1532    1532 pts/0       1762 Ss    1000   0:00 -bash
+</span></span><span class="line"><span class="cl">   1532    1760    1760    1532 pts/0       1762 T     1000   0:00 cat
+</span></span><span class="line"><span class="cl">   1532    1761    1760    1532 pts/0       1762 T     1000   0:00 head
+</span></span><span class="line"><span class="cl">   1532    1762    1762    1532 pts/0       1762 R+    1000   0:00 ps j
+</span></span><span class="line"><span class="cl">   1532    1763    1762    1532 pts/0       1762 S+    1000   0:00 more
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的命令通过 <code>cat | head</code> 创建了第一个进程组，包含 <code>cat</code> 和 <code>head </code>两个进程。这时这个作业是前台任务，可以控制终端。当我们按下 <strong>Ctrl + z</strong>，会发送信号 <strong>SIGTSTP</strong> 给前台进程组的所有进程，该信号的缺省行为是暂停作业执行。暂停的作业会让出终端，并且进程不会再被调度，直到它们收到 <strong>SIGCONT</strong> 信号恢复执行。</p>
+<p>然后我们通过 <code>ps j | more</code> 创建了另一个进程组，包含 <code>ps</code> 和 <code>more</code> 两个进程。<code>ps</code> 的参数 <code>j</code> 表示用任务格式显示进程。输出中的 <strong>STAT</strong> 列是进程的状态码，前面的大写字母表示进程状态，我们可以从 <code>ps</code> 的 <a class="link" href="https://man7.org/linux/man-pages/man1/ps.1.html"  target="_blank" rel="noopener"
+    >man page</a> 查看其含义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">D    uninterruptible sleep (usually IO)
+</span></span><span class="line"><span class="cl">I    Idle kernel thread
+</span></span><span class="line"><span class="cl">R    running or runnable (on run queue)
+</span></span><span class="line"><span class="cl">S    interruptible sleep (waiting for an event to complete)
+</span></span><span class="line"><span class="cl">T    stopped by job control signal
+</span></span><span class="line"><span class="cl">t    stopped by debugger during the tracing
+</span></span><span class="line"><span class="cl">W    paging (not valid since the 2.6.xx kernel)
+</span></span><span class="line"><span class="cl">X    dead (should never be seen)
+</span></span><span class="line"><span class="cl">Z    defunct (&#34;zombie&#34;) process, terminated but not reaped by its parent
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>某些进程除了大写字母代表的进程状态，还跟着一个附加符号：</p>
+<ul>
+<li><strong>s</strong> ：进程是会话 leader 进程</li>
+<li><strong>+</strong> ：进程位于前台进程组中</li>
+</ul>
+<p>从输出可以看出，<code>bash</code> 是这个会话的 leader 进程，它的 <strong>PID</strong>、<strong>PGID</strong> 和 <strong>SID</strong> 相同，都是<code>1532</code> 。这个会话其他所有进程的 <strong>SID</strong> 也都是 <code>1532</code>。</p>
+<p><code>cat | head</code> 进程组的 <strong>PGID</strong> 是 <code>1760</code>，<code>ps j | more</code> 进程组的  <strong>PGID</strong> 是 <code>1762</code>。用管道连接的进程包含在同一个进程组中，每个进程组内第一个进程成为 Group Leader，并以 Group Leader 的 <strong>PID</strong> 作为组内进程的 <strong>PGID</strong>。</p>
+<p>会话有一个前台进程组，还可以有一个或多个后台进程组，只有前台作业可以从终端读写数据。示例的进程组关系如图：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241605195.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="session"
+	
+	
+></p>
+<p>注意到上图中显示，终端设备可以向进程组发送信号。我们可以在终端输入特殊字符向前台进程发送信号：</p>
+<ul>
+<li><strong>Ctrl + c</strong> 发送 <strong>SIGINT</strong> 信号，默认行为是终止进程；</li>
+<li><strong>Ctrl + \</strong> 发送 <strong>SIGQUIT</strong> 信号，默认行为是终止进程，并进行 <code>core dump</code>；</li>
+<li><strong>Ctrl + z</strong> 发送 <strong>SIGTSTP</strong> 信号，暂停进程。</li>
+</ul>
+<p>只有前台进程可以从终端接收输入，也只有前台进程才被允许向终端输出。如果一个后台作业中的进程试图进行终端读写操作，终端会向整个作业发送 <strong>SIGTTOU</strong> 或 <strong>SIGTTIN</strong> 信号，默认的行为是暂停进程。</p>
+<p>当终端关闭时，会向整个会话发送 <strong>SIGHUP</strong> 信号，通常情况下，这个会话的所有进程都会被终止。如果想让运用在后台的进程不随着 <strong>session</strong> 的结束而退出，可以使用 <strong>nohup</strong> 命令忽略 <strong>SIGHUP</strong> 信号：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nohup command &gt;cmd.log 2&gt;&amp;1 &amp;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>即使 <code>shell</code> 结束，运行于后台的进程也能无视  <strong>SIGHUP</strong>  信号继续执行。另外一个方法是可以让进程运行在  <code>screen</code> 或 <code>tmux</code> 这种终端多路复用器（<a class="link" href="https://en.wikipedia.org/wiki/Terminal_multiplexer"  target="_blank" rel="noopener"
+    >terminal multiplexer</a>）中。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-%E4%BF%A1%E5%8F%B7signal/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux 信号(Signal)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入理解 Page Cache</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>consensus on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/consensus/</link>
+        <description>Recent content in consensus on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Fri, 15 May 2020 11:30:26 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/consensus/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Atomikos在微服务场景下的使用</title>
+        <link>https://mazhen.tech/p/atomikos%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E4%BD%BF%E7%94%A8/</link>
+        <pubDate>Fri, 15 May 2020 11:30:26 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/atomikos%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E4%BD%BF%E7%94%A8/</guid>
+        <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Atomikos&lt;/a&gt;是一个轻量级的分布式事务管理器，实现了&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Java Transaction API (JTA)&lt;/a&gt;规范，可以很方便的和&lt;a class=&#34;link&#34; href=&#34;https://spring.io/projects/spring-boot&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Spring Boot&lt;/a&gt;集成，支持微服务场景下跨节点的全局事务。&lt;/p&gt;
+&lt;p&gt;本文为一个微服务的示例应用，通过引入&lt;code&gt;Atomikos&lt;/code&gt;增加全局事务能力。&lt;/p&gt;
+&lt;p&gt;示例代码可以在&lt;a class=&#34;link&#34; href=&#34;https://github.com/mz1999/atomkos-sample&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这里&lt;/a&gt;查看。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241132937.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;demo-services&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;用户访问&lt;code&gt;Business&lt;/code&gt;服务，它通过&lt;code&gt;RPC&lt;/code&gt;调用分别调用&lt;code&gt;Order&lt;/code&gt;和&lt;code&gt;Storage&lt;/code&gt;创建订单和减库存。三个服务需要加入到一个全局事务中，要么全部成功，任何一个服务失败，都会造成事务回滚，数据的状态始终保持一致性。&lt;/p&gt;
+&lt;p&gt;蚂蚁金服开源的&lt;a class=&#34;link&#34; href=&#34;http://seata.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Seata&lt;/a&gt;就是为了解决这类问题，在微服务架构下提供分布式事务服务。传统的应用服务器通过&lt;code&gt;JTA/JTS&lt;/code&gt;也能解决分布式场景下的事务问题，但需要和&lt;code&gt;EJB&lt;/code&gt;绑定在一起才能使用。&lt;code&gt;Atomikos&lt;/code&gt;是一个独立的分布式事务管理器，原先是为&lt;code&gt;Spring&lt;/code&gt;和&lt;code&gt;Tomcat&lt;/code&gt;提供事务服务，让用户不必只为了事务服务而引入应用服务器。&lt;/p&gt;
+&lt;p&gt;现在&lt;code&gt;Atomikos&lt;/code&gt;也能为微服务提供分布式事务服务，这时主要需要两个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;事务上下文如何通过RPC在服务间传播&lt;/li&gt;
+&lt;li&gt;微服务如何参与进两阶段提交协议的过程&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;后面会结合示例应用介绍&lt;code&gt;Atomikos&lt;/code&gt;是如何解决这两个问题。示例应用&lt;code&gt;atomkos-sample&lt;/code&gt;的结构如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;api&lt;/strong&gt;：定义了服务接口&lt;code&gt;OrderService&lt;/code&gt;和&lt;code&gt;StorageService&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;order-service&lt;/strong&gt;：&lt;code&gt;OrderService&lt;/code&gt;的具体实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;storage-service&lt;/strong&gt;：&lt;code&gt;StorageService&lt;/code&gt;的具体实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;business-service&lt;/strong&gt;：用户访问入口&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;事务上下文的传播&#34;&gt;事务上下文的传播&lt;/h2&gt;
+&lt;p&gt;在项目主工程的pom文件中引入&lt;code&gt;Atomikos&lt;/code&gt;依赖，注意要包括&lt;code&gt;transactions-remoting&lt;/code&gt;，正是它才能让事务上下文在&lt;code&gt;RPC&lt;/code&gt;调用时传递。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;dependency&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;lt;groupId&amp;gt;com.atomikos&amp;lt;/groupId&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;lt;artifactId&amp;gt;transactions-remoting&amp;lt;/artifactId&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;lt;version&amp;gt;5.0.6&amp;lt;/version&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;/dependency&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;transactions-remoting&lt;/code&gt;支持&lt;code&gt;jaxrs&lt;/code&gt;，&lt;code&gt;Spring Remoting&lt;/code&gt;和&lt;code&gt;Spring rest&lt;/code&gt;等几种&lt;code&gt;RPC&lt;/code&gt;方式，我们使用的是&lt;code&gt;Spring Remoting&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;以&lt;strong&gt;order-service&lt;/strong&gt;为例，通过&lt;code&gt;TransactionalHttpInvokerServiceExporter&lt;/code&gt;将&lt;code&gt;OrderService&lt;/code&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/mz1999/atomkos-sample/blob/690d6c0026a8f0874de63828023f26ef9210d0dd/order-service/src/main/java/com/apusic/samples/config/ServiceConfig.java#L12&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;发布为远程服务&lt;/a&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Bean(name = &amp;#34;/services/order&amp;#34;)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;TransactionalHttpInvokerServiceExporter orderService(OrderServiceImpl orderService) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    TransactionalHttpInvokerServiceExporter exporter = new TransactionalHttpInvokerServiceExporter();
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    exporter.setService(orderService);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    exporter.setServiceInterface(OrderService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    return exporter;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;OrderService&lt;/code&gt;的调用者&lt;strong&gt;business-service&lt;/strong&gt;使用&lt;code&gt;HttpInvokerProxyFactoryBean&lt;/code&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/mz1999/atomkos-sample/blob/690d6c0026a8f0874de63828023f26ef9210d0dd/business-service/src/main/java/com/apusic/samples/config/ServiceConfig.java#L14&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;引入远程服务&lt;/a&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Bean
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;public HttpInvokerProxyFactoryBean orderService() {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    HttpInvokerProxyFactoryBean orderService = new HttpInvokerProxyFactoryBean();
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    orderService.setHttpInvokerRequestExecutor(httpInvokerRequestExecutor());
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    orderService.setServiceUrl(&amp;#34;http://localhost:8082/services/order&amp;#34;);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    orderService.setServiceInterface(OrderService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    return orderService;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Bean
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;public TransactionalHttpInvokerRequestExecutor httpInvokerRequestExecutor() {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    TransactionalHttpInvokerRequestExecutor httpInvokerRequestExecutor = new TransactionalHttpInvokerRequestExecutor();
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    return httpInvokerRequestExecutor;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;business-service&lt;/strong&gt;负责发起全局事务，它使用&lt;code&gt;Spring&lt;/code&gt;标准的&lt;code&gt;@Transactional&lt;/code&gt;标记方法&lt;a class=&#34;link&#34; href=&#34;https://github.com/mz1999/atomkos-sample/blob/690d6c0026a8f0874de63828023f26ef9210d0dd/business-service/src/main/java/com/apusic/samples/service/BusinessService.java#L19&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;开启事务&lt;/a&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Transactional
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;public void createOrder(String userId, String commodityCode, Integer count) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    orderService.create(userId, commodityCode, count);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    storageService.deduct(commodityCode, count);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;Atomikos&lt;/code&gt;提供了&lt;code&gt;TransactionalHttpInvokerRequestExecutor&lt;/code&gt;和&lt;code&gt;TransactionalHttpInvokerServiceExporter&lt;/code&gt;拦截请求和响应，利用&lt;code&gt;HTTP header&lt;/code&gt;传递事务上下文。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241132653.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;spring-remoting&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;business-service&lt;/strong&gt;在调用远程服务&lt;code&gt;OrderService&lt;/code&gt;时，请求发送前会经过&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerRequestExecutor.java#L30&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;TransactionalHttpInvokerRequestExecutor.prepareConnection&lt;/a&gt;处理，增加&lt;code&gt;HTTP header&lt;/code&gt;，携带事务上下文：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Override
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;protected void prepareConnection(HttpURLConnection con, int contentLength)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		throws IOException {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	String propagation = template.onOutgoingRequest();
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	con.setRequestProperty(HeaderNames.PROPAGATION_HEADER_NAME, propagation);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	super.prepareConnection(con, contentLength);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;OrderService&lt;/code&gt;会使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerServiceExporter.java#L33&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;TransactionalHttpInvokerServiceExporter.decorateInputStream&lt;/a&gt;进行请求拦截，能从&lt;code&gt;HTTP header&lt;/code&gt;中解析出事务上下文：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Override
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;protected InputStream decorateInputStream(HttpServletRequest request, InputStream is) throws IOException {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	try {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		String propagation = request.getHeader(HeaderNames.PROPAGATION_HEADER_NAME);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		template.onIncomingRequest(propagation);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	} catch (IllegalArgumentException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	return super.decorateInputStream(request, is);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;OrderService&lt;/code&gt;处理完成&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerServiceExporter.java#L48&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;返回响应时&lt;/a&gt;，会将该节点加入全局事务包装成&lt;code&gt;Event&lt;/code&gt;，放入&lt;code&gt;HTTP header&lt;/code&gt;返回给&lt;strong&gt;business-service&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Override
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	protected OutputStream decorateOutputStream(HttpServletRequest request, HttpServletResponse response,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;			OutputStream os) throws IOException {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		response.addHeader(HeaderNames.EXTENT_HEADER_NAME, extent);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		return super.decorateOutputStream(request, response, os);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;business-service&lt;/strong&gt;接收到响应，利用&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerRequestExecutor.java#L39&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;TransactionalHttpInvokerRequestExecutor.validateResponse&lt;/a&gt;解析出&lt;code&gt;Event&lt;/code&gt;，注册进事务管理器，这样在全局事务提交时，可以让该分支参与到两阶段提交协议：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@Override
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;protected void validateResponse(HttpInvokerClientConfiguration config,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		HttpURLConnection con) throws IOException {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	super.validateResponse(config, con);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	String extent = con.getHeaderField(HeaderNames.EXTENT_HEADER_NAME);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	template.onIncomingResponse(extent);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;两阶段提交过程&#34;&gt;两阶段提交过程&lt;/h2&gt;
+&lt;p&gt;在处理&lt;code&gt;RPC&lt;/code&gt;调用的响应时，&lt;code&gt;Atomikos&lt;/code&gt;会将参与到全局事务的远程节点注册为&lt;code&gt;Participants&lt;/code&gt;(&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-api/src/main/java/com/atomikos/icatch/Extent.java#L64&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Extent.addRemoteParticipants&lt;/a&gt;)，在事务提交时，所有的&lt;code&gt;Participants&lt;/code&gt;都会&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions/src/main/java/com/atomikos/icatch/imp/CoordinatorImp.java#L673&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;参与到两阶段提交&lt;/a&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;synchronized ( fsm_ ) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;if ( commit ) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	if ( participants_.size () &amp;lt;= 1 ) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		commit ( true );
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	} else {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		int prepareResult = prepare ();
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		// make sure to only do commit if NOT read only
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		if ( prepareResult != Participant.READ_ONLY )
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;			commit ( false );
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;} else {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	rollback ();
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看出，如果&lt;code&gt;Participants&lt;/code&gt;大于1，会走&lt;code&gt;prepare&lt;/code&gt;和&lt;code&gt;commit&lt;/code&gt;两阶段提交的完整过程。那么&lt;code&gt;OrderService&lt;/code&gt;和&lt;code&gt;StorageService&lt;/code&gt;如何参与进两阶段提交呢？&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Atomikos&lt;/code&gt;提供了&lt;code&gt;REST&lt;/code&gt;入口&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/master/public/transactions-remoting/src/main/java/com/atomikos/remoting/twopc/AtomikosRestPort.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.atomikos.remoting.twopc.AtomikosRestPort&lt;/a&gt;，你可以将&lt;code&gt;AtomikosRestPort&lt;/code&gt;注册到&lt;code&gt;JAX-RS&lt;/code&gt;，例如本示例选择的是&lt;a class=&#34;link&#34; href=&#34;https://cxf.apache.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Apache CFX&lt;/a&gt;，在&lt;code&gt;application.properties&lt;/code&gt;进行配置：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cxf.path=/api
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cxf.jaxrs.classes-scan=true
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cxf.jaxrs.classes-scan-packages=com.atomikos.remoting.twopc
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;business-service&lt;/strong&gt;在进行全局事务提交时，会访问所有&lt;code&gt;Participants&lt;/code&gt;相应的&lt;code&gt;REST&lt;/code&gt;接口进行两阶段提交：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241133603.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;atomikosrestport&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;business-service&lt;/strong&gt;是怎么知道&lt;code&gt;AtomikosRestPort&lt;/code&gt;的访问地址的呢？上面提到了，&lt;strong&gt;business-service&lt;/strong&gt;在访问&lt;code&gt;OrderService&lt;/code&gt;时，返回的响应&lt;code&gt;header&lt;/code&gt;中包含了&lt;code&gt;Event&lt;/code&gt;，地址就随着&lt;code&gt;Event&lt;/code&gt;返回给了调用者。&lt;code&gt;AtomikosRestPort&lt;/code&gt;的访问地址配置在&lt;code&gt;jta.properties&lt;/code&gt;中：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.atomikos.icatch.rest_port_url=http://localhost:8082/api/atomikos
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;至此，我们解释清楚了&lt;code&gt;Atomikos&lt;/code&gt;如何为微服务提供分布式事务服务的，主要解决了两个问题：事务上下文如何通过RPC在服务间传播，以及微服务如何参与进两阶段提交协议的过程。&lt;/p&gt;
+&lt;p&gt;下一步我准备为&lt;code&gt;Atomikos&lt;/code&gt;增加&lt;a class=&#34;link&#34; href=&#34;https://dubbo.apache.org&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;dubbo&lt;/a&gt;的支持，即事务上下文可以通过&lt;code&gt;dubbo&lt;/code&gt;进行传播。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>应用服务器的分布式事务支持和Seata的对比分析</title>
+        <link>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/</link>
+        <pubDate>Tue, 21 Apr 2020 11:25:09 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/</guid>
+        <description>&lt;h2 id=&#34;应用服务器的分布式事务支持&#34;&gt;应用服务器的分布式事务支持&lt;/h2&gt;
+&lt;p&gt;我们先看一下分布式事务的需求是如何产生的，以及应用服务器是如何支持分布式事务管理的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;单体应用&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先看单体应用，所有的模块部署在一个应用服务器上，业务数据都保存在单个数据库中，这种场景本地事务就可以满足需求。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241126947.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;local-transaction&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;数据库水平拆分&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果数据库按照业务模块进行水平拆分，完成一个业务请求会涉及到跨库的资源访问和更新，这时候就需要使用应用服务器的&lt;code&gt;JTA&lt;/code&gt;进行两阶段提交，保证跨库操作的事务完整性。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241127654.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;jta&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;应用模块拆分&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;应用按照业务模块进一步拆分，每一个模块都作为&lt;code&gt;EJB&lt;/code&gt;，部署在独立的应用服务器中。完成一个业务请求会跨越多个应用服务器节点和资源，如何在这种场景保证业务操作的事务呢？当访问入口&lt;code&gt;EJB&lt;/code&gt;时&lt;code&gt;JTA&lt;/code&gt;会自动开启全局事务，&lt;strong&gt;事务上下文&lt;/strong&gt;随着&lt;code&gt;EJB&lt;/code&gt;的远程调用在应用服务器之间传播，让被调用的&lt;code&gt;EJB&lt;/code&gt;也加入到全局事务中。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241127730.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;jts&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;这就是应用因拆分而遇到分布式事务的问题，以及应用服务器是如何解决这个问题的。&lt;/p&gt;
+&lt;h2 id=&#34;分布式事务中间件&#34;&gt;分布式事务中间件&lt;/h2&gt;
+&lt;p&gt;微服务时代，没人再使用沉重的&lt;code&gt;EJB&lt;/code&gt;，都是将&lt;code&gt;Spring Bean&lt;/code&gt;直接暴露为远程服务。完成一个业务请求需要跨越多个微服务，同样需要面对分布式事务的问题。这时就需要引入&lt;strong&gt;分布式事务中间件&lt;/strong&gt;。我们以蚂蚁金服开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/seata/seata&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Seata&lt;/a&gt;为例，看看它是怎么解决微服务场景下的分布式事务问题。&lt;/p&gt;
+&lt;p&gt;将上一小节跑在应用服务器上的业务，使用微服务 + &lt;code&gt;Seata&lt;/code&gt;的重构后，部署架构如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241128875.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;seata-microservices&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;上图中黄色方框（&lt;code&gt;RM&lt;/code&gt;，&lt;code&gt;TM&lt;/code&gt;，&lt;code&gt;TC&lt;/code&gt;）是&lt;code&gt;Seata&lt;/code&gt;的核心组件，它们配合完成对微服务的分布式事务支持。可以看出，和应用服务器的&lt;code&gt;EJB&lt;/code&gt;方案架构上类似，只是多了一个独立运行的&lt;code&gt;TC&lt;/code&gt;组件。&lt;/p&gt;
+&lt;p&gt;我们再看看&lt;code&gt;Seata&lt;/code&gt;各组件的具体作用。&lt;/p&gt;
+&lt;h3 id=&#34;seata的架构&#34;&gt;&lt;code&gt;Seata&lt;/code&gt;的架构&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129681.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;seata-architecture&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;由三个组件构成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transaction Coordinator (TC)&lt;/strong&gt;： 事务协调器，维护全局事务的运行状态，负责协调并驱动全局事务的提交或回滚。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transaction Manager (TM)&lt;/strong&gt;： 控制全局事务的边界，负责开启一个全局事务，并最终发起全局提交或全局回滚的决议。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Resource Manager (RM)&lt;/strong&gt;： 控制分支事务，负责分支注册、状态汇报，并接收事务协调器的指令，驱动分支（本地）事务的提交和回滚。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;seata-vs-应用服务器&#34;&gt;&lt;code&gt;Seata&lt;/code&gt; vs. 应用服务器&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器的分布式事务支持主要有以下四个差异：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器都可以实现&lt;strong&gt;业务无侵入&lt;/strong&gt;分布式事务支持。但应用服务器的&lt;code&gt;XA&lt;/code&gt;方案实现的是&lt;strong&gt;实时一致性&lt;/strong&gt;，而&lt;code&gt;Seata&lt;/code&gt;的&lt;code&gt;AT 模式&lt;/code&gt;实现的是&lt;strong&gt;最终一致性&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;引入了独立运行的&lt;code&gt;Transaction Coordinator&lt;/code&gt;，维护全局事务的运行状态。而应用服务器的访问入口节点承担了维护全局事务状态的职责。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;自己实现了&lt;code&gt;Resource Manager&lt;/code&gt;，不需要依赖数据库的&lt;strong&gt;XA driver&lt;/strong&gt;。这样就有可能将没有实现&lt;strong&gt;XA&lt;/strong&gt;接口的资源加入的分布式事务中，例如&lt;code&gt;NoSQL&lt;/code&gt;。同时，&lt;strong&gt;RM&lt;/strong&gt;的实现要比&lt;code&gt;JTA&lt;/code&gt;中的&lt;strong&gt;XAResource&lt;/strong&gt;复杂很多。&lt;strong&gt;RM&lt;/strong&gt;需要拦截并解析&lt;code&gt;SQL&lt;/code&gt;，生成回滚语句，在事务&lt;code&gt;rollback&lt;/code&gt;时自动进行数据还原。&lt;strong&gt;XAResource&lt;/strong&gt;是对&lt;strong&gt;XA driver&lt;/strong&gt;的包装，资源参与分布式事务的能力，都是由数据库提供的。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;事务上下文&lt;/strong&gt;的传播机制不同。应用服务器使用标准的&lt;code&gt;RMI-IIOP&lt;/code&gt;协议进行&lt;strong&gt;事务上下文&lt;/strong&gt;的跨节点传播。&lt;code&gt;Seata&lt;/code&gt;是对各种&lt;code&gt;RPC&lt;/code&gt;框架提供了插件，拦截请求和响应，&lt;strong&gt;事务上下文&lt;/strong&gt;随着&lt;code&gt;RPC&lt;/code&gt;调用进行跨节点传播。目前&lt;code&gt;Seata&lt;/code&gt;已经支持了&lt;a class=&#34;link&#34; href=&#34;https://dubbo.apache.org/zh-cn/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;dubbo&lt;/a&gt;、&lt;a class=&#34;link&#34; href=&#34;https://grpc.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;gRPC&lt;/a&gt;、&lt;a class=&#34;link&#34; href=&#34;https://github.com/weibocom/motan&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Motan&lt;/a&gt;和&lt;a class=&#34;link&#34; href=&#34;https://github.com/sofastack/sofa-rpc&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;sofa-rpc&lt;/a&gt;等多种&lt;code&gt;RPC&lt;/code&gt;框架。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器都支持在分布式场景下的全局事务，都可以做到对业务无侵入。&lt;code&gt;Seata&lt;/code&gt;实现的是&lt;strong&gt;最终一致性&lt;/strong&gt;，因此性能比应用服务器的&lt;code&gt;XA&lt;/code&gt;方案好很多，具备海量并发处理能力，这也是互联网公司选择它的原因。由于&lt;code&gt;Seata&lt;/code&gt;不依赖数据库的&lt;strong&gt;XA driver&lt;/strong&gt;，只使用数据库的本地事务，就完成了对分布式事务的支持，相当于承担了部分数据库的职责，因此&lt;code&gt;Seata&lt;/code&gt;的实现难度要比应用服务器的&lt;code&gt;JTA&lt;/code&gt;大。&lt;/p&gt;
+&lt;h2 id=&#34;应用服务器进入微服务时代&#34;&gt;应用服务器进入微服务时代&lt;/h2&gt;
+&lt;p&gt;那么应用服务器的分布式事务支持在微服务时代还有用吗？或者说我们应该怎样改进，才能让应用服务器进入微服务时代？&lt;/p&gt;
+&lt;p&gt;首先我们要看到&lt;code&gt;JTA/XA&lt;/code&gt;的优势：支持数据的实时一致性，对业务开发更加友好。客户对原有的系统进行微服务改造时，如果把业务模型假定成数据最终一致性，客户就不得不做出很大的妥协和变更。特别是有些金融客户对一致性的要求会比较高。&lt;/p&gt;
+&lt;p&gt;我们可以学习&lt;code&gt;Seata&lt;/code&gt;的架构，抛弃掉沉重的&lt;code&gt;EJB/RMI-IIOP&lt;/code&gt;，让&lt;code&gt;Spring Bean&lt;/code&gt;通过&lt;code&gt;dubbo&lt;/code&gt;等&lt;code&gt;RPC&lt;/code&gt;框架直接对外暴露服务，同时&lt;strong&gt;事务上下文&lt;/strong&gt;可以在&lt;code&gt;RPC&lt;/code&gt;调用时进行传递：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129392.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;jta-microservices&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;我们甚至可以将&lt;code&gt;JTA&lt;/code&gt;独立出来，和&lt;code&gt;Tomcat&lt;/code&gt;这样的Web容器整合，为微服务架构提供分布式事务支持。相信通过这样的改造，应用服务器的分布式事务能力在微服务时代又能焕发第二春。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Consensus and Distributed Transactions</title>
+        <link>https://mazhen.tech/p/consensus-and-distributed-transactions/</link>
+        <pubDate>Fri, 07 Feb 2020 10:44:10 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/consensus-and-distributed-transactions/</guid>
+        <description>&lt;script type=&#34;text/javascript&#34; src= &#39;//js/pdf-js/build/pdf.js&#39;&gt;&lt;/script&gt;
+&lt;style&gt;
+#the-canvas {
+  border: 1px solid black;
+  direction: ltr;
+  width: 100%;
+  height: auto;
+  display: none;
+}
+
+#paginator {
+  display: none;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#loadingWrapper {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 350px;
+}
+
+#loading {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 3px solid #d2d0d0;;
+  border-radius: 50%;
+  border-top-color: #383838;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+&lt;/style&gt;
+
+&lt;div id=&#34;paginator&#34;&gt;
+    &lt;button id=&#34;prev&#34;&gt;Previous&lt;/button&gt;
+    &lt;button id=&#34;next&#34;&gt;Next&lt;/button&gt;
+    &amp;nbsp; &amp;nbsp;
+    &lt;span&gt;Page: &lt;span id=&#34;page_num&#34;&gt;&lt;/span&gt; / &lt;span id=&#34;page_count&#34;&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;/div&gt;
+&lt;div id=&#34;embed-pdf-container&#34;&gt;
+    &lt;div id=&#34;loadingWrapper&#34;&gt;
+      &lt;div id=&#34;loading&#34;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;canvas id=&#34;the-canvas&#34;&gt;&lt;/canvas&gt;
+&lt;/div&gt;
+
+&lt;script type=&#34;text/javascript&#34;&gt;
+window.onload = function() {
+
+
+var url = &#34;https:\/\/mazhen.tech&#34; + &#39;https:\/\/cdn.mazhen.tech\/images\/202209241047269.pdf&#39;;
+
+var hidePaginator = &#34;&#34; === &#34;true&#34;;
+var hideLoader = &#34;&#34; === &#34;true&#34;;
+var selectedPageNum = parseInt(&#34;&#34;) || 1;
+
+
+var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
+
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
+
+
+var pdfDoc = null,
+    pageNum = selectedPageNum,
+    pageRendering = false,
+    pageNumPending = null,
+    scale = 3,
+    canvas = document.getElementById(&#39;the-canvas&#39;),
+    ctx = canvas.getContext(&#39;2d&#39;),
+    paginator = document.getElementById(&#34;paginator&#34;),
+    loadingWrapper = document.getElementById(&#39;loadingWrapper&#39;);
+
+
+
+showPaginator();
+showLoader();
+
+
+
+function renderPage(num) {
+  pageRendering = true;
+  
+  pdfDoc.getPage(num).then(function(page) {
+    var viewport = page.getViewport({scale: scale});
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    
+    var renderContext = {
+      canvasContext: ctx,
+      viewport: viewport
+    };
+    var renderTask = page.render(renderContext);
+
+    
+    renderTask.promise.then(function() {
+      pageRendering = false;
+      showContent();
+      
+      if (pageNumPending !== null) {
+        
+        renderPage(pageNumPending);
+        pageNumPending = null;
+      }
+    });
+  });
+
+  
+  document.getElementById(&#39;page_num&#39;).textContent = num;
+}
+
+
+
+function showContent() {
+  loadingWrapper.style.display = &#39;none&#39;;
+  canvas.style.display = &#39;block&#39;;
+}
+
+
+
+function showLoader() {
+  if(hideLoader) return
+  loadingWrapper.style.display = &#39;flex&#39;;
+  canvas.style.display = &#39;none&#39;;
+}
+
+
+
+function showPaginator() {
+  if(hidePaginator) return
+  paginator.style.display = &#39;block&#39;;
+}
+
+
+
+function queueRenderPage(num) {
+  if (pageRendering) {
+    pageNumPending = num;
+  } else {
+    renderPage(num);
+  }
+}
+
+
+
+function onPrevPage() {
+  if (pageNum &lt;= 1) {
+    return;
+  }
+  pageNum--;
+  queueRenderPage(pageNum);
+}
+document.getElementById(&#39;prev&#39;).addEventListener(&#39;click&#39;, onPrevPage);
+
+
+
+function onNextPage() {
+  if (pageNum &gt;= pdfDoc.numPages) {
+    return;
+  }
+  pageNum++;
+  queueRenderPage(pageNum);
+}
+document.getElementById(&#39;next&#39;).addEventListener(&#39;click&#39;, onNextPage);
+
+
+
+pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+  pdfDoc = pdfDoc_;
+  var numPages = pdfDoc.numPages;
+  document.getElementById(&#39;page_count&#39;).textContent = numPages;
+  
+  
+  if(pageNum &gt; numPages) {
+    pageNum = numPages
+  }
+
+  
+  renderPage(pageNum);
+});
+}
+
+&lt;/script&gt;
+
+</description>
+        </item>
+        
+    </channel>
+</rss>

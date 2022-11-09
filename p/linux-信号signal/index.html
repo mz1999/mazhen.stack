@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。'>
+<title>Linux 信号(Signal)</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/linux-%E4%BF%A1%E5%8F%B7signal/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Linux 信号(Signal)'>
+<meta property='og:description' content='我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。'>
+<meta property='og:url' content='https://mazhen.tech/p/linux-%E4%BF%A1%E5%8F%B7signal/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2022-04-13T16:17:35&#43;08:00'/><meta property='article:modified_time' content='2022-04-13T16:17:35&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Linux 信号(Signal)">
+<meta name="twitter:description" content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#什么是信号">什么是信号</a></li>
+    <li><a href="#信号和中断">信号和中断</a></li>
+    <li><a href="#信号处理">信号处理</a></li>
+    <li><a href="#常见信号">常见信号</a>
+      <ol>
+        <li><a href="#sighup">SIGHUP</a></li>
+        <li><a href="#sigint-sigquit-sigterm-和-sigkill">SIGINT, SIGQUIT, SIGTERM 和 SIGKILL</a></li>
+        <li><a href="#sigstop--sigtstp-和-sigcont">SIGSTOP 、 SIGTSTP 和 SIGCONT</a></li>
+        <li><a href="#sigttou-和-sigttin">SIGTTOU 和 SIGTTIN</a></li>
+      </ol>
+    </li>
+    <li><a href="#jvm-对信号的处理">JVM 对信号的处理</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/linux-%E4%BF%A1%E5%8F%B7signal/">Linux 信号(Signal)</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2022-04-13</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 9 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>我们经常会使用 <code>kill</code> 命令杀掉运行中的进程，对多次杀不死的进程进一步用 <code>kill -9</code> 干掉它。你可能知道这是在用 <code>kill</code> 命令向进程发送信号，优雅或粗暴的让进程退出。我们能向进程发送很多类型的信号，其中一些常见的信号 <strong>SIGINT</strong> 、<strong>SIGQUIT</strong>、 <strong>SIGTERM</strong> 和 <strong>SIGKILL</strong> 都是通知进程退出，但它们有什么区别呢？很多人经常把它们搞混，这篇文章会让你了解 Linux 的信号机制，以及一些常见信号的作用。</p>
+<h2 id="什么是信号">什么是信号</h2>
+<p>信号（Signal）是 Linux 进程收到的一个通知。当进程收到一个信号时，该进程会中断其执行，并执行收到信号对应的处理程序。</p>
+<p>信号机制作为 Linux 进程间通信的一种方法。Linux 进程间通信常用的方法还有管道、消息、共享内存等。</p>
+<p>信号的产生有多种来源：</p>
+<ul>
+<li>硬件来源，例如 CPU 内存访问出错，当前进程会收到信号 SIGSEGV；按下 <code>Ctrl+C</code> 键，当前运行的进程会收到信号 SIGINT 而退出；</li>
+<li>软件来源，例如用户通过命令 <code>kill [pid]</code>，直接向一个进程发送信号。进程使用系统调用 <a class="link" href="https://man7.org/linux/man-pages/man2/kill.2.html"  target="_blank" rel="noopener"
+    >int kill(pid_t pid, int sig)</a> 显示的向另一个进程发送信号。内核在某些情况下，也会给进程发送信号，例如当子进程退出时，内核给父进程发送 SIGCHLD 信号。</li>
+</ul>
+<p>你可以使用 <code>kill -l</code> 命令查看系统实现了哪些信号：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kill -l
+</span></span><span class="line"><span class="cl"> 1) SIGHUP	 2) SIGINT	 3) SIGQUIT	 4) SIGILL	 5) SIGTRAP
+</span></span><span class="line"><span class="cl"> 6) SIGABRT	 7) SIGBUS	 8) SIGFPE	 9) SIGKILL	10) SIGUSR1
+</span></span><span class="line"><span class="cl">11) SIGSEGV	12) SIGUSR2	13) SIGPIPE	14) SIGALRM	15) SIGTERM
+</span></span><span class="line"><span class="cl">16) SIGSTKFLT	17) SIGCHLD	18) SIGCONT	19) SIGSTOP	20) SIGTSTP
+</span></span><span class="line"><span class="cl">21) SIGTTIN	22) SIGTTOU	23) SIGURG	24) SIGXCPU	25) SIGXFSZ
+</span></span><span class="line"><span class="cl">26) SIGVTALRM	27) SIGPROF	28) SIGWINCH	29) SIGIO	30) SIGPWR
+</span></span><span class="line"><span class="cl">31) SIGSYS	34) SIGRTMIN	35) SIGRTMIN+1	36) SIGRTMIN+2	37) SIGRTMIN+3
+</span></span><span class="line"><span class="cl">38) SIGRTMIN+4	39) SIGRTMIN+5	40) SIGRTMIN+6	41) SIGRTMIN+7	42) SIGRTMIN+8
+</span></span><span class="line"><span class="cl">43) SIGRTMIN+9	44) SIGRTMIN+10	45) SIGRTMIN+11	46) SIGRTMIN+12	47) SIGRTMIN+13
+</span></span><span class="line"><span class="cl">48) SIGRTMIN+14	49) SIGRTMIN+15	50) SIGRTMAX-14	51) SIGRTMAX-13	52) SIGRTMAX-12
+</span></span><span class="line"><span class="cl">53) SIGRTMAX-11	54) SIGRTMAX-10	55) SIGRTMAX-9	56) SIGRTMAX-8	57) SIGRTMAX-7
+</span></span><span class="line"><span class="cl">58) SIGRTMAX-6	59) SIGRTMAX-5	60) SIGRTMAX-4	61) SIGRTMAX-3	62) SIGRTMAX-2
+</span></span><span class="line"><span class="cl">63) SIGRTMAX-1	64) SIGRTMAX
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用 <code>man 7 signal</code> 命令查看系统对每个信号作用的描述：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Signal      Standard   Action   Comment       
+</span></span><span class="line"><span class="cl">────────────────────────────────────────────────────────────────────────
+</span></span><span class="line"><span class="cl">SIGABRT      P1990      Core    Abort signal from abort(3)
+</span></span><span class="line"><span class="cl">SIGALRM      P1990      Term    Timer signal from alarm(2)
+</span></span><span class="line"><span class="cl">SIGBUS       P2001      Core    Bus error (bad memory access)
+</span></span><span class="line"><span class="cl">SIGCHLD      P1990      Ign     Child stopped or terminated
+</span></span><span class="line"><span class="cl">SIGCLD         -        Ign     A synonym for SIGCHLD
+</span></span><span class="line"><span class="cl">SIGCONT      P1990      Cont    Continue if stopped
+</span></span><span class="line"><span class="cl">SIGEMT         -        Term    Emulator trap
+</span></span><span class="line"><span class="cl">SIGFPE       P1990      Core    Floating-point exception
+</span></span><span class="line"><span class="cl">SIGHUP       P1990      Term    Hangup detected on controlling terminal
+</span></span><span class="line"><span class="cl">                                or death of controlling process
+</span></span><span class="line"><span class="cl">SIGILL       P1990      Core    Illegal Instruction
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="信号和中断">信号和中断</h2>
+<p>信号处理是一种典型的<strong>异步事件处理方式</strong>：进程需要提前向内核注册信号处理函数，当某个信号到来时，内核会就执行相应的信号处理函数。</p>
+<p>我们知道，硬件中断也是一种内核的<strong>异步事件处理方式</strong>。当外部设备出现一个必须由 CPU 处理的事件，如键盘敲击、数据到达网卡等，内核会收到中断通知，暂时打断当前程序的执行，跳转到该中断类型对应的中断处理程序。中断处理程序是由 BIOS 和操作系统在系统启动过程中预先注册在内核中的。</p>
+<p>中断和信号通知都是在内核产生。中断是完全在内核里完成处理，而<strong>信号的处理则是在用户态完成的</strong>。也就是说，内核只是将信号保存在进程相关的数据结构里面，在执行信号处理程序之前，需要从内核态切换到用户态，执行完信号处理程序之后，又回到内核态，再恢复进程正常的运行。</p>
+<p>可以看出，中断和信号的严重程度不一样。信号影响的是一个进程，信号处理出了问题，最多是这个进程被干掉。而中断影响的是整个系统，一旦中断处理程序出了问题，可能整个系统都会挂掉。</p>
+<h2 id="信号处理">信号处理</h2>
+<p>一旦有信号产生，进程对它的处理都有下面三个选择。</p>
+<ol>
+<li><strong>执行缺省操作（Default）</strong>。Linux 为每个信号都定义了一个缺省的行为。例如，信号 SIGKILL 的缺省操作是 Term，也就是终止进程的意思。信号 SIGQUIT 的缺省操作是 Core，即终止进程后，通过 Core Dump 将当前进程的运行状态保存在文件里面。</li>
+<li><strong>捕捉信号（Catch）</strong>。这个是指让用户进程可以注册自己针对这个信号的处理函数。当信号发生时，就执行我们注册的信号处理函数。</li>
+<li><strong>忽略信号（Ignore）</strong>。当我们不希望处理某些信号的时候，就可以忽略该信号，不做任何处理。</li>
+</ol>
+<p>有两个信号例外，对于 <strong>SIGKILL</strong> 和 <strong>SIGSTOP</strong> 这个两个信号，进程是无法捕捉和忽略，它们用于在任何时候中断或结束某一进程。<strong>SIGKILL</strong> 和 <strong>SIGSTOP</strong> 为内核和超级用户提供了删除任意进程的特权。</p>
+<p>如果我们不想让信号执行缺省操作，可以对特定的信号注册信号处理函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">sighandler_t</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">sighandler_t</span> <span class="nf">signal</span><span class="p">(</span><span class="kt">int</span> <span class="n">signum</span><span class="p">,</span> <span class="n">sighandler_t</span> <span class="n">handler</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>例如下面的例子，程序捕获了信号 SIGINT ，并且只是输出不做其他处理，这样在键盘上按 <code>Ctrl+C</code> 并不能让程序退出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/wait.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">sig_handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">signo</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">signo</span> <span class="o">==</span> <span class="n">SIGINT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">           <span class="n">printf</span><span class="p">(</span><span class="s">&#34;received SIGINT</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">sig_handler</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Process is sleeping</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">           <span class="n">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过 <code>signal</code> 注册的信号处理函数，会保存在进程内核的数据结构 <a class="link" href="https://elixir.bootlin.com/linux/linux-5.17.y/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 中。由于信号都发给进程，并由进程在用户态处理，所以发送给进程的信号也保存在 <a class="link" href="https://elixir.bootlin.com/linux/linux-5.17.y/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 中。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241618125.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="signal"
+	
+	
+></p>
+<p><a class="link" href="https://elixir.bootlin.com/linux/linux-5.17.y/source/include/linux/sched.h#L1084"  target="_blank" rel="noopener"
+    >task_struct-&gt;sighand</a> 和 <a class="link" href="https://elixir.bootlin.com/linux/linux-5.17.y/source/include/linux/sched.h#L1083"  target="_blank" rel="noopener"
+    >task_struct-&gt;signal</a> 是线程组内共享，而 <a class="link" href="https://elixir.bootlin.com/linux/linux-5.17.y/source/include/linux/sched.h#L1089"  target="_blank" rel="noopener"
+    >task_struct-&gt;pending</a> 是线程私有的。</p>
+<p><code>stask_struct-&gt;sighand</code> 里面有一个 <code>action</code>，这是一个数组，下标是信号，数组内容就是注册的信号处理函数。</p>
+<p><code>task_struct-&gt;pending</code> 内包含了一个链表，保存了本线程所有的待处理信号。<code>task_struct-&gt;signal-&gt;shared_pending</code> 上也有一个待处理信号链表，这个链表保存的是线程组内共享的信号。</p>
+<h2 id="常见信号">常见信号</h2>
+<p>下面的列表列举了一些常见的信号。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Singal</th>
+<th>Value</th>
+<th>Action</th>
+<th>comment</th>
+<th>key binding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SIGHUP</strong></td>
+<td>1</td>
+<td>Term</td>
+<td>Hangup detected on controlling terminal or death of controlling process</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGINT</strong></td>
+<td>2</td>
+<td>Term</td>
+<td>Interrupt from keyboard</td>
+<td><strong>Ctrl-c</strong></td>
+</tr>
+<tr>
+<td><strong>SIGQUIT</strong></td>
+<td>3</td>
+<td>Core</td>
+<td>Quit from keyboard</td>
+<td><strong>Ctrl-\</strong></td>
+</tr>
+<tr>
+<td><strong>SIGKILL</strong></td>
+<td>9</td>
+<td>Term</td>
+<td>Kill signal</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGSEGV</strong></td>
+<td>11</td>
+<td>Core</td>
+<td>Invalid memory reference</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGPIPE</strong></td>
+<td>13</td>
+<td>Term</td>
+<td>Broken pipe: write to pipe with no readers</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGTERM</strong></td>
+<td>15</td>
+<td>Term</td>
+<td>Termination signal</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGCHLD</strong></td>
+<td>17</td>
+<td>Ign</td>
+<td>Child stopped or terminated</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGCONT</strong></td>
+<td>18</td>
+<td>Cont</td>
+<td>Continue if stopped</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGSTOP</strong></td>
+<td>19</td>
+<td>Stop</td>
+<td>Stop process</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGTSTP</strong></td>
+<td>20</td>
+<td>Stop</td>
+<td>Stop typed at terminal</td>
+<td><strong>Ctrl-z</strong></td>
+</tr>
+<tr>
+<td><strong>SIGTTIN</strong></td>
+<td>21</td>
+<td>Stop</td>
+<td>Terminal input for background process</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIGTTOU</strong></td>
+<td>22</td>
+<td>Stop</td>
+<td>Terminal output for background process</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>第一列是信号名称，第二列是信号编号。使用 <code>kill</code> 向进程发送信号时，用信号名称和编号都可以，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">kill -1 [pid]
+</span></span><span class="line"><span class="cl">kill -SIGHUP [pid]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Action 列是信号的缺省行为，主要有如下几个：</p>
+<ul>
+<li><strong>Term</strong> 终止进程</li>
+<li><strong>Core</strong> 终止进程并core dump</li>
+<li><strong>Ign</strong> 忽略信号</li>
+<li><strong>Stop</strong> 停止进程</li>
+<li><strong>Cont</strong> 如果进程是已停止，则恢复进程执行</li>
+</ul>
+<p>有一些信号在 TTY 终端做了键盘按键绑定，例如 <code>CTRL+c</code>  会向终端上运行的前台进程发送  SIGINT 信号。</p>
+<hr>
+<h3 id="sighup">SIGHUP</h3>
+<p>运行在终端中，由 bash 启动的进程，都是 bash 的子进程。终端退出结束时会向 bash 的每一个子进程发送 <strong>SIGHUP</strong> 信号。由于 <strong>SIGHUP</strong> 的缺省行为是 Term，因此，即使运行在后台的进程也会和终端一起结束。</p>
+<p>使用 <code>nohup</code> 命令可解决这个问题，它的作用是让进程忽略 SIGHUP 信号：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nohup command &gt;cmd.log 2&gt;&amp;1 &amp;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样，即使我们退出了终端，运行在后台的程序会忽视 <strong>SIGHUP</strong> 信号而继续运行。由于作为父进程的 bash 进程已经结束，因此 <code>/sbin/init</code> 就成为孤儿进程新的父进程。</p>
+<hr>
+<h3 id="sigint-sigquit-sigterm-和-sigkill">SIGINT, SIGQUIT, SIGTERM 和 SIGKILL</h3>
+<p><strong>SIGTERM</strong> 和 <strong>SIGKILL</strong> 是通用的终止进程请求，<strong>SIGINT</strong> 和 <strong>SIGQUIT</strong> 是专门用于来自终端的终止进程请求。他们的关键不同点是：<strong>SIGINT</strong> 和 <strong>SIGQUIT</strong> 可以是用户在终端使用快捷键生成的，而 <strong>SIGTERM</strong> 和 <strong>SIGKILL</strong> 必须由另一个程序以某种方式生成（例如通过 kill 命令）。</p>
+<p>当用户按下 <strong>ctrl-c</strong> 时，终端将发送 <strong>SIGINT</strong> 到前台进程。 SIGINT 的缺省行为是终止进程（Term），但它可以被捕获或忽略。 信号 SIGINT 的目的是为进程提供一种有序、优雅的关闭机制。</p>
+<p>当用户按下 <strong>ctrl-\</strong> 时，终端将发送 <strong>SIGQUIT</strong> 到前台进程。 SIGQUIT 的缺省行为是终止进程并 core dump，它同样可以被捕获或忽略。 你可以认为 <strong>SIGINT</strong> 是用户发起的<em>愉快的终止</em>，而 <strong>SIGQUIT</strong> 是用户发起的<em>不愉快终止</em>，需要生成 Core Dump ，方便用户事后进行分析问题在哪里。</p>
+<p>在 ubuntu 上由 <a class="link" href="http://manpages.ubuntu.com/manpages/focal/man8/systemd-coredump.8.html"  target="_blank" rel="noopener"
+    >systemd-coredump</a> 系统服务处理 core dump。我们可以使用 <a class="link" href="http://manpages.ubuntu.com/manpages/focal/man1/coredumpctl.1.html"  target="_blank" rel="noopener"
+    >coredumpctl</a> 命令行工具查询和处理 core dump 文件。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ coredumpctl list
+</span></span><span class="line"><span class="cl">TIME                         PID  UID  GID SIG     COREFILE EXE           SIZE
+</span></span><span class="line"><span class="cl">Tue 2022-04-12 22:09:52 CST 6754 1000 1000 SIGQUIT present  /usr/bin/cat 17.1K
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>core dump 文件缺省保存在 <code>/var/lib/systemd/coredump</code> 目录下。</p>
+<p><strong>SIGTERM</strong> 默认行为是终止进程，但它也可以被捕获或忽略。<strong>SIGTERM</strong> 的目的是杀死进程，它允许进程有机会在终止前进行清理，优雅的退出。当我们使用 <code>kill</code> 命令时，SIGTERM 是默认信号。</p>
+<p><strong>SIGKILL</strong>  唯一的行为是立即终止进程。 由于 <strong>SIGKILL</strong> 是特权信号，进程无法捕获和忽略，因此进程在收到该信号后无法进行清理，立刻退出。</p>
+<p>例如 docker 在停止容器的时候，先给容器里的1号进程发送 <strong>SIGTERM</strong>，如果不起作用，那么等待30秒后会会发送 <strong>SIGKILL</strong>，保证容器最终会被停止。</p>
+<hr>
+<h3 id="sigstop--sigtstp-和-sigcont">SIGSTOP 、 SIGTSTP 和 SIGCONT</h3>
+<p><strong>SIGSTOP</strong> 和 <strong>SIGTSTP</strong> 这两个信号都是为了暂停一个进程，但 <strong>SIGSTOP</strong>  是特权信息，不能被捕获或忽略。</p>
+<p><strong>SIGSTOP</strong> 必须由另一个程序以某种方式生成（例如：kill -SIGSTOP pid），而<strong>SIGTSTP</strong> 也可以由用户在键盘上键入快捷键 <code>Ctrl-z</code> 生成。</p>
+<p>被暂停的进程通过信号 <strong>SIGCONT</strong> 恢复。当用户调用 <strong>fg</strong> 命令时，<strong>SIGCONT</strong> 由 shell 显式发送给被暂停的进程。</p>
+<p>Linux 使用他们进行作业控制，让你能够手动干预和停止正在运行的应用程序，并在未来某个时间恢复程序的执行。</p>
+<hr>
+<h3 id="sigttou-和-sigttin">SIGTTOU 和 SIGTTIN</h3>
+<p>Linux 系统中可以有多个会话（<strong>session</strong>），每个会话可以包含多个进程组，每个进程组可以包含多个进程。</p>
+<p>会话是用户登录系统到退出的所有活动，从登录到结束前创建的所有进程都属于这次会话。会话有一个前台进程组，还可以有一个或多个后台进程组。只有前台进程可以从终端接收输入，也只有前台进程才被允许向终端输出。如果一个后台作业中的进程试图进行终端读写操作，终端会向整个作业发送 <strong>SIGTTOU</strong> 或 <strong>SIGTTIN</strong> 信号，默认的行为是暂停进程。</p>
+<hr>
+<h2 id="jvm-对信号的处理">JVM 对信号的处理</h2>
+<p>如果你使用 <code>strace</code> 追踪 Java 应用，发现 Java 程序会抛出大量 <code>SIGSEGV</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ strace -fe &#39;trace=!all&#39; java [app]
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">[pid 21746] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061680} ---
+</span></span><span class="line"><span class="cl">[pid 21872] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061480} ---
+</span></span><span class="line"><span class="cl">[pid 21943] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061500} ---
+</span></span><span class="line"><span class="cl">[pid 21844] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061780} ---
+</span></span><span class="line"><span class="cl">[pid 21728] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061c00} ---
+</span></span><span class="line"><span class="cl">[pid 21906] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061980} ---
+</span></span><span class="line"><span class="cl">[pid 21738] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061100} ---
+</span></span><span class="line"><span class="cl">[pid 21729] --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_ACCERR, si_addr=0x7f9cbc061e00} ---
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>SIGSEGV</code> 信号的意思是 “分段错误”（segmentation fault），是当系统检测到进程试图访问不属于它的内存地址时，内核向进程发送的信号。<code>SIGSEGV</code> 对于一般应用来说是很严重的错误，但 Java 进程中的 <code>SIGSEGV</code> 几乎总是正常和安全的。</p>
+<p>在常规的 C/C++ 程序中，当你期望指针是指向某个结构，但实际指向的是 <code>NULL</code>，会导致应用程序崩溃。这种崩溃实际上是内核向进程发送了信号 <code>SIGSEGV</code>。如果应用程序没有为该信号注册信号处理程序，则信号会返回到内核，然后内核会终止应用。实际上 JVM 为 <code>SIGSEGV</code> 注册了一个信号处理程序，因为 JVM 想使用 <code>SIGSEGV</code> 和其他一些信号来实现自己的目的。</p>
+<p><a class="link" href="https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/signals006.html"  target="_blank" rel="noopener"
+    >这篇文档</a> 描述了 JVM 对信号的特殊处理：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th style="text-align:left">Signal</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>SIGSEGV</code>, <code>SIGBUS</code>, <code>SIGFPE</code>, <code>SIGPIPE</code>, <code>SIGILL</code></td>
+<td style="text-align:left">These signals are used in the implementation for implicit null check, and so forth.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SIGQUIT</code></td>
+<td style="text-align:left">This signal is used to dump Java stack traces to the standard error stream. (Optional)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SIGTERM</code>, <code>SIGINT</code>, <code>SIGHUP</code></td>
+<td style="text-align:left">These signals are used to support the shutdown hook mechanism (<code>java.lang.Runtime.addShutdownHook</code>) when the VM is terminated abnormally. (Optional)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SIGUSR1</code></td>
+<td style="text-align:left">This signal is used in the implementation of the <code>java.lang.Thread.interrupt</code> method. Not used starting with Oracle Solaris 10 reserved on Linux. (Configurable)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SIGUSR2</code></td>
+<td style="text-align:left">This signal is used internally. Not used starting with Oracle Solaris 10 operating system. (Configurable)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SIGABRT</code></td>
+<td style="text-align:left">The HotSpot VM does not handle this signal. Instead it calls the <code>abort</code> function after fatal error handling. If an application uses this signal then it should terminate the process to preserve the expected semantics.</td>
+</tr>
+</tbody>
+</table></div>
+<p>实际上，JVM 是使用 SIGSEGV、SIGBUS、SIGPIPE 等进行代码中的各种 <code>NULL</code> 检查。</p>
+<p>同样，我们在终端上键入 <strong>ctrl-\</strong>，也不会让前台运行的 Java 进程终止并 core dump，而是会将 Java 进程的 stack traces 输出到终端的标准错误流。</p>
+<p>那么如何对 Java 进程进行 core dump 呢？需要在 Java 的启动命令里增加 JVM 选项 <code>-Xrs</code> ，它会让 JVM 不自己处理 SIGQUIT 信号，这样 SIGQUIT 会触发缺省行为 core dump。</p>
+<p>一般 Java 进程的运行时内存占用都比较大，在进行 core dump 时很容易超过缺省大小而被truncated，因此需要修改配置文件 <a class="link" href="https://man7.org/linux/man-pages/man5/coredump.conf.5.html"  target="_blank" rel="noopener"
+    >/etc/systemd/coredump.conf</a>，合理设置 ProcessSizeMax 和 ExternalSizeMax 的大小。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入理解 Page Cache</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%9B%E7%A8%8Bid%E5%8F%8A%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">进程ID及进程间的关系</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

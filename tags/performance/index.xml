@@ -1,0 +1,1446 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>performance on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/performance/</link>
+        <description>Recent content in performance on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Mon, 23 Mar 2020 11:01:58 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/performance/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>使用火焰图进行Java性能分析</title>
+        <link>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</link>
+        <pubDate>Mon, 23 Mar 2020 11:01:58 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</guid>
+        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;性能分析工具的分类&lt;/h2&gt;
+&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Counters&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;内核维护着各种统计信息，被称为&lt;code&gt;Counters&lt;/code&gt;，用于对事件进行计数。例如，接收的网络数据包数量，发出的磁盘I/O请求，执行的系统调用次数。常见的这类工具有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;vmstat: 虚拟和物理内存统计&lt;/li&gt;
+&lt;li&gt;mpstat: CPU使用率统计&lt;/li&gt;
+&lt;li&gt;iostat：磁盘的I/O使用情况&lt;/li&gt;
+&lt;li&gt;netstat：网络接口统计信息，TCP/IP协议栈统计信息，连接统计信息&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Tracing&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Tracing&lt;/strong&gt;是收集每个事件的数据进行分析。&lt;strong&gt;Tracing&lt;/strong&gt;会捕获所有的事件，因此有比较大的CPU开销，并且可能需要大量存储来保存数据。&lt;/p&gt;
+&lt;p&gt;常见的&lt;strong&gt;Tracing&lt;/strong&gt;工具有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;tcpdump: network packet tracing&lt;/li&gt;
+&lt;li&gt;blktrace: block I/O tracing&lt;/li&gt;
+&lt;li&gt;perf: Linux Performance Events, 跟踪静态和动态探针&lt;/li&gt;
+&lt;li&gt;strace: 系统调用tracing&lt;/li&gt;
+&lt;li&gt;gdb: 源代码级调试器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Profiling&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Profiling&lt;/strong&gt; 是通过收集目标行为的样本或快照，来了解目标的特征。&lt;strong&gt;Profiling&lt;/strong&gt;可以从多个方面对程序进行动态分析，如&lt;code&gt;CPU&lt;/code&gt;、&lt;code&gt;Memory&lt;/code&gt;、&lt;code&gt;Thread&lt;/code&gt;、&lt;code&gt;I/O&lt;/code&gt;等，其中对&lt;code&gt;CPU&lt;/code&gt;进行&lt;code&gt;Profiling&lt;/code&gt;的应用最为广泛。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;CPU Profiling&lt;/code&gt;原理是基于一定频率对运行的程序进行采样，来分析消耗CPU时间的代码路径。可以基于固定的时间间隔进行采样，例如每10毫秒采样一次。也可以设置固定速率采样，例如每秒采集100个样本。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;CPU Profiling&lt;/code&gt;经常被用于分析代码的热点，比如“哪个方法占用CPU的执行时间最长”、“每个方法占用CPU的比例是多少”等等，然后我们就可以针对热点瓶颈进行分析和性能优化。&lt;/p&gt;
+&lt;p&gt;Linux上常用的&lt;strong&gt;CPU Profiling&lt;/strong&gt;工具有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;perf&lt;/a&gt;的 &lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Tutorial#Sampling_with_perf_record&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;record&lt;/a&gt; 子命令&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/tools/profile.py&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BPF profile&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Monitoring&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;系统性能监控会记录一段时间内的性能统计信息，以便能够基于时间周期进行比较。这对于容量规划，了解高峰期的使用情况都很有帮助。历史值还为我们理解当前的性能指标提供了上下文。&lt;/p&gt;
+&lt;p&gt;监控单个操作系统最常用工具是&lt;strong&gt;sar&lt;/strong&gt;（system activity reporter，系统活动报告）命令。&lt;code&gt;sar&lt;/code&gt;通过一个定期执行的agent来记录系统计数器的状态，并可以使用&lt;code&gt;sar&lt;/code&gt;命令查看它们，例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sar
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Linux 4.15.0-88-generic (mazhen) 	03/19/2020 	_x86_64_	(4 CPU)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:53:08 PM       LINUX RESTART
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:55:01 PM     CPU     %user     %nice   %system   %iowait    %steal     %idle
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;01:05:01 PM     all     14.06      0.00     10.97      0.11      0.00     74.87
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;01:15:01 PM     all      9.60      0.00      7.49      0.09      0.00     82.83
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;01:25:01 PM     all      0.04      0.00      0.02      0.02      0.00     99.92
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;01:35:01 PM     all      0.03      0.00      0.02      0.01      0.00     99.94
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;本文主要讨论如何使用&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BPF&lt;/code&gt;进行&lt;code&gt;CPU Profiling&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;perf&#34;&gt;perf&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;tools/perf&lt;/a&gt;目录下。&lt;/p&gt;
+&lt;p&gt;随后&lt;code&gt;perf&lt;/code&gt;进行了各种增强，增加了&lt;code&gt;tracing&lt;/code&gt;、&lt;code&gt;profiling&lt;/code&gt;等能力，可用于性能瓶颈的查找和热点代码的定位。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;是一个面向事件（event-oriented）的性能剖析工具，因此它也被称为&lt;code&gt;Linux perf events (LPE)&lt;/code&gt;，或&lt;code&gt;perf_events&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;的整体架构如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241109248.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;perf&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt; 由两部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;perf Tools&lt;/strong&gt;：perf用户态命令，为用户提供了一系列工具集，用于收集、分析性能数据。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;perf Event Subsystem&lt;/strong&gt;：Perf Events是内核的子系统之一，和用户态工具共同完成数据的采集。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;内核依赖的硬件，比如说&lt;code&gt;CPU&lt;/code&gt;，一般会内置一些性能统计方面的寄存器（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hardware_performance_counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hardware Performance Counter&lt;/a&gt;），通过软件读取这些特殊寄存器里的信息，我们也可以得到很多直接关于硬件的信息。&lt;code&gt;perf&lt;/code&gt;最初就是用来监测&lt;code&gt;CPU&lt;/code&gt;的性能监控单元（performance monitoring unit, PMU）的。&lt;/p&gt;
+&lt;h3 id=&#34;perf-events分类&#34;&gt;perf Events分类&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241110166.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;event sources&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;这些性能事件分类为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Hardware Events&lt;/strong&gt;: CPU性能监控计数器performance monitoring counters（PMC），也被称为performance monitoring unit（PMU）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Software Events&lt;/strong&gt;: 基于内核计数器的底层事件。例如，CPU迁移，minor faults，major faults等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel Tracepoint Events&lt;/strong&gt;: 内核的静态&lt;code&gt;Tracepoint&lt;/code&gt;，已经硬编码在内核需要收集信息的位置。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;User Statically-Defined Tracing (USDT)&lt;/strong&gt;: 用户级程序的静态&lt;code&gt;Tracepoint&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Dynamic Tracing&lt;/strong&gt;: 用户自定义事件，可以动态的插入到内核或正在运行中的程序。&lt;code&gt;Dynamic Tracing&lt;/code&gt;技术分为两类：
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://lwn.net/Articles/132196/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;kprobes&lt;/a&gt;：对于kernel的动态追踪技术，可以动态地在指定的内核函数的入口和出口等位置上放置探针，并定义自己的探针处理程序。&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://lwn.net/Articles/499190/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;uprobes&lt;/a&gt;：对于用户态软件的动态追踪技术，可以安全地在用户态函数的入口等位置设置动态探针，并执行自己的探针处理程序。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以使用perf的&lt;code&gt;list&lt;/code&gt;子命令查看当前可用的事件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf list
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;List of pre-defined events (to be used in -e):
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  branch-instructions OR branches                    [Hardware event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  branch-misses                                      [Hardware event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  bus-cycles                                         [Hardware event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  cache-misses                                       [Hardware event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  cache-references                                   [Hardware event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  cpu-cycles OR cycles                               [Hardware event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  alignment-faults                                   [Software event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  bpf-output                                         [Software event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  context-switches OR cs                             [Software event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  cpu-clock                                          [Software event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  cpu-migrations OR migrations                       [Software event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  alarmtimer:alarmtimer_cancel                       [Tracepoint event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  alarmtimer:alarmtimer_fired                        [Tracepoint event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  alarmtimer:alarmtimer_start                        [Tracepoint event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  alarmtimer:alarmtimer_suspend                      [Tracepoint event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  block:block_bio_backmerge                          [Tracepoint event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  block:block_bio_bounce                             [Tracepoint event]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;perf的使用&lt;/h3&gt;
+&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt install linux-tools-$(uname -r) linux-tools-generic
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;的功能强大，支持硬件计数器统计，定时采样，静态和动态tracing等。本文只介绍几个常用的使用场景，如果想全面的了解&lt;code&gt;perf&lt;/code&gt;的使用，可以参考&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;perf.wiki&lt;/a&gt;。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;CPU Statistics&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;使用&lt;code&gt;perf&lt;/code&gt;的&lt;code&gt;stat&lt;/code&gt;命令可以收集性能计数器统计信息，精确统计一段时间内 CPU 相关硬件计数器数值的变化。例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-&amp;gt; % sudo perf stat  dd if=/dev/zero of=/dev/null count=10000000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;10000000+0 records in
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;10000000+0 records out
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.2795 s, 417 MB/s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; Performance counter stats for &amp;#39;dd if=/dev/zero of=/dev/null count=10000000&amp;#39;:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      12280.299325      task-clock (msec)         #    1.000 CPUs utilized          
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                16      context-switches          #    0.001 K/sec                  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                 0      cpu-migrations            #    0.000 K/sec                  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                70      page-faults               #    0.006 K/sec                  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    41,610,802,323      cycles                    #    3.388 GHz                    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    20,195,746,887      instructions              #    0.49  insn per cycle         
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     3,972,723,471      branches                  #  323.504 M/sec                  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        90,061,565      branch-misses             #    2.27% of all branches        
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      12.280445133 seconds time elapsed
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;strong&gt;CPU Profiling&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可以使用&lt;code&gt;perf record&lt;/code&gt;以任意频率收集快照。这通常用于CPU使用情况的分析。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sudo perf record -F 99 -a -g  sleep 10&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对所有CPU（&lt;strong&gt;-a&lt;/strong&gt;）进行&lt;code&gt;call stacks&lt;/code&gt;（&lt;strong&gt;-g&lt;/strong&gt;）采样，采样频率为&lt;code&gt;99 Hertz&lt;/code&gt;（&lt;strong&gt;-F 99&lt;/strong&gt;），即每秒99次，持续10秒（&lt;strong&gt;sleep 10&lt;/strong&gt;）。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sudo perf record -F 99 -a -g  -p PID sleep 10&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对指定进程（&lt;strong&gt;-p PID&lt;/strong&gt;）进行采样。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sudo perf record -F 99 -a -g -e context-switches -p PID sleep 10&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;可以和各种&lt;code&gt;instrumentation points&lt;/code&gt;一起使用，以跟踪内核调度程序（&lt;code&gt;scheduler&lt;/code&gt;）的活动。其中包括&lt;code&gt;software events&lt;/code&gt;和&lt;code&gt;tracepoint event&lt;/code&gt;（静态探针）。&lt;/p&gt;
+&lt;p&gt;上面的例子对指定进程的上下文切换（&lt;strong&gt;-e context-switches&lt;/strong&gt;）进行采样。&lt;/p&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;&lt;strong&gt;report&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;perf record&lt;/code&gt;的运行结果保存在当前目录的&lt;code&gt;perf.data&lt;/code&gt;文件中，采样结束后，我们使用&lt;code&gt;perf report&lt;/code&gt;查看结果。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;交互式查看模式&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf report
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241111810.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;perf report&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;以&lt;code&gt;+&lt;/code&gt;开头的行可以回车，展开详细信息。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;使用&lt;code&gt;--stdio&lt;/code&gt;选项打印所有输出&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf report --stdio
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241111875.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;perf report &amp;ndash;stdio&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;context-switches&lt;/code&gt;的采样报告：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241112884.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;perf-report-context-switches&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;后面我们会介绍&lt;strong&gt;火焰图&lt;/strong&gt;，以可视化的方式展示&lt;code&gt;stack traces&lt;/code&gt;，比&lt;code&gt;perf report&lt;/code&gt;更加直观。&lt;/p&gt;
+&lt;h2 id=&#34;bpf&#34;&gt;BPF&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;用于改进网络数据包捕获的性能&lt;/a&gt;。&lt;code&gt;BPF&lt;/code&gt;是在内核级别进行过滤，不必将每个数据包拷贝到用户空间，从而提高了数据包过滤的性能。&lt;code&gt;tcpdump&lt;/code&gt;使用的就是&lt;code&gt;BPF&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241113910.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tcpdump&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;2013年&lt;code&gt;BPF&lt;/code&gt;被重写，被称为&lt;strong&gt;Extended BPF (eBPF)&lt;/strong&gt;，于2014年包含进&lt;code&gt;Linux&lt;/code&gt;内核中。改进后的&lt;code&gt;BPF&lt;/code&gt;成为了通用执行引擎，可用于多种用途，包括创建高级性能分析工具。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;允许在内核中运行&lt;code&gt;mini programs&lt;/code&gt;，来响应系统和应用程序事件（例如磁盘I/O事件）。这种运作机制和&lt;code&gt;JavaScript&lt;/code&gt;类似：&lt;code&gt;JavaScript&lt;/code&gt;是运行在浏览器引擎中的&lt;code&gt;mini programs&lt;/code&gt;，响应鼠标点击等事件。&lt;code&gt;BPF&lt;/code&gt;使内核可编程化，使用户（包括非内核开发人员）能够自定义和控制他们的系统，以解决实际问题。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;可以被认为是一个&lt;strong&gt;虚拟机&lt;/strong&gt;，由指令集，存储对象和helper函数三部分组成。&lt;code&gt;BPF&lt;/code&gt;指令集由位于Linux内核的&lt;code&gt;BPF runtime&lt;/code&gt;执行，&lt;code&gt;BPF runtime&lt;/code&gt;包括了&lt;strong&gt;解释器&lt;/strong&gt;和&lt;strong&gt;JIT编译器&lt;/strong&gt;。&lt;code&gt;BPF&lt;/code&gt;是一种灵活高效的技术，可以用于&lt;code&gt;networking&lt;/code&gt;，&lt;code&gt;tracing&lt;/code&gt;和安全等领域。我们重点关注它作为系统监测工具方面的应用。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241114773.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;linux_ebpf_internals&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;和&lt;code&gt;perf&lt;/code&gt;一样，&lt;code&gt;BPF&lt;/code&gt;能够监测多种性能事件源，同时可以通过调用&lt;code&gt;perf_events&lt;/code&gt;，使用&lt;code&gt;perf&lt;/code&gt;已有的功能：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241114535.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;linux_ebpf_support&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;可以在内核运行计算和统计汇总，这样大大减少了复制到用户空间的数据量：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241115194.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;before_and_after_using_BPF&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;已经内置在Linux内核中，因此你无需再安装任何新的内核组件，就可以在生产环境中使用BPF。&lt;/p&gt;
+&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;BCC和bpftrace&lt;/h2&gt;
+&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241116502.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;bcc-bpftrace&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;BCC（BPF Compiler Collection）&lt;/strong&gt; 提供了一个C编程环境，使用&lt;code&gt;LLVM&lt;/code&gt;工具链来把 C 代码编译为&lt;code&gt;BPF&lt;/code&gt;虚拟机所接受的字节码。此外它还支持&lt;code&gt;Python&lt;/code&gt;，&lt;code&gt;Lua&lt;/code&gt;和&lt;code&gt;C++&lt;/code&gt;作为用户接口。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;bpftrace&lt;/strong&gt; 是一个比较新的前端，它为开发&lt;code&gt;BPF&lt;/code&gt;工具提供了一种专用的高级语言。&lt;code&gt;bpftrace&lt;/code&gt;适合单行代码和自定义短脚本，而&lt;code&gt;BCC&lt;/code&gt;更适合复杂的脚本和守护程序。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;没有在内核代码库，它们存放在GitHub上名为&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;IO Visor&lt;/a&gt;的&lt;code&gt;Linux Foundation&lt;/code&gt;项目中。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;iovisor/bcc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;iovisor/bpftrace&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;bcc的安装&#34;&gt;BCC的安装&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;安装文档&lt;/a&gt;。以&lt;code&gt;Ubuntu 18.04 LTS&lt;/code&gt;为例，建议从源码build安装：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;安装build依赖&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get -y install bison build-essential cmake flex git libedit-dev \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  libllvm6.0 llvm-6.0-dev libclang-6.0-dev python zlib1g-dev libelf-dev
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get -y install luajit luajit-5.1-dev
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;编译和安装&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/iovisor/bcc.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mkdir bcc/build; cd bcc/build
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cmake ..
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo make install
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;build python3 binding&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cmake -DPYTHON_CMD=python3 .. 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pushd src/python/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo make install
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;popd
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;make install&lt;/code&gt;完成后，&lt;code&gt;BCC&lt;/code&gt;自带的工具都安装在了&lt;code&gt;/usr/share/bcc/tools&lt;/code&gt;目录下。&lt;code&gt;BCC&lt;/code&gt;已经包含70多个&lt;code&gt;BPF&lt;/code&gt;工具，用于性能分析和故障排查。这些工具都可以直接使用，无需编写任何&lt;code&gt;BCC&lt;/code&gt;代码。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241116881.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;bcc_tracing_tools&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;我们试用其中一个工具&lt;code&gt;biolatency&lt;/code&gt;，跟踪磁盘&lt;code&gt;I/O&lt;/code&gt;延迟：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-&amp;gt; % sudo /usr/share/bcc/tools/biolatency
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Tracing block device I/O... Hit Ctrl-C to end.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;^C
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     usecs               : count     distribution
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;         0 -&amp;gt; 1          : 0        |                                        |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;         2 -&amp;gt; 3          : 0        |                                        |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;         4 -&amp;gt; 7          : 0        |                                        |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;         8 -&amp;gt; 15         : 0        |                                        |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        16 -&amp;gt; 31         : 2        |***                                     |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        32 -&amp;gt; 63         : 0        |                                        |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        64 -&amp;gt; 127        : 3        |*****                                   |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;       128 -&amp;gt; 255        : 7        |***********                             |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;       256 -&amp;gt; 511        : 6        |**********                              |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;       512 -&amp;gt; 1023       : 11       |******************                      |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      1024 -&amp;gt; 2047       : 16       |**************************              |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      2048 -&amp;gt; 4095       : 24       |****************************************|
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      4096 -&amp;gt; 8191       : 1        |*                                       |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      8192 -&amp;gt; 16383      : 6        |**********                              |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     16384 -&amp;gt; 32767      : 3        |*****                                   |
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;biolatency&lt;/code&gt;展示的直方图比&lt;code&gt;iostat&lt;/code&gt;的平均值能更好的理解磁盘&lt;code&gt;I/O&lt;/code&gt;性能。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;已经自带了&lt;code&gt;CPU profiling&lt;/code&gt;工具：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/tools/profile.py&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;tools/profile&lt;/a&gt;: Profile CPU usage by sampling stack traces at a timed interval.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;此外，&lt;code&gt;BCC&lt;/code&gt;还提供了&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/offcpuanalysis.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Off-CPU&lt;/a&gt;的分析工具：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/tools/offcputime.py&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;tools/offcputime&lt;/a&gt;: Summarize off-CPU time by kernel stack trace&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一般的&lt;code&gt;CPU profiling&lt;/code&gt;都是分析&lt;code&gt;on-CPU&lt;/code&gt;，即CPU时间都花费在了哪些代码路径。&lt;code&gt;off-CPU&lt;/code&gt;是指进程不在CPU上运行时所花费的时间，进程因为某种原因处于休眠状态，比如说等待锁，或者被进程调度器（scheduler）剥夺了 CPU 的使用。这些情况都会导致这个进程无法运行在 CPU 上，但是仍然花费了时间。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241117655.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;thread_states&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;off-CPU&lt;/code&gt;分析是对&lt;code&gt;on-CPU&lt;/code&gt;的补充，让我们知道线程所有的时间花费，更全面的了解程序的运行情况。&lt;/p&gt;
+&lt;p&gt;后面会介绍&lt;code&gt;profile&lt;/code&gt;，&lt;code&gt;offcputime&lt;/code&gt;如何生成火焰图进行可视化分析。&lt;/p&gt;
+&lt;h3 id=&#34;bpftrace的安装&#34;&gt;bpftrace的安装&lt;/h3&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;bpftrace&lt;/a&gt; 建议运行在Linux 4.9 kernel或更高版本。根据&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;安装文档&lt;/a&gt;的说明，是因为&lt;code&gt;kprobes&lt;/code&gt;、&lt;code&gt;uprobes&lt;/code&gt;、&lt;code&gt;tracepoints&lt;/code&gt;等主要特性是在&lt;code&gt;4.x&lt;/code&gt;以上加入内核的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;4.1 - kprobes&lt;/li&gt;
+&lt;li&gt;4.3 - uprobes&lt;/li&gt;
+&lt;li&gt;4.6 - stack traces, count and hist builtins (use PERCPU maps for accuracy and efficiency)&lt;/li&gt;
+&lt;li&gt;4.7 - tracepoints&lt;/li&gt;
+&lt;li&gt;4.9 - timers/profiling&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以运行&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/scripts/check_kernel_features.sh&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;scripts/check_kernel_features.sh&lt;/a&gt;脚本进行验证：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ./scripts/check_kernel_features.sh 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;All required features present!
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;bpftrace&lt;/code&gt;对Linux的版本要求较高，以&lt;code&gt;Ubuntu&lt;/code&gt;为例，&lt;code&gt;19.04&lt;/code&gt;及以上才支持&lt;code&gt;apt&lt;/code&gt;安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y libbpfcc-dev
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;18.04&lt;/code&gt;和&lt;code&gt;18.10&lt;/code&gt;可以从源码build，但需要先build好&lt;code&gt;BCC&lt;/code&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;安装依赖&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get update
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y bison cmake flex g++ git libelf-dev zlib1g-dev libfl-dev systemtap-sdt-dev binutils-dev
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y llvm-7-dev llvm-7-runtime libclang-7-dev clang-7
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;编译和安装&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/iovisor/bpftrace
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mkdir bpftrace/build; cd bpftrace/build;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cmake -DCMAKE_BUILD_TYPE=Release ..
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make -j8
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo make install
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;make install&lt;/code&gt;完成后，&lt;code&gt;bpftrace&lt;/code&gt;自带的工具安装在&lt;code&gt;/usr/local/share/bpftrace/tools&lt;/code&gt;目录下，这些工具的说明文档可以在&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;项目主页&lt;/a&gt;找到。&lt;/p&gt;
+&lt;p&gt;我们同样试用查看&lt;code&gt;Block I/O&lt;/code&gt;延迟直方图的工具：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-&amp;gt; % sudo bpftrace /usr/local/share/bpftrace/tools/biolatency.bt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Attaching 4 probes...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Tracing block device I/O... Hit Ctrl-C to end.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;^C
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;@usecs: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[128, 256)             6 |@@@@@@@@@@                                          |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[256, 512)             4 |@@@@@@                                              |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[512, 1K)              8 |@@@@@@@@@@@@@                                       |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[1K, 2K)              20 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                  |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[2K, 4K)              30 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[4K, 8K)               1 |@                                                   |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[8K, 16K)              3 |@@@@@                                               |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[16K, 32K)             0 |                                                    |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[32K, 64K)             2 |@@@                                                 |
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;关于&lt;code&gt;bpftrace&lt;/code&gt;脚本编写不在本文的讨论范围，感兴趣的可以参考&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;reference_guide&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;火焰图&#34;&gt;火焰图&lt;/h2&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;火焰图&lt;/a&gt;是&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Brendan Gregg&lt;/a&gt;发明的将&lt;code&gt;stack traces&lt;/code&gt;可视化展示的方法。火焰图把时间和空间两个维度上的信息融合在一张图上，将频繁执行的代码路径以可视化的形式，非常直观的展现了出来。&lt;/p&gt;
+&lt;p&gt;火焰图可以用于可视化来自任何&lt;code&gt;profiler&lt;/code&gt;工具的记录的&lt;code&gt;stack traces&lt;/code&gt;信息，除了用来&lt;code&gt;CPU profiling&lt;/code&gt;，还适用于&lt;code&gt;off-CPU&lt;/code&gt;，&lt;code&gt;page faults&lt;/code&gt;等多种场景的分析。本文只讨论 &lt;code&gt;on-CPU&lt;/code&gt; 和 &lt;code&gt;off-CPU&lt;/code&gt; 火焰图的生成。&lt;/p&gt;
+&lt;p&gt;要理解火焰图，先从理解&lt;code&gt;Stack Trace&lt;/code&gt;开始。&lt;/p&gt;
+&lt;h3 id=&#34;stack-trace&#34;&gt;Stack Trace&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_b
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;Profiling Stack Traces&lt;/h3&gt;
+&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
+&lt;p&gt;考虑下面的示例，我们用perf定时采样收集了多个&lt;code&gt;Stack Trace&lt;/code&gt;，然后将相同的&lt;code&gt;Stack Trace&lt;/code&gt;归纳合并，统计出次数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_e
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_d
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_b
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_b
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_b
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看到，总共收集了10个样本，其中代码路径&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_c&lt;/code&gt;有7次，该路径上的&lt;code&gt;func_c&lt;/code&gt;在CPU上运行。 &lt;code&gt;func_a-&amp;gt;func_b&lt;/code&gt;进行了两次采样，&lt;code&gt;func_b&lt;/code&gt;在CPU上运行。&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_d-&amp;gt;func_e&lt;/code&gt;一次采样，&lt;code&gt;func_e&lt;/code&gt;在CPU上运行。&lt;/p&gt;
+&lt;h3 id=&#34;火焰图-1&#34;&gt;火焰图&lt;/h3&gt;
+&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241117302.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;flame-graph-demo&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;火焰图具有以下特性：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个长方块代表了函数调用栈中的一个函数&lt;/li&gt;
+&lt;li&gt;Y 轴显示堆栈的深度（堆栈中的帧数）。调用栈越深，火焰就越高。顶层方块表示 CPU 上正在运行的函数，下面的函数即为它的祖先。&lt;/li&gt;
+&lt;li&gt;X 轴的宽度代表被采集的样本数量，越宽表示采集到的越多，即执行的时间长。需要注意的是，X轴从左到右不代表时间，而是所有的调用栈合并后，按字母顺序排列的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;拿到火焰图，寻找最宽的塔并首先了解它们。顶层的哪个函数占据的宽度最大，说明它可能存在性能问题。&lt;/p&gt;
+&lt;p&gt;可以使用Brendan Gregg开发的开源项目&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;FlameGraph&lt;/a&gt;生成交互式的SVG火焰图。该项目提供了脚本，可以将采集的样本归纳合并，统计出&lt;code&gt;Stack Trace&lt;/code&gt;出现的频率，然后使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/flamegraph.pl&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;flamegraph.pl&lt;/a&gt;生成SVG火焰图。&lt;/p&gt;
+&lt;p&gt;我们先把FlameGraph项目clone下来，后面会用到：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/brendangregg/FlameGraph.git
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;Java CPU Profiling&lt;/h2&gt;
+&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BCC profile&lt;/code&gt;的优点是它很高效，在内核上下文中对堆栈进行计数，并能完整显示用户态和内核态的CPU使用，能看到native libraries（例如libc），JVM（libjvm），Java方法和内核中花费的时间。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241118729.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;java-profilers&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;但是，&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BCC profile&lt;/code&gt;这种系统级的profiler不能很好地与Java配合使用，它们识别不了Java方法和&lt;code&gt;stack traces&lt;/code&gt;。这是因为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;JVM的&lt;code&gt;JIT（just-in-time）&lt;/code&gt;没有给系统级profiler公开符号表&lt;/li&gt;
+&lt;li&gt;JVM还使用帧指针寄存器（frame pointer register，x86-64上的RBP）作为通用寄存器，打破了传统的堆栈遍历&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了能生成包含Java栈与Native栈的火焰图，目前有两种解决方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用&lt;code&gt;JVMTI&lt;/code&gt; agent &lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;perf-map-agent&lt;/a&gt;，生成Java符号表，供&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;bcc&lt;/code&gt;读取（/tmp/perf-PID.map）。同时要加上&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt; JVM 参数，让&lt;code&gt;perf&lt;/code&gt;可以遍历基于帧指针（frame pointer）的堆栈。&lt;/li&gt;
+&lt;li&gt;使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;async-profiler&lt;/a&gt;，该项目将&lt;code&gt;perf&lt;/code&gt;的堆栈追踪和JDK提供的&lt;a class=&#34;link&#34; href=&#34;http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，同样能够获得mixed-mode火焰图。同时，此方法不需要启用帧指针，所以不用加上&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt;参数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面我们就分别演示这两种方式。&lt;/p&gt;
+&lt;h3 id=&#34;perf-map-agent&#34;&gt;perf-map-agent&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
+&lt;p&gt;首先下载并编译&lt;code&gt;perf-map-agent&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/jvm-profiling-tools/perf-map-agent.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cd perf-map-agent
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cmake .
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;配合&lt;code&gt;perf&lt;/code&gt;使用&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;perf-java-flames&lt;/a&gt;脚本，可以一步生成火焰图。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;perf-java-flames&lt;/code&gt;接收&lt;code&gt;perf record&lt;/code&gt;命令参数，它会调用&lt;code&gt;perf&lt;/code&gt;进行采样，然后使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;FlameGraph&lt;/a&gt;生成火焰图，一步完成，非常方便。&lt;/p&gt;
+&lt;p&gt;注意，记得要给被&lt;code&gt;profiling&lt;/code&gt;的Java进程加上&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt; JVM 参数。&lt;/p&gt;
+&lt;p&gt;设置必要的环境变量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;export FLAMEGRAPH_DIR=[FlameGraph 所在的目录]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;export PERF_RECORD_SECONDS=[采样时间]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;./bin/perf-java-flames  [PID] -F 99 -a -g -p [PID]&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对指定进程（&lt;strong&gt;-p PID&lt;/strong&gt;），在所有CPU（&lt;strong&gt;-a&lt;/strong&gt;）上进行call stacks（&lt;strong&gt;-g&lt;/strong&gt;）采样，采样频率为99 Hertz （&lt;strong&gt;-F 99&lt;/strong&gt;），持续时间为&lt;code&gt;PERF_RECORD_SECONDS&lt;/code&gt;秒。命令运行完成后，会在当前目录生成名为&lt;code&gt;flamegraph-pid.svg&lt;/code&gt;的火焰图。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241119221.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;java-flamegraph&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;./bin/perf-java-flames  [PID] -F 99 -g -a -e context-switches -p [PID]&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对指定进程的上下文切换（&lt;strong&gt;-e context-switches&lt;/strong&gt;）进行采样，并生成火焰图。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;当然也可以只为&lt;code&gt;perf&lt;/code&gt;生成Java符号表，然后直接使用perf采样&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./bin/create-java-perf-map.sh [PID]; sudo perf record -F 99 -p [PID] -a -g -- sleep 15
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./bin/create-java-perf-map.sh [PID]; sudo perf record -g -a -e context-switches -p [PID] sleep 15
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 查看报告
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo perf report --stdio
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;配合&lt;code&gt;bcc profile&lt;/code&gt;使用&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;jmaps&lt;/a&gt;脚本，它会调用&lt;code&gt;perf-map-agent&lt;/code&gt;为当前运行的所有Java进程生成符号表。&lt;/p&gt;
+&lt;p&gt;首先为&lt;code&gt;jmaps&lt;/code&gt;脚本设置好&lt;code&gt;JAVA_HOME&lt;/code&gt;和&lt;code&gt;perf-map-agent&lt;/code&gt;的正确位置：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-8-oracle}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;AGENT_HOME=${AGENT_HOME:-/usr/lib/jvm/perf-map-agent} # from https://github.com/jvm-profiling-tools/perf-map-agent
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;运行&lt;code&gt;jmaps&lt;/code&gt;，可以看到它会为当前所有的Java进程生成符号表：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo ./jmaps
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Fetching maps for all java processes...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Mapping PID 30711 (user adp):
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wc(1):   3486  10896 214413 /tmp/perf-30711.map
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;我们在做任何&lt;code&gt;profiling&lt;/code&gt;之前，都需要调用&lt;code&gt;jmaps&lt;/code&gt;，保持符号表是最新的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU Profiling火焰图&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# Profiling
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ./jmaps ; sudo /usr/share/bcc/tools/profile -dF 99 -afp [PID] 10 &amp;gt; out.profile01.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 生成火焰图
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./flamegraph.pl --color=java --hash &amp;lt;out.profile01.txt &amp;gt; flamegraph.svg
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;off-CPU火焰图&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# Profiling
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ./jmaps ; sudo /usr/share/bcc/tools/offcputime -fp [PID] 10 &amp;gt; out.offcpu01.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 生成火焰图
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./flamegraph.pl --color=java --bgcolor=blue --hash --countname=us --width=1024 --title=&amp;#34;Off-CPU Time Flame Graph&amp;#34; &amp;lt; out.offcpu01.txt &amp;gt; out.offcpu01.svg
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;off-CPU，并过滤指定的进程状态&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Linux的进程状态有：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;状态&lt;/th&gt;
+&lt;th&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;TASK_RUNNING&lt;/td&gt;
+&lt;td&gt;意味着进程处于可运行状态。这并不意味着已经实际分配了CPU。进程可能会一直等到调度器选中它。该状态确保进程可以立即运行，而无需等待外部事件。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;TASK_INTERRUPTIBLE&lt;/td&gt;
+&lt;td&gt;可中断的等待状态，主要为恢复时间无法预测的长时间等待。例如等待来自用户的输入。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;TASK_UNINTERRUPTIBLE&lt;/td&gt;
+&lt;td&gt;不可中断的等待状态。用于因内核指示而停用的睡眠进程。它们不能由外部信号唤醒，只能由内核亲自唤醒。例如磁盘输入输出等待。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;TASK_STOPPED&lt;/td&gt;
+&lt;td&gt;响应暂停信号而运行中断的状态。直到恢复前都不会被调度&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;TASK_ZOMBIE&lt;/td&gt;
+&lt;td&gt;僵尸状态，子进程已经终止，但父进程尚未执行wait()，因此该进程的资源没有被系统释放。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;在状态&lt;code&gt;TASK_RUNNING&lt;/code&gt;（0）会发生非自愿上下文切换，而我们通常感兴趣的阻塞事件是&lt;code&gt;TASK_INTERRUPTIBLE&lt;/code&gt;（1）或&lt;code&gt;TASK_UNINTERRUPTIBLE&lt;/code&gt;（2），&lt;code&gt;offcputime&lt;/code&gt;可以用&lt;code&gt;--state&lt;/code&gt;过滤指定的进程状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# Profiling
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ./jmaps ; sudo /usr/share/bcc/tools/offcputime -K --state 2 -f 30 &amp;gt; out.offcpu01.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 生成火焰图
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./flamegraph.pl --color=io --countname=ms &amp;lt; out.offcpu01.txt &amp;gt; out.offcpu01.svg
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;async-profiler&lt;/h3&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;async-profiler&lt;/a&gt;将&lt;code&gt;perf&lt;/code&gt;的堆栈追踪和JDK提供的&lt;a class=&#34;link&#34; href=&#34;http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，做到同时采样Java栈与Native栈，因此也就可以同时分析Java代码和Native代码中存在的性能热点。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;AsyncGetCallTrace&lt;/code&gt;是JDK内部提供的一个函数，它的原型如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;typedef struct {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  jint lineno;         // BCI in the source file
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  jmethodID method_id; // method executed in this frame
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;} ASGCT_CallFrame;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;typedef struct {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  JNIEnv *env_id   //Env where trace was recorded
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  jint num_frames; // number of frames in this trace
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ASGCT_CallFrame *frames;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;} ASGCT_CallTrace; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;void AsyncGetCallTrace(ASGCT_CallTrace *trace, // pre-allocated trace to fill
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                       jint depth,             // max number of frames to walk up the stack
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                       void* ucontext)         // signal context
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看出，该函数直接通过&lt;code&gt;ucontext&lt;/code&gt;就能获取到完整的Java调用栈。&lt;/p&gt;
+&lt;h4 id=&#34;async-profiler的使用&#34;&gt;async-profiler的使用&lt;/h4&gt;
+&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
+&lt;p&gt;从Linux 4.6开始，从&lt;code&gt;non-root&lt;/code&gt;进程使用&lt;code&gt;perf&lt;/code&gt;捕获内核的&lt;code&gt;call stacks&lt;/code&gt;，需要设置如下两个内核参数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# echo 1 &amp;gt; /proc/sys/kernel/perf_event_paranoid
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# echo 0 &amp;gt; /proc/sys/kernel/kptr_restrict
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;async-profiler&lt;/code&gt;的使用非常简单，一步就能生成火焰图。另外，也不需要为被&lt;code&gt;profiling&lt;/code&gt;的Java进程设置&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt;参数。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./profiler.sh -d 30 -f /tmp/flamegraph.svg [PID]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241119380.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;async-profiler&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;使用工具采集样本&lt;/li&gt;
+&lt;li&gt;使用&lt;code&gt;FlameGraph&lt;/code&gt;项目提供的脚本，将采集的样本归纳合并，统计出&lt;code&gt;Stack Trace&lt;/code&gt;出现的频率&lt;/li&gt;
+&lt;li&gt;最后使用&lt;code&gt;flamegraph.pl&lt;/code&gt;利用上一步的输出，绘制SVG火焰图&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;为了能够生成&lt;code&gt;Java stacks&lt;/code&gt;和&lt;code&gt;native stacks&lt;/code&gt;完整的火焰图，解决&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;bcc profile&lt;/code&gt;不能识别Java符号和Java &lt;code&gt;stack traces&lt;/code&gt;的问题，目前有以下两种方式：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;perf-map-agent&lt;/code&gt; 加上 &lt;code&gt;perf&lt;/code&gt;或&lt;code&gt;bcc profile&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;async-profiler&lt;/code&gt;（内部会使用到&lt;code&gt;perf&lt;/code&gt;）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如果只是对Java进程做&lt;code&gt;on-CPU&lt;/code&gt;分析，&lt;code&gt;async-profiler&lt;/code&gt;更加方便好用。如果需要更全面的了解Java进程的运行情况，例如分析系统锁的开销，阻塞的 I/O 操作，以及进程调度器（&lt;code&gt;scheduler&lt;/code&gt;）的工作，那么还是需要使用功能更强大的&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;bcc&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/perf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;perf Examples&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/ebpf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Linux Extended BPF (eBPF) Tracing Tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/bpf-performance-tools-book.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BPF Performance Tools (book)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/offcpuanalysis.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Off-CPU Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Flame Graphs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>Linux TCP队列相关参数的总结</title>
+        <link>https://mazhen.tech/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/</link>
+        <pubDate>Sat, 16 Aug 2014 11:11:24 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
+        <description>&lt;p&gt;在Linux上做网络应用的性能优化时，一般都会对TCP相关的内核参数进行调节，特别是和缓冲、队列有关的参数。网上搜到的文章会告诉你需要修改哪些参数，但我们经常是知其然而不知其所以然，每次照抄过来后，可能很快就忘记或混淆了它们的含义。本文尝试总结TCP队列缓冲相关的内核参数，从协议栈的角度梳理它们，希望可以更容易的理解和记忆。注意，本文内容均来源于参考文档，没有去读相关的内核源码做验证，不能保证内容严谨正确。作为Java程序员没读过内核源码是硬伤。&lt;/p&gt;
+&lt;p&gt;下面我以server端为视角，从&lt;strong&gt;连接建立&lt;/strong&gt;、&lt;strong&gt;数据包接收&lt;/strong&gt;和&lt;strong&gt;数据包发送&lt;/strong&gt;这3条路径对参数进行归类梳理。&lt;/p&gt;
+&lt;h3 id=&#34;一连接建立&#34;&gt;一、连接建立&lt;/h3&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;简单看下连接的建立过程，客户端向server发送&lt;code&gt;SYN&lt;/code&gt;包，server回复&lt;code&gt;SYN＋ACK&lt;/code&gt;，同时将这个处于&lt;code&gt;SYN_RECV&lt;/code&gt;状态的连接保存到半连接队列。客户端返回&lt;code&gt;ACK&lt;/code&gt;包完成三次握手，server将&lt;code&gt;ESTABLISHED&lt;/code&gt;状态的连接移入&lt;code&gt;accept&lt;/code&gt;队列，等待应用调用&lt;code&gt;accept()&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;可以看到建立连接涉及两个队列：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;半连接队列&lt;/strong&gt;，保存&lt;code&gt;SYN_RECV&lt;/code&gt;状态的连接。队列长度由&lt;code&gt;net.ipv4.tcp_max_syn_backlog&lt;/code&gt;设置&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;accept队列&lt;/strong&gt;，保存&lt;code&gt;ESTABLISHED&lt;/code&gt;状态的连接。队列长度为&lt;code&gt;min(net.core.somaxconn, backlog)&lt;/code&gt;。其中&lt;code&gt;backlog&lt;/code&gt;是我们创建&lt;code&gt;ServerSocket(int port,int backlog)&lt;/code&gt;时指定的参数，最终会传递给&lt;code&gt;listen&lt;/code&gt;方法：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;#include &amp;lt;sys/socket.h&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;int listen(int sockfd, int backlog);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果我们设置的&lt;code&gt;backlog&lt;/code&gt;大于&lt;code&gt;net.core.somaxconn&lt;/code&gt;，&lt;code&gt;accept&lt;/code&gt;队列的长度将被设置为&lt;code&gt;net.core.somaxconn&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;另外，为了应对&lt;code&gt;SYN flooding&lt;/code&gt;（即客户端只发送SYN包发起握手而不回应ACK完成连接建立，填满server端的半连接队列，让它无法处理正常的握手请求），Linux实现了一种称为&lt;code&gt;SYN cookie&lt;/code&gt;的机制，通过&lt;code&gt;net.ipv4.tcp_syncookies&lt;/code&gt;控制，设置为1表示开启。简单说&lt;code&gt;SYN cookie&lt;/code&gt;就是将连接信息编码在&lt;code&gt;ISN&lt;/code&gt;(initial sequence number)中返回给客户端，这时server不需要将半连接保存在队列中，而是利用客户端随后发来的ACK带回的&lt;code&gt;ISN&lt;/code&gt;还原连接信息，以完成连接的建立，避免了半连接队列被攻击&lt;code&gt;SYN&lt;/code&gt;包填满。对于一去不复返的客户端握手，不理它就是了。&lt;/p&gt;
+&lt;h3 id=&#34;二数据包的接收&#34;&gt;二、数据包的接收&lt;/h3&gt;
+&lt;p&gt;先看看接收数据包经过的路径：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;数据包的接收，从下往上经过了三层：网卡驱动、系统内核空间，最后到用户态空间的应用。Linux内核使用&lt;code&gt;sk_buff&lt;/code&gt;(&lt;a class=&#34;link&#34; href=&#34;http://vger.kernel.org/~davem/skb.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;socket kernel buffers&lt;/a&gt;)数据结构描述一个数据包。当一个新的数据包到达，&lt;code&gt;NIC&lt;/code&gt;（network interface controller）调用&lt;code&gt;DMA engine&lt;/code&gt;，通过&lt;code&gt;Ring Buffer&lt;/code&gt;将数据包放置到内核内存区。&lt;code&gt;Ring Buffer&lt;/code&gt;的大小固定，它不包含实际的数据包，而是包含了指向&lt;code&gt;sk_buff&lt;/code&gt;的描述符。当&lt;code&gt;Ring Buffer&lt;/code&gt;满的时候，新来的数据包将给丢弃。一旦数据包被成功接收，&lt;code&gt;NIC&lt;/code&gt;发起中断，由内核的中断处理程序将数据包传递给IP层。经过IP层的处理，数据包被放入队列等待TCP层处理。每个数据包经过TCP层一系列复杂的步骤，更新TCP状态机，最终到达&lt;code&gt;recv Buffer&lt;/code&gt;，等待被应用接收处理。有一点需要注意，数据包到达&lt;code&gt;recv Buffer&lt;/code&gt;，TCP就会回&lt;code&gt;ACK&lt;/code&gt;确认，既TCP的&lt;code&gt;ACK&lt;/code&gt;表示数据包已经被操作系统内核收到，但并不确保应用层一定收到数据（例如这个时候系统crash），因此一般建议应用协议层也要设计自己的&lt;code&gt;ACK&lt;/code&gt;确认机制。&lt;/p&gt;
+&lt;p&gt;上面就是一个相当简化的数据包接收流程，让我们逐层看看队列缓冲有关的参数。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;网卡Bonding模式&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;当主机有1个以上的网卡时，Linux会将多个网卡绑定为一个虚拟的bonded网络接口，对TCP/IP而言只存在一个bonded网卡。多网卡绑定一方面能够提高网络吞吐量，另一方面也可以增强网络高可用。Linux支持7种Bonding模式：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;- `Mode 0 (balance-rr)` Round-robin策略，这个模式具备负载均衡和容错能力
+- `Mode 1 (active-backup)` 主备策略，在绑定中只有一个网卡被激活，其他处于备份状态
+- `Mode 2 (balance-xor)` XOR策略，通过源MAC地址与目的MAC地址做异或操作选择slave网卡
+- `Mode 3 (broadcast)` 广播，在所有的网卡上传送所有的报文
+- `Mode 4 (802.3ad)`  IEEE 802.3ad 动态链路聚合。创建共享相同的速率和双工模式的聚合组
+- `Mode 5 (balance-tlb)` Adaptive transmit load balancing
+- `Mode 6 (balance-alb)` Adaptive load balancing
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;详细的说明参考内核文档&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/Documentation/networking/bonding.txt&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Linux Ethernet Bonding Driver HOWTO&lt;/a&gt;。我们可以通过&lt;code&gt;cat /proc/net/bonding/bond0&lt;/code&gt;查看本机的Bonding模式：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;一般很少需要开发去设置网卡Bonding模式，自己实验的话可以参考&lt;a class=&#34;link&#34; href=&#34;http://linux.cloudibee.com/2009/10/linux-network-bonding-setup-guide/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这篇文档&lt;/a&gt;&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;strong&gt;网卡多队列及中断绑定&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;随着网络的带宽的不断提升，单核CPU已经不能满足网卡的需求，这时通过多队列网卡驱动的支持，可以将每个队列通过中断绑定到不同的CPU核上，充分利用多核提升数据包的处理能力。&lt;/p&gt;
+&lt;p&gt;首先查看网卡是否支持多队列，使用&lt;code&gt;lspci -vvv&lt;/code&gt;命令，找到&lt;code&gt;Ethernet controller&lt;/code&gt;项：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;如果有MSI-X， Enable+ 并且Count &amp;gt; 1，则该网卡是多队列网卡。&lt;/p&gt;
+&lt;p&gt;然后查看是否打开了网卡多队列。使用命令&lt;code&gt;cat /proc/interrupts&lt;/code&gt;，如果看到eth0-TxRx-0表明多队列支持已经打开：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011115744.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;最后确认每个队列是否绑定到不同的CPU。&lt;code&gt;cat /proc/interrupts&lt;/code&gt;查询到每个队列的中断号，对应的文件&lt;code&gt;/proc/irq/${IRQ_NUM}/smp_affinity&lt;/code&gt;为中断号&lt;code&gt;IRQ_NUM&lt;/code&gt;绑定的CPU核的情况。以十六进制表示，每一位代表一个CPU核：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;```
+（00000001）代表CPU0
+（00000010）代表CPU1
+（00000011）代表CPU0和CPU1
+```
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果绑定的不均衡，可以手工设置，例如：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;```
+echo &amp;quot;1&amp;quot; &amp;gt; /proc/irq/99/smp_affinity  
+echo &amp;quot;2&amp;quot; &amp;gt; /proc/irq/100/smp_affinity  
+echo &amp;quot;4&amp;quot; &amp;gt; /proc/irq/101/smp_affinity  
+echo &amp;quot;8&amp;quot; &amp;gt; /proc/irq/102/smp_affinity  
+echo &amp;quot;10&amp;quot; &amp;gt; /proc/irq/103/smp_affinity  
+echo &amp;quot;20&amp;quot; &amp;gt; /proc/irq/104/smp_affinity  
+echo &amp;quot;40&amp;quot; &amp;gt; /proc/irq/105/smp_affinity  
+echo &amp;quot;80&amp;quot; &amp;gt; /proc/irq/106/smp_affinity  
+```
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Ring Buffer&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Ring Buffer&lt;/code&gt;位于NIC和IP层之间，是一个典型的FIFO（先进先出）&lt;a class=&#34;link&#34; href=&#34;http://en.wikipedia.org/wiki/Circular_buffer&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;环形队列&lt;/a&gt;。&lt;code&gt;Ring Buffer&lt;/code&gt;没有包含数据本身，而是包含了指向&lt;code&gt;sk_buff&lt;/code&gt;（&lt;a class=&#34;link&#34; href=&#34;http://vger.kernel.org/~davem/skb.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;socket kernel buffers&lt;/a&gt;）的描述符。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可以使用&lt;code&gt;ethtool -g eth0&lt;/code&gt;查看当前&lt;code&gt;Ring Buffer&lt;/code&gt;的设置：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011116458.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;上面的例子接收队列为4096，传输队列为256。可以通过&lt;code&gt;ifconfig&lt;/code&gt;观察接收和传输队列的运行状况：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011116204.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;RX errors&lt;/strong&gt;：收包总的错误数&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;RX dropped&lt;/strong&gt;: 表示数据包已经进入了&lt;code&gt;Ring Buffer&lt;/code&gt;，但是由于内存不够等系统原因，导致在拷贝到内存的过程中被丢弃。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;RX overruns&lt;/strong&gt;: &lt;code&gt;overruns&lt;/code&gt;意味着数据包没到&lt;code&gt;Ring Buffer&lt;/code&gt;就被网卡物理层给丢弃了，而CPU无法及时的处理中断是造成&lt;code&gt;Ring Buffer&lt;/code&gt;满的原因之一，例如中断分配的不均匀。&lt;/p&gt;
+&lt;p&gt;当&lt;code&gt;dropped&lt;/code&gt;数量持续增加，建议增大&lt;code&gt;Ring Buffer&lt;/code&gt;，使用&lt;code&gt;ethtool -G&lt;/code&gt;进行设置。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Input Packet Queue(数据包接收队列)&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;当接收数据包的速率大于内核TCP处理包的速率，数据包将会缓冲在TCP层之前的队列中。接收队列的长度由参数&lt;code&gt;net.core.netdev_max_backlog&lt;/code&gt;设置。&lt;/p&gt;
+&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;&lt;strong&gt;recv Buffer&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;recv buffer&lt;/code&gt;是调节TCP性能的关键参数。&lt;code&gt;BDP&lt;/code&gt;(Bandwidth-delay product，带宽延迟积) 是网络的带宽和与&lt;code&gt;RTT&lt;/code&gt;(round trip time)的乘积，&lt;code&gt;BDP&lt;/code&gt;的含义是任意时刻处于在途未确认的最大数据量。&lt;code&gt;RTT&lt;/code&gt;使用&lt;code&gt;ping&lt;/code&gt;命令可以很容易的得到。为了达到最大的吞吐量，&lt;code&gt;recv Buffer&lt;/code&gt;的设置应该大于&lt;code&gt;BDP&lt;/code&gt;，即&lt;code&gt;recv Buffer &amp;gt;= bandwidth * RTT&lt;/code&gt;。假设带宽是100Mbps，&lt;code&gt;RTT&lt;/code&gt;是100ms，那么&lt;code&gt;BDP&lt;/code&gt;的计算如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;BDP = 100Mbps * 100ms = (100 / 8) * (100 / 1000) = 1.25MB
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Linux在2.6.17以后增加了&lt;code&gt;recv Buffer&lt;/code&gt;自动调节机制，&lt;code&gt;recv buffer&lt;/code&gt;的实际大小会自动在最小值和最大值之间浮动，以期找到性能和资源的平衡点，因此大多数情况下不建议将&lt;code&gt;recv buffer&lt;/code&gt;手工设置成固定值。&lt;/p&gt;
+&lt;p&gt;当&lt;code&gt;net.ipv4.tcp_moderate_rcvbuf&lt;/code&gt;设置为1时，自动调节机制生效，每个TCP连接的recv Buffer由下面的3元数组指定：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;net.ipv4.tcp_rmem = &amp;lt;MIN&amp;gt; &amp;lt;DEFAULT&amp;gt; &amp;lt;MAX&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;最初&lt;code&gt;recv buffer&lt;/code&gt;被设置为&lt;!-- raw HTML omitted --&gt;，同时这个缺省值会覆盖&lt;code&gt;net.core.rmem_default&lt;/code&gt;的设置。随后&lt;code&gt;recv buffer&lt;/code&gt;根据实际情况在最大值和最小值之间动态调节。在缓冲的动态调优机制开启的情况下，我们将&lt;code&gt;net.ipv4.tcp_rmem&lt;/code&gt;的最大值设置为&lt;code&gt;BDP&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;当&lt;code&gt;net.ipv4.tcp_moderate_rcvbuf&lt;/code&gt;被设置为0，或者设置了socket选项&lt;code&gt;SO_RCVBUF&lt;/code&gt;，缓冲的动态调节机制被关闭。&lt;code&gt;recv buffer&lt;/code&gt;的缺省值由&lt;code&gt;net.core.rmem_default&lt;/code&gt;设置，但如果设置了&lt;code&gt;net.ipv4.tcp_rmem&lt;/code&gt;，缺省值则被&lt;code&gt;&amp;lt;DEFAULT&amp;gt;&lt;/code&gt;覆盖。可以通过系统调用&lt;code&gt;setsockopt()&lt;/code&gt;设置&lt;code&gt;recv buffer&lt;/code&gt;的最大值为&lt;code&gt;net.core.rmem_max&lt;/code&gt;。在缓冲动态调节机制关闭的情况下，建议把缓冲的缺省值设置为&lt;code&gt;BDP&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;注意这里还有一个细节，缓冲除了保存接收的数据本身，还需要一部分空间保存socket数据结构等额外信息。因此上面讨论的&lt;code&gt;recv buffer&lt;/code&gt;最佳值仅仅等于&lt;code&gt;BDP&lt;/code&gt;是不够的，还需要考虑保存socket等额外信息的开销。Linux根据参数&lt;code&gt;net.ipv4.tcp_adv_win_scale&lt;/code&gt;计算额外开销的大小：&lt;/p&gt;
+&lt;p&gt;Buffer / 2&lt;!-- raw HTML omitted --&gt;tcp_adv_win_scale&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;p&gt;如果&lt;code&gt;net.ipv4.tcp_adv_win_scale&lt;/code&gt;的值为1，则二分之一的缓冲空间用来做额外开销，如果为2的话，则四分之一缓冲空间用来做额外开销。因此&lt;code&gt;recv buffer&lt;/code&gt;的最佳值应该设置为：&lt;/p&gt;
+&lt;p&gt;BDP / (1 – 1 / 2&lt;!-- raw HTML omitted --&gt;tcp_adv_win_scale&lt;!-- raw HTML omitted --&gt;)&lt;/p&gt;
+&lt;h3 id=&#34;三数据包的发送&#34;&gt;三、数据包的发送&lt;/h3&gt;
+&lt;p&gt;发送数据包经过的路径：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;和接收数据的路径相反，数据包的发送从上往下也经过了三层：用户态空间的应用、系统内核空间、最后到网卡驱动。应用先将数据写入TCP &lt;code&gt;send buffer&lt;/code&gt;，TCP层将&lt;code&gt;send buffer&lt;/code&gt;中的数据构建成数据包转交给IP层。IP层会将待发送的数据包放入队列&lt;code&gt;QDisc&lt;/code&gt;(queueing discipline)。数据包成功放入&lt;code&gt;QDisc&lt;/code&gt;后，指向数据包的描述符&lt;code&gt;sk_buff&lt;/code&gt;被放入&lt;code&gt;Ring Buffer&lt;/code&gt;输出队列，随后网卡驱动调用&lt;code&gt;DMA engine&lt;/code&gt;将数据发送到网络链路上。&lt;/p&gt;
+&lt;p&gt;同样我们逐层来梳理队列缓冲有关的参数。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;send Buffer&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;同&lt;code&gt;recv Buffer&lt;/code&gt;类似，和&lt;code&gt;send Buffer&lt;/code&gt;有关的参数如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;net.ipv4.tcp_wmem = &amp;lt;MIN&amp;gt; &amp;lt;DEFAULT&amp;gt; &amp;lt;MAX&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;net.core.wmem_default
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;net.core.wmem_max
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;发送端缓冲的自动调节机制很早就已经实现，并且是无条件开启，没有参数去设置。如果指定了&lt;code&gt;tcp_wmem&lt;/code&gt;，则&lt;code&gt;net.core.wmem_default&lt;/code&gt;被&lt;code&gt;tcp_wmem&lt;/code&gt;的&lt;!-- raw HTML omitted --&gt;覆盖。&lt;code&gt;send Buffer&lt;/code&gt;在&lt;code&gt;tcp_wmem&lt;/code&gt;的最小值和最大值之间自动调节。如果调用&lt;code&gt;setsockopt()&lt;/code&gt;设置了socket选项&lt;code&gt;SO_SNDBUF&lt;/code&gt;，将关闭发送端缓冲的自动调节机制，&lt;code&gt;tcp_wmem&lt;/code&gt;将被忽略，&lt;code&gt;SO_SNDBUF&lt;/code&gt;的最大值由&lt;code&gt;net.core.wmem_max&lt;/code&gt;限制。&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;strong&gt;QDisc&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;QDisc&lt;/code&gt;（queueing discipline ）位于IP层和网卡的&lt;code&gt;ring buffer&lt;/code&gt;之间。我们已经知道，&lt;code&gt;ring buffer&lt;/code&gt;是一个简单的FIFO队列，这种设计使网卡的驱动层保持简单和快速。而&lt;code&gt;QDisc&lt;/code&gt;实现了流量管理的高级功能，包括流量分类，优先级和流量整形（rate-shaping）。可以使用&lt;code&gt;tc&lt;/code&gt;命令配置&lt;code&gt;QDisc&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;QDisc&lt;/code&gt;的队列长度由&lt;code&gt;txqueuelen&lt;/code&gt;设置，和接收数据包的队列长度由内核参数&lt;code&gt;net.core.netdev_max_backlog&lt;/code&gt;控制所不同，&lt;code&gt;txqueuelen&lt;/code&gt;是和网卡关联，可以用&lt;code&gt;ifconfig&lt;/code&gt;命令查看当前的大小：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011117299.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;使用&lt;code&gt;ifconfig&lt;/code&gt;调整&lt;code&gt;txqueuelen&lt;/code&gt;的大小：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ifconfig eth0 txqueuelen 2000
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Ring Buffer&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;和数据包的接收一样，发送数据包也要经过&lt;code&gt;Ring Buffer&lt;/code&gt;，使用&lt;code&gt;ethtool -g eth0&lt;/code&gt;查看：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011118456.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;其中&lt;code&gt;TX&lt;/code&gt;项是&lt;code&gt;Ring Buffer&lt;/code&gt;的传输队列，也就是发送队列的长度。设置也是使用命令&lt;code&gt;ethtool -G&lt;/code&gt;。&lt;/p&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;&lt;strong&gt;TCP Segmentation和Checksum Offloading&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;操作系统可以把一些TCP/IP的功能转交给网卡去完成，特别是Segmentation(分片)和checksum的计算，这样可以节省CPU资源，并且由硬件代替&lt;code&gt;OS&lt;/code&gt;执行这些操作会带来性能的提升。&lt;/p&gt;
+&lt;p&gt;一般以太网的&lt;code&gt;MTU&lt;/code&gt;（Maximum Transmission Unit）为1500 bytes，假设应用要发送数据包的大小为7300bytes，&lt;code&gt;MTU&lt;/code&gt;1500字节 － IP头部20字节 － TCP头部20字节＝有效负载为1460字节，因此7300字节需要拆分成5个segment：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011118576.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Segmentation&lt;/code&gt;(分片)操作可以由操作系统移交给网卡完成，虽然最终线路上仍然是传输5个包，但这样节省了CPU资源并带来性能的提升：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011118473.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;可以使用&lt;code&gt;ethtool -k eth0&lt;/code&gt;查看网卡当前的offloading情况：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011119505.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;上面这个例子&lt;code&gt;checksum&lt;/code&gt;和&lt;code&gt;tcp segmentation&lt;/code&gt;的&lt;code&gt;offloading&lt;/code&gt;都是打开的。如果想设置网卡的&lt;code&gt;offloading&lt;/code&gt;开关，可以使用&lt;code&gt;ethtool -K&lt;/code&gt;(注意K是大写)命令，例如下面的命令关闭了tcp segmentation offload：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ethtool -K eth0 tso off
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;&lt;strong&gt;网卡多队列和网卡Bonding模式&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在数据包的接收过程中已经介绍过了。&lt;/p&gt;
+&lt;p&gt;至此，终于梳理完毕。整理TCP队列相关参数的起因是最近在排查一个网络超时问题，原因还没有找到，产生的“副作用”就是这篇文档。再想深入解决这个问题可能需要做TCP协议代码的profile，需要继续学习，希望不久的将来就可以再写文档和大家分享了。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;参考文档&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.linuxjournal.com/content/queueing-linux-network-stack&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Queueing in the Linux Network Stack&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;TCP Implementation in Linux: A Brief Tutorial&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://sandilands.info/sgordon/impact-of-bandwidth-delay-product-on-tcp-throughput&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Impact of Bandwidth Delay Product on TCP Throughput&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://hellojava.info/?p=292&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Java程序员也应该知道的系统知识系列之网卡&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>使用USE Method分析系统性能问题</title>
+        <link>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8use-method%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98/</link>
+        <pubDate>Sat, 07 Jun 2014 10:56:00 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8use-method%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98/</guid>
+        <description>&lt;p&gt;遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。两个典型的 ANTI-METHODOLOGIES：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;blame-someone-else&lt;/strong&gt;
+使用此方法的人遵循下列步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;找到一个不是他负责的系统或环境&lt;/li&gt;
+&lt;li&gt;假定问题和这个组件有关&lt;/li&gt;
+&lt;li&gt;将问题转交个负责这个组件的团队&lt;/li&gt;
+&lt;li&gt;如果证明是错误的，重复步骤1&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;路灯法&lt;/strong&gt;
+没有系统的方法论，只是使用自己擅长的工具去观察，而不管问题到底出现在哪儿。就像丢了钥匙的人去路灯下寻找，仅仅是因为路灯下比较亮。这种行为被称为&lt;a class=&#34;link&#34; href=&#34;http://en.wikipedia.org/wiki/Streetlight_effect&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;路灯效应&lt;/a&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;相信很多同学已经脑补出上述的两个场景，他们的行为模式让人抓狂。于是有聪明人总结出了《&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/usemethod.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;The USE Method&lt;/a&gt;》。USE是Utilization，Saturation 和 Errors的缩写，简单说USE是一套分析系统性能问题的方法论，具体表现为一个checklist，分析过程就是对照checklist一项项检查，希望能快速定位瓶颈资源或错误。&lt;/p&gt;
+&lt;p&gt;初看这个方法感觉有点太简单了吧，这也能称为方法论？不过这确实体现出了老外的做事风格，任何事情都会去做定量分析，力求逻辑完整。而我们往往讳莫高深的一笑，只可意会不可言传。&lt;/p&gt;
+&lt;p&gt;简单介绍下USE，详细内容推荐看这篇《&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/usemethod.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;The USE Method&lt;/a&gt;》。USE的一句话总结：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;For every resource, check utilization, saturation, and errors.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;术语解释&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;resource&lt;/strong&gt;：CPU，内存，磁盘，网络等一切物理设备资源&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;utilization&lt;/strong&gt;：资源利用率。例如CPU的资源利用率90%&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;saturation&lt;/strong&gt;：当资源繁忙时仍能接收新的任务，这些额外的任务一般都放入了等待队列。&lt;code&gt;saturation&lt;/code&gt;就表现为队列的长度，例如CPU的平均运行队列为4（Linux上使用vmstat命令获得）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;errors&lt;/strong&gt;：系统的错误报告数，例如&lt;code&gt;TCP&lt;/code&gt;监听队列&lt;code&gt;overflowed&lt;/code&gt;次数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;列出系统中的所有资源，然后逐项检查利用率、等待队列和错误数，就这么简单！下表是一个范例：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;resource&lt;/th&gt;
+&lt;th style=&#34;text-align:right&#34;&gt;type&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;metric&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;CPU&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;utilization&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;CPU utilization (either per-CPU or a system-wide average)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;CPU&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;saturation&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;run-queue length&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Memory capacity&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;utilization&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;available free memory (system-wide)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Memory capacity&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;saturation&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;anonymous paging or thread swapping&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Network interface&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;utilization&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;RX/TX throughput / max bandwidth Storage&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Storage device I/O&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;utilization&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;device busy percent&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Storage device I/O&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;saturation&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;wait queue length&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Storage device I/O&lt;/td&gt;
+&lt;td style=&#34;text-align:right&#34;&gt;errors&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;device errors (&amp;ldquo;soft&amp;rdquo;, &amp;ldquo;hard&amp;rdquo;, &amp;hellip;)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;对于资源测量数据的解读，作者给了一些建议，例如：资源利用率100%肯定表示该资源是系统瓶颈，70%以上的利用率就要引起足够的重视，一般IO设备利用率高于70%，响应时间将大幅上升。资源等待队列大于0意味着可能存在问题。资源的任何错误计数，都值得仔细调查，特别是当性能变差时，错误计数在上升。&lt;/p&gt;
+&lt;p&gt;要使用这个方法，你还需要一份完整的资源列表，一般的系统资源包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CPUs: sockets, cores, hardware threads (virtual CPUs)&lt;/li&gt;
+&lt;li&gt;Memory: capacity&lt;/li&gt;
+&lt;li&gt;Network interfaces&lt;/li&gt;
+&lt;li&gt;Storage devices: I/O, capacity&lt;/li&gt;
+&lt;li&gt;Controllers: storage, network cards&lt;/li&gt;
+&lt;li&gt;Interconnects: CPUs, memory, I/O&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;作者很厚道的按照每种操作系统给出了checklist，重点关注《&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/USEmethod/use-linux.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;USE Method: Linux Performance Checklist&lt;/a&gt;》，不仅列出了资源，而且告诉你如何进行测量。例如CPU运行队列的测量：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;system-wide: vmstat 1, &amp;ldquo;r&amp;rdquo; &amp;gt; CPU count [2]; sar -q, &amp;ldquo;runq-sz&amp;rdquo; &amp;gt; CPU count; dstat -p, &amp;ldquo;run&amp;rdquo; &amp;gt; CPU count; per-process: /proc/PID/schedstat 2nd field (sched_info.run_delay); perf sched latency (shows &amp;ldquo;Average&amp;rdquo; and &amp;ldquo;Maximum&amp;rdquo; delay per-schedule); dynamic tracing, eg, SystemTap schedtimes.stp &amp;ldquo;queued(us)&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;根据作者的实践经验，使用USE方法解决了80%的性能问题，只付出了5%的努力，当考虑了所有的资源，你不太可能忽视任何问题。简单有效！&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

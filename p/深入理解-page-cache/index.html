@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释'>
+<title>深入理解 Page Cache</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='深入理解 Page Cache'>
+<meta property='og:description' content='长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释'>
+<meta property='og:url' content='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2022-04-01T16:06:54&#43;08:00'/><meta property='article:modified_time' content='2022-04-01T16:06:54&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="深入理解 Page Cache">
+<meta name="twitter:description" content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#page-cache-是什么"><strong>Page Cache</strong> 是什么</a></li>
+    <li><a href="#进程虚拟地址空间">进程虚拟地址空间</a></li>
+    <li><a href="#page-cache-的产生和释放">Page Cache 的产生和释放</a></li>
+    <li><a href="#内存文件映射">内存文件映射</a></li>
+    <li><a href="#page-cache-的观测">Page Cache 的观测</a></li>
+    <li><a href="#mmap系统调用">mmap系统调用</a></li>
+    <li><a href="#写在最后">写在最后</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/">深入理解 Page Cache</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2022-04-01</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 14 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 <a class="link" href="http://www.linuxatemyram.com/"  target="_blank" rel="noopener"
+    >LinuxAteMyRam.com</a>解释这个现象。实际上 Linux 内核会尽可能的对访问过的文件进行缓存，来弥补磁盘和内存之间巨大的延迟差距。缓存文件内容的内存就是 <strong>Page Cache</strong>。</p>
+<p>Google 的大神 <a class="link" href="https://research.google/people/jeff/"  target="_blank" rel="noopener"
+    >Jeffrey Dean</a>总结过一个<a class="link" href="https://gist.github.com/hellerbarde/2843375"  target="_blank" rel="noopener"
+    >Latency numbers every programmer should know</a>，其中提到从磁盘读取 1MB 数据的耗时是内存的80倍，即使换成 SSD 也是内存延迟的 4 倍。</p>
+<p>我在本机做了实验，来体会一下 <strong>Page Cache</strong> 的作用。首先生成一个 1G 大小的文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># dd if=/dev/zero of=/root/dd.out bs=4096 count=262144
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>清空 Page Cache：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># sync &amp;&amp; echo 3 &gt; /proc/sys/vm/drop_caches
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>统计第一次读取文件的耗时：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># time cat /root/dd.out &amp;&gt; /dev/null
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real	0m2.097s
+</span></span><span class="line"><span class="cl">user	0m0.010s
+</span></span><span class="line"><span class="cl">sys	    0m0.638s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再此读取同一个文件，由于系统已经将读取过的文件内容放入了 <strong>Page Cache</strong> ，这次耗时大大缩短：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># time cat /root/dd.out &amp;&gt; /dev/null
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real	0m0.186s
+</span></span><span class="line"><span class="cl">user	0m0.004s
+</span></span><span class="line"><span class="cl">sys	    0m0.182s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Page Cache</strong> 不仅能加速对文件内容的访问，对共享库建立 <strong>Page Cache</strong>，可以在多个进程间共享，避免每个进程都单独加载，造成宝贵内存资源的浪费。</p>
+<h2 id="page-cache-是什么"><strong>Page Cache</strong> 是什么</h2>
+<p><strong>Page Cache</strong> 是由内核管理的内存，位于 <a class="link" href="https://www.kernel.org/doc/html/latest/filesystems/vfs.html"  target="_blank" rel="noopener"
+    >VFS(Virtual File System)</a> 层和具体文件系统层（例如ext4，ext3）之间。应用进程使用 <code>read</code>/<code>write</code> 等文件操作，通过系统调用进入到 <strong>VFS</strong> 层，根据 <strong>O_DIRECT</strong> 标志，可以使用 <strong>Page Cache</strong> 作为文件内容的缓存，也可以跳过 <strong>Page Cache</strong> 不使用内核提供的缓存功能。</p>
+<p>另外，应用程序可以使用 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> ，将文件内容映射到进程的虚拟地址空间，可以像读写内存一样直接读写硬盘上的文件。进程的虚拟内存直接和 <strong>Page Cache</strong> 映射。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241608564.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="page cache"
+	
+	
+></p>
+<p>为了了解内核是怎么管理 Page Cache 的，我们先看一下 <strong>VFS</strong> 的几个核心对象：</p>
+<ul>
+<li><a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a> 存放已打开的文件信息，是进程访问文件的接口；</li>
+<li><a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/dcache.h#L81"  target="_blank" rel="noopener"
+    >dentry</a> 使用 <code>dentry</code> 将文件组织成目录树结构；</li>
+<li><a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a> 唯一标识文件系统中的文件。对于同一个文件，内核中只会有一个 <strong>inode</strong> 结构。</li>
+</ul>
+<p>对于每一个进程，打开的文件都有一个文件描述符，内核中进程数据结构 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 中有一个类型为 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fdtable.h#L49:8"  target="_blank" rel="noopener"
+    >files_struct</a> 的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L1073"  target="_blank" rel="noopener"
+    >files</a> 字段，保存着该进程打开的所有文件。<a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fdtable.h#L49:8"  target="_blank" rel="noopener"
+    >files_struct</a> 结构的<a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fdtable.h#L67"  target="_blank" rel="noopener"
+    >fd_array</a> 字段是 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a> 数组， 数组的下标是文件描述符，内容指向一个 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a> 结构，表示该进程打开的文件。<a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a> 与打开文件的进程相关联，如果多个进程打开同一个文件，那么每个进程都有自己的  <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a> ，但这些 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a>  指向同一个 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a>。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241609976.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="vfs"
+	
+	
+></p>
+<p>如上图所示，进程通过文件描述符与 <code>VFS</code> 中的 <code>file</code> 产生联系， 每个 <code>file</code> 对象又与一个 <code>dentry</code> 对应，根据 <code>dentry</code> 能找到 <code>inode</code>，而 <code>inode</code> 则代表文件本身。上图中进程 A 和进程 B 打开了同一个文件，进程 A 和进程 B 都维护着各自的 <code>file</code> ，但它们指向同一个 <code>inode</code>。</p>
+<p><a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a> 通过 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a> 管理着文件已加载到内存中的内容，也就是 <strong>Page Cache</strong>。<a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a> 的字段 <code>i_pages</code> 指向一棵 <a class="link" href="https://www.kernel.org/doc/html/latest/core-api/xarray.html"  target="_blank" rel="noopener"
+    >xarray</a> 树，与这个文件相关的 <strong>Page Cache</strong> 页都挂在这颗树上。我们在访问文件内容的时候，根据指定文件和相应的页偏移量，就可以通过 <a class="link" href="https://www.kernel.org/doc/html/latest/core-api/xarray.html"  target="_blank" rel="noopener"
+    >xarray</a> 树快速判断该页是否已经在 <strong>Page Cache</strong> 中。如果该页存在，说明文件内容已经被读取到了内存，也就是存在于 <strong>Page Cache</strong> 中；如果该页不存在，就说明内容不在 <strong>Page Cache</strong> 中，需要从磁盘中去读取。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241609688.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="address space"
+	
+	
+></p>
+<p>由于文件和  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a> 一一对应，我们可以认为  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a> 是 <strong>Page Cache</strong> 的宿主（<code>host</code>），内核通过 <code>inode-&gt;imapping-&gt;i_pages</code> 指向的树，管理维护着 <strong>Page Cache</strong>。</p>
+<p><strong>Page Cache</strong> 是如何产生和释放，又是如何与进程相关联的呢？我们需要先了解进程虚拟地址空间。</p>
+<h2 id="进程虚拟地址空间">进程虚拟地址空间</h2>
+<p>Linux 是多任务系统，它支持多个进程的的并发执行。操作系统和 CPU 联手制造了一个假象：每个进程都独享连续的虚拟内存空间，并且各个进程的地址空间是完全隔离的，因此进程并不会意识到彼此的存在。从进程的角度来看，它会认为自己是系统中唯一的进程。</p>
+<p>进程看到的是虚拟内存的地址空间，它也不能直接访问物理地址。当进程访问某个虚拟地址的时候，该虚拟地址由内核负责转换成物理内存地址，即完成虚拟地址到物理地址的映射。这样不同进程在运行的时候，即使访问相同的虚拟地址，但内核会将它们映射到不同的物理地址，因此不会发生冲突。</p>
+<p>进程在 Linux 内核由 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 所描述。估计 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 是你学习内核时第一个熟悉的数据结构，因为它实在太重要了。 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a>描述了进程相关的所有信息，包括进程状态，运行时统计信息，进程亲缘关系，进度调度信息，信号处理，进程内存管理，进程打开的文件等等。我们这里关注的进程虚拟内存空间，是由 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 中的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L860"  target="_blank" rel="noopener"
+    >mm</a> 字段指向的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L458"  target="_blank" rel="noopener"
+    >mm_struct</a> 所描述，它是一个进程内存的运行时摘要信息。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241610272.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="process_address_space"
+	
+	
+></p>
+<p>进程的虚拟地址是线性的，使用结构体 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 来描述。内核将每一段具有相同属性的内存区域当作一个 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 进行管理，每个 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a>  是一个连续的虚拟地址范围，这些区域不会互相重叠。 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L458"  target="_blank" rel="noopener"
+    >mm_struct</a> 里面有一个单链表 <code>mmap</code>，用于将 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 串联起来，另外还有一颗红黑树 <code>mm_rb</code> ，<a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 根据起始地址挂在这颗树上。使用红黑树可以根据地址，快速查找一个内存区域。</p>
+<p><a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 可以直接映射到物理内存，也可以关联文件。如果 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 是文件映射，由成员 <code>vm_file</code> 指向对应的文件指针。一个没有关联文件的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 是匿名内存。</p>
+<p>开发者使用 <a class="link" href="https://man7.org/linux/man-pages/man3/free.3.html"  target="_blank" rel="noopener"
+    >malloc</a> 等 glibc 库函数分配内存的时候，不是直接分配物理内存，而是在进程的虚拟内存空间中申请一段虚拟内存，生成相应的数据结构 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> ，然后将它插进 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L458"  target="_blank" rel="noopener"
+    >mm_struct</a> 的链表 <code>mmap</code>，同时挂在红黑树 <code>mm_rb</code> 上，就算完成了工作，根本没有涉及到物理内存的分配。只有当第一次对这块虚拟内存进行读写时，发现该内存区域没有映射到物理内存，这时会触发缺页中断，然后由内核填写页表，完成虚拟内存到物理内存的映射。</p>
+<p>当开发者使用 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 进行文件映射时，内核根据 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a>  中代表文件映射关系 <code>vm_file</code>，将文件内容从磁盘加载到物理内存，也就是 <strong>Page Cache</strong> 中，最后建立这段虚拟地址到物理地址的映射。</p>
+<p>另外，在虚拟内存中连续的页面，在物理内存中不必是连续的。只要维护好从虚拟内存页到物理内存页的映射关系，你就能正确地使用内存。由于每个进程都有独立的地址空间，为了完成虚拟地址到物理地址的映射，每个进程都要有独立的进程页表。在一个实际的进程里面，虚拟内存占用的地址空间，通常是两段连续的空间，而不是完全散落的随机的内存地址。基于这个特点，内核使用多级页表保存映射关系，可以大大减少页表本身的空间占用。最顶级的页表保存在  <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L458"  target="_blank" rel="noopener"
+    >mm_struct</a> 的 <code>pgd</code> 字段中。</p>
+<p>好了，我们对进程虚拟地址空间有了基本的了解，下面看看 <strong>Page Cache</strong> 的产生和释放，以及如何与进程空间发生联系的。</p>
+<h2 id="page-cache-的产生和释放">Page Cache 的产生和释放</h2>
+<p><strong>Page Cache</strong> 的产生有两种不同的方式：</p>
+<ul>
+<li>Buffered I/O</li>
+<li>Memory-Mapped file</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209241611674.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Memory Mapped File"
+	
+	
+></p>
+<p>使用这两种方式访问磁盘上的文件时，内核会根据指定的文件和相应的页偏移量，判断文件内容是否已经在 <strong>Page Cache</strong> 中，如果内容不存在，需要从磁盘中去读取并创建 <strong>Page Cache</strong> 页。</p>
+<p>这两种方式的不同之处在于，使用 <code>Buffered I/O</code>，要先将数据从 <strong>Page Cache</strong> 拷贝到用户缓冲区，应用才能从用户缓冲区读取数据。而对于 <code>Memory-Mapped file</code> 而言，则是直接将 <strong>Page Cache</strong> 页映射到进程虚拟地址空间，用户可以直接读写 <strong>Page Cache</strong> 中的内容。由于少了一次 copy，使用 <code>Memory-Mapped file</code> 要比 <code>Buffered I/O</code>  的效率高一些。</p>
+<p>随着服务器运行时间的增加，系统中空闲内存会越来越少，其中很大一部分都被 Page Cache 占用。访问过的文件都被 Page Cache 缓存，内存最终会被耗尽，那什么时候回收 Page Cache 呢？ 内核认为，Page Cache 是可回收内存，当应用在申请内存时，如果没有足够的空闲内存，就会先回收 Page Cache，再尝试申请。回收的方式主要是两种：直接回收和后台回收。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241611132.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="reclaim_page_cache"
+	
+	
+></p>
+<p>使用 <code>Buffered I/O</code> 时，<strong>Page Cache</strong> 并没有和进程的虚拟内存空间产生直接的关联，而是通过用户缓冲区作为中转。效率更好的<code>Memory-Mapped file</code>方式，看着比较简单，但背后的实现却有些复杂。下面我们看一下内核是如何实现 <code>Memory-Mapped file</code> 的。</p>
+<h2 id="内存文件映射">内存文件映射</h2>
+<p>前面我们介绍过，  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a> 是 <strong>Page Cache</strong> 的宿主（<code>host</code>），内核通过 <code>inode-&gt;imapping-&gt;i_pages</code> 指向的树，管理维护着 <strong>Page Cache</strong>。那么内核是如何完成内存文件映射，直接把缓存了文件内容的 <strong>Page Cache</strong> 映射到进程虚拟内存空间的呢？</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241612690.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="address_space_memory_mapping"
+	
+	
+></p>
+<p>我们知道，进程结构体 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >task_struct</a> 中的字段 <code>mm</code> 指向该进程的虚拟地址空间 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/mm_types.h#L458"  target="_blank" rel="noopener"
+    >mm_struct</a> ，而一段虚拟内存由结构体 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 所描述，将 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 串在一起的链表 <code>mmap</code> 就代表了已经申请分配的虚拟内存。</p>
+<p>如果是进行内存文件映射，那么映射了文件的虚拟内存区域  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> ，它的 <code>vm_file</code> 会指向被映射的文件结构体  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a>。<a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a> 表示进程打开的文件，它的成员 <code>f_mapping</code> 指向 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a>，这样就和管理文件着 <strong>Page Cache</strong> 的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a> 关联了起来。</p>
+<p>当第一次访问文件映射的虚拟内存区域时，这段虚拟内存并没有映射到物理内存，这时会触发缺页中断。内核在处理缺页中断时，发现代表这段虚拟内存的 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 有关联的文件，即 <code>vm_file</code> 字段指向一个文件结构体 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L956"  target="_blank" rel="noopener"
+    >file</a>。内核拿到该文件的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a>，根据要访问内容的页偏移量，对 <code>address_space-&gt;i_pages</code> 指向的 <a class="link" href="https://www.kernel.org/doc/html/latest/core-api/xarray.html"  target="_blank" rel="noopener"
+    >xarray</a> 树进行查找。这颗树上挂的都是页偏移量对应的内存页，如果没找到，就说明文件内容还没加载进内存，就会分配内存页，将文件内容加载到内存中，然后把内存页挂在  <a class="link" href="https://www.kernel.org/doc/html/latest/core-api/xarray.html"  target="_blank" rel="noopener"
+    >xarray</a> 树上。下次再访问同样的页偏移量时，文件内容已经在树上，可直接返回。 <code>address_space-&gt;i_pages</code> 指向的树就是内核管理的 <strong>Page Cache</strong>。</p>
+<p>将文件内容加载到 <strong>Page Cache</strong> 后，内核就可以填写进程相关的页表项，将这块文件映射的虚拟地址区域，直接映射到 <strong>Page Cache</strong> 页，完成缺页中断的处理。</p>
+<p>当内存紧张需要回收 <strong>Page Cache</strong> 时，内核需要知道这些  Page Cache 页映射到了哪些进程，这样才能修改进程的页表，解除虚拟内存和物理内存的映射。我们知道，同一个文件可以映射到多个进程空间，所以需要保存<strong>反向映射关系</strong>，即根据 Page Cache 页找到进程。</p>
+<p>Page Cache  页的反向映射关系保存在 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a> 维护的另一颗树 <code>i_mmap</code>。<code>address_space-&gt;i_mmap</code> 是一个优先查找树（Priority Search Tree），关联了这个文件 Page Cache 页的 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 就挂在这棵树上，而这些  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a>都将指向各自的进程空间描述符 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/mm_types.h#L458"  target="_blank" rel="noopener"
+    >mm_struct</a>，从而建立了 Page Cache 页到进程的联系。</p>
+<p>当需要解除一个 Page Cache 页的映射时，利用 <code>address_space-&gt;i_mmap</code> 指向的树，查找 Page Cache 页映射到哪些进程的哪些 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a>，从而确定需要修改的进程页表项内容。</p>
+<p>简单总结一下，一个文件对应的  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a> 主要管理着两颗树：<code>i_pages</code> 指向的 <a class="link" href="https://www.kernel.org/doc/html/latest/core-api/xarray.html"  target="_blank" rel="noopener"
+    >xarray</a> 树，维护着的所有 Page Cache 页；<code>i_mmap</code> 指向的 PST 树，维护着文件映射所形成的  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 虚拟内存区域，用来在释放 Page Cache 页时，查找映射了该文件的进程。如果文件没有被映射到进程空间，那么 <code>i_mmap</code> 对应的 PST 树为空。</p>
+<h2 id="page-cache-的观测">Page Cache 的观测</h2>
+<p>可以通过查看 <code>/proc/meminfo</code> 文件获知 <strong>Page Cache</strong> 相关的各种指标。</p>
+<p><code>/proc</code> 是伪文件系统（Pseudo filesystems ）。Linux 通过伪文件系统，让系统和内核信息在用户空间可用。使用 <code>free</code>、<code>vmstat</code>等命令查看到的内存信息，数据实际上都来自 <code>/proc/meminfo</code>。</p>
+<p>我们看一个示例：</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p>关于 <code>/proc/meminfo</code> 每一项的详细解释，可以查看 [Linux 内核文档 - The /proc Filesystem](<a class="link" href="https://www.kernel.org/doc/html/latest/filesystems/proc.html#meminfo"  target="_blank" rel="noopener"
+    >The /proc Filesystem — The Linux Kernel documentation</a>)。我们重点看一下 <strong>Page Cache</strong> 相关的字段。</p>
+<p>当前系统 Page Cache 等于 Buffers + Cached 之和 ：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Buffers + Cached = 5072756 kB
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>前面讨论过，如果 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 关联到文件，那么这段内存区域就是 File-backed 内存。没有关联文件的 <a class="link" href="https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L375"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 内存区域是匿名内存。我们是否可以认为，和磁盘文件相关联的 File-backed 内存总和，应该等于 Page Cache 呢？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Active(file) + Inactive(file) = 4908664 kB
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>好像有点对不上，还差了一些，差的这部分是共享内存（<strong>Shmem</strong>）。</p>
+<p>Linux 为了实现“共享内存”（shared memory）功能，即多个进程共同使用同一内存中的内容，需要使用虚拟文件系统。虚拟文件并不是真实存在于磁盘上的文件，它只是由内核模拟出来的。但虚拟文件也有自己的 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a>  和  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L450"  target="_blank" rel="noopener"
+    >address_space</a>结构。内核在创建共享匿名映射区域时，会创建出一个虚拟文件，并将这个文件与 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a>关联起来，这样多个进程的  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 会关联到同一个虚拟文件，最终映射到同样的物理内存页，从而实现了共享内存功能。这就是共享内存（<strong>Shmem</strong>）的实现原理。</p>
+<p>由于 <strong>Shmem</strong> 没有关联磁盘上的文件，因此它不属于 File-backed 内存，而是被记录在匿名内存（<strong>Active(anon)</strong> 或 <strong>Inactive(anon)</strong>）部分。但因为 <strong>Shmem</strong> 有自己的 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614"  target="_blank" rel="noopener"
+    >inode</a> ，<code>inode-&gt;address_sapce</code> 维护的 Page Cache 页挂在 <code>address_space-&gt;i_pages</code> 指向的 <a class="link" href="https://www.kernel.org/doc/html/latest/core-api/xarray.html"  target="_blank" rel="noopener"
+    >xarray</a> 树上，因此 <strong>Shmem</strong> 部分的内存也应该算在 Page Cache 里。</p>
+<p>此外 File-backed 内存还有 Active 和 Inactive 的区别。刚被使用过的数据的内存空间被认为是 Active 的，长时间未被使用过的数据的内存空间则被认为是 Inactive 的。当物理内存不足，不得不释放正在使用的内存时，会首先释放 Inactive 的内存。</p>
+<p><strong>Page Cache</strong> 和 匿名内存以及 File-backed 内存等之间的关系，如图下图所示。虽然难免存在误差，但大体来说下面的关系式是成立的：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241613319.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="file-backed anon"
+	
+	
+></p>
+<p>值得注意的是，<strong>AnonPages != Active(anon) + Inactive(anon)</strong>。<strong>Active(anon)</strong> 和 <strong>Inactive(anon)</strong> 是用来表示不可回收但是可以被交换到 swap 分区的内存，而 <strong>AnonPages</strong> 则是指没有对应文件的内存，两者的角度不一样。 <strong>Shmem</strong> 虽然属于<strong>Active(anon)</strong> 或者 <strong>Inactive(anon)</strong>，但是 <strong>Shmem</strong> 有对应的内存虚拟文件，所以它不属于 <strong>AnonPages</strong>。</p>
+<p>总之，<strong>Page Cache</strong> 肯定关联了文件，不管是真实存在的磁盘文件，还是虚拟内存文件。<strong>AnonPages</strong> 则没有关联任何文件。<strong>Shmem</strong> 关联了虚拟文件，它属于 <strong>Active(anon)</strong> 或者 <strong>Inactive(anon)</strong>，同时也算在 <strong>Page Cache</strong> 中。</p>
+<p>如果我们想知道某个文件有多少内容被缓存在 Page Cache ，可以使用 [fincore](<a class="link" href="https://man7.org/linux/man-pages/man1/fincore.1.html"  target="_blank" rel="noopener"
+    >fincore（1） - Linux 手册页 (man7.org)</a>) 命令。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ fincore /usr/lib/x86_64-linux-gnu/libc.so.6
+</span></span><span class="line"><span class="cl">RES  PAGES  SIZE FILE
+</span></span><span class="line"><span class="cl">2.1M   542  2.1M /usr/lib/x86_64-linux-gnu/libc.so.6
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>RES</code> 是文件内容被加载进物理内存占用的内存空间大小。<code>PAGES</code> 是换算成文件内容占用了多少内存页。 在上面的例子中，文件 <code>/usr/lib/x86_64-linux-gnu/libc.so.6</code> 的全部内容，都被加载进了 Page Cache。</p>
+<p>结合 <code>lsof</code> 命令，我们可以查看某一进程打开的文件占用了多少 Page Cache：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo lsof -p 1270 | grep REG | awk &#39;{print $9}&#39; | xargs sudo fincore
+</span></span><span class="line"><span class="cl">  RES PAGES   SIZE FILE
+</span></span><span class="line"><span class="cl">64.8M 16580  89.9M /usr/bin/dockerd
+</span></span><span class="line"><span class="cl">  32K     8    32K /var/lib/docker/buildkit/cache.db
+</span></span><span class="line"><span class="cl">  16K     4    16K /var/lib/docker/buildkit/metadata_v2.db
+</span></span><span class="line"><span class="cl">  16K     4    16K /var/lib/docker/buildkit/snapshots.db
+</span></span><span class="line"><span class="cl">  16K     4    16K /var/lib/docker/buildkit/containerdmeta.db
+</span></span><span class="line"><span class="cl"> 284K    71 282.4K /usr/lib/x86_64-linux-gnu/libnss_systemd.so.2
+</span></span><span class="line"><span class="cl"> 244K    61 594.7K /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.10.2
+</span></span><span class="line"><span class="cl"> 156K    39 154.2K /usr/lib/x86_64-linux-gnu/libgpg-error.so.0.29.0
+</span></span><span class="line"><span class="cl">  24K     6  20.6K /usr/lib/x86_64-linux-gnu/libpthread.so.0
+</span></span><span class="line"><span class="cl"> 908K   227 906.5K /usr/lib/x86_64-linux-gnu/libm.so.6
+</span></span><span class="line"><span class="cl"> ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>另外，对于所有缓存类型，缓存命中率都是一个非常重要的指标。我们可以使用 <a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >bcc</a> 内置的工具 <a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/cachestat_example.txt"  target="_blank" rel="noopener"
+    >cachestat</a>  追踪整个系统的  Page Cache 命中率：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo cachestat-bpfcc
+</span></span><span class="line"><span class="cl">    HITS   MISSES  DIRTIES HITRATIO   BUFFERS_MB  CACHED_MB
+</span></span><span class="line"><span class="cl">    2059        0       32  100.00%           74       1492
+</span></span><span class="line"><span class="cl">     522        0        0  100.00%           74       1492
+</span></span><span class="line"><span class="cl">      32        0        7  100.00%           74       1492
+</span></span><span class="line"><span class="cl">     135        0       69  100.00%           74       1492
+</span></span><span class="line"><span class="cl">      97        1        3   98.98%           74       1492
+</span></span><span class="line"><span class="cl">     512        0       82  100.00%           74       1492
+</span></span><span class="line"><span class="cl">     303        0       86  100.00%           74       1492
+</span></span><span class="line"><span class="cl">    2474        7     1028   99.72%           74       1494
+</span></span><span class="line"><span class="cl">     815        0      964  100.00%           74       1497
+</span></span><span class="line"><span class="cl">    2786        0        1  100.00%           74       1497
+</span></span><span class="line"><span class="cl">    1051        0        0  100.00%           74       1497
+</span></span><span class="line"><span class="cl">^C     502        0        0  100.00%           74       1497
+</span></span><span class="line"><span class="cl">Detaching...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用 <a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/cachetop_example.txt"  target="_blank" rel="noopener"
+    >cachetop</a> 可以按进程追踪 Page Cache 命中率：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo cachetop-bpfcc 
+</span></span><span class="line"><span class="cl">14:20:41 Buffers MB: 86 / Cached MB: 2834 / Sort: HITS / Order: descending
+</span></span><span class="line"><span class="cl">PID      UID      CMD              HITS     MISSES   DIRTIES  READ_HIT%  WRITE_HIT%
+</span></span><span class="line"><span class="cl">   14237 mazhen   java                12823     4594     3653      52.6%      13.2%
+</span></span><span class="line"><span class="cl">   14370 mazhen   ldd                   869        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14371 mazhen   grep                  596        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14376 mazhen   ldd                   536        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14369 mazhen   env                   468        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14377 mazhen   ldd                   467        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14551 mazhen   grpc-default-ex       466        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14375 mazhen   ldd                   435        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14479 mazhen   ldconfig              421        0        0     100.0%       0.0%
+</span></span><span class="line"><span class="cl">   14475 mazhen   BookieJournal-3       417       58      132      60.0%       6.1%
+</span></span><span class="line"><span class="cl">   ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="mmap系统调用">mmap系统调用</h2>
+<p>系统调用 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a>是最重要的内存管理接口。使用 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 可以创建文件映射，从而产生 Page Cache。使用  <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 还可以用来申请堆内存。glibc 提供的  <a class="link" href="https://man7.org/linux/man-pages/man3/free.3.html"  target="_blank" rel="noopener"
+    >malloc</a>，内部使用的就是 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 系统调用。 由于 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 系统调用分配内存的效率比较低，  <a class="link" href="https://man7.org/linux/man-pages/man3/free.3.html"  target="_blank" rel="noopener"
+    >malloc</a> 会先使用 <a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 向操作系统申请一块比较大的内存，然后再通过各种优化手段让内存分配的效率最大化。</p>
+<p><a class="link" href="https://man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 根据参数的不同， 可以从是不是文件映射，以及是不是私有内存这两个不同的维度来进行组合：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241614395.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="mmap"
+	
+	
+></p>
+<ul>
+<li><strong>私有匿名映射</strong></li>
+</ul>
+<p>在调用 <code>mmap(MAP_ANON | MAP_PRIVATE)</code> 时，只需要在进程虚拟内存空间分配一块内存，然后创建这块内存所对应的  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 结构，这次调用就结束了。当访问到这块虚拟内存时，由于这块虚拟内存都没有映射到物理内存上，就会发生缺页中断。 <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a>关联文件属性为空，所以是匿名映射。内核会分配一个物理内存，然后在页表里建立起虚拟地址到物理地址的映射关系。</p>
+<ul>
+<li><strong>私有文件映射</strong></li>
+</ul>
+<p>进程通过 <code>mmap(MAP_FILE | MAP_PRIVATE)</code> 这种方式来申请的内存，比如进程将共享库（Shared libraries）和可执行文件的代码段（Text Segment）映射到自己的地址空间就是通过这种方式。</p>
+<p>如果文件是只读的话，那这个文件在物理页的层面上其实是共享的。也就是进程 A 和进程 B 都有一页虚拟内存被映射到了相同的物理页上。但如果要写文件的时候，因为这一段内存区域的属性是私有的，所以内核就会做一次写时复制，为写文件的进程单独地创建一份副本。这样，一个进程在写文件时，并不会影响到其他进程的读。</p>
+<p>私有文件映射的只读页是多进程间共享的，可写页是每个进程都有一个独立的副本，创建副本的时机仍然是写时复制。</p>
+<ul>
+<li><strong>共享文件映射</strong></li>
+</ul>
+<p>进程通过 <code>mmap(MAP_FILE | MAP_SHARED)</code> 这种方式来申请的内存。在私有文件映射的基础上，共享文件映射就很简单了：对于可写的页面，在写的时候不进行复制就可以了。这样的话，无论何时，也无论是读还是写，多个进程在访问同一个文件的同一个页时，访问的都是相同的物理页面。</p>
+<ul>
+<li><strong>共享匿名映射</strong></li>
+</ul>
+<p>进程通过 <code>mmap(MAP_ANON | MAP_SHARED)</code> 这种方式来申请的内存。借助虚拟文件系统，多个进程的  <a class="link" href="https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728"  target="_blank" rel="noopener"
+    >vm_area_struct</a> 会关联到同一个虚拟文件，最终映射到同样的物理内存页，实现进程间共享内存的功能。</p>
+<p><code>mmap</code> 的四种映射类型，和上面介绍的 <code>/proc/meminfo</code> 内存指标之间的关系：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241614330.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="mmap"
+	
+	
+></p>
+<p>私有映射都属于 <strong>AnonPages</strong>，共享映射都是 <strong>Page cache</strong>。前面讨论过，共享的匿名映射 <strong>Shmem</strong>，虽然没有关联真实的磁盘文件，但是关联了虚拟内存文件，所以也属于 <strong>Page Cache</strong>。</p>
+<p>私有文件映射，如果文件是只读的话，这块内存属于 <strong>Page Cache</strong>。如果有进程写文件，因为这一段内存区域的属性是私有的，所以内核就会做一次写时复制，为写文件的进程单独地创建一份副本，这个副本就属于 <strong>AnonPages</strong> 了。</p>
+<h2 id="写在最后">写在最后</h2>
+<p>Page Cache 机制涉及了进程空间，文件系统，内存管理等多个内核功能，Page Cache 就像一条线将这几部分串在了一起。因此深入理解 Page Cache 机制，对学习内核会有很大的帮助。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-%E4%BF%A1%E5%8F%B7signal/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux 信号(Signal)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%9B%E7%A8%8Bid%E5%8F%8A%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">进程ID及进程间的关系</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

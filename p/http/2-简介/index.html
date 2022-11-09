@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要特'>
+<title>HTTP/2 简介</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/http/2-%E7%AE%80%E4%BB%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='HTTP/2 简介'>
+<meta property='og:description' content='Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要特'>
+<meta property='og:url' content='https://mazhen.tech/p/http/2-%E7%AE%80%E4%BB%8B/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='http' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2019-10-07T09:59:29&#43;08:00'/><meta property='article:modified_time' content='2019-10-07T09:59:29&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="HTTP/2 简介">
+<meta name="twitter:description" content="Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要特">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#http简史">HTTP简史</a></li>
+        <li><a href="#http简史-1">HTTP简史</a></li>
+        <li><a href="#http简史-2">HTTP简史</a></li>
+        <li><a href="#http简史-3">HTTP简史</a></li>
+        <li><a href="#http简史-4">HTTP简史</a></li>
+        <li><a href="#http简史-5">HTTP简史</a></li>
+        <li><a href="#http简史-6">HTTP简史</a></li>
+        <li><a href="#http简史-7">HTTP简史</a></li>
+        <li><a href="#http简史-8">HTTP简史</a></li>
+        <li><a href="#http简史-9">HTTP简史</a></li>
+        <li><a href="#http11-持久连接">HTTP/1.1 持久连接</a></li>
+        <li><a href="#http11-持久连接-1">HTTP/1.1 持久连接</a></li>
+        <li><a href="#http11-持久连接-2">HTTP/1.1 持久连接</a></li>
+        <li><a href="#http11-管道">HTTP/1.1 管道</a></li>
+        <li><a href="#http11-管道-1">HTTP/1.1 管道</a></li>
+        <li><a href="#http11-管道-2">HTTP/1.1 管道</a></li>
+        <li><a href="#http11-的协议开销"><code>HTTP/1.1</code> 的协议开销</a></li>
+        <li><a href="#http11性能优化建议"><code>HTTP/1.1</code>性能优化建议</a></li>
+        <li><a href="#http11性能优化建议-1"><code>HTTP/1.1</code>性能优化建议</a></li>
+        <li><a href="#http11性能优化建议-2"><code>HTTP/1.1</code>性能优化建议</a></li>
+        <li><a href="#http2-的目标"><code>HTTP/2</code> 的目标</a></li>
+        <li><a href="#http2-二进制分帧层"><code>HTTP/2</code> 二进制分帧层</a></li>
+        <li><a href="#http2-的核心概念"><code>HTTP/2</code> 的核心概念</a></li>
+        <li><a href="#http2-的核心概念-1"><code>HTTP/2</code> 的核心概念</a></li>
+        <li><a href="#http2-的核心概念-2"><code>HTTP/2</code> 的核心概念</a></li>
+        <li><a href="#http2请求与响应的多路复用"><code>HTTP/2</code>请求与响应的多路复用</a></li>
+        <li><a href="#http2-帧格式"><code>HTTP/2</code> 帧格式</a></li>
+        <li><a href="#http2-帧类型"><code>HTTP/2</code> 帧类型</a></li>
+        <li><a href="#http2-请求优先级"><code>HTTP/2</code> 请求优先级</a></li>
+        <li><a href="#http2-流量控制"><code>HTTP/2</code> 流量控制</a></li>
+        <li><a href="#http2-服务器端推送"><code>HTTP/2</code> 服务器端推送</a></li>
+        <li><a href="#http-header压缩"><code>HTTP header</code>压缩</a></li>
+        <li><a href="#http-header压缩-1"><code>HTTP header</code>压缩</a></li>
+        <li><a href="#http2-vs-http11"><code>HTTP/2</code> vs <code>HTTP/1.1</code></a></li>
+        <li><a href="#http2的升级与发现"><code>HTTP/2</code>的升级与发现</a></li>
+        <li><a href="#http2的升级与发现-1"><code>HTTP/2</code>的升级与发现</a></li>
+        <li><a href="#h2和h2c升级协商机制"><code>h2</code>和<code>h2c</code>升级协商机制</a></li>
+        <li><a href="#h2c演示环境"><code>h2c</code>演示环境</a></li>
+        <li><a href="#h2c协议升级"><code>h2c</code>协议升级</a></li>
+        <li><a href="#http2连接建立"><code>HTTP/2</code>连接建立</a></li>
+        <li><a href="#http2连接建立-1"><code>HTTP/2</code>连接建立</a></li>
+        <li><a href="#http2连接建立-2"><code>HTTP/2</code>连接建立</a></li>
+        <li><a href="#http2连接建立-3"><code>HTTP/2</code>连接建立</a></li>
+        <li><a href="#http2连接建立-4"><code>HTTP/2</code>连接建立</a></li>
+        <li><a href="#tls协议的设计目标"><code>TLS</code>协议的设计目标</a></li>
+        <li><a href="#tls发展史"><code>TLS</code>发展史</a></li>
+        <li><a href="#tls-12-握手过程"><code>TLS</code> 1.2 握手过程</a></li>
+        <li><a href="#tls-安全密码套件"><code>TLS</code> 安全密码套件</a></li>
+        <li><a href="#tls13的握手优化"><code>TLS</code>1.3的握手优化</a></li>
+        <li><a href="#测试tls的支持情况">测试<code>TLS</code>的支持情况</a></li>
+        <li><a href="#application-layer-protocol-negotiation">Application-Layer Protocol Negotiation</a></li>
+        <li><a href="#alpn">ALPN</a></li>
+        <li><a href="#h2演示环境"><code>h2</code>演示环境</a></li>
+        <li><a href="#tomcat三种tls实现"><code>Tomcat</code>三种<code>TLS</code>实现</a></li>
+        <li><a href="#tls实现的性能对比"><code>TLS</code>实现的性能对比</a></li>
+        <li><a href="#使用jsse">使用<code>JSSE</code></a></li>
+        <li><a href="#使用jsse-1">使用<code>JSSE</code></a></li>
+        <li><a href="#使用openssl">使用<code>OpenSSL</code></a></li>
+        <li><a href="#使用openssl-1">使用<code>OpenSSL</code></a></li>
+        <li><a href="#alpn协议协商"><code>ALPN</code>协议协商</a></li>
+        <li><a href="#alpn协议协商-1"><code>ALPN</code>协议协商</a></li>
+        <li><a href="#使用chrome开发者工具观察">使用Chrome开发者工具观察</a></li>
+        <li><a href="#http2的问题">HTTP/2的问题</a></li>
+        <li><a href="#http2的问题-1">HTTP/2的问题</a></li>
+        <li><a href="#quic">QUIC</a></li>
+        <li><a href="#quic-1">QUIC</a></li>
+        <li><a href="#参考资料">参考资料</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/http/2-%E7%AE%80%E4%BB%8B/">HTTP/2 简介</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2019-10-07</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 11 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h3 id="outline">Outline</h3>
+<p>回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机</p>
+<ul>
+<li>HTTP简史</li>
+<li>HTTP/1.1的主要特性和问题</li>
+<li>HTTP/2 的核心概念、主要特性</li>
+<li>HTTP/2 的升级与发现</li>
+<li>HTTP/2 的问题及展望</li>
+</ul>
+<hr>
+<h3 id="http简史">HTTP简史</h3>
+<ul>
+<li><code>HTTP</code>(HyperText Transfer Protocol，超文本传输协议)是互联网上最普遍采用的一种应用协议</li>
+<li>由欧洲核子研究委员会<code>CERN</code>的英国工程师<a class="link" href="https://en.wikipedia.org/wiki/Tim_Berners-Lee"  target="_blank" rel="noopener"
+    >Tim Berners-Lee</a>在1991年发明</li>
+<li><a class="link" href="https://en.wikipedia.org/wiki/Tim_Berners-Lee"  target="_blank" rel="noopener"
+    >Tim Berners-Lee</a>也是WWW的发明者</li>
+</ul>
+<hr>
+<h3 id="http简史-1">HTTP简史</h3>
+<ul>
+<li><code>HTTP/0.9</code>：只有一行的协议
+<ul>
+<li>请求只有一行，包括<code>GET</code>方法和要请求的文档的路径</li>
+<li>响应是一个超文本文档，没有首部，也没有其他元数据，只有<code>HTML</code></li>
+<li>服务器与客户端之间的连接在每次请求之后都会关闭</li>
+</ul>
+</li>
+<li><code>HTTP/0.9</code>的设计目标传递超文本文档</li>
+</ul>
+<hr>
+<h3 id="http简史-2">HTTP简史</h3>
+<ul>
+<li><code>HTTP/0.9</code>演示</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$&gt; telnet apache.org 80
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Trying 95.216.24.32...
+</span></span><span class="line"><span class="cl">Connected to apache.org.
+</span></span><span class="line"><span class="cl">Escape character is &#39;^]&#39;.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">GET /foundation/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">Connection closed by foreign host.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="http简史-3">HTTP简史</h3>
+<ul>
+<li>1996年<code>HTTP</code>工作组发布了<code>RFC 1945</code>，这就是<code>HTTP/1.0</code></li>
+<li>提供请求和响应的各种元数据</li>
+<li>不局限于超文本的传输，响应可以是任何类型：<code>HTML</code>文件、图片、音频等</li>
+<li>支持内容协商、内容编码、字符集、认证、缓存等</li>
+<li>从<strong>超文本</strong>到<strong>超媒体</strong>传输</li>
+</ul>
+<hr>
+<h3 id="http简史-4">HTTP简史</h3>
+<ul>
+<li><code>HTTP/1.0</code>演示</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$&gt; telnet apache.org 80
+</span></span><span class="line"><span class="cl">Trying 95.216.24.32...
+</span></span><span class="line"><span class="cl">Connected to apache.org.
+</span></span><span class="line"><span class="cl">GET /foundation/ HTTP/1.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">HTTP/1.1 200 OK
+</span></span><span class="line"><span class="cl">Server: Apache/2.4.18 (Ubuntu)
+</span></span><span class="line"><span class="cl">Content-Length: 46012
+</span></span><span class="line"><span class="cl">Connection: close
+</span></span><span class="line"><span class="cl">Content-Type: text/html
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">Connection closed by foreign host.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="http简史-5">HTTP简史</h3>
+<ul>
+<li>1997年1月定义<code>HTTP/1.1</code>标准的<code>RFC 2068</code>发布</li>
+<li>1999年6月<code>RFC 2616</code>发布，取代了<code>RFC 2068</code></li>
+<li>性能优化
+<ul>
+<li>持久连接
+<ul>
+<li>除非明确告知，默认使用持久连接</li>
+</ul>
+</li>
+<li>分块编码传输</li>
+<li>请求管道，支持并行请求处理（应用的非常有限）</li>
+<li>增强的缓存机制</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http简史-6">HTTP简史</h3>
+<ul>
+<li><code>HTTP/1.1</code>演示</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;$ telnet www.baidu.com 80
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Trying 14.215.177.38...
+</span></span><span class="line"><span class="cl">Connected to www.a.shifen.com.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">GET /s?wd=http2 HTTP/1.1
+</span></span><span class="line"><span class="cl">Accept: text/html,application/xhtml+xml,application/xml
+</span></span><span class="line"><span class="cl">Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7
+</span></span><span class="line"><span class="cl">Connection: keep-alive
+</span></span><span class="line"><span class="cl">Host: www.baidu.com
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">HTTP/1.1 200 OK
+</span></span><span class="line"><span class="cl">Connection: Keep-Alive
+</span></span><span class="line"><span class="cl">Content-Type: text/html;charset=utf-8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Date: Sun, 06 Oct 2019 12:49:28 GMT
+</span></span><span class="line"><span class="cl">Server: BWS/1.1
+</span></span><span class="line"><span class="cl">Transfer-Encoding: chunked
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">ffa
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1be7
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">GET /img/bd_logo1.png HTTP/1.1
+</span></span><span class="line"><span class="cl">Accept: text/html,application/xhtml+xml,application/xml
+</span></span><span class="line"><span class="cl">Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7
+</span></span><span class="line"><span class="cl">Connection: close
+</span></span><span class="line"><span class="cl">Host: www.baidu.com
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">HTTP/1.1 200 OK
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Content-Length: 7877
+</span></span><span class="line"><span class="cl">Content-Type: image/png
+</span></span><span class="line"><span class="cl">Date: Sun, 06 Oct 2019 13:05:06 GMT
+</span></span><span class="line"><span class="cl">Etag: &#34;1ec5-502264e2ae4c0&#34;
+</span></span><span class="line"><span class="cl">Expires: Wed, 03 Oct 2029 13:05:06 GMT
+</span></span><span class="line"><span class="cl">Last-Modified: Wed, 03 Sep 2014 10:00:27 GMT
+</span></span><span class="line"><span class="cl">Server: Apache
+</span></span><span class="line"><span class="cl">Set-Cookie: BAIDUID=0D01C3C9C00A6019C16F79CAEB1EFE91:FG=1
+</span></span><span class="line"><span class="cl">Connection: close
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Connection closed by foreign host.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="http简史-7">HTTP简史</h3>
+<ul>
+<li>Google在2009年发布了实验性协议<code>SPDY</code>，主要目标是解决<code>HTTP/1.1</code>的性能限制</li>
+<li>Google工程师在09年11月分享了实验结果 <a class="link" href="https://blog.chromium.org/2009/11/2x-faster-web.html"  target="_blank" rel="noopener"
+    >A 2x Faster Web</a></li>
+</ul>
+<blockquote>
+<p>So far we have only tested SPDY in lab conditions. The initial results are very encouraging: when we download the top 25 websites over simulated home network connections, we see a significant improvement in performance - pages loaded up to 55% faster.</p>
+</blockquote>
+<ul>
+<li>2012年，<code>SPDY</code>得到Chrome、Firefox和Opera的支持</li>
+<li><code>HTTP-WG</code>(HTTP Working Group)开始在<code>SPDY</code>的基础上制定官方标准</li>
+</ul>
+<hr>
+<h3 id="http简史-8">HTTP简史</h3>
+<ul>
+<li>2015年正式发布<code>HTTP/2</code>
+<ul>
+<li>主要目标：改进传输性能，降低延迟，提高吞吐量</li>
+<li>保持原有的高层协议语义不变</li>
+</ul>
+</li>
+<li>根据<a class="link" href="https://w3techs.com/technologies/details/ce-http2/all/all"  target="_blank" rel="noopener"
+    >W3Techs的报告</a>，截止2019年11月，全球已经有 <strong>42.1%</strong> 的网站开启了<code>HTTP/2</code></li>
+</ul>
+<hr>
+<h3 id="http简史-9">HTTP简史</h3>
+<ul>
+<li>Google在2012年设计开发了<a class="link" href="https://en.wikipedia.org/wiki/QUIC"  target="_blank" rel="noopener"
+    >QUIC协议</a>，让<code>HTTP</code>不再基于<code>TCP</code></li>
+<li>2018年底，<code>HTTP/3</code>标准发布</li>
+<li><code>HTTP/3</code>协议业务逻辑变化不大，可以简单理解为 <code>HTTP/2</code> + <code>QUIC</code></li>
+</ul>
+<hr>
+<h3 id="http11-持久连接">HTTP/1.1 持久连接</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221002459.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tcp-connection1"
+	
+	
+></p>
+<hr>
+<h3 id="http11-持久连接-1">HTTP/1.1 持久连接</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221002365.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tcp-connection2"
+	
+	
+></p>
+<hr>
+<h3 id="http11-持久连接-2">HTTP/1.1 持久连接</h3>
+<ul>
+<li>非持久<code>HTTP</code>连接的固定时间成本
+<ul>
+<li>至少两次网络往返： 握手、请求和响应</li>
+</ul>
+</li>
+<li>服务处理速度越快，固定延迟的影响就越大</li>
+<li>持久连接避免<code>TCP</code>连接时的三次握手，消除<code>TCP</code>的慢启动</li>
+</ul>
+<hr>
+<h3 id="http11-管道">HTTP/1.1 管道</h3>
+<ul>
+<li>多次请求必须满足<strong>先进先出</strong>(FIFO)的顺序</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221004912.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="http-keep-alive"
+	
+	
+></p>
+<hr>
+<h3 id="http11-管道-1">HTTP/1.1 管道</h3>
+<ul>
+<li>尽早发送请求，不被每次响应阻塞</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221005557.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="http-pipeline"
+	
+	
+></p>
+<hr>
+<h3 id="http11-管道-2">HTTP/1.1 管道</h3>
+<ul>
+<li><code>HTTP/1.1</code>的局限性
+<ul>
+<li>只能严格串行地返回响应，不允许一个连接上的多个响应交错到达</li>
+</ul>
+</li>
+<li>管道的问题
+<ul>
+<li>并行处理请求时，服务器必须缓冲管道中的响应，占用服务器资源</li>
+<li>由于失败可能导致重复处理，非幂等的方法不能pipeline化</li>
+<li>由于中间代理的兼容性，可能会破坏管道</li>
+</ul>
+</li>
+<li>管道的应用非常有限</li>
+</ul>
+<hr>
+<h3 id="http11-的协议开销"><code>HTTP/1.1</code> 的协议开销</h3>
+<ul>
+<li>每个<code>HTTP</code>请求都会携带500~800字节的<code>header</code></li>
+<li>如果使用了<code>cookie</code>，每个<code>HTTP</code>请求会增加几千字节的协议开销</li>
+<li><code>HTTP header</code>以纯文本形式发送，不会进行任何压缩</li>
+<li>某些时候<code>HTTP header</code>开销会超过实际传输的数据一个数量级
+<ul>
+<li>例如访问<code>RESTful API</code>时返回<code>JSON</code>格式的响应</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http11性能优化建议"><code>HTTP/1.1</code>性能优化建议</h3>
+<ul>
+<li>由于<code>HTTP/1.1</code>不支持多路复用
+<ul>
+<li>浏览器支持每个主机打开多个连接（例如Chrome是6个）</li>
+<li>应用使用多域名，将资源分散到多个子域名
+<ul>
+<li>浏览器连接限制针对的是主机名，不是<code>IP</code>地址</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>缺点
+<ul>
+<li>消耗客户端和服务器资源</li>
+<li>域名分区增加了额外的<code>DNS</code>查询</li>
+<li>避免不了<code>TCP</code>的慢启动</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http11性能优化建议-1"><code>HTTP/1.1</code>性能优化建议</h3>
+<ul>
+<li>使用多域名分区
+<img src="https://cdn.mazhen.tech/images/202209221005735.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="connection view"
+	
+	
+></li>
+</ul>
+<hr>
+<h3 id="http11性能优化建议-2"><code>HTTP/1.1</code>性能优化建议</h3>
+<ul>
+<li>减少请求次数
+<ul>
+<li>把多个<code>JavaScript</code>或<code>CSS</code>组合为一个文件</li>
+<li>把多张图片组合为一个更大的复合的图片</li>
+<li>inlining内联，将图片嵌入到<code>CSS</code>或者<code>HTML</code>文件中，减少网络请求次数</li>
+</ul>
+</li>
+</ul>
+<p><em>增加应用的复杂度，导致缓存、更新等问题，只是权宜之计</em></p>
+<hr>
+<h3 id="http2-的目标"><code>HTTP/2</code> 的目标</h3>
+<ul>
+<li>性能优化
+<ul>
+<li>支持请求与响应的多路复用</li>
+<li>支持请求优先级和流量控制</li>
+<li>支持服务器端推送</li>
+<li>压缩<code>HTTP header</code>降低协议开销</li>
+</ul>
+</li>
+<li>HTTP的语义不变
+<ul>
+<li><code>HTTP</code>方法、<code>header</code>、状态码、<code>URI</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http2-二进制分帧层"><code>HTTP/2</code> 二进制分帧层</h3>
+<ul>
+<li>引入新的二进制分帧数据层</li>
+<li>将传输的信息分割为消息和帧，并采用二进制格式的编码</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221006530.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="binary-framing-layer"
+	
+	
+></p>
+<hr>
+<h3 id="http2-的核心概念"><code>HTTP/2</code> 的核心概念</h3>
+<ul>
+<li>流(Stream)
+<ul>
+<li>已建立的连接上的双向字节流</li>
+<li>该字节流可以携带一个或多个消息</li>
+</ul>
+</li>
+<li>消息(Message)
+<ul>
+<li>与请求/响应消息对应的一系列完整的数据帧</li>
+</ul>
+</li>
+<li>帧(Frame)
+<ul>
+<li>通信的最小单位</li>
+<li>每个帧包含帧首部，标识出当前帧所属的流</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http2-的核心概念-1"><code>HTTP/2</code> 的核心概念</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221007794.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="stream-message-frame"
+	
+	
+></p>
+<hr>
+<h3 id="http2-的核心概念-2"><code>HTTP/2</code> 的核心概念</h3>
+<ul>
+<li>所有<code>HTTP/2</code>通信都在一个TCP连接上完成</li>
+<li><code>流</code>是连接中的一个虚拟信道，可以承载双向的消息</li>
+<li>一个连接可以承载任意数量的<code>流</code>，每个<code>流</code>都有一个唯一的整数标识符(1、2&hellip;N)</li>
+<li><code>消息</code>是指逻辑上的<code>HTTP</code>消息，比如请求、响应等</li>
+<li><code>消息</code>由一或多个<code>帧</code>组成，这些帧可以交错发送，然后根据每个帧首部的<strong>流标识符</strong>重新组装</li>
+</ul>
+<hr>
+<h3 id="http2请求与响应的多路复用"><code>HTTP/2</code>请求与响应的多路复用</h3>
+<ul>
+<li><code>HTTP/1.x</code>中，如果客户端想发送多个并行的请求，那么必须使用多个<code>TCP</code>连接</li>
+<li><code>HTTP/2</code>中，客户端可以使用多个流发送请求，同时<code>HTTP</code>消息被分解为互不依赖的帧，交错传输，最后在另一端重新组装</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221007697.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="http2-connection"
+	
+	
+></p>
+<hr>
+<h3 id="http2-帧格式"><code>HTTP/2</code> 帧格式</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221008713.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="frame format"
+	
+	
+></p>
+<ul>
+<li>详细说明请参考<a class="link" href="https://tools.ietf.org/html/rfc7540"  target="_blank" rel="noopener"
+    >HTTP/2规范</a></li>
+</ul>
+<hr>
+<h3 id="http2-帧类型"><code>HTTP/2</code> 帧类型</h3>
+<ul>
+<li>客户端通过<code>HEADERS</code>帧来发起新的<code>流</code></li>
+<li>服务器通过<code>PUSH_PROMISE</code>帧来发起推送流</li>
+</ul>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>帧类型</th>
+<th>类型编码</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DATA</td>
+<td>0x0</td>
+<td>传输HTTP消息体</td>
+</tr>
+<tr>
+<td>HEADERS</td>
+<td>0x1</td>
+<td>传输HTTP头部</td>
+</tr>
+<tr>
+<td>PRIORITY</td>
+<td>0x2</td>
+<td>指定流的优先级</td>
+</tr>
+<tr>
+<td>RST_STREAM</td>
+<td>0x3</td>
+<td>通知流的非正常</td>
+</tr>
+<tr>
+<td>SETTINGS</td>
+<td>0x4</td>
+<td>修改连接或者流的配置</td>
+</tr>
+<tr>
+<td>PUSH_PROMISE</td>
+<td>0x5</td>
+<td>服务端推送资源时的请求帧</td>
+</tr>
+<tr>
+<td>PING</td>
+<td>0x6</td>
+<td>心跳检测，计算<code>RTT</code>往返时间</td>
+</tr>
+<tr>
+<td>GOAWAY</td>
+<td>0x7</td>
+<td>优雅的终止连接，或者通知错误</td>
+</tr>
+<tr>
+<td>WINDOW_UPDATE</td>
+<td>0x8</td>
+<td>针对流或者连接，实现流量控制</td>
+</tr>
+<tr>
+<td>CONTINUATION</td>
+<td>0x9</td>
+<td>传递较大HTTP头部时的持续帧</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="http2-请求优先级"><code>HTTP/2</code> 请求优先级</h3>
+<ul>
+<li><code>HTTP/2</code>允许每个流关联一个31<code>bit</code>的优先值
+<ul>
+<li><code>0</code> 最高优先级</li>
+<li><code>2^31 -1</code> 最低优先级</li>
+</ul>
+</li>
+<li>浏览器会基于资源的类型、在页面中的位置等因素，决定请求的优先次序</li>
+<li>服务器可以根据流的优先级，控制资源分配，优先将高优先级的帧发送给客户端</li>
+<li><code>HTTP/2</code>没有规定具体的优先级算法</li>
+</ul>
+<hr>
+<h3 id="http2-流量控制"><code>HTTP/2</code> 流量控制</h3>
+<ul>
+<li>流量控制有方向性，即接收方可能根据自己的情况为每个<code>流</code>，乃至整个连接设置任意窗口大小</li>
+<li>连接建立后，客户端与服务器交换<code>SETTINGS</code>帧，设置 双向的流量控制窗口大小</li>
+<li>流量控制窗口大小通过<code>WINDOW_UPDATE</code>帧更新</li>
+<li><code>HTTP/2</code>流量控制和<code>TCP</code>流量控制的机制相同，但<code>TCP</code>流量控制不能对同一个连接内的多个<code>流</code>实施差异化策略</li>
+</ul>
+<hr>
+<h3 id="http2-服务器端推送"><code>HTTP/2</code> 服务器端推送</h3>
+<ul>
+<li>服务器可以对一个客户端请求发送多个响应</li>
+<li>服务器通过发送<code>PUSH_PROMISE</code>帧来发起推送流</li>
+<li>客户端可以使用<code>HTTP header</code>向服务器发送信号，列出它希望推送的资源</li>
+<li>服务器可以智能分析客户端的需求，自动推送关键资源</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221008652.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="server-push.png"
+	
+	
+></p>
+<hr>
+<h3 id="http-header压缩"><code>HTTP header</code>压缩</h3>
+<ul>
+<li><code>HTTP/2</code>使用<a class="link" href="https://tools.ietf.org/html/rfc7541"  target="_blank" rel="noopener"
+    >HPACK</a>压缩格式压缩请求/响应头
+<ul>
+<li>通过静态霍夫曼码对发送的<code>header</code>字段进行编码，减小了它们的传输大小</li>
+<li>客户端和服务器使用<code>索引表</code>来维护和更新<code>header</code>字段。对于相同的数据，不再重复发送</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http-header压缩-1"><code>HTTP header</code>压缩</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221009736.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="http header"
+	
+	
+></p>
+<hr>
+<h3 id="http2-vs-http11"><code>HTTP/2</code> vs <code>HTTP/1.1</code></h3>
+<ul>
+<li>
+<p><a class="link" href="https://http2.akamai.com/demo"  target="_blank" rel="noopener"
+    >https://http2.akamai.com/demo</a></p>
+<p><img src="https://cdn.mazhen.tech/images/202209221010759.gif"
+	
+	
+	
+	loading="lazy"
+	
+		alt="http2 vs http1"
+	
+	
+></p>
+</li>
+</ul>
+<hr>
+<h3 id="http2的升级与发现"><code>HTTP/2</code>的升级与发现</h3>
+<ul>
+<li><code>HTTP/1.x</code>还将长期存在，客户端和服务器必须同时支持<code>1.x</code>和<code>2.0</code></li>
+<li>客户端和服务器在开始交换数据前，必须发现和协商使用哪个版本的协议进行通信</li>
+<li><code>HTTP/2</code>定义了两种协商机制
+<ul>
+<li>通过安全连接<code>TLS</code>和<code>ALPN</code>进行协商</li>
+<li>基于<code>TCP</code>连接的协商机制</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="http2的升级与发现-1"><code>HTTP/2</code>的升级与发现</h3>
+<ul>
+<li><code>HTTP/2</code>标准不要求必须基于<code>TLS</code>，但浏览器要求必须基于<code>TLS</code>
+<ul>
+<li>Web上存在大量的代理和中间设备：缓存服务器、安全网关、加速器等等</li>
+<li>如果任何中间设备不支持，连接都不会成功</li>
+<li>建立<code>TLS</code>信道，端到端加密传输，绕过中间代理，实现可靠的部署</li>
+<li>新协议一般都要依赖于建立<code>TLS</code>信道，例如<code>WebSocket</code>、<code>SPDY</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="h2和h2c升级协商机制"><code>h2</code>和<code>h2c</code>升级协商机制</h3>
+<ul>
+<li>基于<code>TLS</code>运行的<code>HTTP/2</code>被称为<code>h2</code></li>
+<li>直接在<code>TCP</code>之上运行的<code>HTTP/2</code>被称为<code>h2c</code></li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221010059.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="h2-h2c"
+	
+	
+></p>
+<hr>
+<h3 id="h2c演示环境"><code>h2c</code>演示环境</h3>
+<ul>
+<li>客户端测试工具 <code>curl</code> (&gt; 7.46.0)</li>
+<li>服务器端 <code>Tomcat 9.x</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;Connector port=&#34;8080&#34; protocol=&#34;HTTP/1.1&#34;
+</span></span><span class="line"><span class="cl">           connectionTimeout=&#34;20000&#34;
+</span></span><span class="line"><span class="cl">           redirectPort=&#34;8443&#34; &gt;
+</span></span><span class="line"><span class="cl">    &lt;UpgradeProtocol 
+</span></span><span class="line"><span class="cl">            className=&#34;org.apache.coyote.http2.Http2Protocol&#34;/&gt;
+</span></span><span class="line"><span class="cl">&lt;/Connector&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="h2c协议升级"><code>h2c</code>协议升级</h3>
+<ul>
+<li><code>curl http://localhost:8080 --http2 -v</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt; GET / HTTP/1.1
+</span></span><span class="line"><span class="cl">&gt; Host: localhost:8080
+</span></span><span class="line"><span class="cl">&gt; User-Agent: curl/7.64.1
+</span></span><span class="line"><span class="cl">&gt; Accept: */*
+</span></span><span class="line"><span class="cl">&gt; Connection: Upgrade, HTTP2-Settings
+</span></span><span class="line"><span class="cl">&gt; Upgrade: h2c
+</span></span><span class="line"><span class="cl">&gt; HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt; HTTP/1.1 101 
+</span></span><span class="line"><span class="cl">&lt; Connection: Upgrade
+</span></span><span class="line"><span class="cl">&lt; Upgrade: h2c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="http2连接建立"><code>HTTP/2</code>连接建立</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221011974.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="start-http2-connection"
+	
+	
+></p>
+<hr>
+<h3 id="http2连接建立-1"><code>HTTP/2</code>连接建立</h3>
+<ul>
+<li>Magic帧
+<ul>
+<li>ASCII 编码，12字节</li>
+<li>何时发送?
+<ul>
+<li>接收到服务器发送来的 101 Switching Protocols后</li>
+<li>TLS 握手成功后</li>
+</ul>
+</li>
+<li>Preface 内容</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221012484.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="magic-frame"
+	
+	
+></p>
+<hr>
+<h3 id="http2连接建立-2"><code>HTTP/2</code>连接建立</h3>
+<ul>
+<li>交换<code>settings</code>帧(client -&gt; server)</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221012482.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="setting-frame"
+	
+	
+></p>
+<hr>
+<h3 id="http2连接建立-3"><code>HTTP/2</code>连接建立</h3>
+<ul>
+<li>交换<code>settings</code>帧(server -&gt; client)</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221013497.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="setting-frame"
+	
+	
+></p>
+<hr>
+<h3 id="http2连接建立-4"><code>HTTP/2</code>连接建立</h3>
+<ul>
+<li><code>settings</code> ACK 帧 (client &lt;-&gt; server)</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221013850.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="setting-frame"
+	
+	
+></p>
+<hr>
+<h3 id="tls协议的设计目标"><code>TLS</code>协议的设计目标</h3>
+<ul>
+<li>保密性</li>
+<li>完整性</li>
+<li>身份验证</li>
+</ul>
+<hr>
+<h3 id="tls发展史"><code>TLS</code>发展史</h3>
+<ul>
+<li>1994年，NetScape 设计了<code>SSL</code>协议(Secure Sockets Layer) 1.0，未正式发布</li>
+<li>1995年，NetScape 发布 <code>SSL</code> 2.0</li>
+<li>1996年，发布<code>SSL</code> 3.0</li>
+<li>1999年，IETF标准化了<code>SSL</code>协议，更名为<code>TLS</code>(Transport Layer Security)，发布<code>TLS</code> 1.0</li>
+<li>2006年4月，IETF 工作组发布了<code>TLS</code> 1.1</li>
+<li>2008年8月，IETF 工作组发布了<code>TLS</code> 1.2</li>
+<li>2018年8月，<code>TLS</code> 1.3正式发布</li>
+</ul>
+<hr>
+<h3 id="tls-12-握手过程"><code>TLS</code> 1.2 握手过程</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221014737.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tls-handshake"
+	
+	
+></p>
+<ul>
+<li>验证身份</li>
+<li>达成安全套件共识</li>
+<li>传递密钥</li>
+<li>加密通讯
+非对称加密只在建立<code>TLS</code>信道时使用，之后的通信使用握手时生成的共享密钥加密</li>
+</ul>
+<hr>
+<h3 id="tls-安全密码套件"><code>TLS</code> 安全密码套件</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221015276.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="cipher-suites"
+	
+	
+></p>
+<ul>
+<li>密钥交换算法
+<ul>
+<li>双方在完全没有对方任何预先信息，通过不安全信道创建密钥</li>
+<li>1976年，Diffie–Hellman key exchange，简称 DH</li>
+<li>基于椭圆曲线(Elliptic Curve)升级DH协议，ECDHE</li>
+</ul>
+</li>
+<li>身份验证算法
+<ul>
+<li>非对称加密算法，Public Key Infrastructure(PKI)</li>
+</ul>
+</li>
+<li>对称加密算法、强度、工作模式
+<ul>
+<li>工作模式：将明文分成多个等长的<code>Block</code>模块，对每个模块分别加解密</li>
+</ul>
+</li>
+<li>hash签名算法</li>
+</ul>
+<hr>
+<h3 id="tls13的握手优化"><code>TLS</code>1.3的握手优化</h3>
+<ul>
+<li><a class="link" href="https://www.thesslstore.com/blog/explaining-ssl-handshake/"  target="_blank" rel="noopener"
+    >An Overview of TLS 1.3 – Faster and More Secure</a></li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221015782.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tls-1.3-handshake-performance"
+	
+	
+></p>
+<hr>
+<h3 id="测试tls的支持情况">测试<code>TLS</code>的支持情况</h3>
+<ul>
+<li><a class="link" href="https://www.ssllabs.com/ssltest/index.html"  target="_blank" rel="noopener"
+    >https://www.ssllabs.com/ssltest/index.html</a></li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221016671.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tlstest width:850"
+	
+	
+></p>
+<hr>
+<h3 id="application-layer-protocol-negotiation">Application-Layer Protocol Negotiation</h3>
+<ul>
+<li>
+<p>基于<code>TLS</code>运行的<code>HTTP/2</code>使用<code>ALPN</code>扩展做协议协商</p>
+<ul>
+<li>客户端在<code>ClientHello</code>消息中增加<code>ProtocolNameList</code>字段，包含自己支持的应用协议</li>
+<li>服务器检查<code>ProtocolNameList</code>字段，在<code>ServerHello</code>消息中以<code>ProtocolName</code>字段返回选中的协议</li>
+</ul>
+</li>
+<li>
+<p>在<code>TLS</code>握手的同时协商应用协议，省掉了<code>HTTP</code>的<code>Upgrade</code>机制所需的额外往返时间</p>
+</li>
+</ul>
+<hr>
+<h3 id="alpn">ALPN</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221016783.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="alpn"
+	
+	
+></p>
+<hr>
+<h3 id="h2演示环境"><code>h2</code>演示环境</h3>
+<ul>
+<li>客户端：浏览器</li>
+<li>服务器端：<code>Tomcat 9.x</code>
+<ul>
+<li><code>Tomcat</code>提供了三种不同的<code>TLS</code>实现
+<ul>
+<li>Java运行时提供的<code>JSSE</code>实现</li>
+<li>使用了<code>OpenSSL</code>的<code>JSSE</code>实现</li>
+<li><code>APR</code>实现，默认情况下使用<code>OpenSSL</code>引擎</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="tomcat三种tls实现"><code>Tomcat</code>三种<code>TLS</code>实现</h3>
+<ul>
+<li>JSSE
+<ul>
+<li>非常慢</li>
+<li><a class="link" href="https://tools.ietf.org/html/rfc7301"  target="_blank" rel="noopener"
+    >ALPN</a>是因为<code>HTTP/2</code>才在2014年出现，JDK8不支持<code>ALPN</code></li>
+</ul>
+</li>
+<li><code>OpenSSL</code>实现
+<ul>
+<li>只使用了<code>OpenSSL</code>，没有使用其他本地代码(native socket, poller等)</li>
+<li>可以配合 NIO 和 NIO2</li>
+</ul>
+</li>
+<li><code>APR</code>
+<ul>
+<li>大量的native code</li>
+<li><code>TLS</code>同样使用了<code>OpenSSL</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="tls实现的性能对比"><code>TLS</code>实现的性能对比</h3>
+<ul>
+<li><code>OpenSSL</code>性能比纯Java实现好很多；使用<code>TLS</code>可以不再需要<code>APR</code></li>
+<li><code>Linux</code>上<code>NIO.2</code>是通过<code>epoll</code>来模拟实现的<a class="link" href="https://github.com/openjdk/jdk/blob/6bab0f539fba8fb441697846347597b4a0ade428/src/java.base/linux/classes/sun/nio/ch/EPollPort.java"  target="_blank" rel="noopener"
+    >EPollPort.java</a></li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221017915.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="jsse-openssl"
+	
+	
+></p>
+<hr>
+<h3 id="使用jsse">使用<code>JSSE</code></h3>
+<ul>
+<li>生成private key和自签名证书
+<ul>
+<li><code>keytool -genkey -alias tomcat -keyalg RSA</code></li>
+</ul>
+</li>
+<li>配置<code>server.xml</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;Connector
+</span></span><span class="line"><span class="cl">  protocol=&#34;org.apache.coyote.http11.Http11NioProtocol&#34;
+</span></span><span class="line"><span class="cl">  port=&#34;8443&#34; maxThreads=&#34;200&#34;
+</span></span><span class="line"><span class="cl">  sslImplementationName=
+</span></span><span class="line"><span class="cl">      &#34;org.apache.tomcat.util.net.jsse.JSSEImplementation&#34;
+</span></span><span class="line"><span class="cl">  scheme=&#34;https&#34; secure=&#34;true&#34; SSLEnabled=&#34;true&#34;
+</span></span><span class="line"><span class="cl">  keystoreFile=&#34;${user.home}/.keystore&#34; keystorePass=&#34;changeit&#34;
+</span></span><span class="line"><span class="cl">  clientAuth=&#34;false&#34; sslProtocol=&#34;TLS&#34;&gt;
+</span></span><span class="line"><span class="cl">  &lt;UpgradeProtocol 
+</span></span><span class="line"><span class="cl">        className=&#34;org.apache.coyote.http2.Http2Protocol&#34; /&gt;
+</span></span><span class="line"><span class="cl">&lt;/Connector&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="使用jsse-1">使用<code>JSSE</code></h3>
+<ul>
+<li><code>JDK8</code>不支持<code>ALPN</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">严重 [main]
+</span></span><span class="line"><span class="cl">org.apache.coyote.http11.AbstractHttp11Protocol.configureUpgradeProtocol 
+</span></span><span class="line"><span class="cl">The upgrade handler [org.apache.coyote.http2.Http2Protocol] 
+</span></span><span class="line"><span class="cl">for [h2] only supports upgrade via ALPN but has been configured 
+</span></span><span class="line"><span class="cl">for the [&#34;https-jsse-nio-8443&#34;] connector that does not support ALPN.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>JDK11</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">信息 [main] 
+</span></span><span class="line"><span class="cl">org.apache.coyote.http11.AbstractHttp11Protocol.configureUpgradeProtocol 
+</span></span><span class="line"><span class="cl">The [&#34;https-jsse-nio-8443&#34;] connector has been configured to 
+</span></span><span class="line"><span class="cl">support negotiation to [h2] via ALPN
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="使用openssl">使用<code>OpenSSL</code></h3>
+<ul>
+<li>安装<code>tomcat-native</code>
+<ul>
+<li><code>brew install tomcat-native</code></li>
+</ul>
+</li>
+<li>配置<code>$CATALINA_HOME/bin/setenv.sh</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CATALINA_OPTS=&#34;$CATALINA_OPTS -Djava.library.path=/usr/local/opt/tomcat-native/lib&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>配置server.xml</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;Connector
+</span></span><span class="line"><span class="cl">    protocol=&#34;org.apache.coyote.http11.Http11NioProtocol&#34;
+</span></span><span class="line"><span class="cl">    sslImplementationName=
+</span></span><span class="line"><span class="cl">        &#34;org.apache.tomcat.util.net.openssl.OpenSSLImplementation&#34;
+</span></span><span class="line"><span class="cl">    ... &gt;
+</span></span><span class="line"><span class="cl">&lt;/Connector&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="使用openssl-1">使用<code>OpenSSL</code></h3>
+<ul>
+<li><code>JDK8</code> &amp; <code>JDK11</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">信息 [main] 
+</span></span><span class="line"><span class="cl">org.apache.coyote.http11.AbstractHttp11Protocol.configureUpgradeProtocol 
+</span></span><span class="line"><span class="cl">The [&#34;https-openssl-nio-8443&#34;] connector has been configured to 
+</span></span><span class="line"><span class="cl">support negotiation to [h2] via ALPN
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">信息 [main] 
+</span></span><span class="line"><span class="cl">org.apache.coyote.AbstractProtocol.start 开始协议处理句柄
+</span></span><span class="line"><span class="cl">[&#34;https-openssl-nio-8443&#34;]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="alpn协议协商"><code>ALPN</code>协议协商</h3>
+<ul>
+<li>ClientHello</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221023075.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="client-hello"
+	
+	
+></p>
+<hr>
+<h3 id="alpn协议协商-1"><code>ALPN</code>协议协商</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221024741.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="ServerHello"
+	
+	
+></p>
+<ul>
+<li>ServerHello</li>
+</ul>
+<hr>
+<h3 id="使用chrome开发者工具观察">使用Chrome开发者工具观察</h3>
+<p><img src="https://cdn.mazhen.tech/images/202209221024873.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="chrome width:1000"
+	
+	
+></p>
+<hr>
+<h3 id="http2的问题">HTTP/2的问题</h3>
+<ul>
+<li><code>HTTP/2</code>消除了<code>HTTP</code>协议的队首阻塞现象，但<code>TCP</code>层面上仍然存在队首阻塞</li>
+<li><code>HTTP/2</code>多请求复用一个<code>TCP</code>连接，丢包可能会block住所有的<code>HTTP</code>请求</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221025671.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="head-of-line"
+	
+	
+></p>
+<hr>
+<h3 id="http2的问题-1">HTTP/2的问题</h3>
+<ul>
+<li><code>TCP</code>及<code>TCP+TLS</code>建立连接需要多次round trips
+<img src="https://cdn.mazhen.tech/images/202209221025218.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tcp-tls"
+	
+	
+></li>
+</ul>
+<hr>
+<h3 id="quic">QUIC</h3>
+<ul>
+<li><strong>Q</strong>uick <strong>U</strong>DP <strong>I</strong>nternet <strong>C</strong>onnections</li>
+<li>由Goolge开发，并已经在Google部署使用</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202209221026123.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="quic"
+	
+	
+></p>
+<hr>
+<h3 id="quic-1">QUIC</h3>
+<p><a class="link" href="https://www.youtube.com/watch?v=hQZ-0mXFmk8"  target="_blank" rel="noopener"
+    >QUIC: next generation multiplexed transport over UDP</a></p>
+<p><img src="https://cdn.mazhen.tech/images/202209221026039.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="google-live"
+	
+	
+></p>
+<hr>
+<h3 id="参考资料">参考资料</h3>
+<ul>
+<li><a class="link" href="https://hpbn.co/"  target="_blank" rel="noopener"
+    >High Performance Browser Networking</a></li>
+<li><a class="link" href="https://coolshell.cn/articles/19840.html"  target="_blank" rel="noopener"
+    >HTTP的前世今生</a></li>
+<li><a class="link" href="https://www.infoq.cn/article/x80uOvcRyxVYw3KVusUm"  target="_blank" rel="noopener"
+    >HTTP/3 的过去、现在和未来</a></li>
+<li><a class="link" href="https://tools.ietf.org/html/rfc7540"  target="_blank" rel="noopener"
+    >HTTP/2协议</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/http/">http</a>
+        
+            <a href="/tags/networking/">networking</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">自己动手将谷歌k8s镜像同步到阿里云</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">容器技术创新漫谈</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker跨主机通信路由模式动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BAoverlay%E7%BD%91%E7%BB%9C%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker跨主机Overlay网络动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker单机网络模型动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

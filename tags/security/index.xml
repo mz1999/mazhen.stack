@@ -1,0 +1,886 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>security on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/security/</link>
+        <description>Recent content in security on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Sun, 19 May 2019 09:46:53 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/security/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Kubernetes集群的身份验证</title>
+        <link>https://mazhen.tech/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/</link>
+        <pubDate>Sun, 19 May 2019 09:46:53 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/</guid>
+        <description>&lt;p&gt;用户在访问&lt;code&gt;Kubernetes&lt;/code&gt;集群的&lt;code&gt;API server&lt;/code&gt;时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达&lt;code&gt;API&lt;/code&gt;服务，如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220949892.svg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;access-control-overview&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt;中的用户有两种类型：&lt;code&gt;service accounts&lt;/code&gt; 和 &lt;code&gt;normal users&lt;/code&gt;。&lt;code&gt;service accounts&lt;/code&gt; 由 &lt;code&gt;Kubernetes&lt;/code&gt;管理，它是&lt;code&gt;Pod&lt;/code&gt;中的进程用于访问&lt;code&gt;API&lt;/code&gt;服务的&lt;code&gt;account&lt;/code&gt;，为&lt;code&gt;Pod&lt;/code&gt;中的进程提供了一种身份标识。&lt;code&gt;normal users&lt;/code&gt;是由外部系统管理，在&lt;code&gt;Kubernetes&lt;/code&gt;中并没有对应的 &lt;code&gt;user&lt;/code&gt; 对象，它为人类用户使用&lt;code&gt;kubectl&lt;/code&gt;之类的工具访问&lt;code&gt;API&lt;/code&gt;服务时提供身份标识。所有用户，不管是使用 &lt;code&gt;kubectl&lt;/code&gt;、客户端lib、还是直接发起&lt;code&gt;REST&lt;/code&gt;请求访问&lt;code&gt;API server&lt;/code&gt;，都需要经过上述三个步骤的检查。&lt;/p&gt;
+&lt;p&gt;本文将介绍&lt;code&gt;Kubernetes&lt;/code&gt;集群的身份验证，即&lt;code&gt;Kubernetes&lt;/code&gt;如何确认来访者的身份。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt;支持&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/reference/access-authn-authz/authentication/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;多种方式的身份验证&lt;/a&gt;：客户端证书，Password， Plain Tokens，JWT(JSON Web Token)，HTTP basic auth等。你可以同时启用多种认证，一般建议至少使用两种：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为验证&lt;code&gt;normal users&lt;/code&gt;身份的客户端证书方式&lt;/li&gt;
+&lt;li&gt;为验证&lt;code&gt;Service accounts&lt;/code&gt;身份的 &lt;code&gt;JWT Tokens&lt;/code&gt;方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用客户端证书进行身份验证&#34;&gt;使用客户端证书进行身份验证&lt;/h2&gt;
+&lt;h3 id=&#34;理解数字证书&#34;&gt;理解数字证书&lt;/h3&gt;
+&lt;p&gt;非对称加密算法是证书的基础。数字签名、数字证书等一系列概念有点绕，但只要记住：&lt;strong&gt;公钥用来加密&lt;/strong&gt;，&lt;strong&gt;私钥用来签名&lt;/strong&gt; 就可以了。&lt;/p&gt;
+&lt;p&gt;怎么理解呢？公钥可以随意分发，谁都可以持有，如果你用私钥加密，任何持有对应公钥的人都可以解密，这样做和没加密一样，没什么意义。因此，我们需要用公钥加密，只有持有私钥的那个人才能解密。私钥之所以称为私钥，一定会私密保存，不会向其他人泄漏。同时，用私钥加密虽然没有意义，但如果别人用公钥解开了私钥加密的信息，就能够证明信息是由私钥持有者发出的，验证了信息发送者的身份，这就是数字签名。&lt;/p&gt;
+&lt;p&gt;每个人制作好自己的公钥和私钥，然后把公钥发布出去。两个人如果都有对方的公钥，就可以用对方的公钥给对方发送加密信息，同时附上用私钥加密的信息摘要作为数字签名，证明消息发送者的身份。&lt;/p&gt;
+&lt;p&gt;通过加密防止了窃听风险，通过数字签名防止了冒充风险，数字签名内的消息摘要防止了篡改风险，一起看似很完美。&lt;/p&gt;
+&lt;p&gt;等等，这里有个很重要的问题被忽略了：如何安全的将公钥发布出去？如果双方希望安全通信，最好当面交换公钥，以免被别人冒充，并且要保护好自己的电脑，避免公钥被别有用心的人替换。现实中不可能这样分发公钥，效率太低，几乎无法大规模实行。于是出现了&lt;code&gt;CA&lt;/code&gt;(certificate authority)，为公钥做认证。&lt;code&gt;CA&lt;/code&gt;用自己的私钥，对申请用户的公钥和一些身份信息加密，生成&amp;quot;数字证书&amp;quot;（Digital Certificate）。你现在可以用任何方式将内含公钥的数字证书发布出去，例如有客户发起请求，希望以&lt;code&gt;HTTPS&lt;/code&gt;的方式访问你的WEB服务，你可以在第一次回复客户的响应中带上数字证书。客户拿到你的数字证书，用&lt;code&gt;CA&lt;/code&gt;的公钥解开数字证书，安全的获得你的公钥。有了&lt;code&gt;CA&lt;/code&gt;为你的数字证书背书，客户可以确定你的身份，不是有人在冒充你。&lt;/p&gt;
+&lt;p&gt;那么&lt;code&gt;CA&lt;/code&gt;的公钥如何安全的分发呢？首先，证书的签发是“链”式结构，给你签发证书的&lt;code&gt;CA&lt;/code&gt;，它的证书可能还是由上一级&lt;code&gt;CA&lt;/code&gt;机构签发的，这样一直往上追溯，最终会到某个“根证书”。如果“根证书”是被我们信任的，那么整条“链”上的证书都可信。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220949566.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;certificates in a chain&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;其次，操作系统都内置了“受信任的根证书”。我们拿到某个证书，如果它的根证书在系统的“受信任的根证书”列表中，那么这个证书就是可信的。例如知乎的证书：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220950113.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;zhihu crt&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;可以看到，它的根证书是&lt;a class=&#34;link&#34; href=&#34;https://www.digicert.com/digicert-root-certificates.htm&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DigiCert Global Root CA&lt;/a&gt;，在操作系统的“受信任的根证书”列表中能找到它：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220950931.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;root ca&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;根证书是通过预装的方式完成的分发，因此安装来源不明的操作系统有风险，可能潜伏了非法的根证书。一旦被植入了非法的根证书，一整套的安全体系瞬间土崩瓦解。同时，不能随意向系统中添加可信任的根证书，你很难验证根证书的真伪，它已经是root，没人能为它做背书了。12306网站早期的根证书就不在操作系统的“受信任根证书”列表中，需要用户手工安装，在网上&lt;a class=&#34;link&#34; href=&#34;https://www.williamlong.info/archives/3461.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;引起轩然大波&lt;/a&gt;。最终12306在17年底的时候换成了Digicert的证书。&lt;/p&gt;
+&lt;p&gt;简单总结一下基于非对称加密算法的公钥/私钥体系，&lt;strong&gt;公钥用来加密&lt;/strong&gt;，&lt;strong&gt;私钥用来签名&lt;/strong&gt;，&lt;strong&gt;引入&lt;code&gt;CA&lt;/code&gt;保证公钥的安全分发&lt;/strong&gt;。你可以找&lt;code&gt;CA&lt;/code&gt;签发数字证书，那么你的客户就可以根据本地“受信任的根证书”验证你的数字证书，从而确认你的身份，然后用证书内包含的公钥给你发加密的信息。同样，你也可以要求对方的数字证书，以便确认对方的身份，并给他回加密的信息。&lt;/p&gt;
+&lt;p&gt;理解了数字证书的基本原理，我们再看看&lt;code&gt;Kubernetes&lt;/code&gt;中如何使用客户端证书进行身份验证。&lt;/p&gt;
+&lt;h3 id=&#34;数字证书在kubernetes中的应用&#34;&gt;数字证书在Kubernetes中的应用&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt;各组件之间的通信都是基于&lt;code&gt;TLS&lt;/code&gt;，实现服务的加密访问，同时支持基于证书的双向认证。&lt;/p&gt;
+&lt;p&gt;我们在搭建私有&lt;code&gt;Kubernetes&lt;/code&gt;集群时，一般是自建&lt;code&gt;root CA&lt;/code&gt;，因为参与认证的所有集群节点，包括远程访问集群的客户端桌面都完全由自己控制，我们可以安全的将根证书分发到所有节点。有了&lt;code&gt;CA&lt;/code&gt;，我们再用&lt;code&gt;CA&lt;/code&gt;的私钥/公钥为各个组件签发所需的证书。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;CA&lt;/code&gt;的创建，以及一系列客户端、服务端证书的签发，实际上是建立了&lt;code&gt;Kubernetes&lt;/code&gt;集群的&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Public_key_infrastructure&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;PKI(Public key infrastructure)&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt;中的组件比较多，所以需要的证书会非常多，&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/setup/certificates/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这篇文档&lt;/a&gt;做了介绍。我按证书的用途归类总结一下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;CA&lt;/code&gt;证书
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Kubernetes&lt;/code&gt; 一般用途&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;etcd&lt;/code&gt; 集群根证书&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;aggregation 相关功能&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;服务端证书
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;API server&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;etcd&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;kubelet&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;访问&lt;code&gt;API server&lt;/code&gt;时进行身份验证的客户端证书
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;kubelet&lt;/code&gt;　　　　　　-&amp;gt; &lt;code&gt;API server&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;controller-manager&lt;/code&gt; -&amp;gt; &lt;code&gt;API server&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;kube-scheduler&lt;/code&gt; 　　-&amp;gt; &lt;code&gt;API server&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;admin&lt;/code&gt;用户　　　　　-&amp;gt; &lt;code&gt;API server&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;API server&lt;/code&gt; 访问其他组件时进行身份验证的客户端证书
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;API server&lt;/code&gt; -&amp;gt; &lt;code&gt;etcd&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;API server&lt;/code&gt; -&amp;gt; &lt;code&gt;kubelet&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;API server&lt;/code&gt; -&amp;gt; &lt;code&gt;aggregated API server&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;etcd&lt;/code&gt; 相关功能
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;etcd&lt;/code&gt; 集群中节点互相通信使用的客户端证书&lt;/li&gt;
+&lt;li&gt;如果&lt;code&gt;etcd&lt;/code&gt;是以Pod方式运行，针对&lt;code&gt;etcd&lt;/code&gt;的 Liveness 需要的客户端证书&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Service accounts&lt;/code&gt; 私钥/公钥对，用于生成&lt;code&gt;Service accounts&lt;/code&gt;身份验证的 &lt;code&gt;JWT Tokens&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最后一个不是证书，不过也在&lt;code&gt;Kubernetes PKI&lt;/code&gt;的管理范围。关于&lt;code&gt;Service accounts&lt;/code&gt; 私钥/公钥对的作用，后面会讲到。&lt;/p&gt;
+&lt;p&gt;理论上&lt;code&gt;CA&lt;/code&gt;根证书可以只使用一个，不过为了安全和方便管理，官方强调在不同的上下文最好使用不同的&lt;code&gt;CA&lt;/code&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Warning&lt;/strong&gt;: Do not reuse a CA that is used in a different context unless you understand the risks and the mechanisms to protect the CA’s usage.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以看出，&lt;code&gt;API server&lt;/code&gt;是核心组件，其他组件、包括admin用户对它的访问都需要&lt;code&gt;TLS&lt;/code&gt;双向认证，所以会有&lt;code&gt;API server&lt;/code&gt;的服务端证书和各个组件的客户端证书。&lt;code&gt;API server&lt;/code&gt;作为客户端需要访问&lt;code&gt;etcd&lt;/code&gt;、&lt;code&gt;kubelet&lt;/code&gt;和&lt;code&gt;aggregated API server&lt;/code&gt;，所以也会有相应的服务端、客户端证书。&lt;/p&gt;
+&lt;p&gt;当我们使用&lt;code&gt;kubeadm&lt;/code&gt;安装&lt;code&gt;Kubernetes&lt;/code&gt;时，&lt;code&gt;kubeadm&lt;/code&gt;会为我们生成上述的一系列私钥和证书，放在&lt;code&gt;/etc/kubernetes/&lt;/code&gt;目录下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# tree --dirsfirst /etc/kubernetes/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/etc/kubernetes/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── manifests                         组件的配置文件，以Pod方式运行在集群中
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── etcd.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── kube-apiserver.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── kube-controller-manager.yaml  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   └── kube-scheduler.yaml           
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── pki                               
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── etcd                          
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── ca.crt                    etcd 集群CA证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── ca.key                    etcd 集群CA私钥
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── healthcheck-client.crt    Liveness 健康检查使用的客户端证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── healthcheck-client.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── peer.crt                  etcd节点间通信使用的客户端证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── peer.key                  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   ├── server.crt                etcd服务端证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   │   └── server.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── apiserver.crt                 API Server 服务端证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── apiserver.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── apiserver-etcd-client.crt     API server -&amp;gt; etcd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── apiserver-etcd-client.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── apiserver-kubelet-client.crt  API server -&amp;gt; kubelet
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── apiserver-kubelet-client.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── ca.crt                        CA证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── ca.key                        CA私钥
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── front-proxy-ca.crt            aggregation 相关功能CA证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── front-proxy-ca.key            aggregation 相关功能CA私钥
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── front-proxy-client.crt        API server -&amp;gt; aggregated API server
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── front-proxy-client.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── sa.key                        Service accounts 私钥
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   └── sa.pub                        Service accounts 公钥
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── admin.conf                        admin              -&amp;gt; API server 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── controller-manager.conf           controller-manager -&amp;gt; API server 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── kubelet.conf                      kubelet　　　　　　  -&amp;gt; API server 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└── scheduler.conf                    kube-scheduler     -&amp;gt; API server 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;注意，最后四个&lt;code&gt;*.conf&lt;/code&gt;是&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;kubeconfig file&lt;/a&gt;，内容包含了集群、用户、namespace等信息，还有用来认证的CA证书、客户端证书和私钥。例如&lt;code&gt;admin.conf&lt;/code&gt;就是&lt;code&gt;kubectl&lt;/code&gt;访问集群用到的&lt;code&gt;kubeconfig file&lt;/code&gt;，缺省情况下&lt;code&gt;kubectl&lt;/code&gt;会使用&lt;code&gt;$HOME/.kube/config&lt;/code&gt;，你也可以通过&lt;code&gt;KUBECONFIG&lt;/code&gt;环境变量，或&lt;code&gt;kubectl&lt;/code&gt; 的 &lt;code&gt;--kubeconfig&lt;/code&gt; 参数进行设置。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubelet&lt;/code&gt;运行在每个工作节点，无法提前预知 &lt;code&gt;node&lt;/code&gt; 的 &lt;code&gt;IP&lt;/code&gt; 信息，所以 &lt;code&gt;kubelet&lt;/code&gt; 一般不会明确指定服务端证书, 而是只指定 &lt;code&gt;CA&lt;/code&gt; 根证书, 让 &lt;code&gt;kubelet&lt;/code&gt; 根据本机信息自动生成服务端证书，保存到配置参数指定的&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&amp;ndash;cert-dir&lt;/a&gt;目录中。&lt;code&gt;cert-dir&lt;/code&gt;的缺省值是&lt;code&gt;/var/lib/kubelet/pki&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# tree /var/lib/kubelet/pki
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/var/lib/kubelet/pki
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── kubelet-client-2019-04-28-10-48-13.pem
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── kubelet-client-current.pem -&amp;gt; /var/lib/kubelet/pki/kubelet-client-2019-04-28-10-48-13.pem
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── kubelet.crt   kubelet服务端证书
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└── kubelet.key   kubelet服务端私钥
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;另外，&lt;code&gt;API server&lt;/code&gt;有很多认证相关的&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/#options&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;启动参数&lt;/a&gt;，参数名称让人容易混淆，有人还专门提了&lt;a class=&#34;link&#34; href=&#34;https://github.com/kubernetes/kubernetes/issues/54665&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;issue&lt;/a&gt;，&lt;a class=&#34;link&#34; href=&#34;https://github.com/kubernetes/kubernetes/issues/54665#issuecomment-340960398&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这个回答&lt;/a&gt;根据用途对这些参数进行了分类，说明的非常清晰。&lt;/p&gt;
+&lt;h3 id=&#34;api-server-如何用客户端证书进行身份验证&#34;&gt;API server 如何用客户端证书进行身份验证&lt;/h3&gt;
+&lt;p&gt;前面提到，当用户使用&lt;code&gt;kubectl&lt;/code&gt;访问&lt;code&gt;API server&lt;/code&gt;时，需要以某种方式进行身份验证，最常用的方式就是使用客户端证书。&lt;code&gt;Kubernetes&lt;/code&gt;是没有 &lt;code&gt;user&lt;/code&gt; 这种 API 对象，&lt;code&gt;kubectl&lt;/code&gt;的用户身份信息就包含在客户端证书中。&lt;code&gt;API server&lt;/code&gt;验证了客户端证书，也就可以从证书中获得用户名和所属的&lt;code&gt;group&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;我们以&lt;code&gt;/etc/kubernetes/admin.conf&lt;/code&gt; 为例，看看客户端证书中提供了那些信息。&lt;/p&gt;
+&lt;p&gt;先查看&lt;code&gt;admin.conf&lt;/code&gt;文件的内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl --kubeconfig /etc/kubernetes/admin.conf  config view
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;clusters:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- cluster:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    certificate-authority-data: DATA+OMITTED
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    server: https://172.18.100.90:6443
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: test
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;contexts:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- context:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    cluster: test
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    user: kubernetes-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: kubernetes-admin@test
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;current-context: kubernetes-admin@test
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: Config
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;preferences: {}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;users:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- name: kubernetes-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  user:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    client-certificate-data: REDACTED
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    client-key-data: REDACTED
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个文件提供了&lt;code&gt;API server&lt;/code&gt;的地址，以及身份验证用到的证书：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;certificate-authority-data&lt;/code&gt; ：CA证书&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;client-certificate-data&lt;/code&gt; ：客户端证书&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;client-key-data&lt;/code&gt;： 客户端私钥&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;客户端证书是以&lt;code&gt;base64&lt;/code&gt;编码的方式保存在&lt;code&gt;client-certificate-data&lt;/code&gt;字段中，我们将证书提取出来：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# cat /etc/kubernetes/admin.conf | grep client-certificate-data | cut -d &amp;#34; &amp;#34; -f 6 | base64 -d &amp;gt; admin.crt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# cat admin.crt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-----BEGIN CERTIFICATE-----
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;MIIC8jCCAdqgAwIBAgIIaBuxevPYGaswDQYJKoZIhvcNAQELBQAwFTETMBEGA1UE
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;AxMKa3ViZXJuZXRlczAeFw0xOTA0MjgwMjQwMDBaFw0yMDA0MjcwMjQwMDNaMDQx
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FzAVBgNVBAoTDnN5c3RlbTptYXN0ZXJzMRkwFwYDVQQDExBrdWJlcm5ldGVzLWFk
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;bWluMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvRTIQ4YEMh0mUWKP
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;17pLdUocgZMLVCK6tYmj0DJIihRk+wKvNzYSStfxsug9nnEqVVzmbW5/UxER776H
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;844y/1NGk/8LsDIkFGspf3cEmQ8OE8TlLNW7h9gWIGymLQ/K1qhYfNOPDYoJXPix
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;eUWTJgn0+neJNbJ3JoJk2WRlDFwbE0uXgYYczuDcJablSdbb8Oc+E4qJ1U7u9YMN
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Bo/JBY68wYtdjXHl6Mg28aCioVZrs5eZWkNzNpXMVjQwFdZAdWbnS3OJGN1b6IrV
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gWk9PMoCE2TtFv5NdlHSYFtEAaBEwfl3/D3rGHKb4ZH/fgKWsepy8ffxxibM6pND
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pLnmAwIDAQABoycwJTAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUH
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;AwIwDQYJKoZIhvcNAQELBQADggEBALPYorv2mlXyu6jpX/6gE1kTvpPGK4vylfSY
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;9jl4PtQZgRaXvmVsUKpyIdtVhdMZp9EFaYNC4AYkqaVEOoAbU96SYhdO/6h7Rn8T
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0Ae+f1Vwt+8GxErEN3xp4noHfXM0eSEuFLPXt43BBJInYRyx1J0urAjYtNCvc9wX
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;uQFVmNKsqgmjvHQsRkvKcb8HEzcaD1TqqnTpq3usGjNggVZFTChB58R909yGPEXL
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;n7VsilmN86gom3fgqwCn2C00iKcuzCOwYN2T+Mi8KI2DraDDoVeRMSaYQNUfKNIX
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Ngeod/C4piq+OAdyrPPFEINdLi404EYHyod0CgiD6uhoX5W06O4=
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-----END CERTIFICATE-----
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;使用&lt;code&gt;openssl&lt;/code&gt;查看证书内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# openssl x509 -in ./admin.crt -text
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Certificate:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    Data:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        Version: 3 (0x2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        Serial Number: 7501784745950845355 (0x681bb17af3d819ab)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    Signature Algorithm: sha256WithRSAEncryption
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        Issuer: CN=kubernetes
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        Validity
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            Not Before: Apr 28 02:40:00 2019 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            Not After : Apr 27 02:40:03 2020 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        Subject: O=system:masters, CN=kubernetes-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        Subject Public Key Info:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            Public Key Algorithm: rsaEncryption
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                Public-Key: (2048 bit)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;......
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;注意这一行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Subject: O=system:masters, CN=kubernetes-admin
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;API server&lt;/code&gt;会将证书中&lt;code&gt;CN(Common Name)&lt;/code&gt;作为用户名，&lt;code&gt;O(Organization)&lt;/code&gt;作为用户所属的&lt;code&gt;group&lt;/code&gt;。&lt;code&gt;API server&lt;/code&gt;从这个证书得到的信息是：admin用户所属的group是&lt;code&gt;system:masters&lt;/code&gt;。至此，身份验证阶段完成。&lt;/p&gt;
+&lt;p&gt;下一步是授权检查，也就是检查用户有没有权限执行这个操作。这是另外一个&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/reference/access-authn-authz/authorization/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;话题&lt;/a&gt;，本文不做详细讨论，只是简单介绍一下。根据&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/reference/access-authn-authz/rbac/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方文档&lt;/a&gt;，&lt;code&gt;Kubernetes&lt;/code&gt;提供了缺省的 &lt;code&gt;ClusterRole - group&lt;/code&gt; 绑定关系，已经将&lt;code&gt;system:masters&lt;/code&gt; group 和 角色 &lt;code&gt;cluster-admin&lt;/code&gt;绑定到了一起：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# kubectl get clusterrolebindings  cluster-admin -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: rbac.authorization.k8s.io/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: ClusterRoleBinding
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  annotations:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    rbac.authorization.kubernetes.io/autoupdate: &amp;#34;true&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  creationTimestamp: &amp;#34;2019-04-28T02:40:17Z&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  labels:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    kubernetes.io/bootstrapping: rbac-defaults
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: cluster-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  resourceVersion: &amp;#34;98&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  selfLink: /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/cluster-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  uid: f58a87a7-695e-11e9-91ca-005056ac1c1c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;roleRef:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  apiGroup: rbac.authorization.k8s.io
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  kind: ClusterRole
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: cluster-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;subjects:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- apiGroup: rbac.authorization.k8s.io
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  kind: Group
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: system:masters
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个绑定关系的意思是，属于&lt;code&gt;system:masters&lt;/code&gt;group的用户，都拥有&lt;code&gt;cluster-admin&lt;/code&gt;角色包含的权限。我们再看看角色&lt;code&gt;cluster-admin&lt;/code&gt;的具体权限信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# kubectl get clusterrole cluster-admin -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: rbac.authorization.k8s.io/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: ClusterRole
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  annotations:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    rbac.authorization.kubernetes.io/autoupdate: &amp;#34;true&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  creationTimestamp: &amp;#34;2019-04-28T02:40:17Z&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  labels:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    kubernetes.io/bootstrapping: rbac-defaults
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: cluster-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  resourceVersion: &amp;#34;44&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  selfLink: /apis/rbac.authorization.k8s.io/v1/clusterroles/cluster-admin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  uid: f5523c21-695e-11e9-91ca-005056ac1c1c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rules:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- apiGroups:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - &amp;#39;*&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  resources:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - &amp;#39;*&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  verbs:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - &amp;#39;*&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- nonResourceURLs:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - &amp;#39;*&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  verbs:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - &amp;#39;*&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;从&lt;code&gt;rules&lt;/code&gt;列表可以看出，&lt;code&gt;cluster-admin&lt;/code&gt;这个角色对所有资源都有无限制的操作权限。因此，使用了这个&lt;code&gt;kubeconfig file&lt;/code&gt;的&lt;code&gt;kubectl&lt;/code&gt;的请求就有了操控和管理整个集群的权限。&lt;/p&gt;
+&lt;h2 id=&#34;使用jwt-tokens进行身份验证&#34;&gt;使用&lt;code&gt;JWT Tokens&lt;/code&gt;进行身份验证&lt;/h2&gt;
+&lt;p&gt;运行在&lt;code&gt;Pod&lt;/code&gt;中的进程需要访问&lt;code&gt;API server&lt;/code&gt;时，同样需要进行身份验证和授权检查。如何让&lt;code&gt;Pod&lt;/code&gt;具有用户身份呢？通过给&lt;code&gt;Pod&lt;/code&gt;指定&lt;code&gt;service account&lt;/code&gt;来实现。&lt;code&gt;service account&lt;/code&gt;是&lt;code&gt;Kubernetes&lt;/code&gt;内置的一种 “服务账户”，它为&lt;code&gt;Pod&lt;/code&gt;中的进程提供了一种身份标识。如果&lt;code&gt;Pod&lt;/code&gt;没有显式的指定&lt;code&gt;service account&lt;/code&gt;，系统会自动为其关联&lt;code&gt;default service account&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;我们自己创建&lt;code&gt;service account&lt;/code&gt;对象非常简单：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;//serviceaccount.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: ServiceAccount
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: nginx-example
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# kubectl apply -f serviceaccount.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;serviceaccount/nginx-example created
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看刚刚创建的&lt;code&gt;service account&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# kubectl describe serviceaccounts nginx-example
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Name:                nginx-example
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Namespace:           default
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Labels:              &amp;lt;none&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Annotations:         kubectl.kubernetes.io/last-applied-configuration:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                       {&amp;#34;apiVersion&amp;#34;:&amp;#34;v1&amp;#34;,&amp;#34;kind&amp;#34;:&amp;#34;ServiceAccount&amp;#34;,&amp;#34;metadata&amp;#34;:{&amp;#34;annotations&amp;#34;:{},&amp;#34;name&amp;#34;:&amp;#34;nginx-example&amp;#34;,&amp;#34;namespace&amp;#34;:&amp;#34;default&amp;#34;}}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Image pull secrets:  &amp;lt;none&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Mountable secrets:   nginx-example-token-r2cv6
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Tokens:              nginx-example-token-r2cv6
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Events:              &amp;lt;none&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;当&lt;code&gt;service account&lt;/code&gt;对象创建成功，&lt;code&gt;controller-manager&lt;/code&gt;会发现这个新对象，然后为它生成&lt;code&gt;token&lt;/code&gt;。&lt;code&gt;token&lt;/code&gt;实际上是&lt;code&gt;secret&lt;/code&gt;对象，内部包含了用来身份验证的&lt;code&gt;token&lt;/code&gt;。&lt;code&gt;service account&lt;/code&gt;对象的&lt;code&gt;Tokens&lt;/code&gt;列引用的就是&lt;code&gt;controller-manager&lt;/code&gt;为它创建的&lt;code&gt;token&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;我们来看看&lt;code&gt;token&lt;/code&gt;的内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# kubectl get secrets nginx-example-token-r2cv6 -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;data:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ca.crt: (APISERVER&amp;#39;S CA BASE64 ENCODED)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  namespace: ZGVmYXVsdA==
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  token: (BEARER TOKEN BASE64 ENCODED)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: Secret
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ......
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;type: kubernetes.io/service-account-token
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看到，这个&lt;code&gt;secret&lt;/code&gt;对象的&lt;code&gt;type&lt;/code&gt;是&lt;code&gt;service-account-token&lt;/code&gt;，包含了三部分数据：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ca.crt&lt;/code&gt;： &lt;code&gt;API Server&lt;/code&gt;的&lt;code&gt;CA&lt;/code&gt;证书，用于&lt;code&gt;Pod&lt;/code&gt;中的进程访问&lt;code&gt;API Server&lt;/code&gt;时对服务端证书进行校验&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;namespace&lt;/code&gt;： &lt;code&gt;secret&lt;/code&gt;所在&lt;code&gt;namespace&lt;/code&gt;，使用了&lt;code&gt;base64&lt;/code&gt;编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;token&lt;/code&gt;：&lt;code&gt;JWT Tokens&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;JWT Tokens&lt;/code&gt; 是 &lt;code&gt;controller-manager&lt;/code&gt; 用 &lt;code&gt;service account&lt;/code&gt;私钥&lt;code&gt;sa.key&lt;/code&gt;签发的，其中包含了用户的身份信息，&lt;code&gt;API Server&lt;/code&gt;可以用&lt;code&gt;sa.pub&lt;/code&gt;验证&lt;code&gt;token&lt;/code&gt;，拿到用户身份信息，从而完成身份验证。&lt;/p&gt;
+&lt;p&gt;如果是使用&lt;code&gt;kubeadm&lt;/code&gt;安装的&lt;code&gt;Kubernetes&lt;/code&gt;，我们可以在&lt;code&gt;/etc/kubernetes/manifests/&lt;/code&gt;目录中的配置文件确认&lt;code&gt;sa.key&lt;/code&gt;和&lt;code&gt;sa.pub&lt;/code&gt;的作用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;spec:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  containers:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - command:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    - kube-controller-manager
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    - --service-account-private-key-file=/etc/kubernetes/pki/sa.key
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# cat /etc/kubernetes/manifests/kube-apiserver.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;spec:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  containers:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  - command:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    - kube-apiserver
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    - --service-account-key-file=/etc/kubernetes/pki/sa.pub
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;controller-manager&lt;/code&gt;用私钥&lt;code&gt;sa.key&lt;/code&gt;签名，&lt;code&gt;API Server&lt;/code&gt;用公钥&lt;code&gt;sa.pub&lt;/code&gt;验签。&lt;/p&gt;
+&lt;p&gt;运行在&lt;code&gt;Pod&lt;/code&gt;中的进程在向&lt;code&gt;API server&lt;/code&gt;发起&lt;code&gt;HTTP&lt;/code&gt;请求时，&lt;code&gt;HTTP header&lt;/code&gt;中会携带&lt;code&gt;token&lt;/code&gt;，&lt;code&gt;API server&lt;/code&gt;从&lt;code&gt;header&lt;/code&gt;中拿到&lt;code&gt;token&lt;/code&gt;，进行身份验证：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Authorization: Bearer [token]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;JWT Tokens&lt;/code&gt;的是由用&lt;code&gt;.&lt;/code&gt;分割的三部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Header&lt;/li&gt;
+&lt;li&gt;Payload&lt;/li&gt;
+&lt;li&gt;Signature&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此，一个&lt;code&gt;JWT Tokens&lt;/code&gt;看起来是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;xxxxxxx.yyyyyyyy.zzzzzzz
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;Header&lt;/code&gt;和&lt;code&gt;Payload&lt;/code&gt;都是&lt;code&gt;base64&lt;/code&gt;编码的&lt;code&gt;JSON&lt;/code&gt;，以上面&lt;code&gt;nginx-example&lt;/code&gt;关联的&lt;code&gt;token&lt;/code&gt;为例，看看&lt;code&gt;Header&lt;/code&gt;和&lt;code&gt;Payload&lt;/code&gt;的内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &amp;#34; &amp;#34; -f 7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im5naW54LWV4YW1wbGUtdG9rZW4tcjJjdjYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibmdpbngtZXhhbXBsZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjBmZWRlOWM1LTc2YjUtMTFlOS05MWNhLTAwNTA1NmFjMWMxYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0Om5naW54LWV4YW1wbGUifQ.VOjVQBr5PKg1WyZYtIW0Fos5fxFN4cYE3Mz9p1eWbQP6rQRQGDEiGX-LBuM6ECI9cpSL-F4nYQAL9vmIlA4vbAgS4OFgC4nwu8SzLu2FVeE7RDpguvsdAsj-4T_LxEGX1RPljGTpvlt8HRjTnp9K8W4dy7PyJQEB5XvCf-IVNAs3zESgmuJ7wJwO7mXQe5WdeqhI5vXjcZiXP97oH0VRYT1vTKVP-GooC5YfaNhU7rHoJ0gmR10xNqZjwKGsHKkq5maC5BOrXFLlHRqVRwm9-hRn-ZLgAoCwujCIpLvPaFUR8HaatzX4GQ_HWev2soJnk1qcav0smxfjC-fu540vZA
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &amp;#34; &amp;#34; -f 7 | cut -d &amp;#34;.&amp;#34; -f 1 | base64 -d | python -mjson.tool
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;alg&amp;#34;: &amp;#34;RS256&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kid&amp;#34;: &amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &amp;#34; &amp;#34; -f 7 | cut -d &amp;#34;.&amp;#34; -f 2 | base64 -d | python -mjson.tool
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;iss&amp;#34;: &amp;#34;kubernetes/serviceaccount&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/namespace&amp;#34;: &amp;#34;default&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/secret.name&amp;#34;: &amp;#34;nginx-example-token-r2cv6&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/service-account.name&amp;#34;: &amp;#34;nginx-example&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/service-account.uid&amp;#34;: &amp;#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;sub&amp;#34;: &amp;#34;system:serviceaccount:default:nginx-example&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;Header&lt;/code&gt;中的&lt;code&gt;alg&lt;/code&gt;指明了签名用到的加密算法，&lt;code&gt;Payload&lt;/code&gt; 中包含了用户的身份信息，可以知道这个&lt;code&gt;service account&lt;/code&gt;属于的&lt;code&gt;namespace&lt;/code&gt;为&lt;code&gt;default&lt;/code&gt;，名称为&lt;code&gt;nginx-example&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;第三部分&lt;code&gt;Signature&lt;/code&gt;的构造方式如下，如果加密算法选择了PKCS SHA：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;PKCSSHA256(
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  base64UrlEncode(header) + &amp;#34;.&amp;#34; +
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  base64UrlEncode(payload),
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  secret)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;controller-manager&lt;/code&gt;用&lt;code&gt;sa.key&lt;/code&gt;签名，&lt;code&gt;API Server&lt;/code&gt;用公钥&lt;code&gt;sa.pub&lt;/code&gt;验签，进行身份验证。&lt;/p&gt;
+&lt;p&gt;如果先深入了解&lt;code&gt;JWT(JSON Web Token)&lt;/code&gt;，建议阅读这篇文档&lt;a class=&#34;link&#34; href=&#34;https://blog.angular-university.io/angular-jwt/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&amp;lt;JWT: The Complete Guide to JSON Web Tokens&amp;gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Pod&lt;/code&gt;中的进程如何获得这个&lt;code&gt;token&lt;/code&gt;呢？&lt;code&gt;Kubernetes&lt;/code&gt;在创建&lt;code&gt;Pod&lt;/code&gt;时，会将&lt;code&gt;service account token&lt;/code&gt;映射到&lt;code&gt;Pod&lt;/code&gt;的&lt;code&gt;/var/run/secrets/kubernetes.io/serviceaccount&lt;/code&gt; 目录下。我们通过一个例子演示一下。&lt;/p&gt;
+&lt;p&gt;创建&lt;code&gt;Pod&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;// simple.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: Pod
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    name: firstpod
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;spec:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    serviceAccountName: nginx-example
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    containers:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    - image: nginx
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      name: stan
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl apply -f simple.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pod/firstpod created
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看&lt;code&gt;Pod&lt;/code&gt;内&lt;code&gt;/var/run/secrets/kubernetes.io/serviceaccount&lt;/code&gt;目录的内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl exec firstpod -- ls  /var/run/secrets/kubernetes.io/serviceaccount
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ca.crt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;namespace
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;token
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看&lt;code&gt;Pod&lt;/code&gt;内文件&lt;code&gt;/var/run/secrets/kubernetes.io/serviceaccount/token&lt;/code&gt;的内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl exec firstpod -- cat  /var/run/secrets/kubernetes.io/serviceaccount/token | cut -d &amp;#34;.&amp;#34; -f 2 | base64 -d | python -mjson.tool
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;iss&amp;#34;: &amp;#34;kubernetes/serviceaccount&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/namespace&amp;#34;: &amp;#34;default&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/secret.name&amp;#34;: &amp;#34;nginx-example-token-r2cv6&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/service-account.name&amp;#34;: &amp;#34;nginx-example&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;kubernetes.io/serviceaccount/service-account.uid&amp;#34;: &amp;#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;sub&amp;#34;: &amp;#34;system:serviceaccount:default:nginx-example&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看到，映射进&lt;code&gt;Pod&lt;/code&gt;中的&lt;code&gt;token&lt;/code&gt;，正是我们在配置中通过&lt;code&gt;serviceAccountName&lt;/code&gt;指定的&lt;code&gt;nginx-example&lt;/code&gt;。&lt;code&gt;Pod&lt;/code&gt;中的进程可以通过访问文件&lt;code&gt;/var/run/secrets/kubernetes.io/serviceaccount/token&lt;/code&gt;拿到&lt;code&gt;token&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;如何为&lt;code&gt;service account&lt;/code&gt;授权？通过定义&lt;code&gt;service account&lt;/code&gt;和&lt;code&gt;role&lt;/code&gt;的绑定完成。本文简单演示一下，详细的说明参加&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/reference/access-authn-authz/rbac/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方文档&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;创建&lt;code&gt;role&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;// example-role.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: Role
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: rbac.authorization.k8s.io/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: example-role
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rules:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- apiGroups: [&amp;#34;&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  resources: [&amp;#34;pods&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  verbs: [&amp;#34;get&amp;#34;, &amp;#34;watch&amp;#34;, &amp;#34;list&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl apply -f example-role.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;role.rbac.authorization.k8s.io/example-role created
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;role&lt;/code&gt;可以理解为一组权限的集合，例如上面创建的&lt;code&gt;example-role&lt;/code&gt;对&lt;code&gt;default&lt;/code&gt; Namesapce内的&lt;code&gt;Pods&lt;/code&gt;有&lt;code&gt;get&lt;/code&gt;、&lt;code&gt;watch&lt;/code&gt;和&lt;code&gt;list&lt;/code&gt;操作权限。&lt;/p&gt;
+&lt;p&gt;下一步就是将&lt;code&gt;service account&lt;/code&gt;和&lt;code&gt;role&lt;/code&gt;进行绑定：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;//example-rolebinding.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind: RoleBinding
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apiVersion: rbac.authorization.k8s.io/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;metadata:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: example-rolebinding
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  namespace: default
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;subjects:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;- kind: ServiceAccount
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: nginx-example
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  namespace: default
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;roleRef:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  kind: Role
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  name: example-role
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  apiGroup: rbac.authorization.k8s.io
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kubectl apply -f example-rolebinding.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rolebinding.rbac.authorization.k8s.io/example-rolebinding created
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;通过绑定的创建，&lt;code&gt;service account&lt;/code&gt;就拥有了&lt;code&gt;role&lt;/code&gt;定义的权限。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;用户对&lt;code&gt;API server&lt;/code&gt;的访问需要通过身份验证、授权和准入控制这三个阶段的检查。&lt;/p&gt;
+&lt;p&gt;一般集群外部用户访问&lt;code&gt;API Server&lt;/code&gt;使用客户端证书进行身份验证。&lt;code&gt;Kubernetes&lt;/code&gt;各组件之间的通信都使用了&lt;code&gt;TLS&lt;/code&gt;加密传输，同时支持基于证书的双向认证。因此&lt;code&gt;Kubernetes&lt;/code&gt;的安装过程涉及很多证书的创建，本文分类介绍了这些证书的作用。&lt;/p&gt;
+&lt;p&gt;集群内&lt;code&gt;Pod&lt;/code&gt;中的进程访问&lt;code&gt;API server&lt;/code&gt;时，使用&lt;code&gt;service account&lt;/code&gt;关联的&lt;code&gt;token&lt;/code&gt;进行身份验证。&lt;/p&gt;
+&lt;p&gt;每个&lt;code&gt;Pod&lt;/code&gt;都会关联一个&lt;code&gt;service account&lt;/code&gt;，没有明确指定时使用&lt;code&gt;default&lt;/code&gt;。当我们创建&lt;code&gt;service account&lt;/code&gt;对象，&lt;code&gt;controller-manager&lt;/code&gt;会为这个&lt;code&gt;service account&lt;/code&gt;生成&lt;code&gt;Secret&lt;/code&gt;，内部包含了用来身份验证的&lt;code&gt;JWT Tokens&lt;/code&gt;。&lt;code&gt;Kubernetes&lt;/code&gt;会将&lt;code&gt;token&lt;/code&gt;文件&lt;code&gt;mount&lt;/code&gt;到&lt;code&gt;Pod&lt;/code&gt;的&lt;code&gt;/var/run/secrets/kubernetes.io/serviceaccount/token&lt;/code&gt;，&lt;code&gt;Pod&lt;/code&gt;内的进程在向&lt;code&gt;API server&lt;/code&gt;发起的&lt;code&gt;HTTP&lt;/code&gt;时，就可以在请求头中携带这个&lt;code&gt;token&lt;/code&gt;。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

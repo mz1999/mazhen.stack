@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='现在新出现的MySQL中间件除了基本的数据sharding功能，都增加了很多高级特性，我觉得有三个特性比较重要： 分布式事务的支持 数据的强一致'>
+<title>从RadonDB看新型数据库中间件的特性</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%BB%8Eradondb%E7%9C%8B%E6%96%B0%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E7%89%B9%E6%80%A7/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='从RadonDB看新型数据库中间件的特性'>
+<meta property='og:description' content='现在新出现的MySQL中间件除了基本的数据sharding功能，都增加了很多高级特性，我觉得有三个特性比较重要： 分布式事务的支持 数据的强一致'>
+<meta property='og:url' content='https://mazhen.tech/p/%E4%BB%8Eradondb%E7%9C%8B%E6%96%B0%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E7%89%B9%E6%80%A7/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='db' /><meta property='article:published_time' content='2018-06-03T14:43:12&#43;08:00'/><meta property='article:modified_time' content='2018-06-03T14:43:12&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="从RadonDB看新型数据库中间件的特性">
+<meta name="twitter:description" content="现在新出现的MySQL中间件除了基本的数据sharding功能，都增加了很多高级特性，我觉得有三个特性比较重要： 分布式事务的支持 数据的强一致">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BB%8Eradondb%E7%9C%8B%E6%96%B0%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E7%89%B9%E6%80%A7/">从RadonDB看新型数据库中间件的特性</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2018-06-03</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 7 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>现在新出现的MySQL中间件除了基本的数据sharding功能，都增加了很多高级特性，我觉得有三个特性比较重要：</p>
+<ul>
+<li>分布式事务的支持</li>
+<li>数据的强一致复制，提高了数据的安全性和可用性</li>
+<li>支持跨shard join</li>
+</ul>
+<p>通过对这些特性的支持，MySQL中间件具备了一些newSQL数据库的能力，不再是个纯粹的中间件，让用户更容易使用。我调研了最近开源的青云<a class="link" href="http://radondb.io/"  target="_blank" rel="noopener"
+    >RadonDB</a>，希望了解下这方面最新的进展。</p>
+<p>先简单看下<code>RadonDB</code>的整体架构：存储/计算分离。存储节点是<code>MySQL</code>，3个一组用<code>raft</code>实现数据的强一致性，不再是异步/半同步复制，数据的安全性、可用性级别更高。上层是<code>SQL节点</code>，负责客户端连接、SQL语句的解析和执行、分布式事务协调、数据sharding逻辑等。右下脚<code>计算节点</code>的作用，后面会解释。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207011444858.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>在知乎上看到<a class="link" href="https://www.zhihu.com/question/276564413"  target="_blank" rel="noopener"
+    >&lt;如何评价青云开源的分布式数据库 radondb&gt;</a>，<code>RandoDB</code>被吐槽的很厉害。我们从这些吐槽可以了解产品宣传之外的一些信息，知道做这种中间件不是那么容易。大家对<code>RandoDB</code>的几个关键特性的实现方式都不太满意。让我们逐一看看。</p>
+<ul>
+<li><strong>分布式事务的实现</strong></li>
+</ul>
+<p>对分布式事务的实现大家吐槽的最厉害：</p>
+<blockquote>
+<p>官方宣传用XA实现了Snapshot Isolation，然而众所周知XA是无法实现SI的。所谓的事务其实只支持单条SQL，BEGIN / SET AUTOCOMMIT=0 都不支持。</p>
+<p>单语句事务，就是不能 begin 开启事务。</p>
+<p>为了达到 SI 隔离级别，在执行用户 SQL 时，会加上一个 commitLock，防止其他事务提交。这决定了加锁必须时间很短，比如一条SQL，如果你从start transaction开始加锁，那其他事务全都无法提交了，系统事实上已经不可用。</p>
+<p>所谓分布式事物快照隔离级别是 radondb 层 query 和 commit 语句串行化实现的。这个应该是串行化隔离级别了。而且是和冲突没关系的串行化，就是说根本不管两个事物之间有没有冲突数据。性能自行脑补。</p>
+<p>没有 XA log 的 XA 事务原子性实现都是耍流氓。</p>
+</blockquote>
+<p>为什么<em>XA是无法实现SI</em>？ 我的理解是，单个MySQL实例虽然实现了<code>MVCC</code>，但它没有将底层<code>K/V</code>带有时间戳的版本信息暴露出来。也就是说，多个MySQL实例组成的集群没有全局的<code>MVCC</code>，每个实例内部的<code>MVCC</code>是独立的，无法得到全局一致性快照。XA事务跨越了多个节点，所以没办法实现<code>Snapshot隔离级别</code>。可以对比下<code>TiDB</code>的实现，底层<code>TiKV</code>是一个整体，有全局的<code>MVCC</code>，所以能在上层支持分布式事务的<code>Snapshot隔离级别</code>。</p>
+<p><code>RandoDB</code>的实现能work，但相当于在Proxy层将所有事务串行化，即使两个事务之间没有数据冲突。而且只有单语句事务。</p>
+<p>对于XA log，开发者的解释是：</p>
+<blockquote>
+<p>proxy xa log只针对xa commit出错，目前通过分析log然后人工介入，这里没有再记log的必要</p>
+</blockquote>
+<p>我觉得这么做很不严谨。2PC协议有一个问题，一旦事务参与者投票，它必须等待coordinator给出指示，提交或放弃。如果这时coordinator挂了，事务参与者除了等待什么也做不了。事务处于未决状态，事务的最终结果记录在coordinator的事务日志中，只能等它recovery。因此，现在很多改进的做法是用<code>Paxos/raft</code>保证事务日志的高可用，coordinator挂了可以快速切换。即使不用<code>raft</code>，找一个地方可靠持久的保存事务日志是非常必要的。</p>
+<ul>
+<li><strong>使用Raft保证强一致性</strong></li>
+</ul>
+<p>现在很多项目都会使用<code>Paxos/Raft</code>来改进MySQL的复制机制，实现数据的强一致性。如果主、备间任何时刻都完全一致，那么任何时刻都可以安全的进行主备切换。如果无法保证主、备间的强一致性，那么当有持续不断的更新时，主备切换就无法保证强一致性，需要在切换时暂停主库的写入，服务会有短暂的中断。</p>
+<p>腾讯的<a class="link" href="https://github.com/Tencent/phxsql"  target="_blank" rel="noopener"
+    >PhxSQL</a>就是建立在<code>Paxos</code>的一致性和MySQL的<code>binlog</code>流水基础上，通过<code>Paxos</code>保证强一致和高可用的MySQL集群。关于PhxSQL的设计理念可以参见：</p>
+<ul>
+<li><a class="link" href="https://mp.weixin.qq.com/s/Qz2R4oTqWk3SmhuHCQOleQ"  target="_blank" rel="noopener"
+    >谈谈PhxSQL的设计和实现哲学（上）</a></li>
+<li><a class="link" href="https://mp.weixin.qq.com/s/M2h6v7MuYEnbktVb8VswZw"  target="_blank" rel="noopener"
+    >谈谈PhxSQL的设计和实现哲学（下）</a></li>
+</ul>
+<p>采用类似做法的还有阿里云的<a class="link" href="https://help.aliyun.com/document_detail/51701.htm"  target="_blank" rel="noopener"
+    >MySQL金融版</a>。另外，MySQL官方也从5.7开始推出了<a class="link" href="https://dev.mysql.com/doc/refman/5.7/en/group-replication.html"  target="_blank" rel="noopener"
+    >Group Replication</a>机制，内部使用<code>Paxos</code>实现了多个副本的一致。</p>
+<p><code>RadonDB</code>的实现机制和<a class="link" href="https://github.com/Tencent/phxsql"  target="_blank" rel="noopener"
+    >PhxSQL</a>不太一样。它在一组MySQL集群内的复制还是通过<code>Semi-Sync</code>机制（Semi-Sync设置为无限大，不退化为异步复制），保证有一个<code>slave</code>和<code>master</code>完全一致。主备切换时会选择这个<code>slave</code>为主，然后结合MySQL的 <code>Multi-threaded replication</code> 和 <a class="link" href="https://dev.mysql.com/doc/refman/5.7/en/replication-gtids.html"  target="_blank" rel="noopener"
+    >GTID机制</a> 进行快速回放，让主备重新一致。<code>Raft</code>用在哪里了？在 <code>RadonDB</code> 只使用 <code>Raft</code> 进行选主，当主挂掉之后，使用 <code>Raft</code> 选出新的主。<code>Raft</code>选主的逻辑是选出一个拥有最多的<code>committed log</code>的成员作为主，那么对于<code>RadonDB</code>来说，哪个MySQL的<code>GTID</code>最大就选哪个。</p>
+<p>我自己还没有使用<code>Raft</code>的经验，不确定<code>RadonDB</code>的实现机制是否合理。但利用<code>Semi-Sync</code>模拟同步复制的方案，我觉得有一个地方不妥。当和主库保持强同步的备库有问题时，这组MySQL整体就不可用，因为它需要至少一个备库和主库完全一致，这就因为单点降低了整个集群的可用性。如果是用<code>Raft</code>做数据复制，就不会有这种单点影响全局可用性的问题。</p>
+<p>另外，<code>RandoDB</code>被吐槽 <code>Raft</code> 的实现业余、不严谨：</p>
+<blockquote>
+<p>打开用来做HA的Xenon模块，一看又是作业级的肯写代码不肯写测试的raft练手实现。raft测试用例一共1500行<a class="link" href="https://github.com/radondb/xenon/blob/master/src/raft/raft_test.go"  target="_blank" rel="noopener"
+    >go代码</a>
+刚才数了下，自己的raft库光election相关的单元测试用例就数千行代码了。做生产环境用的系统不是练手写作业，需要一个go的raft库，既然都不肯写完备的测试了，那就老老实实用etcd或者hashicorp的raft。自己私下撸一个raft库练手，和给自己全职项目选一个可靠的raft实现，两者真的不矛盾。最滑稽，只做选主干嘛自己撸一个raft实现？</p>
+</blockquote>
+<ul>
+<li><strong>join等复杂查询的实现</strong></li>
+</ul>
+<p>严格说<code>RandoDB</code>是不支持join的。它的做法是让<code>计算节点</code>通过<code>binglog</code>复制了全量数据，<code>SQL节点</code>会把join等复杂查处路由到<code>计算节点</code>执行。</p>
+<blockquote>
+<p>“计算节点”使用tokudb存储引擎存储全量数据，为了支持复杂查询。。。如果我一个分布式系统的数据总量有20T、100T，也用单个“计算节点”存储全量数据？而且这个数据同步过程是异步的，显然没法用在OLTP场景。</p>
+</blockquote>
+<p>通过一些实用的方式支持了Join，这种做法可以work，但<code>RandoDB</code>离它宣称的数据库还差很远，缺少全局的执行计划优化。</p>
+<p>总体来说，<code>RandoDB</code>的理想很宏大，用实用的方案解决了一些问题，但要成为真正成熟的数据库产品还差的比较远。<code>RadonDB</code> 的核心代码1万行左右。加上其它类库引入，<code>Radon</code>代码11万+， <code>Xenon</code>代码5万行+ 。</p>
+<p>最后，看到有人推荐腾讯的<a class="link" href="http://tdsql.org/"  target="_blank" rel="noopener"
+    >TDSQL</a>，也顺便了解了一下。从资料看<a class="link" href="http://tdsql.org/"  target="_blank" rel="noopener"
+    >TDSQL</a>很不错，可惜不是开源产品。除了水平扩张、安全增强、自动化运维以外，它具备了我们上面提到的数据库中间件的高级特性：</p>
+<ul>
+<li>支持分布式事务<code>XA</code>
+<ul>
+<li>全局事务的隔离级别最高可以达到<code>serializable</code>级别</li>
+<li>分布式事务对业务透明，兼容单机事务语法</li>
+<li>允许事务中多条语句分别发给多个分片</li>
+<li>支持<code>autocommit</code>下单条语句写访问多个分片</li>
+</ul>
+</li>
+<li>默认采用<strong>强同步复制</strong>，即主从节点数据完全一致</li>
+<li>复杂查询方面
+<ul>
+<li>允许以流式处理方式运行<code>group by</code>、<code>order by</code></li>
+<li>支持两个<code>Shard</code>使用<code>shardkey</code>（分表键）做等值连接，以及使用<code>shardkey</code>的子查询</li>
+</ul>
+</li>
+</ul>
+<p>支持了部分受限的复杂查询，对于数据库中间件来说已经算比较强大了。关于<code>TDSQL</code>的分布式事务，可以通过这两篇进行更多的了解：</p>
+<ul>
+<li><a class="link" href="https://cloud.tencent.com/developer/article/1005840"  target="_blank" rel="noopener"
+    >一文教你迅速解决分布式事务 XA 一致性问题</a></li>
+<li><a class="link" href="https://cloud.tencent.com/developer/article/1005380"  target="_blank" rel="noopener"
+    >鹅厂 TDSQL XA 事务隔离级别的奥秘</a></li>
+</ul>
+<p>如果我们做MySQL中间件，可以瞄准<code>TDSQL</code>，对于分布式事务、数据强一致性，以及复杂查询、跨shard join 等特性都要考虑支持。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/db/">db</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/atomikos%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E4%BD%BF%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Atomikos在微服务场景下的使用</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">应用服务器的分布式事务支持和Seata的对比分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/consensus-and-distributed-transactions/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Consensus and Distributed Transactions</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%89%AB%E7%9B%B2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">关系数据库查询处理基础知识扫盲</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%85%B3%E4%BA%8Emysql-xa%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">关于MySQL XA事务的隔离级别</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

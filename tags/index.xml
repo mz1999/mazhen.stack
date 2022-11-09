@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Tags on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/</link>
+        <description>Recent content in Tags on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Wed, 12 Oct 2022 09:14:10 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>rust</title>
+        <link>https://mazhen.tech/tags/rust/</link>
+        <pubDate>Wed, 12 Oct 2022 09:14:10 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/rust/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>kernel</title>
+        <link>https://mazhen.tech/tags/kernel/</link>
+        <pubDate>Fri, 30 Sep 2022 10:23:23 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/kernel/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>linux</title>
+        <link>https://mazhen.tech/tags/linux/</link>
+        <pubDate>Fri, 30 Sep 2022 10:23:23 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/linux/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>java</title>
+        <link>https://mazhen.tech/tags/java/</link>
+        <pubDate>Sat, 17 Sep 2022 16:42:59 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/java/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>mq</title>
+        <link>https://mazhen.tech/tags/mq/</link>
+        <pubDate>Sat, 17 Sep 2022 16:42:59 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/mq/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>docker</title>
+        <link>https://mazhen.tech/tags/docker/</link>
+        <pubDate>Mon, 22 Aug 2022 16:24:52 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/docker/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>consensus</title>
+        <link>https://mazhen.tech/tags/consensus/</link>
+        <pubDate>Fri, 15 May 2020 11:30:26 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/consensus/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>db</title>
+        <link>https://mazhen.tech/tags/db/</link>
+        <pubDate>Fri, 15 May 2020 11:30:26 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/db/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>performance</title>
+        <link>https://mazhen.tech/tags/performance/</link>
+        <pubDate>Mon, 23 Mar 2020 11:01:58 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/performance/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>workout</title>
+        <link>https://mazhen.tech/tags/workout/</link>
+        <pubDate>Mon, 11 Nov 2019 10:36:27 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/workout/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>http</title>
+        <link>https://mazhen.tech/tags/http/</link>
+        <pubDate>Mon, 07 Oct 2019 09:59:29 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/http/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>networking</title>
+        <link>https://mazhen.tech/tags/networking/</link>
+        <pubDate>Mon, 07 Oct 2019 09:59:29 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/networking/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>kubernetes</title>
+        <link>https://mazhen.tech/tags/kubernetes/</link>
+        <pubDate>Tue, 11 Jun 2019 09:36:01 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/kubernetes/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>security</title>
+        <link>https://mazhen.tech/tags/security/</link>
+        <pubDate>Sun, 19 May 2019 09:46:53 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/security/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>tools</title>
+        <link>https://mazhen.tech/tags/tools/</link>
+        <pubDate>Thu, 16 May 2019 10:56:00 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/tools/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>golang</title>
+        <link>https://mazhen.tech/tags/golang/</link>
+        <pubDate>Fri, 06 Apr 2018 14:23:40 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/golang/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>git</title>
+        <link>https://mazhen.tech/tags/git/</link>
+        <pubDate>Mon, 15 Jan 2018 14:38:05 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/git/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

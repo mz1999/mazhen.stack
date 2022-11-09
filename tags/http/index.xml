@@ -1,0 +1,1337 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>http on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/http/</link>
+        <description>Recent content in http on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Mon, 07 Oct 2019 09:59:29 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/http/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>HTTP/2 简介</title>
+        <link>https://mazhen.tech/p/http/2-%E7%AE%80%E4%BB%8B/</link>
+        <pubDate>Mon, 07 Oct 2019 09:59:29 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/http/2-%E7%AE%80%E4%BB%8B/</guid>
+        <description>&lt;h3 id=&#34;outline&#34;&gt;Outline&lt;/h3&gt;
+&lt;p&gt;回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;HTTP简史&lt;/li&gt;
+&lt;li&gt;HTTP/1.1的主要特性和问题&lt;/li&gt;
+&lt;li&gt;HTTP/2 的核心概念、主要特性&lt;/li&gt;
+&lt;li&gt;HTTP/2 的升级与发现&lt;/li&gt;
+&lt;li&gt;HTTP/2 的问题及展望&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP&lt;/code&gt;(HyperText Transfer Protocol，超文本传输协议)是互联网上最普遍采用的一种应用协议&lt;/li&gt;
+&lt;li&gt;由欧洲核子研究委员会&lt;code&gt;CERN&lt;/code&gt;的英国工程师&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Tim_Berners-Lee&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Tim Berners-Lee&lt;/a&gt;在1991年发明&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Tim_Berners-Lee&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Tim Berners-Lee&lt;/a&gt;也是WWW的发明者&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史-1&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/0.9&lt;/code&gt;：只有一行的协议
+&lt;ul&gt;
+&lt;li&gt;请求只有一行，包括&lt;code&gt;GET&lt;/code&gt;方法和要请求的文档的路径&lt;/li&gt;
+&lt;li&gt;响应是一个超文本文档，没有首部，也没有其他元数据，只有&lt;code&gt;HTML&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;服务器与客户端之间的连接在每次请求之后都会关闭&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/0.9&lt;/code&gt;的设计目标传递超文本文档&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史-2&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/0.9&lt;/code&gt;演示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$&amp;gt; telnet apache.org 80
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Trying 95.216.24.32...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connected to apache.org.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GET /foundation/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection closed by foreign host.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;http简史-3&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;1996年&lt;code&gt;HTTP&lt;/code&gt;工作组发布了&lt;code&gt;RFC 1945&lt;/code&gt;，这就是&lt;code&gt;HTTP/1.0&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;提供请求和响应的各种元数据&lt;/li&gt;
+&lt;li&gt;不局限于超文本的传输，响应可以是任何类型：&lt;code&gt;HTML&lt;/code&gt;文件、图片、音频等&lt;/li&gt;
+&lt;li&gt;支持内容协商、内容编码、字符集、认证、缓存等&lt;/li&gt;
+&lt;li&gt;从&lt;strong&gt;超文本&lt;/strong&gt;到&lt;strong&gt;超媒体&lt;/strong&gt;传输&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史-4&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/1.0&lt;/code&gt;演示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$&amp;gt; telnet apache.org 80
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Trying 95.216.24.32...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connected to apache.org.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GET /foundation/ HTTP/1.0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Accept: */*
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;HTTP/1.1 200 OK
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Server: Apache/2.4.18 (Ubuntu)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Length: 46012
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection: close
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Type: text/html
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection closed by foreign host.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;http简史-5&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;1997年1月定义&lt;code&gt;HTTP/1.1&lt;/code&gt;标准的&lt;code&gt;RFC 2068&lt;/code&gt;发布&lt;/li&gt;
+&lt;li&gt;1999年6月&lt;code&gt;RFC 2616&lt;/code&gt;发布，取代了&lt;code&gt;RFC 2068&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;性能优化
+&lt;ul&gt;
+&lt;li&gt;持久连接
+&lt;ul&gt;
+&lt;li&gt;除非明确告知，默认使用持久连接&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;分块编码传输&lt;/li&gt;
+&lt;li&gt;请求管道，支持并行请求处理（应用的非常有限）&lt;/li&gt;
+&lt;li&gt;增强的缓存机制&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史-6&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/1.1&lt;/code&gt;演示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt;$ telnet www.baidu.com 80
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Trying 14.215.177.38...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connected to www.a.shifen.com.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GET /s?wd=http2 HTTP/1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Accept: text/html,application/xhtml+xml,application/xml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection: keep-alive
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Host: www.baidu.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;HTTP/1.1 200 OK
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection: Keep-Alive
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Type: text/html;charset=utf-8
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Date: Sun, 06 Oct 2019 12:49:28 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Server: BWS/1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Transfer-Encoding: chunked
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ffa
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1be7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GET /img/bd_logo1.png HTTP/1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Accept: text/html,application/xhtml+xml,application/xml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection: close
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Host: www.baidu.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;HTTP/1.1 200 OK
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Length: 7877
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Type: image/png
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Date: Sun, 06 Oct 2019 13:05:06 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Etag: &amp;#34;1ec5-502264e2ae4c0&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Expires: Wed, 03 Oct 2029 13:05:06 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Last-Modified: Wed, 03 Sep 2014 10:00:27 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Server: Apache
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Set-Cookie: BAIDUID=0D01C3C9C00A6019C16F79CAEB1EFE91:FG=1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection: close
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Connection closed by foreign host.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;http简史-7&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Google在2009年发布了实验性协议&lt;code&gt;SPDY&lt;/code&gt;，主要目标是解决&lt;code&gt;HTTP/1.1&lt;/code&gt;的性能限制&lt;/li&gt;
+&lt;li&gt;Google工程师在09年11月分享了实验结果 &lt;a class=&#34;link&#34; href=&#34;https://blog.chromium.org/2009/11/2x-faster-web.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;A 2x Faster Web&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;So far we have only tested SPDY in lab conditions. The initial results are very encouraging: when we download the top 25 websites over simulated home network connections, we see a significant improvement in performance - pages loaded up to 55% faster.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;2012年，&lt;code&gt;SPDY&lt;/code&gt;得到Chrome、Firefox和Opera的支持&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP-WG&lt;/code&gt;(HTTP Working Group)开始在&lt;code&gt;SPDY&lt;/code&gt;的基础上制定官方标准&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史-8&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年正式发布&lt;code&gt;HTTP/2&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;主要目标：改进传输性能，降低延迟，提高吞吐量&lt;/li&gt;
+&lt;li&gt;保持原有的高层协议语义不变&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;根据&lt;a class=&#34;link&#34; href=&#34;https://w3techs.com/technologies/details/ce-http2/all/all&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;W3Techs的报告&lt;/a&gt;，截止2019年11月，全球已经有 &lt;strong&gt;42.1%&lt;/strong&gt; 的网站开启了&lt;code&gt;HTTP/2&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http简史-9&#34;&gt;HTTP简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Google在2012年设计开发了&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/QUIC&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;QUIC协议&lt;/a&gt;，让&lt;code&gt;HTTP&lt;/code&gt;不再基于&lt;code&gt;TCP&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;2018年底，&lt;code&gt;HTTP/3&lt;/code&gt;标准发布&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/3&lt;/code&gt;协议业务逻辑变化不大，可以简单理解为 &lt;code&gt;HTTP/2&lt;/code&gt; + &lt;code&gt;QUIC&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-持久连接&#34;&gt;HTTP/1.1 持久连接&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221002459.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tcp-connection1&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-持久连接-1&#34;&gt;HTTP/1.1 持久连接&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221002365.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tcp-connection2&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-持久连接-2&#34;&gt;HTTP/1.1 持久连接&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;非持久&lt;code&gt;HTTP&lt;/code&gt;连接的固定时间成本
+&lt;ul&gt;
+&lt;li&gt;至少两次网络往返： 握手、请求和响应&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;服务处理速度越快，固定延迟的影响就越大&lt;/li&gt;
+&lt;li&gt;持久连接避免&lt;code&gt;TCP&lt;/code&gt;连接时的三次握手，消除&lt;code&gt;TCP&lt;/code&gt;的慢启动&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-管道&#34;&gt;HTTP/1.1 管道&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;多次请求必须满足&lt;strong&gt;先进先出&lt;/strong&gt;(FIFO)的顺序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221004912.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;http-keep-alive&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-管道-1&#34;&gt;HTTP/1.1 管道&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;尽早发送请求，不被每次响应阻塞&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221005557.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;http-pipeline&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-管道-2&#34;&gt;HTTP/1.1 管道&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/1.1&lt;/code&gt;的局限性
+&lt;ul&gt;
+&lt;li&gt;只能严格串行地返回响应，不允许一个连接上的多个响应交错到达&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;管道的问题
+&lt;ul&gt;
+&lt;li&gt;并行处理请求时，服务器必须缓冲管道中的响应，占用服务器资源&lt;/li&gt;
+&lt;li&gt;由于失败可能导致重复处理，非幂等的方法不能pipeline化&lt;/li&gt;
+&lt;li&gt;由于中间代理的兼容性，可能会破坏管道&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;管道的应用非常有限&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11-的协议开销&#34;&gt;&lt;code&gt;HTTP/1.1&lt;/code&gt; 的协议开销&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;每个&lt;code&gt;HTTP&lt;/code&gt;请求都会携带500~800字节的&lt;code&gt;header&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;如果使用了&lt;code&gt;cookie&lt;/code&gt;，每个&lt;code&gt;HTTP&lt;/code&gt;请求会增加几千字节的协议开销&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP header&lt;/code&gt;以纯文本形式发送，不会进行任何压缩&lt;/li&gt;
+&lt;li&gt;某些时候&lt;code&gt;HTTP header&lt;/code&gt;开销会超过实际传输的数据一个数量级
+&lt;ul&gt;
+&lt;li&gt;例如访问&lt;code&gt;RESTful API&lt;/code&gt;时返回&lt;code&gt;JSON&lt;/code&gt;格式的响应&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11性能优化建议&#34;&gt;&lt;code&gt;HTTP/1.1&lt;/code&gt;性能优化建议&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;由于&lt;code&gt;HTTP/1.1&lt;/code&gt;不支持多路复用
+&lt;ul&gt;
+&lt;li&gt;浏览器支持每个主机打开多个连接（例如Chrome是6个）&lt;/li&gt;
+&lt;li&gt;应用使用多域名，将资源分散到多个子域名
+&lt;ul&gt;
+&lt;li&gt;浏览器连接限制针对的是主机名，不是&lt;code&gt;IP&lt;/code&gt;地址&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;缺点
+&lt;ul&gt;
+&lt;li&gt;消耗客户端和服务器资源&lt;/li&gt;
+&lt;li&gt;域名分区增加了额外的&lt;code&gt;DNS&lt;/code&gt;查询&lt;/li&gt;
+&lt;li&gt;避免不了&lt;code&gt;TCP&lt;/code&gt;的慢启动&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11性能优化建议-1&#34;&gt;&lt;code&gt;HTTP/1.1&lt;/code&gt;性能优化建议&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;使用多域名分区
+&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221005735.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;connection view&#34;
+	
+	
+&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http11性能优化建议-2&#34;&gt;&lt;code&gt;HTTP/1.1&lt;/code&gt;性能优化建议&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;减少请求次数
+&lt;ul&gt;
+&lt;li&gt;把多个&lt;code&gt;JavaScript&lt;/code&gt;或&lt;code&gt;CSS&lt;/code&gt;组合为一个文件&lt;/li&gt;
+&lt;li&gt;把多张图片组合为一个更大的复合的图片&lt;/li&gt;
+&lt;li&gt;inlining内联，将图片嵌入到&lt;code&gt;CSS&lt;/code&gt;或者&lt;code&gt;HTML&lt;/code&gt;文件中，减少网络请求次数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;增加应用的复杂度，导致缓存、更新等问题，只是权宜之计&lt;/em&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-的目标&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 的目标&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;性能优化
+&lt;ul&gt;
+&lt;li&gt;支持请求与响应的多路复用&lt;/li&gt;
+&lt;li&gt;支持请求优先级和流量控制&lt;/li&gt;
+&lt;li&gt;支持服务器端推送&lt;/li&gt;
+&lt;li&gt;压缩&lt;code&gt;HTTP header&lt;/code&gt;降低协议开销&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;HTTP的语义不变
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP&lt;/code&gt;方法、&lt;code&gt;header&lt;/code&gt;、状态码、&lt;code&gt;URI&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-二进制分帧层&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 二进制分帧层&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;引入新的二进制分帧数据层&lt;/li&gt;
+&lt;li&gt;将传输的信息分割为消息和帧，并采用二进制格式的编码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221006530.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;binary-framing-layer&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-的核心概念&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 的核心概念&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;流(Stream)
+&lt;ul&gt;
+&lt;li&gt;已建立的连接上的双向字节流&lt;/li&gt;
+&lt;li&gt;该字节流可以携带一个或多个消息&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;消息(Message)
+&lt;ul&gt;
+&lt;li&gt;与请求/响应消息对应的一系列完整的数据帧&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;帧(Frame)
+&lt;ul&gt;
+&lt;li&gt;通信的最小单位&lt;/li&gt;
+&lt;li&gt;每个帧包含帧首部，标识出当前帧所属的流&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-的核心概念-1&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 的核心概念&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221007794.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;stream-message-frame&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-的核心概念-2&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 的核心概念&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;所有&lt;code&gt;HTTP/2&lt;/code&gt;通信都在一个TCP连接上完成&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;流&lt;/code&gt;是连接中的一个虚拟信道，可以承载双向的消息&lt;/li&gt;
+&lt;li&gt;一个连接可以承载任意数量的&lt;code&gt;流&lt;/code&gt;，每个&lt;code&gt;流&lt;/code&gt;都有一个唯一的整数标识符(1、2&amp;hellip;N)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;消息&lt;/code&gt;是指逻辑上的&lt;code&gt;HTTP&lt;/code&gt;消息，比如请求、响应等&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;消息&lt;/code&gt;由一或多个&lt;code&gt;帧&lt;/code&gt;组成，这些帧可以交错发送，然后根据每个帧首部的&lt;strong&gt;流标识符&lt;/strong&gt;重新组装&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2请求与响应的多路复用&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;请求与响应的多路复用&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/1.x&lt;/code&gt;中，如果客户端想发送多个并行的请求，那么必须使用多个&lt;code&gt;TCP&lt;/code&gt;连接&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;中，客户端可以使用多个流发送请求，同时&lt;code&gt;HTTP&lt;/code&gt;消息被分解为互不依赖的帧，交错传输，最后在另一端重新组装&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221007697.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;http2-connection&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-帧格式&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 帧格式&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221008713.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;frame format&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;详细说明请参考&lt;a class=&#34;link&#34; href=&#34;https://tools.ietf.org/html/rfc7540&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HTTP/2规范&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-帧类型&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 帧类型&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;客户端通过&lt;code&gt;HEADERS&lt;/code&gt;帧来发起新的&lt;code&gt;流&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;服务器通过&lt;code&gt;PUSH_PROMISE&lt;/code&gt;帧来发起推送流&lt;/li&gt;
+&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;帧类型&lt;/th&gt;
+&lt;th&gt;类型编码&lt;/th&gt;
+&lt;th&gt;用途&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;DATA&lt;/td&gt;
+&lt;td&gt;0x0&lt;/td&gt;
+&lt;td&gt;传输HTTP消息体&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;HEADERS&lt;/td&gt;
+&lt;td&gt;0x1&lt;/td&gt;
+&lt;td&gt;传输HTTP头部&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PRIORITY&lt;/td&gt;
+&lt;td&gt;0x2&lt;/td&gt;
+&lt;td&gt;指定流的优先级&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;RST_STREAM&lt;/td&gt;
+&lt;td&gt;0x3&lt;/td&gt;
+&lt;td&gt;通知流的非正常&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;SETTINGS&lt;/td&gt;
+&lt;td&gt;0x4&lt;/td&gt;
+&lt;td&gt;修改连接或者流的配置&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PUSH_PROMISE&lt;/td&gt;
+&lt;td&gt;0x5&lt;/td&gt;
+&lt;td&gt;服务端推送资源时的请求帧&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PING&lt;/td&gt;
+&lt;td&gt;0x6&lt;/td&gt;
+&lt;td&gt;心跳检测，计算&lt;code&gt;RTT&lt;/code&gt;往返时间&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;GOAWAY&lt;/td&gt;
+&lt;td&gt;0x7&lt;/td&gt;
+&lt;td&gt;优雅的终止连接，或者通知错误&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;WINDOW_UPDATE&lt;/td&gt;
+&lt;td&gt;0x8&lt;/td&gt;
+&lt;td&gt;针对流或者连接，实现流量控制&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;CONTINUATION&lt;/td&gt;
+&lt;td&gt;0x9&lt;/td&gt;
+&lt;td&gt;传递较大HTTP头部时的持续帧&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-请求优先级&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 请求优先级&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;允许每个流关联一个31&lt;code&gt;bit&lt;/code&gt;的优先值
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;0&lt;/code&gt; 最高优先级&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;2^31 -1&lt;/code&gt; 最低优先级&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;浏览器会基于资源的类型、在页面中的位置等因素，决定请求的优先次序&lt;/li&gt;
+&lt;li&gt;服务器可以根据流的优先级，控制资源分配，优先将高优先级的帧发送给客户端&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;没有规定具体的优先级算法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-流量控制&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 流量控制&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;流量控制有方向性，即接收方可能根据自己的情况为每个&lt;code&gt;流&lt;/code&gt;，乃至整个连接设置任意窗口大小&lt;/li&gt;
+&lt;li&gt;连接建立后，客户端与服务器交换&lt;code&gt;SETTINGS&lt;/code&gt;帧，设置 双向的流量控制窗口大小&lt;/li&gt;
+&lt;li&gt;流量控制窗口大小通过&lt;code&gt;WINDOW_UPDATE&lt;/code&gt;帧更新&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;流量控制和&lt;code&gt;TCP&lt;/code&gt;流量控制的机制相同，但&lt;code&gt;TCP&lt;/code&gt;流量控制不能对同一个连接内的多个&lt;code&gt;流&lt;/code&gt;实施差异化策略&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-服务器端推送&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; 服务器端推送&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;服务器可以对一个客户端请求发送多个响应&lt;/li&gt;
+&lt;li&gt;服务器通过发送&lt;code&gt;PUSH_PROMISE&lt;/code&gt;帧来发起推送流&lt;/li&gt;
+&lt;li&gt;客户端可以使用&lt;code&gt;HTTP header&lt;/code&gt;向服务器发送信号，列出它希望推送的资源&lt;/li&gt;
+&lt;li&gt;服务器可以智能分析客户端的需求，自动推送关键资源&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221008652.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;server-push.png&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http-header压缩&#34;&gt;&lt;code&gt;HTTP header&lt;/code&gt;压缩&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;使用&lt;a class=&#34;link&#34; href=&#34;https://tools.ietf.org/html/rfc7541&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HPACK&lt;/a&gt;压缩格式压缩请求/响应头
+&lt;ul&gt;
+&lt;li&gt;通过静态霍夫曼码对发送的&lt;code&gt;header&lt;/code&gt;字段进行编码，减小了它们的传输大小&lt;/li&gt;
+&lt;li&gt;客户端和服务器使用&lt;code&gt;索引表&lt;/code&gt;来维护和更新&lt;code&gt;header&lt;/code&gt;字段。对于相同的数据，不再重复发送&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http-header压缩-1&#34;&gt;&lt;code&gt;HTTP header&lt;/code&gt;压缩&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221009736.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;http header&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2-vs-http11&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt; vs &lt;code&gt;HTTP/1.1&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://http2.akamai.com/demo&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://http2.akamai.com/demo&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221010759.gif&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;http2 vs http1&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2的升级与发现&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;的升级与发现&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/1.x&lt;/code&gt;还将长期存在，客户端和服务器必须同时支持&lt;code&gt;1.x&lt;/code&gt;和&lt;code&gt;2.0&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;客户端和服务器在开始交换数据前，必须发现和协商使用哪个版本的协议进行通信&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;定义了两种协商机制
+&lt;ul&gt;
+&lt;li&gt;通过安全连接&lt;code&gt;TLS&lt;/code&gt;和&lt;code&gt;ALPN&lt;/code&gt;进行协商&lt;/li&gt;
+&lt;li&gt;基于&lt;code&gt;TCP&lt;/code&gt;连接的协商机制&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2的升级与发现-1&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;的升级与发现&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;标准不要求必须基于&lt;code&gt;TLS&lt;/code&gt;，但浏览器要求必须基于&lt;code&gt;TLS&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;Web上存在大量的代理和中间设备：缓存服务器、安全网关、加速器等等&lt;/li&gt;
+&lt;li&gt;如果任何中间设备不支持，连接都不会成功&lt;/li&gt;
+&lt;li&gt;建立&lt;code&gt;TLS&lt;/code&gt;信道，端到端加密传输，绕过中间代理，实现可靠的部署&lt;/li&gt;
+&lt;li&gt;新协议一般都要依赖于建立&lt;code&gt;TLS&lt;/code&gt;信道，例如&lt;code&gt;WebSocket&lt;/code&gt;、&lt;code&gt;SPDY&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;h2和h2c升级协商机制&#34;&gt;&lt;code&gt;h2&lt;/code&gt;和&lt;code&gt;h2c&lt;/code&gt;升级协商机制&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;基于&lt;code&gt;TLS&lt;/code&gt;运行的&lt;code&gt;HTTP/2&lt;/code&gt;被称为&lt;code&gt;h2&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;直接在&lt;code&gt;TCP&lt;/code&gt;之上运行的&lt;code&gt;HTTP/2&lt;/code&gt;被称为&lt;code&gt;h2c&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221010059.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;h2-h2c&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;h2c演示环境&#34;&gt;&lt;code&gt;h2c&lt;/code&gt;演示环境&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;客户端测试工具 &lt;code&gt;curl&lt;/code&gt; (&amp;gt; 7.46.0)&lt;/li&gt;
+&lt;li&gt;服务器端 &lt;code&gt;Tomcat 9.x&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;Connector port=&amp;#34;8080&amp;#34; protocol=&amp;#34;HTTP/1.1&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;           connectionTimeout=&amp;#34;20000&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;           redirectPort=&amp;#34;8443&amp;#34; &amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;lt;UpgradeProtocol 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            className=&amp;#34;org.apache.coyote.http2.Http2Protocol&amp;#34;/&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;/Connector&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;h2c协议升级&#34;&gt;&lt;code&gt;h2c&lt;/code&gt;协议升级&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;curl http://localhost:8080 --http2 -v&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; GET / HTTP/1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; Host: localhost:8080
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; User-Agent: curl/7.64.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; Accept: */*
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; Connection: Upgrade, HTTP2-Settings
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; Upgrade: h2c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;gt; HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt; HTTP/1.1 101 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt; Connection: Upgrade
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt; Upgrade: h2c
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;http2连接建立&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;连接建立&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221011974.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;start-http2-connection&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2连接建立-1&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;连接建立&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Magic帧
+&lt;ul&gt;
+&lt;li&gt;ASCII 编码，12字节&lt;/li&gt;
+&lt;li&gt;何时发送?
+&lt;ul&gt;
+&lt;li&gt;接收到服务器发送来的 101 Switching Protocols后&lt;/li&gt;
+&lt;li&gt;TLS 握手成功后&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Preface 内容&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221012484.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;magic-frame&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2连接建立-2&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;连接建立&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;交换&lt;code&gt;settings&lt;/code&gt;帧(client -&amp;gt; server)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221012482.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;setting-frame&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2连接建立-3&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;连接建立&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;交换&lt;code&gt;settings&lt;/code&gt;帧(server -&amp;gt; client)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221013497.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;setting-frame&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2连接建立-4&#34;&gt;&lt;code&gt;HTTP/2&lt;/code&gt;连接建立&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;settings&lt;/code&gt; ACK 帧 (client &amp;lt;-&amp;gt; server)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221013850.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;setting-frame&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tls协议的设计目标&#34;&gt;&lt;code&gt;TLS&lt;/code&gt;协议的设计目标&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;保密性&lt;/li&gt;
+&lt;li&gt;完整性&lt;/li&gt;
+&lt;li&gt;身份验证&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tls发展史&#34;&gt;&lt;code&gt;TLS&lt;/code&gt;发展史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;1994年，NetScape 设计了&lt;code&gt;SSL&lt;/code&gt;协议(Secure Sockets Layer) 1.0，未正式发布&lt;/li&gt;
+&lt;li&gt;1995年，NetScape 发布 &lt;code&gt;SSL&lt;/code&gt; 2.0&lt;/li&gt;
+&lt;li&gt;1996年，发布&lt;code&gt;SSL&lt;/code&gt; 3.0&lt;/li&gt;
+&lt;li&gt;1999年，IETF标准化了&lt;code&gt;SSL&lt;/code&gt;协议，更名为&lt;code&gt;TLS&lt;/code&gt;(Transport Layer Security)，发布&lt;code&gt;TLS&lt;/code&gt; 1.0&lt;/li&gt;
+&lt;li&gt;2006年4月，IETF 工作组发布了&lt;code&gt;TLS&lt;/code&gt; 1.1&lt;/li&gt;
+&lt;li&gt;2008年8月，IETF 工作组发布了&lt;code&gt;TLS&lt;/code&gt; 1.2&lt;/li&gt;
+&lt;li&gt;2018年8月，&lt;code&gt;TLS&lt;/code&gt; 1.3正式发布&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tls-12-握手过程&#34;&gt;&lt;code&gt;TLS&lt;/code&gt; 1.2 握手过程&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221014737.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tls-handshake&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;验证身份&lt;/li&gt;
+&lt;li&gt;达成安全套件共识&lt;/li&gt;
+&lt;li&gt;传递密钥&lt;/li&gt;
+&lt;li&gt;加密通讯
+非对称加密只在建立&lt;code&gt;TLS&lt;/code&gt;信道时使用，之后的通信使用握手时生成的共享密钥加密&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tls-安全密码套件&#34;&gt;&lt;code&gt;TLS&lt;/code&gt; 安全密码套件&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221015276.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;cipher-suites&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;密钥交换算法
+&lt;ul&gt;
+&lt;li&gt;双方在完全没有对方任何预先信息，通过不安全信道创建密钥&lt;/li&gt;
+&lt;li&gt;1976年，Diffie–Hellman key exchange，简称 DH&lt;/li&gt;
+&lt;li&gt;基于椭圆曲线(Elliptic Curve)升级DH协议，ECDHE&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;身份验证算法
+&lt;ul&gt;
+&lt;li&gt;非对称加密算法，Public Key Infrastructure(PKI)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;对称加密算法、强度、工作模式
+&lt;ul&gt;
+&lt;li&gt;工作模式：将明文分成多个等长的&lt;code&gt;Block&lt;/code&gt;模块，对每个模块分别加解密&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;hash签名算法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tls13的握手优化&#34;&gt;&lt;code&gt;TLS&lt;/code&gt;1.3的握手优化&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.thesslstore.com/blog/explaining-ssl-handshake/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;An Overview of TLS 1.3 – Faster and More Secure&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221015782.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tls-1.3-handshake-performance&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;测试tls的支持情况&#34;&gt;测试&lt;code&gt;TLS&lt;/code&gt;的支持情况&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.ssllabs.com/ssltest/index.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.ssllabs.com/ssltest/index.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221016671.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tlstest width:850&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;application-layer-protocol-negotiation&#34;&gt;Application-Layer Protocol Negotiation&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;基于&lt;code&gt;TLS&lt;/code&gt;运行的&lt;code&gt;HTTP/2&lt;/code&gt;使用&lt;code&gt;ALPN&lt;/code&gt;扩展做协议协商&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;客户端在&lt;code&gt;ClientHello&lt;/code&gt;消息中增加&lt;code&gt;ProtocolNameList&lt;/code&gt;字段，包含自己支持的应用协议&lt;/li&gt;
+&lt;li&gt;服务器检查&lt;code&gt;ProtocolNameList&lt;/code&gt;字段，在&lt;code&gt;ServerHello&lt;/code&gt;消息中以&lt;code&gt;ProtocolName&lt;/code&gt;字段返回选中的协议&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在&lt;code&gt;TLS&lt;/code&gt;握手的同时协商应用协议，省掉了&lt;code&gt;HTTP&lt;/code&gt;的&lt;code&gt;Upgrade&lt;/code&gt;机制所需的额外往返时间&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;alpn&#34;&gt;ALPN&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221016783.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alpn&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;h2演示环境&#34;&gt;&lt;code&gt;h2&lt;/code&gt;演示环境&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;客户端：浏览器&lt;/li&gt;
+&lt;li&gt;服务器端：&lt;code&gt;Tomcat 9.x&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Tomcat&lt;/code&gt;提供了三种不同的&lt;code&gt;TLS&lt;/code&gt;实现
+&lt;ul&gt;
+&lt;li&gt;Java运行时提供的&lt;code&gt;JSSE&lt;/code&gt;实现&lt;/li&gt;
+&lt;li&gt;使用了&lt;code&gt;OpenSSL&lt;/code&gt;的&lt;code&gt;JSSE&lt;/code&gt;实现&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;APR&lt;/code&gt;实现，默认情况下使用&lt;code&gt;OpenSSL&lt;/code&gt;引擎&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tomcat三种tls实现&#34;&gt;&lt;code&gt;Tomcat&lt;/code&gt;三种&lt;code&gt;TLS&lt;/code&gt;实现&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;JSSE
+&lt;ul&gt;
+&lt;li&gt;非常慢&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://tools.ietf.org/html/rfc7301&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ALPN&lt;/a&gt;是因为&lt;code&gt;HTTP/2&lt;/code&gt;才在2014年出现，JDK8不支持&lt;code&gt;ALPN&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;OpenSSL&lt;/code&gt;实现
+&lt;ul&gt;
+&lt;li&gt;只使用了&lt;code&gt;OpenSSL&lt;/code&gt;，没有使用其他本地代码(native socket, poller等)&lt;/li&gt;
+&lt;li&gt;可以配合 NIO 和 NIO2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;APR&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;大量的native code&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TLS&lt;/code&gt;同样使用了&lt;code&gt;OpenSSL&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;tls实现的性能对比&#34;&gt;&lt;code&gt;TLS&lt;/code&gt;实现的性能对比&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;OpenSSL&lt;/code&gt;性能比纯Java实现好很多；使用&lt;code&gt;TLS&lt;/code&gt;可以不再需要&lt;code&gt;APR&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Linux&lt;/code&gt;上&lt;code&gt;NIO.2&lt;/code&gt;是通过&lt;code&gt;epoll&lt;/code&gt;来模拟实现的&lt;a class=&#34;link&#34; href=&#34;https://github.com/openjdk/jdk/blob/6bab0f539fba8fb441697846347597b4a0ade428/src/java.base/linux/classes/sun/nio/ch/EPollPort.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;EPollPort.java&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221017915.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;jsse-openssl&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;使用jsse&#34;&gt;使用&lt;code&gt;JSSE&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;生成private key和自签名证书
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;keytool -genkey -alias tomcat -keyalg RSA&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;配置&lt;code&gt;server.xml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;Connector
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  protocol=&amp;#34;org.apache.coyote.http11.Http11NioProtocol&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  port=&amp;#34;8443&amp;#34; maxThreads=&amp;#34;200&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  sslImplementationName=
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &amp;#34;org.apache.tomcat.util.net.jsse.JSSEImplementation&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  scheme=&amp;#34;https&amp;#34; secure=&amp;#34;true&amp;#34; SSLEnabled=&amp;#34;true&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  keystoreFile=&amp;#34;${user.home}/.keystore&amp;#34; keystorePass=&amp;#34;changeit&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  clientAuth=&amp;#34;false&amp;#34; sslProtocol=&amp;#34;TLS&amp;#34;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &amp;lt;UpgradeProtocol 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        className=&amp;#34;org.apache.coyote.http2.Http2Protocol&amp;#34; /&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;/Connector&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;使用jsse-1&#34;&gt;使用&lt;code&gt;JSSE&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;JDK8&lt;/code&gt;不支持&lt;code&gt;ALPN&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;严重 [main]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;org.apache.coyote.http11.AbstractHttp11Protocol.configureUpgradeProtocol 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;The upgrade handler [org.apache.coyote.http2.Http2Protocol] 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;for [h2] only supports upgrade via ALPN but has been configured 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;for the [&amp;#34;https-jsse-nio-8443&amp;#34;] connector that does not support ALPN.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;JDK11&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;信息 [main] 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;org.apache.coyote.http11.AbstractHttp11Protocol.configureUpgradeProtocol 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;The [&amp;#34;https-jsse-nio-8443&amp;#34;] connector has been configured to 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;support negotiation to [h2] via ALPN
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;使用openssl&#34;&gt;使用&lt;code&gt;OpenSSL&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;安装&lt;code&gt;tomcat-native&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;brew install tomcat-native&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;配置&lt;code&gt;$CATALINA_HOME/bin/setenv.sh&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CATALINA_OPTS=&amp;#34;$CATALINA_OPTS -Djava.library.path=/usr/local/opt/tomcat-native/lib&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;配置server.xml&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;Connector
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    protocol=&amp;#34;org.apache.coyote.http11.Http11NioProtocol&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    sslImplementationName=
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &amp;#34;org.apache.tomcat.util.net.openssl.OpenSSLImplementation&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ... &amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;/Connector&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;使用openssl-1&#34;&gt;使用&lt;code&gt;OpenSSL&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;JDK8&lt;/code&gt; &amp;amp; &lt;code&gt;JDK11&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;信息 [main] 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;org.apache.coyote.http11.AbstractHttp11Protocol.configureUpgradeProtocol 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;The [&amp;#34;https-openssl-nio-8443&amp;#34;] connector has been configured to 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;support negotiation to [h2] via ALPN
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;信息 [main] 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;org.apache.coyote.AbstractProtocol.start 开始协议处理句柄
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[&amp;#34;https-openssl-nio-8443&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h3 id=&#34;alpn协议协商&#34;&gt;&lt;code&gt;ALPN&lt;/code&gt;协议协商&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;ClientHello&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221023075.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;client-hello&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;alpn协议协商-1&#34;&gt;&lt;code&gt;ALPN&lt;/code&gt;协议协商&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221024741.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;ServerHello&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ServerHello&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;使用chrome开发者工具观察&#34;&gt;使用Chrome开发者工具观察&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221024873.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;chrome width:1000&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2的问题&#34;&gt;HTTP/2的问题&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;消除了&lt;code&gt;HTTP&lt;/code&gt;协议的队首阻塞现象，但&lt;code&gt;TCP&lt;/code&gt;层面上仍然存在队首阻塞&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTTP/2&lt;/code&gt;多请求复用一个&lt;code&gt;TCP&lt;/code&gt;连接，丢包可能会block住所有的&lt;code&gt;HTTP&lt;/code&gt;请求&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221025671.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;head-of-line&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;http2的问题-1&#34;&gt;HTTP/2的问题&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;TCP&lt;/code&gt;及&lt;code&gt;TCP+TLS&lt;/code&gt;建立连接需要多次round trips
+&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221025218.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;tcp-tls&#34;
+	
+	
+&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;quic&#34;&gt;QUIC&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Q&lt;/strong&gt;uick &lt;strong&gt;U&lt;/strong&gt;DP &lt;strong&gt;I&lt;/strong&gt;nternet &lt;strong&gt;C&lt;/strong&gt;onnections&lt;/li&gt;
+&lt;li&gt;由Goolge开发，并已经在Google部署使用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221026123.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;quic&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;quic-1&#34;&gt;QUIC&lt;/h3&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.youtube.com/watch?v=hQZ-0mXFmk8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;QUIC: next generation multiplexed transport over UDP&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209221026039.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;google-live&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;参考资料&#34;&gt;参考资料&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://hpbn.co/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;High Performance Browser Networking&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://coolshell.cn/articles/19840.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HTTP的前世今生&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.infoq.cn/article/x80uOvcRyxVYw3KVusUm&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HTTP/3 的过去、现在和未来&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://tools.ietf.org/html/rfc7540&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HTTP/2协议&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

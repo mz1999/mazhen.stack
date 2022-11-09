@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Kubernetes在2017年赢得了容器编排之战，使得基于容器&#43;Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注'>
+<title>容器技术创新漫谈</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='容器技术创新漫谈'>
+<meta property='og:description' content='Kubernetes在2017年赢得了容器编排之战，使得基于容器&#43;Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注'>
+<meta property='og:url' content='https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2018-12-16T22:03:21&#43;08:00'/><meta property='article:modified_time' content='2018-12-16T22:03:21&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="容器技术创新漫谈">
+<meta name="twitter:description" content="Kubernetes在2017年赢得了容器编排之战，使得基于容器&#43;Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#操作系统的工作方式">操作系统的工作方式</a>
+      <ol>
+        <li><a href="#cpu的特权等级">CPU的特权等级</a></li>
+        <li><a href="#系统调用">系统调用</a></li>
+        <li><a href="#优化系统调用">优化系统调用</a></li>
+      </ol>
+    </li>
+    <li><a href="#虚拟化技术">虚拟化技术</a>
+      <ol>
+        <li><a href="#kvm--qemu">KVM &amp; QEMU</a></li>
+        <li><a href="#cpu-虚拟化技术-vt-x">CPU 虚拟化技术 VT-x</a></li>
+      </ol>
+    </li>
+    <li><a href="#容器的本质">容器的本质</a></li>
+    <li><a href="#虚拟化容器技术">虚拟化容器技术</a></li>
+    <li><a href="#gvisor">gVisor</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/">容器技术创新漫谈</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2018-12-16</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 13 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><code>Kubernetes</code>在2017年赢得了容器编排之战，使得基于<code>容器</code>+<code>Kubernetes</code>来构建<code>PaaS</code>平台成为了云计算的主流方式。在人们把关注的目光都聚焦在<code>Kubernetes</code>上时，容器技术领域在2018年也发生了很多创新，包括<code>amazon</code>最近开源的轻量级虚拟机管理器 <a class="link" href="https://firecracker-microvm.github.io/"  target="_blank" rel="noopener"
+    >Firecracker</a>，<code>Google</code>在今年5月份开源的基于用户态操作系统内核的 <a class="link" href="https://github.com/google/gvisor"  target="_blank" rel="noopener"
+    >gVisor</a> 容器，还有更早开源的虚拟化容器项目 <a class="link" href="https://katacontainers.io/"  target="_blank" rel="noopener"
+    >KataContainers</a>，可谓百花齐放。一般的开发者可能认为容器就等于<code>Docker</code>，没想到容器领域还在发生着这么多创新。我在了解这些项目时，发现如果没有一些背景知识，很难get到它们的创新点。我试着通过这篇文章进行一次背景知识的梳理。让我们先从最基本的问题开始：操作系统是怎么工作的？</p>
+<h2 id="操作系统的工作方式">操作系统的工作方式</h2>
+<p>我们不去讨论操作系统的标准定义，而是想想操作系统的本质是什么，它是怎么为应用提供服务的呢？</p>
+<p>其实操作系统很“懒”，它不是一直运行着主动干活，而是躺在那儿等着被中断“唤醒”，然后根据中断它的事件类型做下一步处理：是不是有键盘敲击、网络数据包到达，还是时间片到了该考虑进程切换，或者是有应用向内核发出了服务请求。内核处理完唤醒它的事件，会将控制权返还给应用程序，然后等着再次被中断“唤醒”。内核就是这样由中断驱动，控制着CPU、内存等硬件资源，为应用程序提供服务。</p>
+<p>”唤醒“操作系统内核的事件主要分为三类：</p>
+<ul>
+<li><strong>中断</strong>：来自硬件设备的处理请求；</li>
+<li><strong>异常</strong>：当前正在执行的进程，由于非法指令或者其他原因导致执行失败而产生的异常事情处理请求，典型的如缺页异常；</li>
+<li><strong>系统调用</strong>：应用程序主动向操作系统内核发出的服务请求。系统调用的本质其实也是中断，相对于硬件设备的中断，这种中断被称为<code>软中断</code>。</li>
+</ul>
+<h3 id="cpu的特权等级">CPU的特权等级</h3>
+<p>内核代码常驻在内存中，被每个进程映射到它的<strong>逻辑地址空间</strong>：</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112206004.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="space"
+	
+	
+></p>
+<p>进程<code>逻辑地址空间</code>的最大长度与实际可用的物理内存数量无关，由<code>CPU</code>的字长决定。进程的<code>逻辑地址空间</code>划分为两个部分，分别称为<code>内核空间</code>和<code>用户空间</code>。<code>用户空间</code>是彼此独立的，而逻辑地址空间顶部的<code>内核空间</code>是被所有进程共享。</p>
+<p>从每个进程的角度来看，地址空间中只有自身一个进程，它不会感知到其他进程的存在。由于<code>内核空间</code>被所有进程共享，为了防止进程修改彼此的数据而造成相互干扰，用户进程不能直接操作或读取<code>内核空间</code>中的数据。同时由于内核管理着所有硬件资源，也不能让用户进程直接执行<code>内核空间</code>中的代码。操作系统应该如何做到这种限制呢？</p>
+<p>实际上，操作系统的实现依赖 <code>CPU</code> 提供的功能。现代的<code>CPU</code>体系架构都提供几种特权级别，每个特权级别有各种限制。各级别可以看作是环，内环能够访问更多的功能，外环则较少，被称为<a class="link" href="https://en.wikipedia.org/wiki/Protection_ring"  target="_blank" rel="noopener"
+    >protection rings</a>：</p>
+<!-- raw HTML omitted -->
+<p><code>Intel</code> 的 <code>CPU</code> 提供了4种特权级别， <code>Linux</code> 只使用了 <code>Ring0</code> 和 <code>Ring3</code> 两个级别。<code>Ring 0</code> 拥有最多的特权，它可以直接和CPU、内存等物理硬件交互。 <code>Ring 0</code> 被称为<code>内核态</code>，操作系统内核正是运行在<code>Ring 0</code>。<code>Ring 3</code>被称为<code>用户态</code>，应用程序运行在<code>用户态</code>。</p>
+<h3 id="系统调用">系统调用</h3>
+<p>在<code>用户态</code>禁止直接访问<code>内核态</code>，也就是说不同通过普通的函数调用方式调用内核代码，而必须使用<strong>系统调用</strong>陷入（<code>trap</code>）内核，完成从<code>用户态</code>到<code>内核态</code>的切换。内核首先检查进程是否允许执行想要的操作，然后代表进程执行所需的操作，完成后再返回到<code>用户态</code>。</p>
+<!-- raw HTML omitted -->
+<p>除了代表用户程序执行代码之外，内核还可以由硬件中断激活，然后在<code>中断上下文</code>中运行。另外除了普通进程，系统中还有<code>内核线程</code>在运行。<code>内核线程</code>不与任何特定的用户空间进程相关联。</p>
+<p><code>CPU</code> 在任何时间点上的活动必然为下列三者之一 ：</p>
+<ul>
+<li>运行于用户空间，执行应用程序</li>
+<li>运行于内核空间，处于<code>进程上下文</code>，即代表某个特定的进程执行</li>
+<li>运行于内核空间，处于<code>中断上下文</code>，与任何进程无关，处理某个特定的中断</li>
+</ul>
+<h3 id="优化系统调用">优化系统调用</h3>
+<p>从上面的讨论可以看出，由于<code>系统调用</code>会经过<code>用户态</code>到<code>内核态</code>的切换，开销要比普通函数调用大很多，因此在进行系统级编程时，减少<code>用户态</code>与<code>内核态</code>之间的切换是一个很重要的优化方法。</p>
+<p>例如同样是实现 <code>Overlay网络</code>，使用 <code>VXLAN</code> 完全在内核态完成封装和解封装，要比把数据包从内核态通过虚拟设备<code>TUN</code>传入用户态再进行处理要高效很多。</p>
+<p>对应的也可以从另外一个方向进行优化：使用 <a class="link" href="https://www.dpdk.org/"  target="_blank" rel="noopener"
+    >DPDK</a> 跳过内核网络协议栈，数据从网卡直接到达用户态，在用户态处理数据包，也就是说网络协议栈完全运行在用户态，同样避免了<code>用户态</code>和<code>内核态</code>的切换。像腾讯开源的 <a class="link" href="https://github.com/f-stack/f-stack"  target="_blank" rel="noopener"
+    >F-Stack</a>就是一个基于<a class="link" href="https://www.dpdk.org/"  target="_blank" rel="noopener"
+    >DPDK</a>运行在用户空间的TCP/IP协议栈。</p>
+<p>了解了操作系统内核的基本工作方式，我们再看下一个话题：<strong>虚拟化</strong>。</p>
+<h2 id="虚拟化技术">虚拟化技术</h2>
+<p>为了更高效灵活的使用硬件资源，同时能够实现服务间的安全隔离，我们需要虚拟化技术。运行虚拟化软件（<a class="link" href="https://en.wikipedia.org/wiki/Hypervisor"  target="_blank" rel="noopener"
+    >Hypervisor</a>或者叫<code>VMM</code>，virtual machine monitor）的物理设施我们称之为<code>Host</code>，安装在<code>Hypervisor</code>之上的虚拟机称为<code>Guest</code>。</p>
+<p>根据<code>Hypervisor</code>在系统中的位置，可以将它归类为<code>type-1</code>或<code>type-2</code>型。如果<code>hypervisor</code>直接运行在硬件之上，它通常被认为是<code>Type-1</code>型。如果<code>hypervisor</code>作为一个单独的层运行在操作系统之上，它将被认为是<code>Type 2</code>型。</p>
+<p><code>Type-1</code>型<code>Hypervisor</code>的概念图：</p>
+<!-- raw HTML omitted -->
+<p><code>Type-2</code>型<code>Hypervisor</code>的概念图：</p>
+<!-- raw HTML omitted -->
+<h3 id="kvm--qemu">KVM &amp; QEMU</h3>
+<p>实际上<code>Type-1</code>和<code>Type-2</code>并没有严格的区分，像最常见的虚拟化软件 <a class="link" href="https://www.linux-kvm.org/"  target="_blank" rel="noopener"
+    >KVM</a>（Kernel-based Virtual Machine）是一个<code>Linux</code>内核模块，加载<code>KVM</code>后<code>Linux</code>内核就转换成了<code>Type-1 hypervisor</code>。同时，<code>Linux</code>还是一个通用的操作系统，也可以认为<code>KVM</code>是运行在<code>Linux</code>之上的<code>Type-2 hypervisor</code>。</p>
+<p>为了在<code>Host</code>上创建出虚拟机，仅仅有<code>KVM</code>是不够的。对于 <code>I/O</code> 的仿真，<code>KVM</code> 还需要 <a class="link" href="https://www.qemu.org/"  target="_blank" rel="noopener"
+    >QEMU</a>的配合。<code>QEMU</code> 是一个运行在用户空间程序，它可以仿真处理器和一系列的物理设备：磁盘、网络、<code>VGA</code>、<code>PCI</code>、<code>USB</code>、串口/并口等等，基于<code>QEMU</code>可以构造出一个完整的虚拟PC。</p>
+<p>值得注意的是，<code>QEMU</code> 有两种运行模式：<code>仿真模式</code>和<code>虚拟化模式</code>。在仿真模式下，<code>QEMU</code>可以在一个<code>Intel</code>的<code>Host</code>上运行<code>ARM</code>或<code>MIPS</code>虚拟机。这是怎么做到的呢？实际上，<code>QEMU</code> 通过 <code>TCG</code>（<a class="link" href="https://en.wikipedia.org/wiki/QEMU#Tiny_Code_Generator"  target="_blank" rel="noopener"
+    >Tiny Code Generator</a>）技术进行了二进制代码转换，可以认为这是一种高级语言的<code>VM</code>，就像<code>JVM</code>。例如可以将运行在<code>ARM</code>上的二进制转换为一种中间字节码，然后让它运行在<code>Host</code>的<code>Intel CPU</code>上。很明显，这种二进制代码转换有着巨大的性能开销。</p>
+<p>相对应的，<code>QEMU</code>的另一种是虚拟化模式，它借助<code>KVM</code>完成处理器的虚拟化。由于和CPU的体系结构紧密关联，虚拟化模式能够带来更好的性能，限制是<code>Guest</code>必须使用和<code>Host</code>一样的CPU体系机构。这就是我们最常用到的虚拟化技术栈：<code>KVM/QEMU</code></p>
+<!-- raw HTML omitted -->
+<p><code>KVM</code> 和 <code>QEMU</code> 有两种交互方式：通过设备文件<code>/dev/kvm</code> 和通过内存映射页面。<code>QEMU</code> 和 <code>KVM</code>之间的大块数据传递会使用内存映射页面。<code>/dev/kvm</code>是<code>KVM</code>暴露的主要API，它支持一系列<code>ioctl</code>接口，<code>QEMU</code> 使用这些接口和<code>KVM</code>交互。<code>/dev/kvm</code> API分为三个层次：</p>
+<ul>
+<li><strong>System Level</strong>: 用于<code>KVM</code>全局状态的维护，例如创建 <code>VM</code>；</li>
+<li><strong>VM Level</strong>: 用于处理和特定<code>VM</code>相关工作的 API，<code>vCPU</code> 就是通过这个级别的API创建出来的；</li>
+<li><strong>vCPU Level</strong>: 这是最细粒度的API，用于和特定<code>vCPU</code>的交互。<code>QEMU</code>会为每个<code>vCPU</code>分配一个专门的线程。</li>
+</ul>
+<h3 id="cpu-虚拟化技术-vt-x">CPU 虚拟化技术 VT-x</h3>
+<p><code>KVM</code>和<code>QEMU</code>配合完美，但和<code>CPU</code>的特权级别在一起就遇到了麻烦。我们知道，<code>hypervisor</code>需要管理宿主机的<code>CPU</code>、内存、<code>I/O</code>设备等资源，因此它需要运行在<code>ring 0</code>级别才能执行这些高特权操作。然而运行在<code>VM</code>中的操作系统希望得到访问所有资源的权限，它并不知道自己运行在虚拟机中。因为同一时间只有一个内核可以运行在<code>ring 0</code>，<code>Guest OS</code>不得不被“挤”到了<code>ring 1</code>，这一级别不能满足内核的需求。怎么解决？</p>
+<p>虽然我们可以使用软件的方式进行模拟，让<code>hypervisor</code>拦截应用发往<code>ring 0</code>的系统调用，再转发给<code>Guest OS</code>，但这么做会产生额外的性能损耗，而且方案复杂难以维护。<code>Intel</code>和<code>AMD</code>认识到了虚拟化的重要性，各自独立创建了<code>X86</code>架构的扩展指令集，分别称为 <code>VT-x</code> and <code>AMD-V</code>，从<code>CPU</code>层面支持虚拟化。</p>
+<p>以<code>Intel</code> CPU为例，<code>VT-x</code>不仅增加了虚拟化相关的指令集，还将CPU的指令划分会两种模式：<code>root</code> 和 <code>non-root</code>。<code>hypervisor</code>运行在 <code>root</code> 模式，而<code>VM</code>运行在<code>non-root</code>模式。指令在<code>non-root</code>模式的运行速度和<code>root</code>模式几乎一样，除了不能执行一些涉及CPU全局状态切换的指令。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112210555.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="vt-x"
+	
+	
+></p>
+<p><code>VMX</code>（Virtual Machine Extensions）是增加到<code>VT-x</code>中的指令集，主要有四个指令：</p>
+<ul>
+<li><strong>VMXON</strong>：在这个指令执行之前，CPU还没有<code>root</code> 和 <code>non-root</code>的概念。<code>VMXON</code>执行后，CPU进入虚拟化模式。</li>
+<li><strong>VMXOFF</strong>：<code>VMXON</code>的相反操作，执行<code>VMXOFF</code>退出虚拟化模式。</li>
+<li><strong>VMLAUNCH</strong>：创建一个<code>VM</code>实例，然后进入<code>non-root</code>模式。</li>
+<li><strong>VMRESUME</strong>：进入<code>non-root</code>模式，恢复前面退出的<code>VM</code>实例。当<code>VM</code>试图执行一个在<code>non-root</code>禁止的指令，CPU立即切换到root模式，类似前面介绍的系统调用<code>trap</code>方式，这就是<code>VM</code>的退出。</li>
+</ul>
+<p>这样，<code>VT-x/KVM/QEMU</code> 构成了今天应用最广泛的虚拟化技术栈。</p>
+<p>有了上面的铺垫，终于要谈到容器技术了。</p>
+<h2 id="容器的本质">容器的本质</h2>
+<p>虽然虚拟化技术在灵活高效的使用硬件资源方面前进了一大步，但人们还觉得远远不够。特别是在机器使用量巨大的互联网公司。因为虚拟机一旦创建，为它分配的资源就相对固定，缺乏弹性，很难再提高机器的利用率。而且创建、销毁虚拟机也是相对“重”的操作。这时候容器技术出现了。我们知道，容器依赖的底层技术，<code>Linux Namesapce</code>和<code>Cgroups</code>都是最早由Google开发，提交进Linux内核的。</p>
+<p><strong>容器</strong>的本质就是一个进程，只不过对它进行了<code>Linux Namesapce</code>隔离，让它“看”不到外面的世界，用<code>Cgroups</code>限制了它能使用的资源，同时利用系统调用<code>pivot_root</code>或<code>chroot</code>切换了进程的根目录，把容器镜像挂载为根文件系统<code>rootfs</code>。<code>rootfs</code>中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。<code>rootfs</code>打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112142723.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="docker"
+	
+	
+></p>
+<p>从上图可以看出，容器和虚拟机的最大区别就是，每个虚拟机都有独立的操作系统内核<code>Guest OS</code>，而容器只是一种特殊的进程，它们共享同一个操作系统内核。</p>
+<p>看清了容器的本质，很多问题就容易理解。例如我们执行 <code>docker exec</code> 命令能够进入运行中的容器，好像登录进独立的虚拟机一样。实际上这只不过是利用系统调用<code>setns</code>，让当前进程进入到容器进程的<code>Namesapce</code>中，它就能“看到”容器内部的情况了。</p>
+<p>由于容器就是进程，它的创建、销毁非常轻量，对资源的使用控制更加灵活，因此让<code>Kubernetes</code>这种容器编排和资源调度工具可以大显身手，通过合理的搭配，极大的提高了整个集群的资源利用率。</p>
+<h2 id="虚拟化容器技术">虚拟化容器技术</h2>
+<p>前面提到，运行在一个宿主机上的所有容器共享同一个操作系统内核，这种隔离级别存在着很大的潜在安全风险。因此在公有云的多租户场景下，还是需要先用虚拟机进行租户强隔离，然后用户在虚拟机上再使用容器+<code>Kubernetes</code>部署应用。</p>
+<p>然而在<code>Serverless</code>的场景下，传统的先建虚拟机再创建容器的方式，在灵活性、执行效率方面难以满足需求。随着<code>Serverless</code>、<code>FaaS</code>（Function-as-a-Service）的兴起，各公有云厂商都将安全性容器作为了创新焦点。</p>
+<p>一个很自然能想到的方案，是结合虚拟机的强隔离安全性+容器的轻量灵活性，这就是虚拟化容器项目 <a class="link" href="https://katacontainers.io/"  target="_blank" rel="noopener"
+    >KataContainers</a>。</p>
+<p><a class="link" href="https://www.openstack.org/"  target="_blank" rel="noopener"
+    >OpenStack</a>在2017年底发布的 <code>KataContainers</code> 项目，最初是由 <code>Intel ClearContainer</code> 和 <code>Hyper runV</code> 两个项目合并而产生的。在<code>Kubernetes</code>场景下，一个<code>Pod</code>对应于<code>Kata Containers</code>启动的一个轻量化虚拟机，<code>Pod</code>中的容器，就是运行在这个轻量级虚拟机里的进程。每个<code>Pod</code>都运行在独立的操作系统内核上，从而达到安全隔离的目的。</p>
+<!-- raw HTML omitted -->
+<p>可以看出，<code>KataContainers</code> 依赖 <code>KVM/QEMU</code>技术栈。</p>
+<p>amazon最近开源的<a class="link" href="https://firecracker-microvm.github.io/"  target="_blank" rel="noopener"
+    >Firecracker</a>也是为了实现在 functions-based services 场景下，多租户安全隔离的容器。</p>
+<!-- raw HTML omitted -->
+<p><code>Firecracker</code>同样依赖<code>KVM</code>，然后它没有用到<code>QEMU</code>，因为<code>Firecracker</code>本身就是<code>QEMU</code>的替代实现。<code>Firecracker</code>是一个比<code>QEMU</code>更轻量级的<code>VMM</code>，它只仿真了4个设备：<code>virtio-net</code>，<code>virtio-block</code>，<code>serial console</code>和一个按钮的键盘，仅仅用来停止<code>microVM</code>。理论上，<code>KataContainers</code>可以用<code>Firecracker</code>换掉它现在使用的<code>QEMU</code>，从而将 <code>Firecracker</code>整合进<code>Kubernetes</code>生态圈。</p>
+<p>其实Google早就没有使用<code>QEMU</code>，而且对<code>KVM</code>进行了深度定制。我们可以从这篇介绍看出端倪：<a class="link" href="https://cloud.google.com/blog/products/gcp/7-ways-we-harden-our-kvm-hypervisor-at-google-cloud-security-in-plaintext"  target="_blank" rel="noopener"
+    >7 ways we harden our KVM hypervisor at Google Cloud: security in plaintext</a></p>
+<blockquote>
+<p>Non-QEMU implementation: Google does not use QEMU, the user-space virtual machine monitor and hardware emulation. Instead, we wrote our own user-space virtual machine monitor that has the following security advantages over QEMU</p>
+</blockquote>
+<blockquote>
+<p>&hellip;</p>
+</blockquote>
+<h2 id="gvisor">gVisor</h2>
+<p>Google 开源的<a class="link" href="https://github.com/google/gvisor"  target="_blank" rel="noopener"
+    >gVisor</a>为了实现安全容器另辟蹊径，它用 Go 实现了一个运行在用户态的操作系统内核，作为容器运行的<code>Guest Kernel</code>，每个容器都依赖独立的操作系统内核，实现了容器间安全隔离的目的。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112213958.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="gVisor"
+	
+	
+></p>
+<p>虽然 <code>gVisor</code> 今年才开源，但它已经在<a class="link" href="https://cloud.google.com/appengine/"  target="_blank" rel="noopener"
+    >Google App Engine</a> 和 <a class="link" href="https://cloud.google.com/functions/docs/"  target="_blank" rel="noopener"
+    >Google Cloud Functions</a>运行了多年。</p>
+<!-- raw HTML omitted -->
+<p><code>gVisor</code>作为运行应用的安全沙箱，扮演着<code>Virtual kernel</code>的角色。同时<code>gVisor</code> 包含了一个兼容<a class="link" href="https://www.opencontainers.org/"  target="_blank" rel="noopener"
+    >Open Container Initiative (OCI)</a> 的运行时<code>runsc</code>，因此可以用它替换掉 Docker 的 <code>runc</code>，整合进<code>Kubernetes</code>生态圈，为<code>Kubernetes</code>带来另一种安全容器的实现方案。</p>
+<p><code>Kata Containers</code>和<code>gVisor</code>的本质都是为容器提供一个独立的操作系统内核，避免容器共享宿主机的内核而产生安全风险。<code>KataContainers</code>使用了传统的虚拟化技术，<code>gVisor</code>则自己实现了一个运行在用户态、极小的内核。<code>gVisor</code>比<code>KataContainers</code>更加轻量级，根据这个<a class="link" href="https://www.youtube.com/watch?v=pWyJahTWa4I"  target="_blank" rel="noopener"
+    >分享</a>的介绍，<code>gVisor</code>目前只实现了211个Linux系统调用，启动时间150ms，内存占用15MB。</p>
+<p><code>gVisor</code>实现原理，简单来说是模拟内核的行为，使用某种方式拦截应用发起的系统调用，经过<code>gVisor</code>的安全控制，代替容器进程向宿主机发起可控的系统调用。目前<code>gVisor</code>实现了两种拦截方式：</p>
+<ul>
+<li>基于<a class="link" href="https://en.wikipedia.org/wiki/Ptrace"  target="_blank" rel="noopener"
+    >Ptrace</a> 机制的拦截</li>
+<li>使用 <code>KVM</code> 来进行系统调用拦截。</li>
+</ul>
+<p>因为<code>gVisor</code>基于拦截系统调用的实现原理，它并不适合系统调用密集的应用。</p>
+<p>最后，对于像我这样没有读过Linux内核代码的后端程序员，<code>gVisor</code>是一个很好的窥探内核内部实现的窗口，又激起了我研究内核的兴趣。Twitter上看到有人和我有类似的看法：</p>
+<!-- raw HTML omitted -->
+<p>希望下次能分享<code>gVisor</code>深入研究系列。保持好奇心，Stay hungry. Stay foolish.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/docker/">docker</a>
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/networking/">networking</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker跨主机通信路由模式动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BAoverlay%E7%BD%91%E7%BB%9C%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker跨主机Overlay网络动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker单机网络模型动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">自己动手将谷歌k8s镜像同步到阿里云</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Pages on mazhen.tech</title>
+        <link>https://mazhen.tech/page/</link>
+        <description>Recent content in Pages on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Tue, 28 May 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://mazhen.tech/page/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Archives</title>
+        <link>https://mazhen.tech/archives/</link>
+        <pubDate>Tue, 28 May 2019 00:00:00 +0000</pubDate>
+        
+        <guid>https://mazhen.tech/archives/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>关于</title>
+        <link>https://mazhen.tech/%E5%85%B3%E4%BA%8E/</link>
+        <pubDate>Sat, 01 Sep 2018 00:00:00 +0000</pubDate>
+        
+        <guid>https://mazhen.tech/%E5%85%B3%E4%BA%8E/</guid>
+        <description>&lt;p&gt;中年程序员，仍在写代码。感兴趣的领域：Linux kernel，网络，Rust。&lt;/p&gt;
+&lt;p&gt;曾就职于淘宝网中间件团队，目前在国内某基础软件公司。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Links</title>
+        <link>https://mazhen.tech/links/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://mazhen.tech/links/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Search</title>
+        <link>https://mazhen.tech/search/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://mazhen.tech/search/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

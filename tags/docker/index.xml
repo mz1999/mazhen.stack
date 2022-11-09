@@ -1,0 +1,1986 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>docker on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/docker/</link>
+        <description>Recent content in docker on mazhen.tech</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-CN</language>
+        <lastBuildDate>Mon, 22 Aug 2022 16:24:52 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/docker/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>深入浅出容器技术</title>
+        <link>https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/</link>
+        <pubDate>Mon, 22 Aug 2022 16:24:52 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/</guid>
+        <description>&lt;script type=&#34;text/javascript&#34; src= &#39;//js/pdf-js/build/pdf.js&#39;&gt;&lt;/script&gt;
+&lt;style&gt;
+#the-canvas {
+  border: 1px solid black;
+  direction: ltr;
+  width: 100%;
+  height: auto;
+  display: none;
+}
+
+#paginator {
+  display: none;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#loadingWrapper {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 350px;
+}
+
+#loading {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 3px solid #d2d0d0;;
+  border-radius: 50%;
+  border-top-color: #383838;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+&lt;/style&gt;
+
+&lt;div id=&#34;paginator&#34;&gt;
+    &lt;button id=&#34;prev&#34;&gt;Previous&lt;/button&gt;
+    &lt;button id=&#34;next&#34;&gt;Next&lt;/button&gt;
+    &amp;nbsp; &amp;nbsp;
+    &lt;span&gt;Page: &lt;span id=&#34;page_num&#34;&gt;&lt;/span&gt; / &lt;span id=&#34;page_count&#34;&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;/div&gt;
+&lt;div id=&#34;embed-pdf-container&#34;&gt;
+    &lt;div id=&#34;loadingWrapper&#34;&gt;
+      &lt;div id=&#34;loading&#34;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;canvas id=&#34;the-canvas&#34;&gt;&lt;/canvas&gt;
+&lt;/div&gt;
+
+&lt;script type=&#34;text/javascript&#34;&gt;
+window.onload = function() {
+
+
+var url = &#34;https:\/\/mazhen.tech&#34; + &#39;https:\/\/cdn.mazhen.tech\/images\/202209241626966.pdf&#39;;
+
+var hidePaginator = &#34;&#34; === &#34;true&#34;;
+var hideLoader = &#34;&#34; === &#34;true&#34;;
+var selectedPageNum = parseInt(&#34;&#34;) || 1;
+
+
+var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
+
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
+
+
+var pdfDoc = null,
+    pageNum = selectedPageNum,
+    pageRendering = false,
+    pageNumPending = null,
+    scale = 3,
+    canvas = document.getElementById(&#39;the-canvas&#39;),
+    ctx = canvas.getContext(&#39;2d&#39;),
+    paginator = document.getElementById(&#34;paginator&#34;),
+    loadingWrapper = document.getElementById(&#39;loadingWrapper&#39;);
+
+
+
+showPaginator();
+showLoader();
+
+
+
+function renderPage(num) {
+  pageRendering = true;
+  
+  pdfDoc.getPage(num).then(function(page) {
+    var viewport = page.getViewport({scale: scale});
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    
+    var renderContext = {
+      canvasContext: ctx,
+      viewport: viewport
+    };
+    var renderTask = page.render(renderContext);
+
+    
+    renderTask.promise.then(function() {
+      pageRendering = false;
+      showContent();
+      
+      if (pageNumPending !== null) {
+        
+        renderPage(pageNumPending);
+        pageNumPending = null;
+      }
+    });
+  });
+
+  
+  document.getElementById(&#39;page_num&#39;).textContent = num;
+}
+
+
+
+function showContent() {
+  loadingWrapper.style.display = &#39;none&#39;;
+  canvas.style.display = &#39;block&#39;;
+}
+
+
+
+function showLoader() {
+  if(hideLoader) return
+  loadingWrapper.style.display = &#39;flex&#39;;
+  canvas.style.display = &#39;none&#39;;
+}
+
+
+
+function showPaginator() {
+  if(hidePaginator) return
+  paginator.style.display = &#39;block&#39;;
+}
+
+
+
+function queueRenderPage(num) {
+  if (pageRendering) {
+    pageNumPending = num;
+  } else {
+    renderPage(num);
+  }
+}
+
+
+
+function onPrevPage() {
+  if (pageNum &lt;= 1) {
+    return;
+  }
+  pageNum--;
+  queueRenderPage(pageNum);
+}
+document.getElementById(&#39;prev&#39;).addEventListener(&#39;click&#39;, onPrevPage);
+
+
+
+function onNextPage() {
+  if (pageNum &gt;= pdfDoc.numPages) {
+    return;
+  }
+  pageNum++;
+  queueRenderPage(pageNum);
+}
+document.getElementById(&#39;next&#39;).addEventListener(&#39;click&#39;, onNextPage);
+
+
+
+pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+  pdfDoc = pdfDoc_;
+  var numPages = pdfDoc.numPages;
+  document.getElementById(&#39;page_count&#39;).textContent = numPages;
+  
+  
+  if(pageNum &gt; numPages) {
+    pageNum = numPages
+  }
+
+  
+  renderPage(pageNum);
+});
+}
+
+&lt;/script&gt;
+
+</description>
+        </item>
+        <item>
+        <title>自己动手将谷歌k8s镜像同步到阿里云</title>
+        <link>https://mazhen.tech/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/</link>
+        <pubDate>Thu, 06 Jun 2019 09:53:24 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/</guid>
+        <description>&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt; 相关的&lt;code&gt;docker&lt;/code&gt;镜像存放在Google的镜像仓库 &lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/container-registry/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;k8s.gcr.io&lt;/a&gt;，在国内网络环境内无法访问。有人已经将这些镜像同步到了阿里云，你可以在&lt;a class=&#34;link&#34; href=&#34;https://cr.console.aliyun.com/cn-shenzhen/instances/images&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;阿里云容器镜像服务&lt;/a&gt;中搜索到它们。几乎所有的k8s镜像都已经同步到了阿里云。&lt;a class=&#34;link&#34; href=&#34;https://www.aliyun.com/product/containerservice&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;阿里云容器服务&lt;/a&gt;团队甚至还有一个开源项目&lt;a class=&#34;link&#34; href=&#34;https://github.com/AliyunContainerService/sync-repo&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;sync-repo&lt;/a&gt;，专门做&lt;code&gt;Docker Registry&lt;/code&gt;之间的同步。但是，如果你不放心别人同步的镜像，或者最新版本的镜像还没人同步过来，你可以按照本文将介绍的步骤，自己将&lt;code&gt;gcr.io&lt;/code&gt;上的&lt;code&gt;docker&lt;/code&gt;镜像搬到阿里云。&lt;/p&gt;
+&lt;h2 id=&#34;安装配置shadowsocks客户端&#34;&gt;安装配置shadowsocks客户端&lt;/h2&gt;
+&lt;p&gt;先简单介绍下&lt;code&gt;Shadowsocks&lt;/code&gt;协议，详细的工作原理可以参考&lt;a class=&#34;link&#34; href=&#34;https://www.desgard.com/Shadowsocks-1/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这篇博客&lt;/a&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220955184.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;ss&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;当我们启动&lt;code&gt;shadowsocks client&lt;/code&gt;时，实际上是启动了一个 &lt;code&gt;ss-local&lt;/code&gt; 进程，左侧绿色的 &lt;code&gt;Socks5 Client&lt;/code&gt; 可以是浏览器，也可以是&lt;code&gt;Telegram&lt;/code&gt;等本地应用，它们和&lt;code&gt;ss-local&lt;/code&gt;之间是使用 &lt;code&gt;socks&lt;/code&gt; 协议进行通信。也就是说，浏览器像连接普通 &lt;code&gt;socks&lt;/code&gt; 代理一样，连接到&lt;code&gt;ss-local&lt;/code&gt;进程。&lt;code&gt;ss-local&lt;/code&gt; 会将收到的请求，转发给&lt;code&gt;ss-server&lt;/code&gt;，由&lt;code&gt;ss-server&lt;/code&gt;完成实际的访问，并将结果通过&lt;code&gt;ss-local&lt;/code&gt;返回给浏览器。&lt;code&gt;ss-server&lt;/code&gt;部署在国内网络之外，和&lt;code&gt;ss-local&lt;/code&gt;之间是加密传输，这样就实现了跨越长城。其实防火长城已经能够识别&lt;code&gt;Shadowsocks&lt;/code&gt;协议，但发现我们是在努力学习先进技术，就先放我们过关。&lt;/p&gt;
+&lt;p&gt;好了，我们现在首先要做的是在本机安装配置&lt;code&gt;shadowsocks&lt;/code&gt;客户端。推荐使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/shadowsocks/shadowsocks-libev&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;shadowsocks-libev&lt;/a&gt;，纯C实现的&lt;code&gt;shadowsocks&lt;/code&gt;协议，已经在很多操作系统的官方&lt;code&gt;repository&lt;/code&gt;中 ，安装非常方便。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;macOS&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;brew install shadowsocks-libev
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Ubuntu&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt install shadowsocks-libev
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;接下来填写&lt;code&gt;shadowsocks client&lt;/code&gt;配置文件，&lt;code&gt;JSON&lt;/code&gt;格式，简单易懂：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;server&amp;#34;:&amp;#34;ss服务器IP&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;server_port&amp;#34;:443, // ss服务器port
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;local_port&amp;#34;:1080, // 本地监听端口
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;password&amp;#34;:&amp;#34;xxxx&amp;#34;, // ss服务器密码
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;timeout&amp;#34;:600,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;method&amp;#34;:&amp;#34;aes-256-cfb&amp;#34; // ss服务器加密方法
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;至于&lt;code&gt;shadowsocks&lt;/code&gt;服务器端，可以租用国内网络外的云主机自己搭建，也可以购买现成的&lt;a class=&#34;link&#34; href=&#34;https://www.emptyus.com/aff.php?uid=16723&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;机场服务&lt;/a&gt;，本文就不讨论了。&lt;/p&gt;
+&lt;p&gt;然后启动&lt;code&gt;shadowsocks client&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;nohup ss-local -c ss-client.conf &amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;安装配置http代理&#34;&gt;安装配置HTTP代理&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;shadowsocks client&lt;/code&gt;创建的是&lt;code&gt;socks5&lt;/code&gt;代理，不过一些程序无法使用 &lt;code&gt;socks5&lt;/code&gt; ，它们需要通过 &lt;code&gt;http_proxy&lt;/code&gt; 和 &lt;code&gt;https_proxy&lt;/code&gt; 环境变量，使用 &lt;code&gt;HTTP&lt;/code&gt; 代理。&lt;code&gt;polipo&lt;/code&gt; 可以帮助我们将 &lt;code&gt;socks5&lt;/code&gt; 代理转换为 &lt;code&gt;HTTP&lt;/code&gt; 代理。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;macOS&lt;/code&gt;下安装&lt;code&gt;polipo&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;brew install polipo
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Ubuntu&lt;/code&gt;下安装&lt;code&gt;polipo&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt install polipo
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 建议停掉polipo服务，需要的时候自己启动
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo systemctl stop polipo.service
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo systemctl disable  polipo.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;启动&lt;code&gt;HTTP&lt;/code&gt;代理&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo polipo socksParentProxy=127.0.0.1:1080 proxyPort=1087
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;socksParentProxy&lt;/code&gt;配置为&lt;code&gt;localhost&lt;/code&gt;和&lt;code&gt;ss-local&lt;/code&gt;监听端口，&lt;code&gt;proxyPort&lt;/code&gt;是启动的&lt;code&gt;HTTP&lt;/code&gt;代理端口。&lt;/p&gt;
+&lt;p&gt;我们可以在命令行终端测试&lt;code&gt;HTTP&lt;/code&gt;代理的效果：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ export http_proxy=http://localhost:1087
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ export https_proxy=http://localhost:1087
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ curl https://www.google.com
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;应该可以正常访问到Google。&lt;/p&gt;
+&lt;h2 id=&#34;设置docker-http代理&#34;&gt;设置Docker HTTP代理&lt;/h2&gt;
+&lt;p&gt;如果是在&lt;code&gt;macOS&lt;/code&gt;上使用&lt;code&gt;Docker Desctop&lt;/code&gt;，可以在&lt;code&gt;Preference&lt;/code&gt;中的&lt;code&gt;Proxies&lt;/code&gt;设置上一步启动的HTTP代理：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220957013.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;docker proxy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;如果是&lt;code&gt;Linux&lt;/code&gt;平台，请参考Docker的&lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/config/daemon/systemd/#httphttps-proxy&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方文档&lt;/a&gt;进行设置。&lt;/p&gt;
+&lt;h2 id=&#34;在阿里云创建容器镜像的命名空间&#34;&gt;在阿里云创建容器镜像的命名空间&lt;/h2&gt;
+&lt;p&gt;为了将镜像同步到阿里云，首先需要在阿里云的&lt;a class=&#34;link&#34; href=&#34;https://cr.console.aliyun.com/cn-shenzhen/instances/namespaces&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;容器镜像服务控制台&lt;/a&gt;创建镜像的命名空间。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209220958603.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;aliyun docker image namespace&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;建议将仓库类型设置为“公开”，这样其他人也能搜索、下载到镜像。&lt;/p&gt;
+&lt;h2 id=&#34;从gcrio下载镜像&#34;&gt;从&lt;code&gt;gcr.io&lt;/code&gt;下载镜像&lt;/h2&gt;
+&lt;p&gt;在本机从&lt;code&gt;gcr.io&lt;/code&gt;下载镜像，我们以镜像&lt;code&gt;pause:3.1&lt;/code&gt;为例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;docker pull k8s.gcr.io/pause:3.1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;给镜像标记新的tag&#34;&gt;给镜像标记新的&lt;code&gt;tag&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;根据前面在阿里云创建的命名空间，给镜像标记新的&lt;code&gt;tag&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;docker tag k8s.gcr.io/pause:3.1 registry.cn-shenzhen.aliyuncs.com/mz-k8s/pause:3.1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;mz-k8s&lt;/code&gt;是在前面创建的命名空间。 查看tag结果：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ docker images
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;REPOSITORY                                       TAG                 IMAGE ID            CREATED             SIZE
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;k8s.gcr.io/pause                                 3.1                 da86e6ba6ca1        17 months ago       742kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;registry.cn-shenzhen.aliyuncs.com/mz-k8s/pause   3.1                 da86e6ba6ca1        17 months ago       742kB
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;通过&lt;code&gt;IMAGE ID&lt;/code&gt;可以看出，两个镜像为同一个。&lt;/p&gt;
+&lt;h2 id=&#34;将镜像上传到阿里云&#34;&gt;将镜像上传到阿里云&lt;/h2&gt;
+&lt;p&gt;登录阿里云镜像仓库：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ docker login --username=(阿里云账号) registry.cn-shenzhen.aliyuncs.com
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;根据提示输入password，登录成功后，显示Login Succeeded。&lt;/p&gt;
+&lt;p&gt;上传镜像：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;docker push registry.cn-shenzhen.aliyuncs.com/mz-k8s/pause:3.1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;从阿里云下载镜像&#34;&gt;从阿里云下载镜像&lt;/h2&gt;
+&lt;p&gt;现在可以在其他机器上从阿里云下载&lt;code&gt;pause:3.1&lt;/code&gt;镜像，这时候已经不需要科学上网了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ docker pull registry.cn-shenzhen.aliyuncs.com/mz-k8s/pause:3.1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;给镜像打上原来的tag，这样&lt;code&gt;kubeadm&lt;/code&gt;等工具就可以使用本地仓库中的&lt;code&gt;pause:3.1&lt;/code&gt;镜像了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ docker tag registry.cn-shenzhen.aliyuncs.com/mz-k8s/pause:3.1 k8s.gcr.io/pause:3.1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;至此，我们跨越长城，将一个docker镜像从&lt;code&gt;gcr.io&lt;/code&gt;搬到了&lt;code&gt;Aliyun&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;如果是需要批量、定时的从&lt;code&gt;gcr.io&lt;/code&gt;同步镜像，建议考虑使用阿里开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/AliyunContainerService/sync-repo&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;sync-repo&lt;/a&gt;。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Kubernetes工作原理概述</title>
+        <link>https://mazhen.tech/p/kubernetes%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E6%A6%82%E8%BF%B0/</link>
+        <pubDate>Sun, 24 Feb 2019 17:30:11 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/kubernetes%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E6%A6%82%E8%BF%B0/</guid>
+        <description>&lt;p&gt;刚接触&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Kubernetes&lt;/a&gt;时很容易被它繁多的概念（&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;POD&lt;/a&gt;，&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/concepts/services-networking/service/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Service&lt;/a&gt;，&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/concepts/workloads/controllers/deployment/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Deployment&lt;/a&gt; &amp;hellip;)以及比较复杂的部署架构搞晕，本文希望能通过一个简单的例子，讲解&lt;code&gt;Kubernetes&lt;/code&gt;最基本的工作原理。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt;本质上是为用户提供了一个容器编排工具，可以管理和调度用户提交的作业。用户在 &lt;code&gt;YAML&lt;/code&gt; 配置文件中描述应用所需的环境配置、参数等信息，以及应用期待平台提供的服务（负载均衡，水平扩展等），然后将 &lt;code&gt;YAML&lt;/code&gt; 提交，&lt;code&gt;Kubernetes&lt;/code&gt;会按照用户的要求，在集群上将应用运行起来。在遇到异常情况，或用户的主动调整时，&lt;code&gt;Kubernetes&lt;/code&gt; 将始终保持应用实际的运行状态，符合用户的期待状态。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt; 是由 &lt;code&gt;Master&lt;/code&gt; 和 &lt;code&gt;Node&lt;/code&gt; 两种节点组成。Master由3个独立的组件组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;负责 API 服务的 &lt;code&gt;kube-apiserver&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;负责容器编排的 &lt;code&gt;kube-controller-manager&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;负责调度的 &lt;code&gt;kube-scheduler&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt; 集群的所有状态信息都存储在 &lt;code&gt;etcd&lt;/code&gt;，其他组件对 &lt;code&gt;etcd&lt;/code&gt; 的访问，必须通过 &lt;code&gt;kube-apiserver&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kubelet&lt;/code&gt; 运行在所有节点上，它通过容器运行时（例如Docker），让应用真正的在节点上运行起来。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;下面通过一个简单的例子，描述 &lt;code&gt;Kubernetes&lt;/code&gt; 的各个组件，是如何协作完成工作的。&lt;/p&gt;
+&lt;p&gt;用户将 &lt;code&gt;YAML&lt;/code&gt; 提交给 &lt;code&gt;kube-apiserver&lt;/code&gt;，&lt;code&gt;YAML&lt;/code&gt; 经过校验后转换为 &lt;code&gt;API 对象&lt;/code&gt;，存储在 &lt;code&gt;etcd&lt;/code&gt; 中。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;kube-controller-manager&lt;/code&gt; 是负责编排的组件，当它发现有新提交的应用，会根据配置的要求生成对应的 &lt;code&gt;Pod&lt;/code&gt; 对象。&lt;code&gt;Pod&lt;/code&gt; 是 &lt;code&gt;Kubernetes&lt;/code&gt; 调度管理的最小单元，可以简单的认为，&lt;code&gt;Pod&lt;/code&gt; 就是一个虚拟机，其中运行着关系紧密的进程，共同组成用户的应用。例如Web应用进程和日志收集agent，可以包含在一个&lt;code&gt;Pod&lt;/code&gt;中。&lt;code&gt;Pod&lt;/code&gt; 对象也存储在 &lt;code&gt;etcd&lt;/code&gt; 中。本例子中用户定义 &lt;code&gt;replicas&lt;/code&gt; 为2，也就是用户期待有两个 &lt;code&gt;Pod&lt;/code&gt; 实例。&lt;/p&gt;
+&lt;p&gt;其实&lt;code&gt;kube-controller-manager&lt;/code&gt; 内部一直在做循环检查，只要发现有应用没有对应的 &lt;code&gt;Pod&lt;/code&gt;，或者 &lt;code&gt;Pod&lt;/code&gt; 的数量不满足用户的期望，它都会进行适当的调整，创建或删除&lt;code&gt;Pod&lt;/code&gt; 对象。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;kube-scheduler&lt;/code&gt; 负责 &lt;code&gt;Pod&lt;/code&gt; 的调度。&lt;code&gt;kube-scheduler&lt;/code&gt; 发现有新的 &lt;code&gt;Pod&lt;/code&gt; 出现，它会按照调度算法，为每个 &lt;code&gt;Pod&lt;/code&gt; 寻找一个最合适的节点（Node）。&lt;code&gt;kube-scheduler&lt;/code&gt; 对一个 &lt;code&gt;Pod&lt;/code&gt; 的调度成功，实际上就是在 &lt;code&gt;Pod&lt;/code&gt; 对象上记录了调度结果的节点名称。注意，&lt;code&gt;Pod&lt;/code&gt; 调度成功，只是在 &lt;code&gt;Pod&lt;/code&gt; 上标记了节点的名字，&lt;code&gt;Pod&lt;/code&gt; 是否真正在节点上运行，就不是&lt;code&gt;kube-scheduler&lt;/code&gt;的责任了。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;Kubelet&lt;/code&gt; 运行在所有节点上，它会订阅所有 &lt;code&gt;Pod&lt;/code&gt; 对象的变化，当发现一个 &lt;code&gt;Pod&lt;/code&gt; 与 &lt;code&gt;Node&lt;/code&gt; 绑定，也就是这个 &lt;code&gt;Pod&lt;/code&gt; 上标记了&lt;code&gt;Node&lt;/code&gt;的名字，而这个被绑定的 &lt;code&gt;Node&lt;/code&gt; 就是它自己，&lt;code&gt;Kubelet&lt;/code&gt; 就会在这个节点将 &lt;code&gt;Pod&lt;/code&gt; 启动。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;至此，用户提交的应用在&lt;code&gt;Kubernetes&lt;/code&gt;集群中就运行起来了。&lt;/p&gt;
+&lt;p&gt;同时，上述的过程一直在循环往复。例如，用户更新了 &lt;code&gt;YAML&lt;/code&gt;，将 &lt;code&gt;replicas&lt;/code&gt; 改为3，并将更新后的 &lt;code&gt;YAML&lt;/code&gt; 再次提交。&lt;code&gt;kube-controller-manager&lt;/code&gt;会发现实际运行的 &lt;code&gt;Pod&lt;/code&gt; 数量与用户的期望不符，它会生成一个新的 &lt;code&gt;Pod&lt;/code&gt; 对象。紧接着 &lt;code&gt;kube-scheduler&lt;/code&gt; 发现一个没有绑定节点的 &lt;code&gt;Pod&lt;/code&gt;，它会按照调度算法为这个&lt;code&gt;Pod&lt;/code&gt;寻找一个最佳节点完成绑定。最后，某个&lt;code&gt;Kubelet&lt;/code&gt; 发现新绑定节点的 &lt;code&gt;Pod&lt;/code&gt; 应该在本节点上运行，它会通过接口调用&lt;code&gt;Docker&lt;/code&gt;完成 &lt;code&gt;Pod&lt;/code&gt; 的启动。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;上面就是 &lt;code&gt;Kubernetes&lt;/code&gt; 基本工作流程的简单描述，希望对你理解它的工作原理有所帮助。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>容器技术创新漫谈</title>
+        <link>https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/</link>
+        <pubDate>Sun, 16 Dec 2018 22:03:21 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/</guid>
+        <description>&lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt;在2017年赢得了容器编排之战，使得基于&lt;code&gt;容器&lt;/code&gt;+&lt;code&gt;Kubernetes&lt;/code&gt;来构建&lt;code&gt;PaaS&lt;/code&gt;平台成为了云计算的主流方式。在人们把关注的目光都聚焦在&lt;code&gt;Kubernetes&lt;/code&gt;上时，容器技术领域在2018年也发生了很多创新，包括&lt;code&gt;amazon&lt;/code&gt;最近开源的轻量级虚拟机管理器 &lt;a class=&#34;link&#34; href=&#34;https://firecracker-microvm.github.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Firecracker&lt;/a&gt;，&lt;code&gt;Google&lt;/code&gt;在今年5月份开源的基于用户态操作系统内核的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/google/gvisor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;gVisor&lt;/a&gt; 容器，还有更早开源的虚拟化容器项目 &lt;a class=&#34;link&#34; href=&#34;https://katacontainers.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;KataContainers&lt;/a&gt;，可谓百花齐放。一般的开发者可能认为容器就等于&lt;code&gt;Docker&lt;/code&gt;，没想到容器领域还在发生着这么多创新。我在了解这些项目时，发现如果没有一些背景知识，很难get到它们的创新点。我试着通过这篇文章进行一次背景知识的梳理。让我们先从最基本的问题开始：操作系统是怎么工作的？&lt;/p&gt;
+&lt;h2 id=&#34;操作系统的工作方式&#34;&gt;操作系统的工作方式&lt;/h2&gt;
+&lt;p&gt;我们不去讨论操作系统的标准定义，而是想想操作系统的本质是什么，它是怎么为应用提供服务的呢？&lt;/p&gt;
+&lt;p&gt;其实操作系统很“懒”，它不是一直运行着主动干活，而是躺在那儿等着被中断“唤醒”，然后根据中断它的事件类型做下一步处理：是不是有键盘敲击、网络数据包到达，还是时间片到了该考虑进程切换，或者是有应用向内核发出了服务请求。内核处理完唤醒它的事件，会将控制权返还给应用程序，然后等着再次被中断“唤醒”。内核就是这样由中断驱动，控制着CPU、内存等硬件资源，为应用程序提供服务。&lt;/p&gt;
+&lt;p&gt;”唤醒“操作系统内核的事件主要分为三类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;中断&lt;/strong&gt;：来自硬件设备的处理请求；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;异常&lt;/strong&gt;：当前正在执行的进程，由于非法指令或者其他原因导致执行失败而产生的异常事情处理请求，典型的如缺页异常；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;系统调用&lt;/strong&gt;：应用程序主动向操作系统内核发出的服务请求。系统调用的本质其实也是中断，相对于硬件设备的中断，这种中断被称为&lt;code&gt;软中断&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;cpu的特权等级&#34;&gt;CPU的特权等级&lt;/h3&gt;
+&lt;p&gt;内核代码常驻在内存中，被每个进程映射到它的&lt;strong&gt;逻辑地址空间&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112206004.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;space&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;进程&lt;code&gt;逻辑地址空间&lt;/code&gt;的最大长度与实际可用的物理内存数量无关，由&lt;code&gt;CPU&lt;/code&gt;的字长决定。进程的&lt;code&gt;逻辑地址空间&lt;/code&gt;划分为两个部分，分别称为&lt;code&gt;内核空间&lt;/code&gt;和&lt;code&gt;用户空间&lt;/code&gt;。&lt;code&gt;用户空间&lt;/code&gt;是彼此独立的，而逻辑地址空间顶部的&lt;code&gt;内核空间&lt;/code&gt;是被所有进程共享。&lt;/p&gt;
+&lt;p&gt;从每个进程的角度来看，地址空间中只有自身一个进程，它不会感知到其他进程的存在。由于&lt;code&gt;内核空间&lt;/code&gt;被所有进程共享，为了防止进程修改彼此的数据而造成相互干扰，用户进程不能直接操作或读取&lt;code&gt;内核空间&lt;/code&gt;中的数据。同时由于内核管理着所有硬件资源，也不能让用户进程直接执行&lt;code&gt;内核空间&lt;/code&gt;中的代码。操作系统应该如何做到这种限制呢？&lt;/p&gt;
+&lt;p&gt;实际上，操作系统的实现依赖 &lt;code&gt;CPU&lt;/code&gt; 提供的功能。现代的&lt;code&gt;CPU&lt;/code&gt;体系架构都提供几种特权级别，每个特权级别有各种限制。各级别可以看作是环，内环能够访问更多的功能，外环则较少，被称为&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Protection_ring&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;protection rings&lt;/a&gt;：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;Intel&lt;/code&gt; 的 &lt;code&gt;CPU&lt;/code&gt; 提供了4种特权级别， &lt;code&gt;Linux&lt;/code&gt; 只使用了 &lt;code&gt;Ring0&lt;/code&gt; 和 &lt;code&gt;Ring3&lt;/code&gt; 两个级别。&lt;code&gt;Ring 0&lt;/code&gt; 拥有最多的特权，它可以直接和CPU、内存等物理硬件交互。 &lt;code&gt;Ring 0&lt;/code&gt; 被称为&lt;code&gt;内核态&lt;/code&gt;，操作系统内核正是运行在&lt;code&gt;Ring 0&lt;/code&gt;。&lt;code&gt;Ring 3&lt;/code&gt;被称为&lt;code&gt;用户态&lt;/code&gt;，应用程序运行在&lt;code&gt;用户态&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;系统调用&#34;&gt;系统调用&lt;/h3&gt;
+&lt;p&gt;在&lt;code&gt;用户态&lt;/code&gt;禁止直接访问&lt;code&gt;内核态&lt;/code&gt;，也就是说不同通过普通的函数调用方式调用内核代码，而必须使用&lt;strong&gt;系统调用&lt;/strong&gt;陷入（&lt;code&gt;trap&lt;/code&gt;）内核，完成从&lt;code&gt;用户态&lt;/code&gt;到&lt;code&gt;内核态&lt;/code&gt;的切换。内核首先检查进程是否允许执行想要的操作，然后代表进程执行所需的操作，完成后再返回到&lt;code&gt;用户态&lt;/code&gt;。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;除了代表用户程序执行代码之外，内核还可以由硬件中断激活，然后在&lt;code&gt;中断上下文&lt;/code&gt;中运行。另外除了普通进程，系统中还有&lt;code&gt;内核线程&lt;/code&gt;在运行。&lt;code&gt;内核线程&lt;/code&gt;不与任何特定的用户空间进程相关联。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;CPU&lt;/code&gt; 在任何时间点上的活动必然为下列三者之一 ：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;运行于用户空间，执行应用程序&lt;/li&gt;
+&lt;li&gt;运行于内核空间，处于&lt;code&gt;进程上下文&lt;/code&gt;，即代表某个特定的进程执行&lt;/li&gt;
+&lt;li&gt;运行于内核空间，处于&lt;code&gt;中断上下文&lt;/code&gt;，与任何进程无关，处理某个特定的中断&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;优化系统调用&#34;&gt;优化系统调用&lt;/h3&gt;
+&lt;p&gt;从上面的讨论可以看出，由于&lt;code&gt;系统调用&lt;/code&gt;会经过&lt;code&gt;用户态&lt;/code&gt;到&lt;code&gt;内核态&lt;/code&gt;的切换，开销要比普通函数调用大很多，因此在进行系统级编程时，减少&lt;code&gt;用户态&lt;/code&gt;与&lt;code&gt;内核态&lt;/code&gt;之间的切换是一个很重要的优化方法。&lt;/p&gt;
+&lt;p&gt;例如同样是实现 &lt;code&gt;Overlay网络&lt;/code&gt;，使用 &lt;code&gt;VXLAN&lt;/code&gt; 完全在内核态完成封装和解封装，要比把数据包从内核态通过虚拟设备&lt;code&gt;TUN&lt;/code&gt;传入用户态再进行处理要高效很多。&lt;/p&gt;
+&lt;p&gt;对应的也可以从另外一个方向进行优化：使用 &lt;a class=&#34;link&#34; href=&#34;https://www.dpdk.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DPDK&lt;/a&gt; 跳过内核网络协议栈，数据从网卡直接到达用户态，在用户态处理数据包，也就是说网络协议栈完全运行在用户态，同样避免了&lt;code&gt;用户态&lt;/code&gt;和&lt;code&gt;内核态&lt;/code&gt;的切换。像腾讯开源的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/f-stack/f-stack&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;F-Stack&lt;/a&gt;就是一个基于&lt;a class=&#34;link&#34; href=&#34;https://www.dpdk.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DPDK&lt;/a&gt;运行在用户空间的TCP/IP协议栈。&lt;/p&gt;
+&lt;p&gt;了解了操作系统内核的基本工作方式，我们再看下一个话题：&lt;strong&gt;虚拟化&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;虚拟化技术&#34;&gt;虚拟化技术&lt;/h2&gt;
+&lt;p&gt;为了更高效灵活的使用硬件资源，同时能够实现服务间的安全隔离，我们需要虚拟化技术。运行虚拟化软件（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hypervisor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hypervisor&lt;/a&gt;或者叫&lt;code&gt;VMM&lt;/code&gt;，virtual machine monitor）的物理设施我们称之为&lt;code&gt;Host&lt;/code&gt;，安装在&lt;code&gt;Hypervisor&lt;/code&gt;之上的虚拟机称为&lt;code&gt;Guest&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;根据&lt;code&gt;Hypervisor&lt;/code&gt;在系统中的位置，可以将它归类为&lt;code&gt;type-1&lt;/code&gt;或&lt;code&gt;type-2&lt;/code&gt;型。如果&lt;code&gt;hypervisor&lt;/code&gt;直接运行在硬件之上，它通常被认为是&lt;code&gt;Type-1&lt;/code&gt;型。如果&lt;code&gt;hypervisor&lt;/code&gt;作为一个单独的层运行在操作系统之上，它将被认为是&lt;code&gt;Type 2&lt;/code&gt;型。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Type-1&lt;/code&gt;型&lt;code&gt;Hypervisor&lt;/code&gt;的概念图：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;Type-2&lt;/code&gt;型&lt;code&gt;Hypervisor&lt;/code&gt;的概念图：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;h3 id=&#34;kvm--qemu&#34;&gt;KVM &amp;amp; QEMU&lt;/h3&gt;
+&lt;p&gt;实际上&lt;code&gt;Type-1&lt;/code&gt;和&lt;code&gt;Type-2&lt;/code&gt;并没有严格的区分，像最常见的虚拟化软件 &lt;a class=&#34;link&#34; href=&#34;https://www.linux-kvm.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;KVM&lt;/a&gt;（Kernel-based Virtual Machine）是一个&lt;code&gt;Linux&lt;/code&gt;内核模块，加载&lt;code&gt;KVM&lt;/code&gt;后&lt;code&gt;Linux&lt;/code&gt;内核就转换成了&lt;code&gt;Type-1 hypervisor&lt;/code&gt;。同时，&lt;code&gt;Linux&lt;/code&gt;还是一个通用的操作系统，也可以认为&lt;code&gt;KVM&lt;/code&gt;是运行在&lt;code&gt;Linux&lt;/code&gt;之上的&lt;code&gt;Type-2 hypervisor&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;为了在&lt;code&gt;Host&lt;/code&gt;上创建出虚拟机，仅仅有&lt;code&gt;KVM&lt;/code&gt;是不够的。对于 &lt;code&gt;I/O&lt;/code&gt; 的仿真，&lt;code&gt;KVM&lt;/code&gt; 还需要 &lt;a class=&#34;link&#34; href=&#34;https://www.qemu.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;QEMU&lt;/a&gt;的配合。&lt;code&gt;QEMU&lt;/code&gt; 是一个运行在用户空间程序，它可以仿真处理器和一系列的物理设备：磁盘、网络、&lt;code&gt;VGA&lt;/code&gt;、&lt;code&gt;PCI&lt;/code&gt;、&lt;code&gt;USB&lt;/code&gt;、串口/并口等等，基于&lt;code&gt;QEMU&lt;/code&gt;可以构造出一个完整的虚拟PC。&lt;/p&gt;
+&lt;p&gt;值得注意的是，&lt;code&gt;QEMU&lt;/code&gt; 有两种运行模式：&lt;code&gt;仿真模式&lt;/code&gt;和&lt;code&gt;虚拟化模式&lt;/code&gt;。在仿真模式下，&lt;code&gt;QEMU&lt;/code&gt;可以在一个&lt;code&gt;Intel&lt;/code&gt;的&lt;code&gt;Host&lt;/code&gt;上运行&lt;code&gt;ARM&lt;/code&gt;或&lt;code&gt;MIPS&lt;/code&gt;虚拟机。这是怎么做到的呢？实际上，&lt;code&gt;QEMU&lt;/code&gt; 通过 &lt;code&gt;TCG&lt;/code&gt;（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/QEMU#Tiny_Code_Generator&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Tiny Code Generator&lt;/a&gt;）技术进行了二进制代码转换，可以认为这是一种高级语言的&lt;code&gt;VM&lt;/code&gt;，就像&lt;code&gt;JVM&lt;/code&gt;。例如可以将运行在&lt;code&gt;ARM&lt;/code&gt;上的二进制转换为一种中间字节码，然后让它运行在&lt;code&gt;Host&lt;/code&gt;的&lt;code&gt;Intel CPU&lt;/code&gt;上。很明显，这种二进制代码转换有着巨大的性能开销。&lt;/p&gt;
+&lt;p&gt;相对应的，&lt;code&gt;QEMU&lt;/code&gt;的另一种是虚拟化模式，它借助&lt;code&gt;KVM&lt;/code&gt;完成处理器的虚拟化。由于和CPU的体系结构紧密关联，虚拟化模式能够带来更好的性能，限制是&lt;code&gt;Guest&lt;/code&gt;必须使用和&lt;code&gt;Host&lt;/code&gt;一样的CPU体系机构。这就是我们最常用到的虚拟化技术栈：&lt;code&gt;KVM/QEMU&lt;/code&gt;&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;KVM&lt;/code&gt; 和 &lt;code&gt;QEMU&lt;/code&gt; 有两种交互方式：通过设备文件&lt;code&gt;/dev/kvm&lt;/code&gt; 和通过内存映射页面。&lt;code&gt;QEMU&lt;/code&gt; 和 &lt;code&gt;KVM&lt;/code&gt;之间的大块数据传递会使用内存映射页面。&lt;code&gt;/dev/kvm&lt;/code&gt;是&lt;code&gt;KVM&lt;/code&gt;暴露的主要API，它支持一系列&lt;code&gt;ioctl&lt;/code&gt;接口，&lt;code&gt;QEMU&lt;/code&gt; 使用这些接口和&lt;code&gt;KVM&lt;/code&gt;交互。&lt;code&gt;/dev/kvm&lt;/code&gt; API分为三个层次：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;System Level&lt;/strong&gt;: 用于&lt;code&gt;KVM&lt;/code&gt;全局状态的维护，例如创建 &lt;code&gt;VM&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VM Level&lt;/strong&gt;: 用于处理和特定&lt;code&gt;VM&lt;/code&gt;相关工作的 API，&lt;code&gt;vCPU&lt;/code&gt; 就是通过这个级别的API创建出来的；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;vCPU Level&lt;/strong&gt;: 这是最细粒度的API，用于和特定&lt;code&gt;vCPU&lt;/code&gt;的交互。&lt;code&gt;QEMU&lt;/code&gt;会为每个&lt;code&gt;vCPU&lt;/code&gt;分配一个专门的线程。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;cpu-虚拟化技术-vt-x&#34;&gt;CPU 虚拟化技术 VT-x&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;KVM&lt;/code&gt;和&lt;code&gt;QEMU&lt;/code&gt;配合完美，但和&lt;code&gt;CPU&lt;/code&gt;的特权级别在一起就遇到了麻烦。我们知道，&lt;code&gt;hypervisor&lt;/code&gt;需要管理宿主机的&lt;code&gt;CPU&lt;/code&gt;、内存、&lt;code&gt;I/O&lt;/code&gt;设备等资源，因此它需要运行在&lt;code&gt;ring 0&lt;/code&gt;级别才能执行这些高特权操作。然而运行在&lt;code&gt;VM&lt;/code&gt;中的操作系统希望得到访问所有资源的权限，它并不知道自己运行在虚拟机中。因为同一时间只有一个内核可以运行在&lt;code&gt;ring 0&lt;/code&gt;，&lt;code&gt;Guest OS&lt;/code&gt;不得不被“挤”到了&lt;code&gt;ring 1&lt;/code&gt;，这一级别不能满足内核的需求。怎么解决？&lt;/p&gt;
+&lt;p&gt;虽然我们可以使用软件的方式进行模拟，让&lt;code&gt;hypervisor&lt;/code&gt;拦截应用发往&lt;code&gt;ring 0&lt;/code&gt;的系统调用，再转发给&lt;code&gt;Guest OS&lt;/code&gt;，但这么做会产生额外的性能损耗，而且方案复杂难以维护。&lt;code&gt;Intel&lt;/code&gt;和&lt;code&gt;AMD&lt;/code&gt;认识到了虚拟化的重要性，各自独立创建了&lt;code&gt;X86&lt;/code&gt;架构的扩展指令集，分别称为 &lt;code&gt;VT-x&lt;/code&gt; and &lt;code&gt;AMD-V&lt;/code&gt;，从&lt;code&gt;CPU&lt;/code&gt;层面支持虚拟化。&lt;/p&gt;
+&lt;p&gt;以&lt;code&gt;Intel&lt;/code&gt; CPU为例，&lt;code&gt;VT-x&lt;/code&gt;不仅增加了虚拟化相关的指令集，还将CPU的指令划分会两种模式：&lt;code&gt;root&lt;/code&gt; 和 &lt;code&gt;non-root&lt;/code&gt;。&lt;code&gt;hypervisor&lt;/code&gt;运行在 &lt;code&gt;root&lt;/code&gt; 模式，而&lt;code&gt;VM&lt;/code&gt;运行在&lt;code&gt;non-root&lt;/code&gt;模式。指令在&lt;code&gt;non-root&lt;/code&gt;模式的运行速度和&lt;code&gt;root&lt;/code&gt;模式几乎一样，除了不能执行一些涉及CPU全局状态切换的指令。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112210555.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;vt-x&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;VMX&lt;/code&gt;（Virtual Machine Extensions）是增加到&lt;code&gt;VT-x&lt;/code&gt;中的指令集，主要有四个指令：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;VMXON&lt;/strong&gt;：在这个指令执行之前，CPU还没有&lt;code&gt;root&lt;/code&gt; 和 &lt;code&gt;non-root&lt;/code&gt;的概念。&lt;code&gt;VMXON&lt;/code&gt;执行后，CPU进入虚拟化模式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VMXOFF&lt;/strong&gt;：&lt;code&gt;VMXON&lt;/code&gt;的相反操作，执行&lt;code&gt;VMXOFF&lt;/code&gt;退出虚拟化模式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VMLAUNCH&lt;/strong&gt;：创建一个&lt;code&gt;VM&lt;/code&gt;实例，然后进入&lt;code&gt;non-root&lt;/code&gt;模式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VMRESUME&lt;/strong&gt;：进入&lt;code&gt;non-root&lt;/code&gt;模式，恢复前面退出的&lt;code&gt;VM&lt;/code&gt;实例。当&lt;code&gt;VM&lt;/code&gt;试图执行一个在&lt;code&gt;non-root&lt;/code&gt;禁止的指令，CPU立即切换到root模式，类似前面介绍的系统调用&lt;code&gt;trap&lt;/code&gt;方式，这就是&lt;code&gt;VM&lt;/code&gt;的退出。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这样，&lt;code&gt;VT-x/KVM/QEMU&lt;/code&gt; 构成了今天应用最广泛的虚拟化技术栈。&lt;/p&gt;
+&lt;p&gt;有了上面的铺垫，终于要谈到容器技术了。&lt;/p&gt;
+&lt;h2 id=&#34;容器的本质&#34;&gt;容器的本质&lt;/h2&gt;
+&lt;p&gt;虽然虚拟化技术在灵活高效的使用硬件资源方面前进了一大步，但人们还觉得远远不够。特别是在机器使用量巨大的互联网公司。因为虚拟机一旦创建，为它分配的资源就相对固定，缺乏弹性，很难再提高机器的利用率。而且创建、销毁虚拟机也是相对“重”的操作。这时候容器技术出现了。我们知道，容器依赖的底层技术，&lt;code&gt;Linux Namesapce&lt;/code&gt;和&lt;code&gt;Cgroups&lt;/code&gt;都是最早由Google开发，提交进Linux内核的。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;容器&lt;/strong&gt;的本质就是一个进程，只不过对它进行了&lt;code&gt;Linux Namesapce&lt;/code&gt;隔离，让它“看”不到外面的世界，用&lt;code&gt;Cgroups&lt;/code&gt;限制了它能使用的资源，同时利用系统调用&lt;code&gt;pivot_root&lt;/code&gt;或&lt;code&gt;chroot&lt;/code&gt;切换了进程的根目录，把容器镜像挂载为根文件系统&lt;code&gt;rootfs&lt;/code&gt;。&lt;code&gt;rootfs&lt;/code&gt;中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。&lt;code&gt;rootfs&lt;/code&gt;打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112142723.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;docker&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;从上图可以看出，容器和虚拟机的最大区别就是，每个虚拟机都有独立的操作系统内核&lt;code&gt;Guest OS&lt;/code&gt;，而容器只是一种特殊的进程，它们共享同一个操作系统内核。&lt;/p&gt;
+&lt;p&gt;看清了容器的本质，很多问题就容易理解。例如我们执行 &lt;code&gt;docker exec&lt;/code&gt; 命令能够进入运行中的容器，好像登录进独立的虚拟机一样。实际上这只不过是利用系统调用&lt;code&gt;setns&lt;/code&gt;，让当前进程进入到容器进程的&lt;code&gt;Namesapce&lt;/code&gt;中，它就能“看到”容器内部的情况了。&lt;/p&gt;
+&lt;p&gt;由于容器就是进程，它的创建、销毁非常轻量，对资源的使用控制更加灵活，因此让&lt;code&gt;Kubernetes&lt;/code&gt;这种容器编排和资源调度工具可以大显身手，通过合理的搭配，极大的提高了整个集群的资源利用率。&lt;/p&gt;
+&lt;h2 id=&#34;虚拟化容器技术&#34;&gt;虚拟化容器技术&lt;/h2&gt;
+&lt;p&gt;前面提到，运行在一个宿主机上的所有容器共享同一个操作系统内核，这种隔离级别存在着很大的潜在安全风险。因此在公有云的多租户场景下，还是需要先用虚拟机进行租户强隔离，然后用户在虚拟机上再使用容器+&lt;code&gt;Kubernetes&lt;/code&gt;部署应用。&lt;/p&gt;
+&lt;p&gt;然而在&lt;code&gt;Serverless&lt;/code&gt;的场景下，传统的先建虚拟机再创建容器的方式，在灵活性、执行效率方面难以满足需求。随着&lt;code&gt;Serverless&lt;/code&gt;、&lt;code&gt;FaaS&lt;/code&gt;（Function-as-a-Service）的兴起，各公有云厂商都将安全性容器作为了创新焦点。&lt;/p&gt;
+&lt;p&gt;一个很自然能想到的方案，是结合虚拟机的强隔离安全性+容器的轻量灵活性，这就是虚拟化容器项目 &lt;a class=&#34;link&#34; href=&#34;https://katacontainers.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;KataContainers&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.openstack.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;OpenStack&lt;/a&gt;在2017年底发布的 &lt;code&gt;KataContainers&lt;/code&gt; 项目，最初是由 &lt;code&gt;Intel ClearContainer&lt;/code&gt; 和 &lt;code&gt;Hyper runV&lt;/code&gt; 两个项目合并而产生的。在&lt;code&gt;Kubernetes&lt;/code&gt;场景下，一个&lt;code&gt;Pod&lt;/code&gt;对应于&lt;code&gt;Kata Containers&lt;/code&gt;启动的一个轻量化虚拟机，&lt;code&gt;Pod&lt;/code&gt;中的容器，就是运行在这个轻量级虚拟机里的进程。每个&lt;code&gt;Pod&lt;/code&gt;都运行在独立的操作系统内核上，从而达到安全隔离的目的。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;可以看出，&lt;code&gt;KataContainers&lt;/code&gt; 依赖 &lt;code&gt;KVM/QEMU&lt;/code&gt;技术栈。&lt;/p&gt;
+&lt;p&gt;amazon最近开源的&lt;a class=&#34;link&#34; href=&#34;https://firecracker-microvm.github.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Firecracker&lt;/a&gt;也是为了实现在 functions-based services 场景下，多租户安全隔离的容器。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;Firecracker&lt;/code&gt;同样依赖&lt;code&gt;KVM&lt;/code&gt;，然后它没有用到&lt;code&gt;QEMU&lt;/code&gt;，因为&lt;code&gt;Firecracker&lt;/code&gt;本身就是&lt;code&gt;QEMU&lt;/code&gt;的替代实现。&lt;code&gt;Firecracker&lt;/code&gt;是一个比&lt;code&gt;QEMU&lt;/code&gt;更轻量级的&lt;code&gt;VMM&lt;/code&gt;，它只仿真了4个设备：&lt;code&gt;virtio-net&lt;/code&gt;，&lt;code&gt;virtio-block&lt;/code&gt;，&lt;code&gt;serial console&lt;/code&gt;和一个按钮的键盘，仅仅用来停止&lt;code&gt;microVM&lt;/code&gt;。理论上，&lt;code&gt;KataContainers&lt;/code&gt;可以用&lt;code&gt;Firecracker&lt;/code&gt;换掉它现在使用的&lt;code&gt;QEMU&lt;/code&gt;，从而将 &lt;code&gt;Firecracker&lt;/code&gt;整合进&lt;code&gt;Kubernetes&lt;/code&gt;生态圈。&lt;/p&gt;
+&lt;p&gt;其实Google早就没有使用&lt;code&gt;QEMU&lt;/code&gt;，而且对&lt;code&gt;KVM&lt;/code&gt;进行了深度定制。我们可以从这篇介绍看出端倪：&lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/blog/products/gcp/7-ways-we-harden-our-kvm-hypervisor-at-google-cloud-security-in-plaintext&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;7 ways we harden our KVM hypervisor at Google Cloud: security in plaintext&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Non-QEMU implementation: Google does not use QEMU, the user-space virtual machine monitor and hardware emulation. Instead, we wrote our own user-space virtual machine monitor that has the following security advantages over QEMU&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;hellip;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;gvisor&#34;&gt;gVisor&lt;/h2&gt;
+&lt;p&gt;Google 开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/google/gvisor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;gVisor&lt;/a&gt;为了实现安全容器另辟蹊径，它用 Go 实现了一个运行在用户态的操作系统内核，作为容器运行的&lt;code&gt;Guest Kernel&lt;/code&gt;，每个容器都依赖独立的操作系统内核，实现了容器间安全隔离的目的。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112213958.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;gVisor&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;虽然 &lt;code&gt;gVisor&lt;/code&gt; 今年才开源，但它已经在&lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/appengine/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Google App Engine&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/functions/docs/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Google Cloud Functions&lt;/a&gt;运行了多年。&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;code&gt;gVisor&lt;/code&gt;作为运行应用的安全沙箱，扮演着&lt;code&gt;Virtual kernel&lt;/code&gt;的角色。同时&lt;code&gt;gVisor&lt;/code&gt; 包含了一个兼容&lt;a class=&#34;link&#34; href=&#34;https://www.opencontainers.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Open Container Initiative (OCI)&lt;/a&gt; 的运行时&lt;code&gt;runsc&lt;/code&gt;，因此可以用它替换掉 Docker 的 &lt;code&gt;runc&lt;/code&gt;，整合进&lt;code&gt;Kubernetes&lt;/code&gt;生态圈，为&lt;code&gt;Kubernetes&lt;/code&gt;带来另一种安全容器的实现方案。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Kata Containers&lt;/code&gt;和&lt;code&gt;gVisor&lt;/code&gt;的本质都是为容器提供一个独立的操作系统内核，避免容器共享宿主机的内核而产生安全风险。&lt;code&gt;KataContainers&lt;/code&gt;使用了传统的虚拟化技术，&lt;code&gt;gVisor&lt;/code&gt;则自己实现了一个运行在用户态、极小的内核。&lt;code&gt;gVisor&lt;/code&gt;比&lt;code&gt;KataContainers&lt;/code&gt;更加轻量级，根据这个&lt;a class=&#34;link&#34; href=&#34;https://www.youtube.com/watch?v=pWyJahTWa4I&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;分享&lt;/a&gt;的介绍，&lt;code&gt;gVisor&lt;/code&gt;目前只实现了211个Linux系统调用，启动时间150ms，内存占用15MB。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;gVisor&lt;/code&gt;实现原理，简单来说是模拟内核的行为，使用某种方式拦截应用发起的系统调用，经过&lt;code&gt;gVisor&lt;/code&gt;的安全控制，代替容器进程向宿主机发起可控的系统调用。目前&lt;code&gt;gVisor&lt;/code&gt;实现了两种拦截方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基于&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Ptrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ptrace&lt;/a&gt; 机制的拦截&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;KVM&lt;/code&gt; 来进行系统调用拦截。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因为&lt;code&gt;gVisor&lt;/code&gt;基于拦截系统调用的实现原理，它并不适合系统调用密集的应用。&lt;/p&gt;
+&lt;p&gt;最后，对于像我这样没有读过Linux内核代码的后端程序员，&lt;code&gt;gVisor&lt;/code&gt;是一个很好的窥探内核内部实现的窗口，又激起了我研究内核的兴趣。Twitter上看到有人和我有类似的看法：&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;希望下次能分享&lt;code&gt;gVisor&lt;/code&gt;深入研究系列。保持好奇心，Stay hungry. Stay foolish.&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Docker跨主机通信路由模式动手实验</title>
+        <link>https://mazhen.tech/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/</link>
+        <pubDate>Sun, 11 Nov 2018 22:00:22 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/</guid>
+        <description>&lt;p&gt;容器的跨主机通信主要有两种方式：封包模式和路由模式。&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-overlay-networks&#34; &gt;上一篇文章&lt;/a&gt;演示了使用&lt;code&gt;VXLAN&lt;/code&gt;协议的封包模式，这篇将介绍另一种方式，利用三层网络的路由转发实现容器的跨主机通信。&lt;/p&gt;
+&lt;h2 id=&#34;路由模式概述&#34;&gt;路由模式概述&lt;/h2&gt;
+&lt;p&gt;宿主机将它负责的容器IP网段，以某种方式告诉其他节点，然后每个节点根据收到的&lt;code&gt;&amp;lt;宿主机-容器IP网段&amp;gt;&lt;/code&gt;映射关系，配置本机路由表。&lt;/p&gt;
+&lt;p&gt;这样对于容器间跨节点的IP包，就可以根据本机路由表获得到达目的容器的网关地址，即目的容器所在的宿主机地址。接着在把IP包封装成二层网络数据帧时，将目的MAC地址设置为网关的MAC地址，IP包就可以通过二层网络送达目的容器所在的宿主机。&lt;/p&gt;
+&lt;p&gt;至于用什么方式将&lt;code&gt;&amp;lt;宿主机-容器IP网段&amp;gt;&lt;/code&gt;映射关系发布出去，不同的项目采用了不同的实现方案。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/coreos/flannel&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Flannel&lt;/a&gt;是将这些信息集中存储在&lt;a class=&#34;link&#34; href=&#34;https://github.com/etcd-io/etcd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;etcd&lt;/a&gt;中，每个节点从&lt;a class=&#34;link&#34; href=&#34;https://github.com/etcd-io/etcd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;etcd&lt;/a&gt;自动获取数据，更新宿主机路由表。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/projectcalico/calico/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Calico&lt;/a&gt;则使用&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Border_Gateway_Protocol&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BGP&lt;/a&gt;（Border Gateway Protocol）协议交换共享路由信息，每个宿主机都是运行在它之上的容器的&lt;code&gt;边界网关&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;如果宿主机之间跨了网段怎么办？宿主机之间的二层网络不通，虽然知道目的容器所在的宿主机，但没办法将目的MAC地址设置为那台宿主机的MAC地址。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Calico&lt;/code&gt;有两种解决方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;IPIP 模式，在跨网段的宿主机之间建立“隧道”&lt;/li&gt;
+&lt;li&gt;让宿主机之间的路由器“学习”到容器路由规则，每个路由器都知道某个容器IP网段是哪个宿主机负责的，容器间的IP包就能正常路由了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动手实验&#34;&gt;动手实验&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112201327.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;route&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;路由模式的实验比较简单，关键在于宿主机上路由规则的配置。为了简化实验，这些路由规则都是我们手工配置，而且两个节点之间二层网络互通，没有跨网段。&lt;/p&gt;
+&lt;p&gt;参照&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-overlay-networks&#34; &gt;Docker跨主机Overlay网络动手实验&lt;/a&gt;，创建“容器”，&lt;code&gt;veth pairs&lt;/code&gt;，&lt;code&gt;bridge&lt;/code&gt;，设置IP，激活虚拟设备。&lt;/p&gt;
+&lt;p&gt;然后在&lt;code&gt;node-1&lt;/code&gt;上增加路由规则：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip route add 172.18.20.0/24 via 192.168.31.192
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;node-2&lt;/code&gt;上增加路由规则：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip route add 172.18.10.0/24 via 192.168.31.183
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;当&lt;code&gt;docker1&lt;/code&gt;访问&lt;code&gt;docker2&lt;/code&gt;时，IP包会从&lt;code&gt;veth&lt;/code&gt;到达&lt;code&gt;br0&lt;/code&gt;，然后根据&lt;code&gt;node-1&lt;/code&gt;上刚设置的路由规则，访问&lt;code&gt;172.18.20.0/24&lt;/code&gt;网段的网关地址为&lt;code&gt;node-2&lt;/code&gt;，这样，IP包就能路由到&lt;code&gt;node-2&lt;/code&gt;了。&lt;/p&gt;
+&lt;p&gt;同时，&lt;code&gt;node-2&lt;/code&gt;的路由表中包含这样的一条规则：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ip route
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;172.18.20.0/24 dev br0 proto kernel scope link src 172.18.20.1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;到达&lt;code&gt;node-2&lt;/code&gt;的IP包，会根据这条规则路由到网桥&lt;code&gt;br0&lt;/code&gt;，最终到达&lt;code&gt;docker-2&lt;/code&gt;。反过来从&lt;code&gt;docker2&lt;/code&gt;访问&lt;code&gt;docker1&lt;/code&gt;的过程也是类似。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;两种容器跨主机的通信方案我们都实验了一下，现在做个简单总结对比：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;封包模式&lt;/strong&gt;对基础设施要求低，三层网络通就可以了。但封包、解包带来的性能损耗较大。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;路由模式&lt;/strong&gt;性能好，但要求二层网络连通，或者在跨网段的情况下，要求路由器能配合“学习”路由规则。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;至此，容器网络的三篇系列完成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-network-bridge&#34; &gt;Docker单机网络模型动手实验&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-overlay-networks&#34; &gt;Docker跨主机Overlay网络动手实验&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Docker跨主机通信路由模式动手实验（本篇）&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>Docker跨主机Overlay网络动手实验</title>
+        <link>https://mazhen.tech/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BAoverlay%E7%BD%91%E7%BB%9C%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/</link>
+        <pubDate>Wed, 07 Nov 2018 21:52:36 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BAoverlay%E7%BD%91%E7%BB%9C%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/</guid>
+        <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-network-bridge&#34; &gt;上一篇文章&lt;/a&gt;我演示了&lt;code&gt;docker bridge&lt;/code&gt;网络模型的实验，这次我将展示如何利用&lt;code&gt;Overlay 网络&lt;/code&gt;实现跨主机容器的通信。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112154262.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;cross nodes&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;两个容器&lt;code&gt;docker1&lt;/code&gt;和&lt;code&gt;docker2&lt;/code&gt;分别位于节点&lt;code&gt;Node-1&lt;/code&gt;和&lt;code&gt;Node-2&lt;/code&gt;，如何实现容器的跨主机通信呢？一般来说有两种实现方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;封包模式：利用&lt;code&gt;Overlay&lt;/code&gt;网络协议在节点间建立“隧道”，容器之间的网络包被封装在外层的网络协议包中进行传输。&lt;/li&gt;
+&lt;li&gt;路由模式：容器间的网络包传输全部用三层网络的路由转发来实现。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本文主要介绍封包模式。&lt;code&gt;Overlay&lt;/code&gt;网络主要有两种方式，一种是使用UDP在用户态封装，一种是利用&lt;code&gt;VXLAN&lt;/code&gt; 在内核态封装。由于减少了用户态到内核态的切换，封包解包逻辑都在内核态进行，&lt;code&gt;VXLAN&lt;/code&gt; 的性能更好，成为了容器网络的主流方案。&lt;/p&gt;
+&lt;p&gt;关于路由模式，会在&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-route-networks&#34; &gt;下一篇文章&lt;/a&gt;介绍。&lt;/p&gt;
+&lt;h2 id=&#34;vxlan&#34;&gt;VXLAN&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;VXLAN&lt;/code&gt;（Virtual Extensible LAN）是一种网络虚拟化技术，它将链路层的以太网包封装到UDP包中进行传输。&lt;code&gt;VXLAN&lt;/code&gt;最初是由VMware、Cisco开发，主要解决云环境下多租户的二层网络隔离。我们常听到公有云厂商宣称支持&lt;code&gt;VPC&lt;/code&gt;（virtual private cloud），实际底层就是使用&lt;code&gt;VXLAN&lt;/code&gt;实现的。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;VXLAN&lt;/code&gt; packet的结构：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112155616.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;vxlan&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;我们可以看到，最内部是原始的二层网络包，外面加上一个&lt;code&gt;VXLAN header&lt;/code&gt;，其中最重要的是&lt;code&gt;VNI&lt;/code&gt;（VXLAN network identifier)字段，它用来唯一标识一个&lt;code&gt;VXLAN&lt;/code&gt;。也就是说，使用不同的&lt;code&gt;VNI&lt;/code&gt;来区分不同的虚拟二层网络。&lt;code&gt;VNI&lt;/code&gt;有24位，基本够公用云厂商使用了。要知道原先用来网络隔离的虚拟局域网VLAN只支持4096个虚拟网络。&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;VXLAN header&lt;/code&gt;外面封装了正常的UDP包。&lt;code&gt;VXLAN&lt;/code&gt;在UDP之上，实现了一个虚拟的二层网络，连接在这个虚拟二层网络上的主机，就像连接在普通的局域网上一样，可以互相通信。&lt;/p&gt;
+&lt;p&gt;介绍完背景知识，我们可以开始动手实验了。&lt;/p&gt;
+&lt;h2 id=&#34;实现方案一&#34;&gt;实现方案一&lt;/h2&gt;
+&lt;p&gt;参照&lt;a class=&#34;link&#34; href=&#34;https://github.com/coreos/flannel&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Flannel&lt;/a&gt;的实现方案：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112156887.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;flannel&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;配置内核参数，允许IP forwarding&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;分别在&lt;code&gt;Node-1&lt;/code&gt;、&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo sysctl net.ipv4.conf.all.forwarding=1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建“容器”&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在&lt;code&gt;Node-1&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns add docker1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns add docker2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为什么创建个&lt;code&gt;Namesapce&lt;/code&gt;就说是“容器”？请参考&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-network-bridge&#34; &gt;上一篇文章&lt;/a&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建Veth pairs&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;分别在&lt;code&gt;Node-1&lt;/code&gt;、&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add veth0 type veth peer name veth1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;将Veth的一端放入“容器”&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在&lt;code&gt;Node-1&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth0 netns docker1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth0 netns docker2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建bridge&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;分别在&lt;code&gt;Node-1&lt;/code&gt;、&lt;code&gt;Node-2&lt;/code&gt;上创建bridge &lt;code&gt;br0&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addbr br0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;将Veth的另一端接入bridge&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;分别在&lt;code&gt;Node-1&lt;/code&gt;、&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 veth1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;为&amp;quot;容器“内的网卡分配IP地址，并激活上线&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在&lt;code&gt;Node-1&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ip addr add 172.18.10.2/24 dev veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ip link set veth0 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 ip addr add 172.18.20.2/24 dev veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 ip link set veth0 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Veth另一端的网卡激活上线&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;分别在&lt;code&gt;Node-1&lt;/code&gt;、&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth1 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;为bridge分配IP地址，激活上线&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在&lt;code&gt;Node-1&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip addr add 172.18.10.1/24 dev br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip addr add 172.18.20.1/24 dev br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;将bridge设置为“容器”的缺省网关&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在&lt;code&gt;Node-1&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 route add default gw 172.18.10.1 veth0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 route add default gw 172.18.20.1 veth0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建VXLAN虚拟网卡&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;VXLAN&lt;/code&gt;需要在宿主机上创建一个虚拟网络设备对 &lt;code&gt;VXLAN&lt;/code&gt; 的包进行封装和解封装，实现这个功能的设备称为 &lt;code&gt;VTEP&lt;/code&gt;（VXLAN Tunnel Endpoint）。宿主机之间通过&lt;code&gt;VTEP&lt;/code&gt;建立“隧道”，在其中传输虚拟二层网络包。&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;Node-1&lt;/code&gt;创建&lt;code&gt;vxlan100&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add vxlan100 type vxlan \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    id 100 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    local 192.168.31.183 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dev enp0s3 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dstport 4789 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    nolearning
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为&lt;code&gt;vxlan100&lt;/code&gt;分配IP地址，然后激活：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip addr add 172.18.10.0/32 dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set vxlan100 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为了让&lt;code&gt;Node-1&lt;/code&gt;上访问&lt;code&gt;172.18.20.0/24&lt;/code&gt;网段的数据包能进入“隧道”，我们需要增加如下的路由规则：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip route add 172.18.20.0/24 dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在&lt;code&gt;Node-2&lt;/code&gt;上执行相应的命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add vxlan100 type vxlan \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    id 100 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    local 192.168.31.192 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dev enp0s3 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dstport 4789 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    nolearning
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip addr add 172.18.20.0/32 dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set vxlan100 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip route add 172.18.10.0/24 dev vxlan100 scope global
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;手动更新ARP和FDB&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;虚拟设备&lt;code&gt;vxlan100&lt;/code&gt;会用&lt;code&gt;ARP&lt;/code&gt;和&lt;code&gt;FDB&lt;/code&gt; (forwarding database) 数据库中记录的信息，填充网络协议包，建立节点间转发虚拟网络数据包的“隧道”。&lt;/p&gt;
+&lt;p&gt;我们知道，在二层网络上传输IP包，需要先根据目的IP地址查询到目的MAC地址，这就是&lt;code&gt;ARP&lt;/code&gt;（Address Resolution Protocol）协议的作用。我们应该可以通过ARP查询到其他节点上容器IP地址对应的MAC地址，然后填充在&lt;code&gt;VXLAN&lt;/code&gt;内层的网络包中。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;FDB&lt;/code&gt;是记录网桥设备转发数据包的规则。虚拟网络数据包根据上面定义的路由规则，从&lt;code&gt;br0&lt;/code&gt;进入了本机的&lt;code&gt;vxlan100&lt;/code&gt;“隧道”入口，应该可以在&lt;code&gt;FDB&lt;/code&gt;中查询到“隧道”出口的MAC地址应该如何到达，这样，两个&lt;code&gt;VTEP&lt;/code&gt;就能完成”隧道“的建立。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vxlan&lt;/code&gt;为了建立节点间的“隧道”，需要一种机制，能让一个节点的加入、退出信息通知到其他节点，可以采用&lt;code&gt;multicast&lt;/code&gt;的方式进行节点的自动发现，也有很多&lt;code&gt;Unicast&lt;/code&gt;的方案，这篇文章&lt;a class=&#34;link&#34; href=&#34;https://vincent.bernat.ch/en/blog/2017-vxlan-linux&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&amp;lt;VXLAN &amp;amp; Linux&amp;gt;&lt;/a&gt;有很详细的介绍。总之就是要找到一种方式，能够更新每个节点的&lt;code&gt;ARP&lt;/code&gt;和&lt;code&gt;FDB&lt;/code&gt;数据库。&lt;/p&gt;
+&lt;p&gt;如果是使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/coreos/flannel&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Flannel&lt;/a&gt;，它在节点启动的时候会采用某种机制自动更新其他节点的ARP和FDB数据库。现在我们的实验只能在两个节点上手动更新&lt;code&gt;ARP&lt;/code&gt;和&lt;code&gt;FDB&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;首先在两个节点上查询到设备&lt;code&gt;vxlan100&lt;/code&gt;的MAC地址，例如在我当前的环境：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Node-1&lt;/code&gt;上&lt;code&gt;vxlan100&lt;/code&gt;的MAC地址是&lt;code&gt;3a:8d:b8:69:10:3e&lt;/code&gt;
+&lt;code&gt;Node-2&lt;/code&gt;上&lt;code&gt;vxlan100&lt;/code&gt;的MAC地址是&lt;code&gt;0e:e6:e6:5d:c2:da&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;然后在&lt;code&gt;Node-1&lt;/code&gt;上增加ARP和FDB的记录：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip neighbor add 172.18.20.2 lladdr 0e:e6:e6:5d:c2:da dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo bridge fdb append 0e:e6:e6:5d:c2:da dev vxlan100 dst 192.168.31.192
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;我们可以确认下执行结果：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112157782.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;node-1&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ARP&lt;/code&gt;中已经记录了&lt;code&gt;Node-2&lt;/code&gt;上容器IP对应的MAC地址。再看看&lt;code&gt;FDB&lt;/code&gt;的情况：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112158834.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;node-2&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;根据最后一条新增规则，我们可以知道如何到达&lt;code&gt;Node-2&lt;/code&gt;上“隧道”的出口&lt;code&gt;vxlan100&lt;/code&gt;。“隧道”两端是使用UDP进行传输，即容器间通讯的二层网络包是靠UDP在宿主机之间通信。&lt;/p&gt;
+&lt;p&gt;类似的，在&lt;code&gt;Node-2&lt;/code&gt;上执行下面的命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip neighbor add 172.18.10.2 lladdr 3a:8d:b8:69:10:3e dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo bridge fdb append 3a:8d:b8:69:10:3e dev vxlan100 dst 192.168.31.183
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;测试容器的跨节点通信&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;现在，容器&lt;code&gt;docker1&lt;/code&gt;和&lt;code&gt;docker1&lt;/code&gt;之间就可以相互访问了。&lt;/p&gt;
+&lt;p&gt;我们从&lt;code&gt;docker1&lt;/code&gt;访问&lt;code&gt;docker2&lt;/code&gt;，在&lt;code&gt;Node-1&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ping -c 3 172.18.20.2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;同样可以从&lt;code&gt;docker2&lt;/code&gt;访问&lt;code&gt;docker1&lt;/code&gt;，在&lt;code&gt;Node-2&lt;/code&gt;上执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 ping -c 3 172.18.10.2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在测试过程中如果需要troubleshooting，可以使用&lt;code&gt;tcpdump&lt;/code&gt;在&lt;code&gt;veth1&lt;/code&gt;、&lt;code&gt;br0&lt;/code&gt;、&lt;code&gt;vxlan100&lt;/code&gt;等虚拟设备上抓包，确认网络包是按照预定路线在转发：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo tcpdump -i vxlan100 -n
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;测试环境恢复&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在两个节点上删除我们创建的虚拟设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 down
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl delbr br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link  del veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link del vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;实现方案二&#34;&gt;实现方案二&lt;/h2&gt;
+&lt;p&gt;Docker原生的&lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/network/overlay/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;overlay driver&lt;/a&gt;底层也是使用&lt;code&gt;VXLAN&lt;/code&gt;技术，但实现方案和&lt;a class=&#34;link&#34; href=&#34;https://github.com/coreos/flannel&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Flannel&lt;/a&gt;略有不同：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112159004.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;overlay driver&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;我们可以看到，&lt;code&gt;vxlan100&lt;/code&gt;被“插”在了虚拟交换机&lt;code&gt;br0&lt;/code&gt;上，虚拟网络数据包从&lt;code&gt;br0&lt;/code&gt;到&lt;code&gt;vxlan100&lt;/code&gt;不是通过本机路由，而是&lt;code&gt;vxlan100&lt;/code&gt;根据&lt;code&gt;FDB&lt;/code&gt;直接进行了转发。&lt;/p&gt;
+&lt;p&gt;执行的命令略有差异，我不再赘述过程，直接提供了命令，大家自己实验吧：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;36
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;37
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;38
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;39
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;40
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;41
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;42
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;43
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;44
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;45
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;46
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;47
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;48
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;49
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;50
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;51
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;52
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;53
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;54
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;55
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;56
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;57
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;58
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;59
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;60
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;61
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;62
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;63
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;64
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;65
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;66
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;67
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;68
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;69
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;70
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;71
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;72
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;73
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 在Node-1上执行
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo sysctl net.ipv4.conf.all.forwarding=1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns add docker1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add veth0 type veth peer name veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth0 netns docker1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addbr br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ip addr add 172.18.10.2/24 dev veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ip link set veth0 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth1 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 route add default veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add vxlan100 type vxlan \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    id 100 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    local 192.168.31.183 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dev enp0s5 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dstport 4789 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    nolearning \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    proxy
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set vxlan100 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip neigh add 172.18.20.2 lladdr [docker2的MAC地址] dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo bridge fdb append [docker2的MAC地址]  dev vxlan100 dst 192.168.31.192
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 在Node-2上执行
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo sysctl net.ipv4.conf.all.forwarding=1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns add docker2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add veth0 type veth peer name veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth0 netns docker2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addbr br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 ip addr add 172.18.20.2/24 dev veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 ip link set veth0 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth1 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker2 route add default veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add vxlan100 type vxlan \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    id 100 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    local 192.168.31.192 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dev enp0s5 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    dstport 4789 \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    nolearning \
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    proxy
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set vxlan100 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip neigh add 172.18.10.2 lladdr [docker1的MAC地址] dev vxlan100
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo bridge fdb append [docker1的MAC地址]  dev vxlan100 dst 192.168.31.183
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;相信通过亲自动手实验，容器网络对你来说不再神秘。希望本文对你理解容器网络有所帮助。&lt;/p&gt;
+&lt;p&gt;下一篇我将动手实验容器跨主机通信的&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-route-networks&#34; &gt;路由模式&lt;/a&gt;。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Docker单机网络模型动手实验</title>
+        <link>https://mazhen.tech/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/</link>
+        <pubDate>Fri, 26 Oct 2018 21:40:03 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/</guid>
+        <description>&lt;h2 id=&#34;容器的本质&#34;&gt;容器的本质&lt;/h2&gt;
+&lt;p&gt;容器的本质就是一个进程，只不过对它进行了&lt;code&gt;Linux Namesapce&lt;/code&gt;隔离，让它看不到外面的世界，用&lt;code&gt;Cgroups&lt;/code&gt;限制了它能使用的资源，同时利用系统调用&lt;code&gt;pivot_root&lt;/code&gt;或&lt;code&gt;chroot&lt;/code&gt;切换了进程的根目录，把容器镜像挂载为根文件系统&lt;code&gt;rootfs&lt;/code&gt;。&lt;code&gt;rootfs&lt;/code&gt;中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。&lt;code&gt;rootfs&lt;/code&gt;打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112142723.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;docker&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;从上图可以看出，容器和虚拟机的最大区别就是，每个虚拟机都有独立的操作系统内核&lt;code&gt;Guest OS&lt;/code&gt;，而容器只是一种特殊的进程，它们共享同一个操作系统内核。&lt;/p&gt;
+&lt;p&gt;看清了容器的本质，很多问题就容易理解。例如我们执行 &lt;code&gt;docker exec&lt;/code&gt; 命令能够进入运行中的容器，好像登录进独立的虚拟机一样。实际上这只不过是利用系统调用&lt;code&gt;setns&lt;/code&gt;，让当前进程进入到容器进程的&lt;code&gt;Namesapce&lt;/code&gt;中，它就能“看到”容器内部的情况了。&lt;/p&gt;
+&lt;p&gt;关于容器涉及的基础技术，&lt;a class=&#34;link&#34; href=&#34;https://weibo.com/haoel&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;左耳朵耗子&lt;/a&gt;多年前写的系列文章仍然很有参考价值：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://coolshell.cn/articles/17010.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DOCKER基础技术：LINUX NAMESPACE（上）&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://coolshell.cn/articles/17029.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DOCKER基础技术：LINUX NAMESPACE（下）&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://coolshell.cn/articles/17049.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DOCKER基础技术：LINUX CGROUP&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://coolshell.cn/articles/17061.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DOCKER基础技术：AUFS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://coolshell.cn/articles/17200.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;DOCKER基础技术：DEVICEMAPPER&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;容器网络&#34;&gt;容器网络&lt;/h2&gt;
+&lt;p&gt;如何让容器之间互相连接保持网络通畅，Docker有多种网络模型。对于单机上运行的多个容器，可以使用缺省的&lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/network/bridge/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;bridge网络驱动&lt;/a&gt;。而容器的跨主机通信，一种常用的方式是利用&lt;code&gt;Overlay 网络&lt;/code&gt;，基于物理网络的虚拟化网络来实现。&lt;/p&gt;
+&lt;p&gt;本文会在单机上实验展示&lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/network/bridge/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;bridge网络模型&lt;/a&gt;，揭示其背后的实现原理。&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-overlay-networks&#34; &gt;下一篇文章&lt;/a&gt;会演示容器如何利用&lt;code&gt;Overlay 网络&lt;/code&gt;进行跨主机通信。&lt;/p&gt;
+&lt;p&gt;我们按照下图创建网络拓扑，让容器之间网络互通，从容器内部可以访问外部资源，同时，容器内可以暴露服务让外部访问。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112143366.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;local&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在开始动手实验之前，先简单介绍一下&lt;code&gt;bridge网络模型&lt;/code&gt;会用到的Linux虚拟化网络技术。&lt;/p&gt;
+&lt;h3 id=&#34;veth-pairs&#34;&gt;Veth Pairs&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Veth&lt;/code&gt;是成对出现的两张虚拟网卡，从一端发送的数据包，总会在另一端接收到。利用&lt;code&gt;Veth&lt;/code&gt;的特性，我们可以将一端的虚拟网卡&amp;quot;放入&amp;quot;容器内，另一端接入虚拟交换机。这样，接入同一个虚拟交换机的容器之间就实现了网络互通。&lt;/p&gt;
+&lt;h3 id=&#34;linux-bridge&#34;&gt;Linux Bridge&lt;/h3&gt;
+&lt;p&gt;交换机是工作在数据链路层的网络设备，它转发的是二层网络包。最简单的转发策略是将到达交换机输入端口的报文，广播到所有的输出端口。当然更好的策略是在转发过程中进行学习，记录交换机端口和MAC地址的映射关系，这样在下次转发时就能够根据报文中的MAC地址，发送到对应的输出端口。&lt;/p&gt;
+&lt;p&gt;我们可以认为&lt;code&gt;Linux bridge&lt;/code&gt;就是虚拟交换机，连接在同一个&lt;code&gt;bridge&lt;/code&gt;上的容器组成局域网，不同的&lt;code&gt;bridge&lt;/code&gt;之间网络是隔离的。 &lt;code&gt;docker network create [NETWORK NAME]&lt;/code&gt;实际上就是创建出虚拟交换机。&lt;/p&gt;
+&lt;h3 id=&#34;iptables&#34;&gt;iptables&lt;/h3&gt;
+&lt;p&gt;容器需要能够访问外部世界，同时也可以暴露服务让外界访问，这时就要用到&lt;code&gt;iptables&lt;/code&gt;。另外，不同&lt;code&gt;bridge&lt;/code&gt;之间的隔离也会用到&lt;code&gt;iptables&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;我们说的&lt;code&gt;iptables&lt;/code&gt;包含了用户态的配置工具(&lt;code&gt;/sbin/iptables&lt;/code&gt;)和内核&lt;code&gt;netfilter&lt;/code&gt;模块，通过使用&lt;code&gt;iptables&lt;/code&gt;命令对内核的&lt;code&gt;netfilter&lt;/code&gt;模块做规则配置。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;netfilter&lt;/code&gt;允许在网络数据包处理流程的各个阶段插入hook函数，可以根据预先定义的规则对数据包进行修改、过滤或传送。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112144668.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;iptables&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;从上图可以看出，网络包的处理流程有五个关键节点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;PREROUTING&lt;/code&gt;：数据包进入路由表之前&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;INPUT&lt;/code&gt;：通过路由表后目的地为本机&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;FORWARDING&lt;/code&gt;：通过路由表后，目的地不为本机&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;OUTPUT&lt;/code&gt;：由本机产生，向外转发&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;POSTROUTIONG&lt;/code&gt;：发送到网卡接口之前&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;iptables&lt;/code&gt; 提供了四种内置的表 &lt;code&gt;raw → mangle → nat → filter&lt;/code&gt;，优先级从高到低：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;raw&lt;/code&gt; 用于配置数据包，&lt;code&gt;raw&lt;/code&gt;中的数据包不会被系统跟踪。不常用。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mangle&lt;/code&gt; 用于对特定数据包的修改。不常用。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;nat&lt;/code&gt;: 用于网络地址转换（NAT）功能（端口映射，地址映射等）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filter&lt;/code&gt;：一般的过滤功能，默认表。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;每个表可以设置在多个指定的节点，例如&lt;code&gt;filter&lt;/code&gt;表可以设置在&lt;code&gt;INPUT&lt;/code&gt;、&lt;code&gt;FORWARDING&lt;/code&gt;、&lt;code&gt;OUTPUT&lt;/code&gt;等节点。同一个节点中的多个表串联成&lt;code&gt;链&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;iptables&lt;/code&gt; 是按照&lt;code&gt;表&lt;/code&gt;的维度来管理规则，&lt;code&gt;表&lt;/code&gt;中包含多个&lt;code&gt;链&lt;/code&gt;，&lt;code&gt;链&lt;/code&gt;中包含&lt;code&gt;规则&lt;/code&gt;列表。例如我们使用&lt;code&gt;sudo iptables -t filter -L&lt;/code&gt; 查看&lt;code&gt;filter&lt;/code&gt;表：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112144620.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;iptables&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;可以看到，&lt;code&gt;filter&lt;/code&gt;表中包含三个&lt;code&gt;链&lt;/code&gt;，每个&lt;code&gt;链&lt;/code&gt;中定义了多条规则。由于&lt;code&gt;filter&lt;/code&gt;是缺省表，上面的命令可以简化为：&lt;code&gt;sudo iptables -L&lt;/code&gt;，即不通过&lt;code&gt;-t&lt;/code&gt;指定表时，操作的就是&lt;code&gt;filter&lt;/code&gt;表。&lt;/p&gt;
+&lt;p&gt;在容器化网络场景，我们经常用到的是在&lt;code&gt;nat&lt;/code&gt;表中设置&lt;code&gt;SNAT&lt;/code&gt;和&lt;code&gt;DNAT&lt;/code&gt;。源地址转换是发生在数据包离开机器被发送之前，因此&lt;code&gt;SNAT&lt;/code&gt;只能设置在&lt;code&gt;POSTROUTIONG&lt;/code&gt;阶段。&lt;code&gt;DNAT&lt;/code&gt;是对目标地址的转换，需要在路由选择前完成，因此可以设置在&lt;code&gt;PREROUTING&lt;/code&gt;和&lt;code&gt;OUTPUT&lt;/code&gt;阶段。&lt;/p&gt;
+&lt;h2 id=&#34;动手实验&#34;&gt;动手实验&lt;/h2&gt;
+&lt;p&gt;有了前面的背景知识，我们就可以开始动手实验了。因为涉及到很多系统级设置，建议在一个“干净”的虚拟机内折腾，以免干扰到工作环境。我使用的实验环境是&lt;code&gt;Ubuntu 18.04.1 LTS&lt;/code&gt;，不需要安装&lt;code&gt;docker&lt;/code&gt;，我们使用系统命令模拟出容器网络环境。&lt;/p&gt;
+&lt;h3 id=&#34;场景一容器间的网络互通&#34;&gt;场景一：容器间的网络互通&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建“容器”&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;从前面的背景知识了解到，容器的本质是 &lt;code&gt;Namespace + Cgroups + rootfs&lt;/code&gt;。因此本实验我们可以仅仅创建出&lt;code&gt;Namespace&lt;/code&gt;网络隔离环境来模拟容器行为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns add docker0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns add docker1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看创建出的网络&lt;code&gt;Namesapce&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /var/run/netns
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- 1 root root 0 Nov 11 03:52 docker0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- 1 root root 0 Nov 11 03:52 docker1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建Veth pairs&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add veth0 type veth peer name veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link add veth2 type veth peer name veth3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看创建出的&lt;code&gt;Veth pairs&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ip addr show
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3: veth1@veth0: &amp;lt;BROADCAST,MULTICAST,M-DOWN&amp;gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    link/ether 3e:fe:2b:90:3e:b7 brd ff:ff:ff:ff:ff:ff
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4: veth0@veth1: &amp;lt;BROADCAST,MULTICAST,M-DOWN&amp;gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    link/ether 6a:a3:02:07:f4:92 brd ff:ff:ff:ff:ff:ff
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5: veth3@veth2: &amp;lt;BROADCAST,MULTICAST,M-DOWN&amp;gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    link/ether 76:14:e5:0e:26:98 brd ff:ff:ff:ff:ff:ff
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;6: veth2@veth3: &amp;lt;BROADCAST,MULTICAST,M-DOWN&amp;gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    link/ether 6a:0a:84:0f:a7:f7 brd ff:ff:ff:ff:ff:ff
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;将Veth的一端放入“容器”&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;设置&lt;code&gt;Veth&lt;/code&gt;一端的虚拟网卡的&lt;code&gt;Namespace&lt;/code&gt;，相当于将这张网卡放入“容器”内：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth0 netns docker0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth2 netns docker1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看“容器” docker0 内的网卡：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo ip netns exec docker0 ip addr show
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1: lo: &amp;lt;LOOPBACK&amp;gt; mtu 65536 qdisc noop state DOWN group default qlen 1000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4: veth0@if3: &amp;lt;BROADCAST,MULTICAST&amp;gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    link/ether 6a:a3:02:07:f4:92 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;ip netns exec docker0 ...&lt;/code&gt;的意思是在网络&lt;code&gt;Namesapce&lt;/code&gt; &lt;code&gt;docker0&lt;/code&gt;的限制下执行后面跟着的命令，相当于在“容器”内执行命令。&lt;/p&gt;
+&lt;p&gt;可以看到，&lt;code&gt;veth0&lt;/code&gt;已经放入了“容器”docker0内。同样使用命令&lt;code&gt;sudo ip netns exec docker1 ip addr show&lt;/code&gt;查看“容器”docker1内的网卡。&lt;/p&gt;
+&lt;p&gt;同时，在宿主机上查看网卡&lt;code&gt;ip addr&lt;/code&gt;，发现&lt;code&gt;veth0&lt;/code&gt;和&lt;code&gt;veth2&lt;/code&gt;已经消失，确实是放入“容器”内了。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;创建bridge&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;安装&lt;code&gt;bridge&lt;/code&gt;管理工具&lt;code&gt;brctl&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install bridge-utils
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;创建bridge &lt;code&gt;br0&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addbr br0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;将Veth的另一端接入bridge&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl addif br0 veth3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看接入效果：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl show
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112145791.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;brctl&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;两个网卡&lt;code&gt;veth1&lt;/code&gt;和&lt;code&gt;veth3&lt;/code&gt;已经“插”在&lt;code&gt;bridge&lt;/code&gt;上。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;为&amp;quot;容器“内的网卡分配IP地址，并激活上线&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;docker0容器：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 ip addr add 172.18.0.2/24 dev veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 ip link set veth0 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;docker1容器：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ip addr add 172.18.0.3/24 dev veth2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ip link set veth2 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Veth另一端的网卡激活上线&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth1 up
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set veth3 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;为bridge分配IP地址，激活上线&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip addr add 172.18.0.1/24 dev br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;“容器”间的互通测试&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我们可以先设置监听&lt;code&gt;br0&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo tcpdump -i br0 -n
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;从容器&lt;code&gt;docker0&lt;/code&gt; &lt;code&gt;ping&lt;/code&gt; 容器&lt;code&gt;docker1&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 ping -c 3 172.18.0.3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;br0&lt;/code&gt;上监控到的网络流量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:10.859956 ARP, Request who-has 172.18.0.3 tell 172.18.0.2, length 28
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:10.859973 ARP, Reply 172.18.0.3 is-at 06:f4:01:c2:dd:6e, length 28
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:10.860030 IP 172.18.0.2 &amp;gt; 172.18.0.3: ICMP echo request, id 1310, seq 1, length 64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:10.860050 IP 172.18.0.3 &amp;gt; 172.18.0.2: ICMP echo reply, id 1310, seq 1, length 64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:11.878348 IP 172.18.0.2 &amp;gt; 172.18.0.3: ICMP echo request, id 1310, seq 2, length 64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:11.878365 IP 172.18.0.3 &amp;gt; 172.18.0.2: ICMP echo reply, id 1310, seq 2, length 64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:12.901334 IP 172.18.0.2 &amp;gt; 172.18.0.3: ICMP echo request, id 1310, seq 3, length 64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:12.901350 IP 172.18.0.3 &amp;gt; 172.18.0.2: ICMP echo reply, id 1310, seq 3, length 64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:16.006471 ARP, Request who-has 172.18.0.2 tell 172.18.0.3, length 28
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;05:53:16.006498 ARP, Reply 172.18.0.2 is-at c2:23:fe:ac:f5:4e, length 28
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看到，先是&lt;code&gt;172.18.0.2&lt;/code&gt;发起的ARP请求，询问&lt;code&gt;172.18.0.3&lt;/code&gt;的&lt;code&gt;MAC&lt;/code&gt;地址，然后是&lt;code&gt;ICMP&lt;/code&gt;的请求和响应，最后是&lt;code&gt;172.18.0.3&lt;/code&gt;的ARP请求。因为接在同一个bridge &lt;code&gt;br0&lt;/code&gt;上，所以是二层互通的局域网。&lt;/p&gt;
+&lt;p&gt;同样，从容器&lt;code&gt;docker1&lt;/code&gt; &lt;code&gt;ping&lt;/code&gt; 容器&lt;code&gt;docker0&lt;/code&gt;也是通的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ping -c 3 172.18.0.2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;场景二从宿主机访问容器内网络&#34;&gt;场景二：从宿主机访问“容器”内网络&lt;/h3&gt;
+&lt;p&gt;在“容器”&lt;code&gt;docker0&lt;/code&gt;内启动服务，监听80端口：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 nc -lp 80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在宿主机上执行telnet，可以连接到&lt;code&gt;docker0&lt;/code&gt;的80端口：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;telnet 172.18.0.2 80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;场景三从容器内访问外网&#34;&gt;场景三：从“容器”内访问外网&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;配置内核参数，允许IP forwarding&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo sysctl net.ipv4.conf.all.forwarding=1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;配置iptables FORWARD规则&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先确认&lt;code&gt;iptables FORWARD&lt;/code&gt;的缺省策略：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo iptables -L
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112146892.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;iptables&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;如果缺省策略是&lt;code&gt;DROP&lt;/code&gt;，需要设置为&lt;code&gt;ACCEPT&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo iptables -P FORWARD ACCEPT
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;缺省策略的含义是，在数据包没有匹配到规则时执行的缺省动作。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;将bridge设置为“容器”的缺省网关&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 route add default gw 172.18.0.1 veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 route add default gw 172.18.0.1 veth2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看“容器”内的路由表：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$sudo ip netns exec docker0  route -n
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Kernel IP routing table
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0.0.0.0         172.18.0.1      0.0.0.0         UG    0      0        0 veth0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;172.18.0.0      0.0.0.0         255.255.255.0   U     0      0        0 veth0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看出，“容器”内的缺省&lt;code&gt;Gateway&lt;/code&gt;是&lt;code&gt;bridge&lt;/code&gt;的IP地址，非&lt;code&gt;172.18.0.0/24&lt;/code&gt;网段的数据包会路由给&lt;code&gt;bridge&lt;/code&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;配置iptables的SNAT规则&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;容器的IP地址外部并不认识，如果它要访问外网，需要在数据包离开前将源地址替换为宿主机的IP，这样外部主机才能用宿主机的IP作为目的地址发回响应。&lt;/p&gt;
+&lt;p&gt;另外一个需要注意的问题，内核&lt;code&gt;netfilter&lt;/code&gt;会追踪记录连接，我们在增加了SNAT规则时，系统会自动增加一个隐式的反向规则，这样返回的包会自动将宿主机的IP替换为容器IP。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo iptables -t nat -A POSTROUTING -s 172.18.0.0/24 ! -o br0 -j MASQUERADE
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;上面的命令的含义是：在&lt;code&gt;nat&lt;/code&gt;表的&lt;code&gt;POSTROUTING&lt;/code&gt;链增加规则，当数据包的源地址为&lt;code&gt;172.18.0.0/24&lt;/code&gt;网段，出口设备不是&lt;code&gt;br0&lt;/code&gt;时，就执行&lt;code&gt;MASQUERADE&lt;/code&gt;动作。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;MASQUERADE&lt;/code&gt;也是一种源地址转换动作，它会动态选择宿主机的一个IP做源地址转换，而&lt;code&gt;SNAT&lt;/code&gt;动作必须在命令中指定固定的IP地址。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;从“容器”内访问外部地址&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 ping -c 3 123.125.115.110
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker1 ping -c 3 123.125.115.110
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;我们确认在“容器”内是可以访问外部网络的。&lt;/p&gt;
+&lt;h3 id=&#34;场景四从外部访问容器内暴露的服务&#34;&gt;场景四：从外部访问“容器”内暴露的服务&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;配置iptables的DNAT规则&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当外部通过宿主机的IP和端口访问容器内启动的服务时，在数据包进入&lt;code&gt;PREROUTING&lt;/code&gt;阶段就要进行目的地址转换，将宿主机IP转换为容器IP。同样，系统会为我们自动增加一个隐式的反向规则，数据包在离开宿主机时自动做反向转换。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo iptables -t nat -A PREROUTING  ! -i br0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 172.18.0.2:80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;上面命令的含义是：在&lt;code&gt;nat&lt;/code&gt;表的&lt;code&gt;PREROUTING&lt;/code&gt;链增加规则，当输入设备不是&lt;code&gt;br0&lt;/code&gt;，目的端口为80时，做目的地址转换，将宿主机IP替换为容器IP。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;从远程访问“容器”内暴露的服务&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在“容器”docker0内启动服务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip netns exec docker0 nc -lp 80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在和宿主机同一个局域网的远程主机访问宿主机IP:80&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;telnet 192.168.31.183 80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;确认可以访问到容器内启动的服务。&lt;/p&gt;
+&lt;h3 id=&#34;测试环境恢复&#34;&gt;测试环境恢复&lt;/h3&gt;
+&lt;p&gt;删除虚拟网络设备&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link set br0 down
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo brctl delbr br0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link  del veth1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ip link  del veth3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;iptablers&lt;/code&gt;和&lt;code&gt;Namesapce&lt;/code&gt;的配置在机器重启后被清除。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;本文我们在介绍了&lt;code&gt;veth&lt;/code&gt;、&lt;code&gt;Linux bridge&lt;/code&gt;、&lt;code&gt;iptables&lt;/code&gt;等概念后，亲自动手模拟出了&lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/network/bridge/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;docker bridge网络模型&lt;/a&gt;，并测试了几种场景的网络互通。实际上&lt;code&gt;docker network&lt;/code&gt; 就是使用了上述技术，帮我们创建和维护网络。通过动手实验，相信你对docker bridge网络理解的更加深入。&lt;/p&gt;
+&lt;p&gt;下一篇我将动手实验容器如何&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/docker-overlay-networks&#34; &gt;利用&lt;code&gt;Overlay 网络&lt;/code&gt;进行跨主机通信&lt;/a&gt;。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>利用docker compose在单机上玩转TiDB</title>
+        <link>https://mazhen.tech/p/%E5%88%A9%E7%94%A8docker-compose%E5%9C%A8%E5%8D%95%E6%9C%BA%E4%B8%8A%E7%8E%A9%E8%BD%ACtidb/</link>
+        <pubDate>Fri, 09 Feb 2018 14:32:20 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E5%88%A9%E7%94%A8docker-compose%E5%9C%A8%E5%8D%95%E6%9C%BA%E4%B8%8A%E7%8E%A9%E8%BD%ACtidb/</guid>
+        <description>&lt;p&gt;TiDB提供了&lt;code&gt;docker compose&lt;/code&gt;的部署方式，可以很方便的在单机上搭建一个TiDB集群作为开发测试环境。如果修改了&lt;code&gt;TiDB&lt;/code&gt;源码，可以使用这样方式，先在本机部署集群做一些验证。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;首先本机要安装&lt;code&gt;docker&lt;/code&gt;和&lt;code&gt;docker compose&lt;/code&gt;，建议参考官方文档&lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/engine/installation/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Install Docker&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://docs.docker.com/compose/install/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Install Docker Compose&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;下载&lt;code&gt;tidb-docker-compose&lt;/code&gt;项目&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/pingcap/tidb-docker-compose.git
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;使用&lt;code&gt;docker compose&lt;/code&gt;启动TiDB集群&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cd tidb-docker-compose &amp;amp;&amp;amp; sudo docker-compose up -d
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;就这么简单，集群启动成功了。使用&lt;code&gt;docker ps&lt;/code&gt;查看：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011433415.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;可以看到，已经启动了三个&lt;code&gt;tikv&lt;/code&gt;实例，一个&lt;code&gt;tidb&lt;/code&gt;实例，三个&lt;code&gt;pd&lt;/code&gt;实例，还有监控和&lt;code&gt;tidb-vision&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;监控的访问地址是 &lt;a class=&#34;link&#34; href=&#34;http://localhost:3000&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;http://localhost:3000&lt;/a&gt;，用户名/密码：admin/admin。&lt;/p&gt;
+&lt;p&gt;tidb-vision 的访问地址是 &lt;a class=&#34;link&#34; href=&#34;http://localhost:8010&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;http://localhost:8010&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用&lt;code&gt;MySQL&lt;/code&gt;客户端访问&lt;code&gt;TiDB&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果本机有&lt;code&gt;MySQL&lt;/code&gt;客户端，可以直接连接：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mysql -h 127.0.0.1 -P 4000 -u root
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果本机没有&lt;code&gt;MySQL&lt;/code&gt;客户端，可以使用docker启动一个&lt;code&gt;MySQL&lt;/code&gt;容器，然后登录到容器内，再使用&lt;code&gt;MySQL&lt;/code&gt;客户端连接&lt;code&gt;TiDB&lt;/code&gt;集群。这种方式比较环保，只要有docker环境就行。先查看&lt;code&gt;TiDB&lt;/code&gt;集群的&lt;code&gt;docker&lt;/code&gt;网络：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011434062.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;然后启动MySQL容器，注意要加入&lt;code&gt;TiDB&lt;/code&gt;集群的&lt;code&gt;docker&lt;/code&gt;网络：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo docker run --network=tidbdockercompose_default --rm -it mysql /bin/bash
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;因为和&lt;code&gt;TiDB&lt;/code&gt;集群在同一个docker网络，在MySQL容器内，可以使用&lt;code&gt;tidb&lt;/code&gt;名称访问到&lt;code&gt;TiDB&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mysql -h tidb -P 4000 -u root
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;停止集群&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo docker-compose down
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果自己build了&lt;code&gt;TiDB&lt;/code&gt;版本想在本机run集群，&lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb-docker-compose&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;文档&lt;/a&gt;写的很清楚，告诉你镜像应该放在什么位置。&lt;/p&gt;
+&lt;p&gt;Have fun!&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

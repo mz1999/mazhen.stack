@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的网'>
+<title>使用火焰图进行Java性能分析</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='使用火焰图进行Java性能分析'>
+<meta property='og:description' content='性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的网'>
+<meta property='og:url' content='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='performance' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2020-03-23T11:01:58&#43;08:00'/><meta property='article:modified_time' content='2020-03-23T11:01:58&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="使用火焰图进行Java性能分析">
+<meta name="twitter:description" content="性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的网">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#性能分析工具的分类">性能分析工具的分类</a></li>
+    <li><a href="#perf">perf</a>
+      <ol>
+        <li><a href="#perf-events分类">perf Events分类</a></li>
+        <li><a href="#perf的使用">perf的使用</a></li>
+      </ol>
+    </li>
+    <li><a href="#bpf">BPF</a></li>
+    <li><a href="#bcc和bpftrace">BCC和bpftrace</a>
+      <ol>
+        <li><a href="#bcc的安装">BCC的安装</a></li>
+        <li><a href="#bpftrace的安装">bpftrace的安装</a></li>
+      </ol>
+    </li>
+    <li><a href="#火焰图">火焰图</a>
+      <ol>
+        <li><a href="#stack-trace">Stack Trace</a></li>
+        <li><a href="#profiling-stack-traces">Profiling Stack Traces</a></li>
+        <li><a href="#火焰图-1">火焰图</a></li>
+      </ol>
+    </li>
+    <li><a href="#java-cpu-profiling">Java CPU Profiling</a>
+      <ol>
+        <li><a href="#perf-map-agent">perf-map-agent</a>
+          <ol>
+            <li><a href="#配合perf使用">配合<code>perf</code>使用</a></li>
+            <li><a href="#配合bcc-profile使用">配合<code>bcc profile</code>使用</a></li>
+          </ol>
+        </li>
+        <li><a href="#async-profiler">async-profiler</a>
+          <ol>
+            <li><a href="#async-profiler的使用">async-profiler的使用</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+    <li><a href="#参考资料">参考资料</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">使用火焰图进行Java性能分析</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2020-03-23</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 18 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="性能分析工具的分类">性能分析工具的分类</h2>
+<p>性能分析的技术和工具可以分为以下几类：</p>
+<ol>
+<li><strong>Counters</strong></li>
+</ol>
+<p>内核维护着各种统计信息，被称为<code>Counters</code>，用于对事件进行计数。例如，接收的网络数据包数量，发出的磁盘I/O请求，执行的系统调用次数。常见的这类工具有：</p>
+<ul>
+<li>vmstat: 虚拟和物理内存统计</li>
+<li>mpstat: CPU使用率统计</li>
+<li>iostat：磁盘的I/O使用情况</li>
+<li>netstat：网络接口统计信息，TCP/IP协议栈统计信息，连接统计信息</li>
+</ul>
+<ol start="2">
+<li><strong>Tracing</strong></li>
+</ol>
+<p><strong>Tracing</strong>是收集每个事件的数据进行分析。<strong>Tracing</strong>会捕获所有的事件，因此有比较大的CPU开销，并且可能需要大量存储来保存数据。</p>
+<p>常见的<strong>Tracing</strong>工具有：</p>
+<ul>
+<li>tcpdump: network packet tracing</li>
+<li>blktrace: block I/O tracing</li>
+<li>perf: Linux Performance Events, 跟踪静态和动态探针</li>
+<li>strace: 系统调用tracing</li>
+<li>gdb: 源代码级调试器</li>
+</ul>
+<ol start="3">
+<li><strong>Profiling</strong></li>
+</ol>
+<p><strong>Profiling</strong> 是通过收集目标行为的样本或快照，来了解目标的特征。<strong>Profiling</strong>可以从多个方面对程序进行动态分析，如<code>CPU</code>、<code>Memory</code>、<code>Thread</code>、<code>I/O</code>等，其中对<code>CPU</code>进行<code>Profiling</code>的应用最为广泛。</p>
+<p><code>CPU Profiling</code>原理是基于一定频率对运行的程序进行采样，来分析消耗CPU时间的代码路径。可以基于固定的时间间隔进行采样，例如每10毫秒采样一次。也可以设置固定速率采样，例如每秒采集100个样本。</p>
+<p><code>CPU Profiling</code>经常被用于分析代码的热点，比如“哪个方法占用CPU的执行时间最长”、“每个方法占用CPU的比例是多少”等等，然后我们就可以针对热点瓶颈进行分析和性能优化。</p>
+<p>Linux上常用的<strong>CPU Profiling</strong>工具有：</p>
+<ul>
+<li><a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
+    >perf</a>的 <a class="link" href="https://perf.wiki.kernel.org/index.php/Tutorial#Sampling_with_perf_record"  target="_blank" rel="noopener"
+    >record</a> 子命令</li>
+<li><a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/profile.py"  target="_blank" rel="noopener"
+    >BPF profile</a></li>
+</ul>
+<ol start="4">
+<li><strong>Monitoring</strong></li>
+</ol>
+<p>系统性能监控会记录一段时间内的性能统计信息，以便能够基于时间周期进行比较。这对于容量规划，了解高峰期的使用情况都很有帮助。历史值还为我们理解当前的性能指标提供了上下文。</p>
+<p>监控单个操作系统最常用工具是<strong>sar</strong>（system activity reporter，系统活动报告）命令。<code>sar</code>通过一个定期执行的agent来记录系统计数器的状态，并可以使用<code>sar</code>命令查看它们，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sar
+</span></span><span class="line"><span class="cl">Linux 4.15.0-88-generic (mazhen) 	03/19/2020 	_x86_64_	(4 CPU)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">12:53:08 PM       LINUX RESTART
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">12:55:01 PM     CPU     %user     %nice   %system   %iowait    %steal     %idle
+</span></span><span class="line"><span class="cl">01:05:01 PM     all     14.06      0.00     10.97      0.11      0.00     74.87
+</span></span><span class="line"><span class="cl">01:15:01 PM     all      9.60      0.00      7.49      0.09      0.00     82.83
+</span></span><span class="line"><span class="cl">01:25:01 PM     all      0.04      0.00      0.02      0.02      0.00     99.92
+</span></span><span class="line"><span class="cl">01:35:01 PM     all      0.03      0.00      0.02      0.01      0.00     99.94
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>本文主要讨论如何使用<code>perf</code>和<code>BPF</code>进行<code>CPU Profiling</code>。</p>
+<h2 id="perf">perf</h2>
+<p><strong>perf</strong>最初是使用<code>Linux</code>性能计数器子系统的工具，因此<code>perf</code>开始的名称是<code>Performance Counters for Linux</code>(PCL)。<code>perf</code>在Linux<code>2.6.31</code>合并进内核，位于<a class="link" href="https://github.com/torvalds/linux/tree/master/tools/perf"  target="_blank" rel="noopener"
+    >tools/perf</a>目录下。</p>
+<p>随后<code>perf</code>进行了各种增强，增加了<code>tracing</code>、<code>profiling</code>等能力，可用于性能瓶颈的查找和热点代码的定位。</p>
+<p><code>perf</code>是一个面向事件（event-oriented）的性能剖析工具，因此它也被称为<code>Linux perf events (LPE)</code>，或<code>perf_events</code>。</p>
+<p><code>perf</code>的整体架构如下：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241109248.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="perf"
+	
+	
+></p>
+<p><code>perf</code> 由两部分组成：</p>
+<ul>
+<li><strong>perf Tools</strong>：perf用户态命令，为用户提供了一系列工具集，用于收集、分析性能数据。</li>
+<li><strong>perf Event Subsystem</strong>：Perf Events是内核的子系统之一，和用户态工具共同完成数据的采集。</li>
+</ul>
+<p>内核依赖的硬件，比如说<code>CPU</code>，一般会内置一些性能统计方面的寄存器（<a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter"  target="_blank" rel="noopener"
+    >Hardware Performance Counter</a>），通过软件读取这些特殊寄存器里的信息，我们也可以得到很多直接关于硬件的信息。<code>perf</code>最初就是用来监测<code>CPU</code>的性能监控单元（performance monitoring unit, PMU）的。</p>
+<h3 id="perf-events分类">perf Events分类</h3>
+<p><code>perf</code>支持多种性能事件：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241110166.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="event sources"
+	
+	
+></p>
+<p>这些性能事件分类为：</p>
+<ul>
+<li><strong>Hardware Events</strong>: CPU性能监控计数器performance monitoring counters（PMC），也被称为performance monitoring unit（PMU）</li>
+<li><strong>Software Events</strong>: 基于内核计数器的底层事件。例如，CPU迁移，minor faults，major faults等。</li>
+<li><strong>Kernel Tracepoint Events</strong>: 内核的静态<code>Tracepoint</code>，已经硬编码在内核需要收集信息的位置。</li>
+<li><strong>User Statically-Defined Tracing (USDT)</strong>: 用户级程序的静态<code>Tracepoint</code>。</li>
+<li><strong>Dynamic Tracing</strong>: 用户自定义事件，可以动态的插入到内核或正在运行中的程序。<code>Dynamic Tracing</code>技术分为两类：
+<ul>
+<li><a class="link" href="https://lwn.net/Articles/132196/"  target="_blank" rel="noopener"
+    >kprobes</a>：对于kernel的动态追踪技术，可以动态地在指定的内核函数的入口和出口等位置上放置探针，并定义自己的探针处理程序。</li>
+<li><a class="link" href="https://lwn.net/Articles/499190/"  target="_blank" rel="noopener"
+    >uprobes</a>：对于用户态软件的动态追踪技术，可以安全地在用户态函数的入口等位置设置动态探针，并执行自己的探针处理程序。</li>
+</ul>
+</li>
+</ul>
+<p>可以使用perf的<code>list</code>子命令查看当前可用的事件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo perf list
+</span></span><span class="line"><span class="cl">List of pre-defined events (to be used in -e):
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  branch-instructions OR branches                    [Hardware event]
+</span></span><span class="line"><span class="cl">  branch-misses                                      [Hardware event]
+</span></span><span class="line"><span class="cl">  bus-cycles                                         [Hardware event]
+</span></span><span class="line"><span class="cl">  cache-misses                                       [Hardware event]
+</span></span><span class="line"><span class="cl">  cache-references                                   [Hardware event]
+</span></span><span class="line"><span class="cl">  cpu-cycles OR cycles                               [Hardware event]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  alignment-faults                                   [Software event]
+</span></span><span class="line"><span class="cl">  bpf-output                                         [Software event]
+</span></span><span class="line"><span class="cl">  context-switches OR cs                             [Software event]
+</span></span><span class="line"><span class="cl">  cpu-clock                                          [Software event]
+</span></span><span class="line"><span class="cl">  cpu-migrations OR migrations                       [Software event]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  alarmtimer:alarmtimer_cancel                       [Tracepoint event]
+</span></span><span class="line"><span class="cl">  alarmtimer:alarmtimer_fired                        [Tracepoint event]
+</span></span><span class="line"><span class="cl">  alarmtimer:alarmtimer_start                        [Tracepoint event]
+</span></span><span class="line"><span class="cl">  alarmtimer:alarmtimer_suspend                      [Tracepoint event]
+</span></span><span class="line"><span class="cl">  block:block_bio_backmerge                          [Tracepoint event]
+</span></span><span class="line"><span class="cl">  block:block_bio_bounce                             [Tracepoint event]
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="perf的使用">perf的使用</h3>
+<p>如果还没有安装<code>perf</code>，可以使用<code>apt</code>或<code>yum</code>进行安装：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt install linux-tools-$(uname -r) linux-tools-generic
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>perf</code>的功能强大，支持硬件计数器统计，定时采样，静态和动态tracing等。本文只介绍几个常用的使用场景，如果想全面的了解<code>perf</code>的使用，可以参考<a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
+    >perf.wiki</a>。</p>
+<ol>
+<li><strong>CPU Statistics</strong></li>
+</ol>
+<p>使用<code>perf</code>的<code>stat</code>命令可以收集性能计数器统计信息，精确统计一段时间内 CPU 相关硬件计数器数值的变化。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-&gt; % sudo perf stat  dd if=/dev/zero of=/dev/null count=10000000
+</span></span><span class="line"><span class="cl">10000000+0 records in
+</span></span><span class="line"><span class="cl">10000000+0 records out
+</span></span><span class="line"><span class="cl">5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.2795 s, 417 MB/s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> Performance counter stats for &#39;dd if=/dev/zero of=/dev/null count=10000000&#39;:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      12280.299325      task-clock (msec)         #    1.000 CPUs utilized          
+</span></span><span class="line"><span class="cl">                16      context-switches          #    0.001 K/sec                  
+</span></span><span class="line"><span class="cl">                 0      cpu-migrations            #    0.000 K/sec                  
+</span></span><span class="line"><span class="cl">                70      page-faults               #    0.006 K/sec                  
+</span></span><span class="line"><span class="cl">    41,610,802,323      cycles                    #    3.388 GHz                    
+</span></span><span class="line"><span class="cl">    20,195,746,887      instructions              #    0.49  insn per cycle         
+</span></span><span class="line"><span class="cl">     3,972,723,471      branches                  #  323.504 M/sec                  
+</span></span><span class="line"><span class="cl">        90,061,565      branch-misses             #    2.27% of all branches        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      12.280445133 seconds time elapsed
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li><strong>CPU Profiling</strong></li>
+</ol>
+<p>可以使用<code>perf record</code>以任意频率收集快照。这通常用于CPU使用情况的分析。</p>
+<ul>
+<li><code>sudo perf record -F 99 -a -g  sleep 10</code></li>
+</ul>
+<p>对所有CPU（<strong>-a</strong>）进行<code>call stacks</code>（<strong>-g</strong>）采样，采样频率为<code>99 Hertz</code>（<strong>-F 99</strong>），即每秒99次，持续10秒（<strong>sleep 10</strong>）。</p>
+<ul>
+<li><code>sudo perf record -F 99 -a -g  -p PID sleep 10</code></li>
+</ul>
+<p>对指定进程（<strong>-p PID</strong>）进行采样。</p>
+<ul>
+<li><code>sudo perf record -F 99 -a -g -e context-switches -p PID sleep 10</code></li>
+</ul>
+<p><code>perf</code>可以和各种<code>instrumentation points</code>一起使用，以跟踪内核调度程序（<code>scheduler</code>）的活动。其中包括<code>software events</code>和<code>tracepoint event</code>（静态探针）。</p>
+<p>上面的例子对指定进程的上下文切换（<strong>-e context-switches</strong>）进行采样。</p>
+<ol start="3">
+<li><strong>report</strong></li>
+</ol>
+<p><code>perf record</code>的运行结果保存在当前目录的<code>perf.data</code>文件中，采样结束后，我们使用<code>perf report</code>查看结果。</p>
+<ul>
+<li><strong>交互式查看模式</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo perf report
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://cdn.mazhen.tech/images/202209241111810.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="perf report"
+	
+	
+></p>
+<p>以<code>+</code>开头的行可以回车，展开详细信息。</p>
+<ul>
+<li><strong>使用<code>--stdio</code>选项打印所有输出</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo perf report --stdio
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://cdn.mazhen.tech/images/202209241111875.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="perf report &ndash;stdio"
+	
+	
+></p>
+<p><code>context-switches</code>的采样报告：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241112884.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="perf-report-context-switches"
+	
+	
+></p>
+<p>后面我们会介绍<strong>火焰图</strong>，以可视化的方式展示<code>stack traces</code>，比<code>perf report</code>更加直观。</p>
+<h2 id="bpf">BPF</h2>
+<p><strong>BPF</strong>是<strong>Berkeley Packet Filter</strong>的缩写，最初是为BSD开发，第一个版本于1992年发布，<a class="link" href="https://www.tcpdump.org/papers/bpf-usenix93.pdf"  target="_blank" rel="noopener"
+    >用于改进网络数据包捕获的性能</a>。<code>BPF</code>是在内核级别进行过滤，不必将每个数据包拷贝到用户空间，从而提高了数据包过滤的性能。<code>tcpdump</code>使用的就是<code>BPF</code>。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241113910.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="tcpdump"
+	
+	
+></p>
+<p>2013年<code>BPF</code>被重写，被称为<strong>Extended BPF (eBPF)</strong>，于2014年包含进<code>Linux</code>内核中。改进后的<code>BPF</code>成为了通用执行引擎，可用于多种用途，包括创建高级性能分析工具。</p>
+<p><code>BPF</code>允许在内核中运行<code>mini programs</code>，来响应系统和应用程序事件（例如磁盘I/O事件）。这种运作机制和<code>JavaScript</code>类似：<code>JavaScript</code>是运行在浏览器引擎中的<code>mini programs</code>，响应鼠标点击等事件。<code>BPF</code>使内核可编程化，使用户（包括非内核开发人员）能够自定义和控制他们的系统，以解决实际问题。</p>
+<p><code>BPF</code>可以被认为是一个<strong>虚拟机</strong>，由指令集，存储对象和helper函数三部分组成。<code>BPF</code>指令集由位于Linux内核的<code>BPF runtime</code>执行，<code>BPF runtime</code>包括了<strong>解释器</strong>和<strong>JIT编译器</strong>。<code>BPF</code>是一种灵活高效的技术，可以用于<code>networking</code>，<code>tracing</code>和安全等领域。我们重点关注它作为系统监测工具方面的应用。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241114773.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="linux_ebpf_internals"
+	
+	
+></p>
+<p>和<code>perf</code>一样，<code>BPF</code>能够监测多种性能事件源，同时可以通过调用<code>perf_events</code>，使用<code>perf</code>已有的功能：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241114535.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="linux_ebpf_support"
+	
+	
+></p>
+<p><code>BPF</code>可以在内核运行计算和统计汇总，这样大大减少了复制到用户空间的数据量：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241115194.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="before_and_after_using_BPF"
+	
+	
+></p>
+<p><code>BPF</code>已经内置在Linux内核中，因此你无需再安装任何新的内核组件，就可以在生产环境中使用BPF。</p>
+<h2 id="bcc和bpftrace">BCC和bpftrace</h2>
+<p>直接使用<code>BPF</code>指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了<code>BCC</code>和<code>bpftrace</code>。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241116502.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="bcc-bpftrace"
+	
+	
+></p>
+<p><strong>BCC（BPF Compiler Collection）</strong> 提供了一个C编程环境，使用<code>LLVM</code>工具链来把 C 代码编译为<code>BPF</code>虚拟机所接受的字节码。此外它还支持<code>Python</code>，<code>Lua</code>和<code>C++</code>作为用户接口。</p>
+<p><strong>bpftrace</strong> 是一个比较新的前端，它为开发<code>BPF</code>工具提供了一种专用的高级语言。<code>bpftrace</code>适合单行代码和自定义短脚本，而<code>BCC</code>更适合复杂的脚本和守护程序。</p>
+<p><code>BCC</code>和<code>bpftrace</code>没有在内核代码库，它们存放在GitHub上名为<a class="link" href="https://github.com/iovisor"  target="_blank" rel="noopener"
+    >IO Visor</a>的<code>Linux Foundation</code>项目中。</p>
+<ul>
+<li><a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >iovisor/bcc</a></li>
+<li><a class="link" href="https://github.com/iovisor/bpftrace"  target="_blank" rel="noopener"
+    >iovisor/bpftrace</a></li>
+</ul>
+<h3 id="bcc的安装">BCC的安装</h3>
+<p><code>BCC</code>可以参考官方的<a class="link" href="https://github.com/iovisor/bcc/blob/master/INSTALL.md"  target="_blank" rel="noopener"
+    >安装文档</a>。以<code>Ubuntu 18.04 LTS</code>为例，建议从源码build安装：</p>
+<ul>
+<li>安装build依赖</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt-get -y install bison build-essential cmake flex git libedit-dev \
+</span></span><span class="line"><span class="cl">  libllvm6.0 llvm-6.0-dev libclang-6.0-dev python zlib1g-dev libelf-dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sudo apt-get -y install luajit luajit-5.1-dev
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>编译和安装</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/iovisor/bcc.git
+</span></span><span class="line"><span class="cl">mkdir bcc/build; cd bcc/build
+</span></span><span class="line"><span class="cl">cmake ..
+</span></span><span class="line"><span class="cl">make
+</span></span><span class="line"><span class="cl">sudo make install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>build python3 binding</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cmake -DPYTHON_CMD=python3 .. 
+</span></span><span class="line"><span class="cl">pushd src/python/
+</span></span><span class="line"><span class="cl">make
+</span></span><span class="line"><span class="cl">sudo make install
+</span></span><span class="line"><span class="cl">popd
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>make install</code>完成后，<code>BCC</code>自带的工具都安装在了<code>/usr/share/bcc/tools</code>目录下。<code>BCC</code>已经包含70多个<code>BPF</code>工具，用于性能分析和故障排查。这些工具都可以直接使用，无需编写任何<code>BCC</code>代码。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241116881.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="bcc_tracing_tools"
+	
+	
+></p>
+<p>我们试用其中一个工具<code>biolatency</code>，跟踪磁盘<code>I/O</code>延迟：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-&gt; % sudo /usr/share/bcc/tools/biolatency
+</span></span><span class="line"><span class="cl">Tracing block device I/O... Hit Ctrl-C to end.
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">     usecs               : count     distribution
+</span></span><span class="line"><span class="cl">         0 -&gt; 1          : 0        |                                        |
+</span></span><span class="line"><span class="cl">         2 -&gt; 3          : 0        |                                        |
+</span></span><span class="line"><span class="cl">         4 -&gt; 7          : 0        |                                        |
+</span></span><span class="line"><span class="cl">         8 -&gt; 15         : 0        |                                        |
+</span></span><span class="line"><span class="cl">        16 -&gt; 31         : 2        |***                                     |
+</span></span><span class="line"><span class="cl">        32 -&gt; 63         : 0        |                                        |
+</span></span><span class="line"><span class="cl">        64 -&gt; 127        : 3        |*****                                   |
+</span></span><span class="line"><span class="cl">       128 -&gt; 255        : 7        |***********                             |
+</span></span><span class="line"><span class="cl">       256 -&gt; 511        : 6        |**********                              |
+</span></span><span class="line"><span class="cl">       512 -&gt; 1023       : 11       |******************                      |
+</span></span><span class="line"><span class="cl">      1024 -&gt; 2047       : 16       |**************************              |
+</span></span><span class="line"><span class="cl">      2048 -&gt; 4095       : 24       |****************************************|
+</span></span><span class="line"><span class="cl">      4096 -&gt; 8191       : 1        |*                                       |
+</span></span><span class="line"><span class="cl">      8192 -&gt; 16383      : 6        |**********                              |
+</span></span><span class="line"><span class="cl">     16384 -&gt; 32767      : 3        |*****                                   |
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>biolatency</code>展示的直方图比<code>iostat</code>的平均值能更好的理解磁盘<code>I/O</code>性能。</p>
+<p><code>BCC</code>已经自带了<code>CPU profiling</code>工具：</p>
+<blockquote>
+<ul>
+<li><a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/profile.py"  target="_blank" rel="noopener"
+    >tools/profile</a>: Profile CPU usage by sampling stack traces at a timed interval.</li>
+</ul>
+</blockquote>
+<p>此外，<code>BCC</code>还提供了<a class="link" href="http://www.brendangregg.com/offcpuanalysis.html"  target="_blank" rel="noopener"
+    >Off-CPU</a>的分析工具：</p>
+<blockquote>
+<ul>
+<li><a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/offcputime.py"  target="_blank" rel="noopener"
+    >tools/offcputime</a>: Summarize off-CPU time by kernel stack trace</li>
+</ul>
+</blockquote>
+<p>一般的<code>CPU profiling</code>都是分析<code>on-CPU</code>，即CPU时间都花费在了哪些代码路径。<code>off-CPU</code>是指进程不在CPU上运行时所花费的时间，进程因为某种原因处于休眠状态，比如说等待锁，或者被进程调度器（scheduler）剥夺了 CPU 的使用。这些情况都会导致这个进程无法运行在 CPU 上，但是仍然花费了时间。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241117655.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="thread_states"
+	
+	
+></p>
+<p><code>off-CPU</code>分析是对<code>on-CPU</code>的补充，让我们知道线程所有的时间花费，更全面的了解程序的运行情况。</p>
+<p>后面会介绍<code>profile</code>，<code>offcputime</code>如何生成火焰图进行可视化分析。</p>
+<h3 id="bpftrace的安装">bpftrace的安装</h3>
+<p><a class="link" href="https://github.com/iovisor/bpftrace"  target="_blank" rel="noopener"
+    >bpftrace</a> 建议运行在Linux 4.9 kernel或更高版本。根据<a class="link" href="https://github.com/iovisor/bpftrace/blob/master/INSTALL.md"  target="_blank" rel="noopener"
+    >安装文档</a>的说明，是因为<code>kprobes</code>、<code>uprobes</code>、<code>tracepoints</code>等主要特性是在<code>4.x</code>以上加入内核的：</p>
+<blockquote>
+<ul>
+<li>4.1 - kprobes</li>
+<li>4.3 - uprobes</li>
+<li>4.6 - stack traces, count and hist builtins (use PERCPU maps for accuracy and efficiency)</li>
+<li>4.7 - tracepoints</li>
+<li>4.9 - timers/profiling</li>
+</ul>
+</blockquote>
+<p>可以运行<a class="link" href="https://github.com/iovisor/bpftrace/blob/master/scripts/check_kernel_features.sh"  target="_blank" rel="noopener"
+    >scripts/check_kernel_features.sh</a>脚本进行验证：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ./scripts/check_kernel_features.sh 
+</span></span><span class="line"><span class="cl">All required features present!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>bpftrace</code>对Linux的版本要求较高，以<code>Ubuntu</code>为例，<code>19.04</code>及以上才支持<code>apt</code>安装：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt-get install -y libbpfcc-dev
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>18.04</code>和<code>18.10</code>可以从源码build，但需要先build好<code>BCC</code>。</p>
+<ul>
+<li>安装依赖</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt-get update
+</span></span><span class="line"><span class="cl">sudo apt-get install -y bison cmake flex g++ git libelf-dev zlib1g-dev libfl-dev systemtap-sdt-dev binutils-dev
+</span></span><span class="line"><span class="cl">sudo apt-get install -y llvm-7-dev llvm-7-runtime libclang-7-dev clang-7
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>编译和安装</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/iovisor/bpftrace
+</span></span><span class="line"><span class="cl">mkdir bpftrace/build; cd bpftrace/build;
+</span></span><span class="line"><span class="cl">cmake -DCMAKE_BUILD_TYPE=Release ..
+</span></span><span class="line"><span class="cl">make -j8
+</span></span><span class="line"><span class="cl">sudo make install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>make install</code>完成后，<code>bpftrace</code>自带的工具安装在<code>/usr/local/share/bpftrace/tools</code>目录下，这些工具的说明文档可以在<a class="link" href="https://github.com/iovisor/bpftrace"  target="_blank" rel="noopener"
+    >项目主页</a>找到。</p>
+<p>我们同样试用查看<code>Block I/O</code>延迟直方图的工具：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-&gt; % sudo bpftrace /usr/local/share/bpftrace/tools/biolatency.bt
+</span></span><span class="line"><span class="cl">Attaching 4 probes...
+</span></span><span class="line"><span class="cl">Tracing block device I/O... Hit Ctrl-C to end.
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">@usecs: 
+</span></span><span class="line"><span class="cl">[128, 256)             6 |@@@@@@@@@@                                          |
+</span></span><span class="line"><span class="cl">[256, 512)             4 |@@@@@@                                              |
+</span></span><span class="line"><span class="cl">[512, 1K)              8 |@@@@@@@@@@@@@                                       |
+</span></span><span class="line"><span class="cl">[1K, 2K)              20 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                  |
+</span></span><span class="line"><span class="cl">[2K, 4K)              30 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+</span></span><span class="line"><span class="cl">[4K, 8K)               1 |@                                                   |
+</span></span><span class="line"><span class="cl">[8K, 16K)              3 |@@@@@                                               |
+</span></span><span class="line"><span class="cl">[16K, 32K)             0 |                                                    |
+</span></span><span class="line"><span class="cl">[32K, 64K)             2 |@@@                                                 |
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>关于<code>bpftrace</code>脚本编写不在本文的讨论范围，感兴趣的可以参考<a class="link" href="https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md"  target="_blank" rel="noopener"
+    >reference_guide</a>。</p>
+<h2 id="火焰图">火焰图</h2>
+<p><a class="link" href="http://www.brendangregg.com/flamegraphs.html"  target="_blank" rel="noopener"
+    >火焰图</a>是<a class="link" href="http://www.brendangregg.com/"  target="_blank" rel="noopener"
+    >Brendan Gregg</a>发明的将<code>stack traces</code>可视化展示的方法。火焰图把时间和空间两个维度上的信息融合在一张图上，将频繁执行的代码路径以可视化的形式，非常直观的展现了出来。</p>
+<p>火焰图可以用于可视化来自任何<code>profiler</code>工具的记录的<code>stack traces</code>信息，除了用来<code>CPU profiling</code>，还适用于<code>off-CPU</code>，<code>page faults</code>等多种场景的分析。本文只讨论 <code>on-CPU</code> 和 <code>off-CPU</code> 火焰图的生成。</p>
+<p>要理解火焰图，先从理解<code>Stack Trace</code>开始。</p>
+<h3 id="stack-trace">Stack Trace</h3>
+<p><code>Stack Trace</code>是程序执行过程中，在特定时间点的函数调用列表。例如，<code>func_a()</code>调用<code>func_b()</code>，<code>func_b()</code>调用<code>func_c()</code>，此时的<code>Stack Trace</code>可写为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">func_c
+</span></span><span class="line"><span class="cl">func_b
+</span></span><span class="line"><span class="cl">func_a
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="profiling-stack-traces">Profiling Stack Traces</h3>
+<p>我们做<code>CPU profiling</code>时，会使用perf或bcc定时采样<code>Stack Trace</code>，这样会收集到非常多的<code>Stack Trace</code>。前面介绍了<code>perf report</code>会将<code>Stack Trace</code>样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？</p>
+<p>考虑下面的示例，我们用perf定时采样收集了多个<code>Stack Trace</code>，然后将相同的<code>Stack Trace</code>归纳合并，统计出次数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">func_e
+</span></span><span class="line"><span class="cl">func_d
+</span></span><span class="line"><span class="cl">func_b
+</span></span><span class="line"><span class="cl">func_a
+</span></span><span class="line"><span class="cl">1 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">func_b
+</span></span><span class="line"><span class="cl">func_a
+</span></span><span class="line"><span class="cl">2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">func_c
+</span></span><span class="line"><span class="cl">func_b
+</span></span><span class="line"><span class="cl">func_a
+</span></span><span class="line"><span class="cl">7
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，总共收集了10个样本，其中代码路径<code>func_a-&gt;func_b-&gt;func_c</code>有7次，该路径上的<code>func_c</code>在CPU上运行。 <code>func_a-&gt;func_b</code>进行了两次采样，<code>func_b</code>在CPU上运行。<code>func_a-&gt;func_b-&gt;func_d-&gt;func_e</code>一次采样，<code>func_e</code>在CPU上运行。</p>
+<h3 id="火焰图-1">火焰图</h3>
+<p>根据前面对<code>Stack Trace</code>的统计信息，可以绘制出如下的火焰图：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241117302.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="flame-graph-demo"
+	
+	
+></p>
+<p>火焰图具有以下特性：</p>
+<ul>
+<li>每个长方块代表了函数调用栈中的一个函数</li>
+<li>Y 轴显示堆栈的深度（堆栈中的帧数）。调用栈越深，火焰就越高。顶层方块表示 CPU 上正在运行的函数，下面的函数即为它的祖先。</li>
+<li>X 轴的宽度代表被采集的样本数量，越宽表示采集到的越多，即执行的时间长。需要注意的是，X轴从左到右不代表时间，而是所有的调用栈合并后，按字母顺序排列的。</li>
+</ul>
+<p>拿到火焰图，寻找最宽的塔并首先了解它们。顶层的哪个函数占据的宽度最大，说明它可能存在性能问题。</p>
+<p>可以使用Brendan Gregg开发的开源项目<a class="link" href="https://github.com/brendangregg/FlameGraph"  target="_blank" rel="noopener"
+    >FlameGraph</a>生成交互式的SVG火焰图。该项目提供了脚本，可以将采集的样本归纳合并，统计出<code>Stack Trace</code>出现的频率，然后使用<a class="link" href="https://github.com/brendangregg/FlameGraph/blob/master/flamegraph.pl"  target="_blank" rel="noopener"
+    >flamegraph.pl</a>生成SVG火焰图。</p>
+<p>我们先把FlameGraph项目clone下来，后面会用到：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/brendangregg/FlameGraph.git
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="java-cpu-profiling">Java CPU Profiling</h2>
+<p>虽然有很多Java专用的<code>profiler</code>工具，但这些工具一般只能看到Java方法的执行，缺少了<code>GC</code>，<code>JVM</code>的CPU时间消耗，并且有些工具的<code>Method tracing</code>性能损耗比较大。</p>
+<p><code>perf</code>和<code>BCC profile</code>的优点是它很高效，在内核上下文中对堆栈进行计数，并能完整显示用户态和内核态的CPU使用，能看到native libraries（例如libc），JVM（libjvm），Java方法和内核中花费的时间。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241118729.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="java-profilers"
+	
+	
+></p>
+<p>但是，<code>perf</code>和<code>BCC profile</code>这种系统级的profiler不能很好地与Java配合使用，它们识别不了Java方法和<code>stack traces</code>。这是因为：</p>
+<ul>
+<li>JVM的<code>JIT（just-in-time）</code>没有给系统级profiler公开符号表</li>
+<li>JVM还使用帧指针寄存器（frame pointer register，x86-64上的RBP）作为通用寄存器，打破了传统的堆栈遍历</li>
+</ul>
+<p>为了能生成包含Java栈与Native栈的火焰图，目前有两种解决方式：</p>
+<ul>
+<li>使用<code>JVMTI</code> agent <a class="link" href="https://github.com/jvm-profiling-tools/perf-map-agent"  target="_blank" rel="noopener"
+    >perf-map-agent</a>，生成Java符号表，供<code>perf</code>和<code>bcc</code>读取（/tmp/perf-PID.map）。同时要加上<code>-XX:+PreserveFramePointer</code> JVM 参数，让<code>perf</code>可以遍历基于帧指针（frame pointer）的堆栈。</li>
+<li>使用<a class="link" href="https://github.com/jvm-profiling-tools/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a>，该项目将<code>perf</code>的堆栈追踪和JDK提供的<a class="link" href="http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html"  target="_blank" rel="noopener"
+    >AsyncGetCallTrace</a>结合了起来，同样能够获得mixed-mode火焰图。同时，此方法不需要启用帧指针，所以不用加上<code>-XX:+PreserveFramePointer</code>参数。</li>
+</ul>
+<p>下面我们就分别演示这两种方式。</p>
+<h3 id="perf-map-agent">perf-map-agent</h3>
+<p><code>perf</code>期望能从<code>/tmp/perf-&lt;pid&gt;.map</code>中获得在未知内存区域执行的代码的符号表。<code>perf-map-agent</code>可以为<code>JIT</code>编译的方法生成<code>/tmp/perf-&lt;pid&gt;.map</code>文件，以满足<code>perf</code>的要求。</p>
+<p>首先下载并编译<code>perf-map-agent</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/jvm-profiling-tools/perf-map-agent.git
+</span></span><span class="line"><span class="cl">cd perf-map-agent
+</span></span><span class="line"><span class="cl">cmake .
+</span></span><span class="line"><span class="cl">make
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="配合perf使用">配合<code>perf</code>使用</h4>
+<p><code>perf-map-agent</code>提供了<a class="link" href="https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames"  target="_blank" rel="noopener"
+    >perf-java-flames</a>脚本，可以一步生成火焰图。</p>
+<p><code>perf-java-flames</code>接收<code>perf record</code>命令参数，它会调用<code>perf</code>进行采样，然后使用<a class="link" href="https://github.com/brendangregg/FlameGraph"  target="_blank" rel="noopener"
+    >FlameGraph</a>生成火焰图，一步完成，非常方便。</p>
+<p>注意，记得要给被<code>profiling</code>的Java进程加上<code>-XX:+PreserveFramePointer</code> JVM 参数。</p>
+<p>设置必要的环境变量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">export FLAMEGRAPH_DIR=[FlameGraph 所在的目录]
+</span></span><span class="line"><span class="cl">export PERF_RECORD_SECONDS=[采样时间]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>./bin/perf-java-flames  [PID] -F 99 -a -g -p [PID]</code></li>
+</ul>
+<p>对指定进程（<strong>-p PID</strong>），在所有CPU（<strong>-a</strong>）上进行call stacks（<strong>-g</strong>）采样，采样频率为99 Hertz （<strong>-F 99</strong>），持续时间为<code>PERF_RECORD_SECONDS</code>秒。命令运行完成后，会在当前目录生成名为<code>flamegraph-pid.svg</code>的火焰图。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241119221.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="java-flamegraph"
+	
+	
+></p>
+<ul>
+<li><code>./bin/perf-java-flames  [PID] -F 99 -g -a -e context-switches -p [PID]</code></li>
+</ul>
+<p>对指定进程的上下文切换（<strong>-e context-switches</strong>）进行采样，并生成火焰图。</p>
+<ul>
+<li>当然也可以只为<code>perf</code>生成Java符号表，然后直接使用perf采样</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">./bin/create-java-perf-map.sh [PID]; sudo perf record -F 99 -p [PID] -a -g -- sleep 15
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">./bin/create-java-perf-map.sh [PID]; sudo perf record -g -a -e context-switches -p [PID] sleep 15
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># 查看报告
+</span></span><span class="line"><span class="cl">sudo perf report --stdio
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="配合bcc-profile使用">配合<code>bcc profile</code>使用</h4>
+<p><code>FlameGraph</code>项目提供了<a class="link" href="https://github.com/brendangregg/FlameGraph/blob/master/jmaps"  target="_blank" rel="noopener"
+    >jmaps</a>脚本，它会调用<code>perf-map-agent</code>为当前运行的所有Java进程生成符号表。</p>
+<p>首先为<code>jmaps</code>脚本设置好<code>JAVA_HOME</code>和<code>perf-map-agent</code>的正确位置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-8-oracle}
+</span></span><span class="line"><span class="cl">AGENT_HOME=${AGENT_HOME:-/usr/lib/jvm/perf-map-agent} # from https://github.com/jvm-profiling-tools/perf-map-agent
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行<code>jmaps</code>，可以看到它会为当前所有的Java进程生成符号表：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo ./jmaps
+</span></span><span class="line"><span class="cl">Fetching maps for all java processes...
+</span></span><span class="line"><span class="cl">Mapping PID 30711 (user adp):
+</span></span><span class="line"><span class="cl">wc(1):   3486  10896 214413 /tmp/perf-30711.map
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们在做任何<code>profiling</code>之前，都需要调用<code>jmaps</code>，保持符号表是最新的。</p>
+<ul>
+<li>CPU Profiling火焰图</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Profiling
+</span></span><span class="line"><span class="cl">sudo ./jmaps ; sudo /usr/share/bcc/tools/profile -dF 99 -afp [PID] 10 &gt; out.profile01.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># 生成火焰图
+</span></span><span class="line"><span class="cl">./flamegraph.pl --color=java --hash &lt;out.profile01.txt &gt; flamegraph.svg
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>off-CPU火焰图</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Profiling
+</span></span><span class="line"><span class="cl">sudo ./jmaps ; sudo /usr/share/bcc/tools/offcputime -fp [PID] 10 &gt; out.offcpu01.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># 生成火焰图
+</span></span><span class="line"><span class="cl">./flamegraph.pl --color=java --bgcolor=blue --hash --countname=us --width=1024 --title=&#34;Off-CPU Time Flame Graph&#34; &lt; out.offcpu01.txt &gt; out.offcpu01.svg
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>off-CPU，并过滤指定的进程状态</li>
+</ul>
+<p>Linux的进程状态有：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>状态</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TASK_RUNNING</td>
+<td>意味着进程处于可运行状态。这并不意味着已经实际分配了CPU。进程可能会一直等到调度器选中它。该状态确保进程可以立即运行，而无需等待外部事件。</td>
+</tr>
+<tr>
+<td>TASK_INTERRUPTIBLE</td>
+<td>可中断的等待状态，主要为恢复时间无法预测的长时间等待。例如等待来自用户的输入。</td>
+</tr>
+<tr>
+<td>TASK_UNINTERRUPTIBLE</td>
+<td>不可中断的等待状态。用于因内核指示而停用的睡眠进程。它们不能由外部信号唤醒，只能由内核亲自唤醒。例如磁盘输入输出等待。</td>
+</tr>
+<tr>
+<td>TASK_STOPPED</td>
+<td>响应暂停信号而运行中断的状态。直到恢复前都不会被调度</td>
+</tr>
+<tr>
+<td>TASK_ZOMBIE</td>
+<td>僵尸状态，子进程已经终止，但父进程尚未执行wait()，因此该进程的资源没有被系统释放。</td>
+</tr>
+</tbody>
+</table></div>
+<p>在状态<code>TASK_RUNNING</code>（0）会发生非自愿上下文切换，而我们通常感兴趣的阻塞事件是<code>TASK_INTERRUPTIBLE</code>（1）或<code>TASK_UNINTERRUPTIBLE</code>（2），<code>offcputime</code>可以用<code>--state</code>过滤指定的进程状态：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Profiling
+</span></span><span class="line"><span class="cl">sudo ./jmaps ; sudo /usr/share/bcc/tools/offcputime -K --state 2 -f 30 &gt; out.offcpu01.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># 生成火焰图
+</span></span><span class="line"><span class="cl">./flamegraph.pl --color=io --countname=ms &lt; out.offcpu01.txt &gt; out.offcpu01.svg
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="async-profiler">async-profiler</h3>
+<p><a class="link" href="https://github.com/jvm-profiling-tools/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a>将<code>perf</code>的堆栈追踪和JDK提供的<a class="link" href="http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html"  target="_blank" rel="noopener"
+    >AsyncGetCallTrace</a>结合了起来，做到同时采样Java栈与Native栈，因此也就可以同时分析Java代码和Native代码中存在的性能热点。</p>
+<p><code>AsyncGetCallTrace</code>是JDK内部提供的一个函数，它的原型如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">typedef struct {
+</span></span><span class="line"><span class="cl">  jint lineno;         // BCI in the source file
+</span></span><span class="line"><span class="cl">  jmethodID method_id; // method executed in this frame
+</span></span><span class="line"><span class="cl">} ASGCT_CallFrame;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">typedef struct {
+</span></span><span class="line"><span class="cl">  JNIEnv *env_id   //Env where trace was recorded
+</span></span><span class="line"><span class="cl">  jint num_frames; // number of frames in this trace
+</span></span><span class="line"><span class="cl">  ASGCT_CallFrame *frames;
+</span></span><span class="line"><span class="cl">} ASGCT_CallTrace; 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">void AsyncGetCallTrace(ASGCT_CallTrace *trace, // pre-allocated trace to fill
+</span></span><span class="line"><span class="cl">                       jint depth,             // max number of frames to walk up the stack
+</span></span><span class="line"><span class="cl">                       void* ucontext)         // signal context
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看出，该函数直接通过<code>ucontext</code>就能获取到完整的Java调用栈。</p>
+<h4 id="async-profiler的使用">async-profiler的使用</h4>
+<p>下载并解压好<code>async-profiler</code>安装包。</p>
+<p>从Linux 4.6开始，从<code>non-root</code>进程使用<code>perf</code>捕获内核的<code>call stacks</code>，需要设置如下两个内核参数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># echo 1 &gt; /proc/sys/kernel/perf_event_paranoid
+</span></span><span class="line"><span class="cl"># echo 0 &gt; /proc/sys/kernel/kptr_restrict
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>async-profiler</code>的使用非常简单，一步就能生成火焰图。另外，也不需要为被<code>profiling</code>的Java进程设置<code>-XX:+PreserveFramePointer</code>参数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">./profiler.sh -d 30 -f /tmp/flamegraph.svg [PID]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://cdn.mazhen.tech/images/202209241119380.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="async-profiler"
+	
+	
+></p>
+<h2 id="总结">总结</h2>
+<p>为Java生成<code>CPU profiling</code>火焰图，基本的流程都是：</p>
+<ol>
+<li>使用工具采集样本</li>
+<li>使用<code>FlameGraph</code>项目提供的脚本，将采集的样本归纳合并，统计出<code>Stack Trace</code>出现的频率</li>
+<li>最后使用<code>flamegraph.pl</code>利用上一步的输出，绘制SVG火焰图</li>
+</ol>
+<p>为了能够生成<code>Java stacks</code>和<code>native stacks</code>完整的火焰图，解决<code>perf</code>和<code>bcc profile</code>不能识别Java符号和Java <code>stack traces</code>的问题，目前有以下两种方式：</p>
+<ol>
+<li><code>perf-map-agent</code> 加上 <code>perf</code>或<code>bcc profile</code></li>
+<li><code>async-profiler</code>（内部会使用到<code>perf</code>）</li>
+</ol>
+<p>如果只是对Java进程做<code>on-CPU</code>分析，<code>async-profiler</code>更加方便好用。如果需要更全面的了解Java进程的运行情况，例如分析系统锁的开销，阻塞的 I/O 操作，以及进程调度器（<code>scheduler</code>）的工作，那么还是需要使用功能更强大的<code>perf</code>和<code>bcc</code>。</p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a class="link" href="http://www.brendangregg.com/perf.html"  target="_blank" rel="noopener"
+    >perf Examples</a></li>
+<li><a class="link" href="http://www.brendangregg.com/ebpf.html"  target="_blank" rel="noopener"
+    >Linux Extended BPF (eBPF) Tracing Tools</a></li>
+<li><a class="link" href="http://www.brendangregg.com/bpf-performance-tools-book.html"  target="_blank" rel="noopener"
+    >BPF Performance Tools (book)</a></li>
+<li><a class="link" href="http://www.brendangregg.com/offcpuanalysis.html"  target="_blank" rel="noopener"
+    >Off-CPU Analysis</a></li>
+<li><a class="link" href="http://www.brendangregg.com/flamegraphs.html"  target="_blank" rel="noopener"
+    >Flame Graphs</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">java</a>
+        
+            <a href="/tags/performance/">performance</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux TCP队列相关参数的总结</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">BookKeeper实现分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

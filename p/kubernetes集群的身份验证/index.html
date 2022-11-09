@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，'>
+<title>Kubernetes集群的身份验证</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Kubernetes集群的身份验证'>
+<meta property='og:description' content='用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，'>
+<meta property='og:url' content='https://mazhen.tech/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='kubernetes' /><meta property='article:tag' content='security' /><meta property='article:published_time' content='2019-05-19T09:46:53&#43;08:00'/><meta property='article:modified_time' content='2019-05-19T09:46:53&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Kubernetes集群的身份验证">
+<meta name="twitter:description" content="用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#使用客户端证书进行身份验证">使用客户端证书进行身份验证</a>
+      <ol>
+        <li><a href="#理解数字证书">理解数字证书</a></li>
+        <li><a href="#数字证书在kubernetes中的应用">数字证书在Kubernetes中的应用</a></li>
+        <li><a href="#api-server-如何用客户端证书进行身份验证">API server 如何用客户端证书进行身份验证</a></li>
+      </ol>
+    </li>
+    <li><a href="#使用jwt-tokens进行身份验证">使用<code>JWT Tokens</code>进行身份验证</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/">Kubernetes集群的身份验证</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2019-05-19</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 16 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>用户在访问<code>Kubernetes</code>集群的<code>API server</code>时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达<code>API</code>服务，如下图所示：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209220949892.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="access-control-overview"
+	
+	
+></p>
+<p><code>Kubernetes</code>中的用户有两种类型：<code>service accounts</code> 和 <code>normal users</code>。<code>service accounts</code> 由 <code>Kubernetes</code>管理，它是<code>Pod</code>中的进程用于访问<code>API</code>服务的<code>account</code>，为<code>Pod</code>中的进程提供了一种身份标识。<code>normal users</code>是由外部系统管理，在<code>Kubernetes</code>中并没有对应的 <code>user</code> 对象，它为人类用户使用<code>kubectl</code>之类的工具访问<code>API</code>服务时提供身份标识。所有用户，不管是使用 <code>kubectl</code>、客户端lib、还是直接发起<code>REST</code>请求访问<code>API server</code>，都需要经过上述三个步骤的检查。</p>
+<p>本文将介绍<code>Kubernetes</code>集群的身份验证，即<code>Kubernetes</code>如何确认来访者的身份。</p>
+<p><code>Kubernetes</code>支持<a class="link" href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/"  target="_blank" rel="noopener"
+    >多种方式的身份验证</a>：客户端证书，Password， Plain Tokens，JWT(JSON Web Token)，HTTP basic auth等。你可以同时启用多种认证，一般建议至少使用两种：</p>
+<ul>
+<li>为验证<code>normal users</code>身份的客户端证书方式</li>
+<li>为验证<code>Service accounts</code>身份的 <code>JWT Tokens</code>方式</li>
+</ul>
+<h2 id="使用客户端证书进行身份验证">使用客户端证书进行身份验证</h2>
+<h3 id="理解数字证书">理解数字证书</h3>
+<p>非对称加密算法是证书的基础。数字签名、数字证书等一系列概念有点绕，但只要记住：<strong>公钥用来加密</strong>，<strong>私钥用来签名</strong> 就可以了。</p>
+<p>怎么理解呢？公钥可以随意分发，谁都可以持有，如果你用私钥加密，任何持有对应公钥的人都可以解密，这样做和没加密一样，没什么意义。因此，我们需要用公钥加密，只有持有私钥的那个人才能解密。私钥之所以称为私钥，一定会私密保存，不会向其他人泄漏。同时，用私钥加密虽然没有意义，但如果别人用公钥解开了私钥加密的信息，就能够证明信息是由私钥持有者发出的，验证了信息发送者的身份，这就是数字签名。</p>
+<p>每个人制作好自己的公钥和私钥，然后把公钥发布出去。两个人如果都有对方的公钥，就可以用对方的公钥给对方发送加密信息，同时附上用私钥加密的信息摘要作为数字签名，证明消息发送者的身份。</p>
+<p>通过加密防止了窃听风险，通过数字签名防止了冒充风险，数字签名内的消息摘要防止了篡改风险，一起看似很完美。</p>
+<p>等等，这里有个很重要的问题被忽略了：如何安全的将公钥发布出去？如果双方希望安全通信，最好当面交换公钥，以免被别人冒充，并且要保护好自己的电脑，避免公钥被别有用心的人替换。现实中不可能这样分发公钥，效率太低，几乎无法大规模实行。于是出现了<code>CA</code>(certificate authority)，为公钥做认证。<code>CA</code>用自己的私钥，对申请用户的公钥和一些身份信息加密，生成&quot;数字证书&quot;（Digital Certificate）。你现在可以用任何方式将内含公钥的数字证书发布出去，例如有客户发起请求，希望以<code>HTTPS</code>的方式访问你的WEB服务，你可以在第一次回复客户的响应中带上数字证书。客户拿到你的数字证书，用<code>CA</code>的公钥解开数字证书，安全的获得你的公钥。有了<code>CA</code>为你的数字证书背书，客户可以确定你的身份，不是有人在冒充你。</p>
+<p>那么<code>CA</code>的公钥如何安全的分发呢？首先，证书的签发是“链”式结构，给你签发证书的<code>CA</code>，它的证书可能还是由上一级<code>CA</code>机构签发的，这样一直往上追溯，最终会到某个“根证书”。如果“根证书”是被我们信任的，那么整条“链”上的证书都可信。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209220949566.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="certificates in a chain"
+	
+	
+></p>
+<p>其次，操作系统都内置了“受信任的根证书”。我们拿到某个证书，如果它的根证书在系统的“受信任的根证书”列表中，那么这个证书就是可信的。例如知乎的证书：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209220950113.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="zhihu crt"
+	
+	
+></p>
+<p>可以看到，它的根证书是<a class="link" href="https://www.digicert.com/digicert-root-certificates.htm"  target="_blank" rel="noopener"
+    >DigiCert Global Root CA</a>，在操作系统的“受信任的根证书”列表中能找到它：</p>
+<p><img src="https://cdn.mazhen.tech/images/202209220950931.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="root ca"
+	
+	
+></p>
+<p>根证书是通过预装的方式完成的分发，因此安装来源不明的操作系统有风险，可能潜伏了非法的根证书。一旦被植入了非法的根证书，一整套的安全体系瞬间土崩瓦解。同时，不能随意向系统中添加可信任的根证书，你很难验证根证书的真伪，它已经是root，没人能为它做背书了。12306网站早期的根证书就不在操作系统的“受信任根证书”列表中，需要用户手工安装，在网上<a class="link" href="https://www.williamlong.info/archives/3461.html"  target="_blank" rel="noopener"
+    >引起轩然大波</a>。最终12306在17年底的时候换成了Digicert的证书。</p>
+<p>简单总结一下基于非对称加密算法的公钥/私钥体系，<strong>公钥用来加密</strong>，<strong>私钥用来签名</strong>，<strong>引入<code>CA</code>保证公钥的安全分发</strong>。你可以找<code>CA</code>签发数字证书，那么你的客户就可以根据本地“受信任的根证书”验证你的数字证书，从而确认你的身份，然后用证书内包含的公钥给你发加密的信息。同样，你也可以要求对方的数字证书，以便确认对方的身份，并给他回加密的信息。</p>
+<p>理解了数字证书的基本原理，我们再看看<code>Kubernetes</code>中如何使用客户端证书进行身份验证。</p>
+<h3 id="数字证书在kubernetes中的应用">数字证书在Kubernetes中的应用</h3>
+<p><code>Kubernetes</code>各组件之间的通信都是基于<code>TLS</code>，实现服务的加密访问，同时支持基于证书的双向认证。</p>
+<p>我们在搭建私有<code>Kubernetes</code>集群时，一般是自建<code>root CA</code>，因为参与认证的所有集群节点，包括远程访问集群的客户端桌面都完全由自己控制，我们可以安全的将根证书分发到所有节点。有了<code>CA</code>，我们再用<code>CA</code>的私钥/公钥为各个组件签发所需的证书。</p>
+<p><code>CA</code>的创建，以及一系列客户端、服务端证书的签发，实际上是建立了<code>Kubernetes</code>集群的<a class="link" href="https://en.wikipedia.org/wiki/Public_key_infrastructure"  target="_blank" rel="noopener"
+    >PKI(Public key infrastructure)</a>。</p>
+<p><code>Kubernetes</code>中的组件比较多，所以需要的证书会非常多，<a class="link" href="https://kubernetes.io/docs/setup/certificates/"  target="_blank" rel="noopener"
+    >这篇文档</a>做了介绍。我按证书的用途归类总结一下：</p>
+<ul>
+<li><code>CA</code>证书
+<ul>
+<li><code>Kubernetes</code> 一般用途</li>
+<li><code>etcd</code> 集群根证书</li>
+<li><a class="link" href="https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/"  target="_blank" rel="noopener"
+    >aggregation 相关功能</a></li>
+</ul>
+</li>
+<li>服务端证书
+<ul>
+<li><code>API server</code></li>
+<li><code>etcd</code></li>
+<li><code>kubelet</code></li>
+</ul>
+</li>
+<li>访问<code>API server</code>时进行身份验证的客户端证书
+<ul>
+<li><code>kubelet</code>　　　　　　-&gt; <code>API server</code></li>
+<li><code>controller-manager</code> -&gt; <code>API server</code></li>
+<li><code>kube-scheduler</code> 　　-&gt; <code>API server</code></li>
+<li><code>admin</code>用户　　　　　-&gt; <code>API server</code></li>
+</ul>
+</li>
+<li><code>API server</code> 访问其他组件时进行身份验证的客户端证书
+<ul>
+<li><code>API server</code> -&gt; <code>etcd</code></li>
+<li><code>API server</code> -&gt; <code>kubelet</code></li>
+<li><code>API server</code> -&gt; <code>aggregated API server</code></li>
+</ul>
+</li>
+<li><code>etcd</code> 相关功能
+<ul>
+<li><code>etcd</code> 集群中节点互相通信使用的客户端证书</li>
+<li>如果<code>etcd</code>是以Pod方式运行，针对<code>etcd</code>的 Liveness 需要的客户端证书</li>
+</ul>
+</li>
+<li><code>Service accounts</code> 私钥/公钥对，用于生成<code>Service accounts</code>身份验证的 <code>JWT Tokens</code></li>
+</ul>
+<p>最后一个不是证书，不过也在<code>Kubernetes PKI</code>的管理范围。关于<code>Service accounts</code> 私钥/公钥对的作用，后面会讲到。</p>
+<p>理论上<code>CA</code>根证书可以只使用一个，不过为了安全和方便管理，官方强调在不同的上下文最好使用不同的<code>CA</code>：</p>
+<blockquote>
+<p><strong>Warning</strong>: Do not reuse a CA that is used in a different context unless you understand the risks and the mechanisms to protect the CA’s usage.</p>
+</blockquote>
+<p>可以看出，<code>API server</code>是核心组件，其他组件、包括admin用户对它的访问都需要<code>TLS</code>双向认证，所以会有<code>API server</code>的服务端证书和各个组件的客户端证书。<code>API server</code>作为客户端需要访问<code>etcd</code>、<code>kubelet</code>和<code>aggregated API server</code>，所以也会有相应的服务端、客户端证书。</p>
+<p>当我们使用<code>kubeadm</code>安装<code>Kubernetes</code>时，<code>kubeadm</code>会为我们生成上述的一系列私钥和证书，放在<code>/etc/kubernetes/</code>目录下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># tree --dirsfirst /etc/kubernetes/
+</span></span><span class="line"><span class="cl">/etc/kubernetes/
+</span></span><span class="line"><span class="cl">├── manifests                         组件的配置文件，以Pod方式运行在集群中
+</span></span><span class="line"><span class="cl">│   ├── etcd.yaml
+</span></span><span class="line"><span class="cl">│   ├── kube-apiserver.yaml
+</span></span><span class="line"><span class="cl">│   ├── kube-controller-manager.yaml  
+</span></span><span class="line"><span class="cl">│   └── kube-scheduler.yaml           
+</span></span><span class="line"><span class="cl">├── pki                               
+</span></span><span class="line"><span class="cl">│   ├── etcd                          
+</span></span><span class="line"><span class="cl">│   │   ├── ca.crt                    etcd 集群CA证书
+</span></span><span class="line"><span class="cl">│   │   ├── ca.key                    etcd 集群CA私钥
+</span></span><span class="line"><span class="cl">│   │   ├── healthcheck-client.crt    Liveness 健康检查使用的客户端证书
+</span></span><span class="line"><span class="cl">│   │   ├── healthcheck-client.key
+</span></span><span class="line"><span class="cl">│   │   ├── peer.crt                  etcd节点间通信使用的客户端证书
+</span></span><span class="line"><span class="cl">│   │   ├── peer.key                  
+</span></span><span class="line"><span class="cl">│   │   ├── server.crt                etcd服务端证书
+</span></span><span class="line"><span class="cl">│   │   └── server.key
+</span></span><span class="line"><span class="cl">│   ├── apiserver.crt                 API Server 服务端证书
+</span></span><span class="line"><span class="cl">│   ├── apiserver.key
+</span></span><span class="line"><span class="cl">│   ├── apiserver-etcd-client.crt     API server -&gt; etcd
+</span></span><span class="line"><span class="cl">│   ├── apiserver-etcd-client.key
+</span></span><span class="line"><span class="cl">│   ├── apiserver-kubelet-client.crt  API server -&gt; kubelet
+</span></span><span class="line"><span class="cl">│   ├── apiserver-kubelet-client.key
+</span></span><span class="line"><span class="cl">│   ├── ca.crt                        CA证书
+</span></span><span class="line"><span class="cl">│   ├── ca.key                        CA私钥
+</span></span><span class="line"><span class="cl">│   ├── front-proxy-ca.crt            aggregation 相关功能CA证书
+</span></span><span class="line"><span class="cl">│   ├── front-proxy-ca.key            aggregation 相关功能CA私钥
+</span></span><span class="line"><span class="cl">│   ├── front-proxy-client.crt        API server -&gt; aggregated API server
+</span></span><span class="line"><span class="cl">│   ├── front-proxy-client.key
+</span></span><span class="line"><span class="cl">│   ├── sa.key                        Service accounts 私钥
+</span></span><span class="line"><span class="cl">│   └── sa.pub                        Service accounts 公钥
+</span></span><span class="line"><span class="cl">├── admin.conf                        admin              -&gt; API server 
+</span></span><span class="line"><span class="cl">├── controller-manager.conf           controller-manager -&gt; API server 
+</span></span><span class="line"><span class="cl">├── kubelet.conf                      kubelet　　　　　　  -&gt; API server 
+</span></span><span class="line"><span class="cl">└── scheduler.conf                    kube-scheduler     -&gt; API server 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意，最后四个<code>*.conf</code>是<a class="link" href="https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/"  target="_blank" rel="noopener"
+    >kubeconfig file</a>，内容包含了集群、用户、namespace等信息，还有用来认证的CA证书、客户端证书和私钥。例如<code>admin.conf</code>就是<code>kubectl</code>访问集群用到的<code>kubeconfig file</code>，缺省情况下<code>kubectl</code>会使用<code>$HOME/.kube/config</code>，你也可以通过<code>KUBECONFIG</code>环境变量，或<code>kubectl</code> 的 <code>--kubeconfig</code> 参数进行设置。</p>
+<p><code>kubelet</code>运行在每个工作节点，无法提前预知 <code>node</code> 的 <code>IP</code> 信息，所以 <code>kubelet</code> 一般不会明确指定服务端证书, 而是只指定 <code>CA</code> 根证书, 让 <code>kubelet</code> 根据本机信息自动生成服务端证书，保存到配置参数指定的<a class="link" href="https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/"  target="_blank" rel="noopener"
+    >&ndash;cert-dir</a>目录中。<code>cert-dir</code>的缺省值是<code>/var/lib/kubelet/pki</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># tree /var/lib/kubelet/pki
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/var/lib/kubelet/pki
+</span></span><span class="line"><span class="cl">├── kubelet-client-2019-04-28-10-48-13.pem
+</span></span><span class="line"><span class="cl">├── kubelet-client-current.pem -&gt; /var/lib/kubelet/pki/kubelet-client-2019-04-28-10-48-13.pem
+</span></span><span class="line"><span class="cl">├── kubelet.crt   kubelet服务端证书
+</span></span><span class="line"><span class="cl">└── kubelet.key   kubelet服务端私钥
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>另外，<code>API server</code>有很多认证相关的<a class="link" href="https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/#options"  target="_blank" rel="noopener"
+    >启动参数</a>，参数名称让人容易混淆，有人还专门提了<a class="link" href="https://github.com/kubernetes/kubernetes/issues/54665"  target="_blank" rel="noopener"
+    >issue</a>，<a class="link" href="https://github.com/kubernetes/kubernetes/issues/54665#issuecomment-340960398"  target="_blank" rel="noopener"
+    >这个回答</a>根据用途对这些参数进行了分类，说明的非常清晰。</p>
+<h3 id="api-server-如何用客户端证书进行身份验证">API server 如何用客户端证书进行身份验证</h3>
+<p>前面提到，当用户使用<code>kubectl</code>访问<code>API server</code>时，需要以某种方式进行身份验证，最常用的方式就是使用客户端证书。<code>Kubernetes</code>是没有 <code>user</code> 这种 API 对象，<code>kubectl</code>的用户身份信息就包含在客户端证书中。<code>API server</code>验证了客户端证书，也就可以从证书中获得用户名和所属的<code>group</code>。</p>
+<p>我们以<code>/etc/kubernetes/admin.conf</code> 为例，看看客户端证书中提供了那些信息。</p>
+<p>先查看<code>admin.conf</code>文件的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl --kubeconfig /etc/kubernetes/admin.conf  config view
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">apiVersion: v1
+</span></span><span class="line"><span class="cl">clusters:
+</span></span><span class="line"><span class="cl">- cluster:
+</span></span><span class="line"><span class="cl">    certificate-authority-data: DATA+OMITTED
+</span></span><span class="line"><span class="cl">    server: https://172.18.100.90:6443
+</span></span><span class="line"><span class="cl">  name: test
+</span></span><span class="line"><span class="cl">contexts:
+</span></span><span class="line"><span class="cl">- context:
+</span></span><span class="line"><span class="cl">    cluster: test
+</span></span><span class="line"><span class="cl">    user: kubernetes-admin
+</span></span><span class="line"><span class="cl">  name: kubernetes-admin@test
+</span></span><span class="line"><span class="cl">current-context: kubernetes-admin@test
+</span></span><span class="line"><span class="cl">kind: Config
+</span></span><span class="line"><span class="cl">preferences: {}
+</span></span><span class="line"><span class="cl">users:
+</span></span><span class="line"><span class="cl">- name: kubernetes-admin
+</span></span><span class="line"><span class="cl">  user:
+</span></span><span class="line"><span class="cl">    client-certificate-data: REDACTED
+</span></span><span class="line"><span class="cl">    client-key-data: REDACTED
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个文件提供了<code>API server</code>的地址，以及身份验证用到的证书：</p>
+<ul>
+<li><code>certificate-authority-data</code> ：CA证书</li>
+<li><code>client-certificate-data</code> ：客户端证书</li>
+<li><code>client-key-data</code>： 客户端私钥</li>
+</ul>
+<p>客户端证书是以<code>base64</code>编码的方式保存在<code>client-certificate-data</code>字段中，我们将证书提取出来：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># cat /etc/kubernetes/admin.conf | grep client-certificate-data | cut -d &#34; &#34; -f 6 | base64 -d &gt; admin.crt
+</span></span><span class="line"><span class="cl"># cat admin.crt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-----BEGIN CERTIFICATE-----
+</span></span><span class="line"><span class="cl">MIIC8jCCAdqgAwIBAgIIaBuxevPYGaswDQYJKoZIhvcNAQELBQAwFTETMBEGA1UE
+</span></span><span class="line"><span class="cl">AxMKa3ViZXJuZXRlczAeFw0xOTA0MjgwMjQwMDBaFw0yMDA0MjcwMjQwMDNaMDQx
+</span></span><span class="line"><span class="cl">FzAVBgNVBAoTDnN5c3RlbTptYXN0ZXJzMRkwFwYDVQQDExBrdWJlcm5ldGVzLWFk
+</span></span><span class="line"><span class="cl">bWluMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvRTIQ4YEMh0mUWKP
+</span></span><span class="line"><span class="cl">17pLdUocgZMLVCK6tYmj0DJIihRk+wKvNzYSStfxsug9nnEqVVzmbW5/UxER776H
+</span></span><span class="line"><span class="cl">844y/1NGk/8LsDIkFGspf3cEmQ8OE8TlLNW7h9gWIGymLQ/K1qhYfNOPDYoJXPix
+</span></span><span class="line"><span class="cl">eUWTJgn0+neJNbJ3JoJk2WRlDFwbE0uXgYYczuDcJablSdbb8Oc+E4qJ1U7u9YMN
+</span></span><span class="line"><span class="cl">Bo/JBY68wYtdjXHl6Mg28aCioVZrs5eZWkNzNpXMVjQwFdZAdWbnS3OJGN1b6IrV
+</span></span><span class="line"><span class="cl">gWk9PMoCE2TtFv5NdlHSYFtEAaBEwfl3/D3rGHKb4ZH/fgKWsepy8ffxxibM6pND
+</span></span><span class="line"><span class="cl">pLnmAwIDAQABoycwJTAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUH
+</span></span><span class="line"><span class="cl">AwIwDQYJKoZIhvcNAQELBQADggEBALPYorv2mlXyu6jpX/6gE1kTvpPGK4vylfSY
+</span></span><span class="line"><span class="cl">9jl4PtQZgRaXvmVsUKpyIdtVhdMZp9EFaYNC4AYkqaVEOoAbU96SYhdO/6h7Rn8T
+</span></span><span class="line"><span class="cl">0Ae+f1Vwt+8GxErEN3xp4noHfXM0eSEuFLPXt43BBJInYRyx1J0urAjYtNCvc9wX
+</span></span><span class="line"><span class="cl">uQFVmNKsqgmjvHQsRkvKcb8HEzcaD1TqqnTpq3usGjNggVZFTChB58R909yGPEXL
+</span></span><span class="line"><span class="cl">n7VsilmN86gom3fgqwCn2C00iKcuzCOwYN2T+Mi8KI2DraDDoVeRMSaYQNUfKNIX
+</span></span><span class="line"><span class="cl">Ngeod/C4piq+OAdyrPPFEINdLi404EYHyod0CgiD6uhoX5W06O4=
+</span></span><span class="line"><span class="cl">-----END CERTIFICATE-----
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<code>openssl</code>查看证书内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># openssl x509 -in ./admin.crt -text
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Certificate:
+</span></span><span class="line"><span class="cl">    Data:
+</span></span><span class="line"><span class="cl">        Version: 3 (0x2)
+</span></span><span class="line"><span class="cl">        Serial Number: 7501784745950845355 (0x681bb17af3d819ab)
+</span></span><span class="line"><span class="cl">    Signature Algorithm: sha256WithRSAEncryption
+</span></span><span class="line"><span class="cl">        Issuer: CN=kubernetes
+</span></span><span class="line"><span class="cl">        Validity
+</span></span><span class="line"><span class="cl">            Not Before: Apr 28 02:40:00 2019 GMT
+</span></span><span class="line"><span class="cl">            Not After : Apr 27 02:40:03 2020 GMT
+</span></span><span class="line"><span class="cl">        Subject: O=system:masters, CN=kubernetes-admin
+</span></span><span class="line"><span class="cl">        Subject Public Key Info:
+</span></span><span class="line"><span class="cl">            Public Key Algorithm: rsaEncryption
+</span></span><span class="line"><span class="cl">                Public-Key: (2048 bit)
+</span></span><span class="line"><span class="cl">......
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意这一行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Subject: O=system:masters, CN=kubernetes-admin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>API server</code>会将证书中<code>CN(Common Name)</code>作为用户名，<code>O(Organization)</code>作为用户所属的<code>group</code>。<code>API server</code>从这个证书得到的信息是：admin用户所属的group是<code>system:masters</code>。至此，身份验证阶段完成。</p>
+<p>下一步是授权检查，也就是检查用户有没有权限执行这个操作。这是另外一个<a class="link" href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/"  target="_blank" rel="noopener"
+    >话题</a>，本文不做详细讨论，只是简单介绍一下。根据<a class="link" href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/"  target="_blank" rel="noopener"
+    >官方文档</a>，<code>Kubernetes</code>提供了缺省的 <code>ClusterRole - group</code> 绑定关系，已经将<code>system:masters</code> group 和 角色 <code>cluster-admin</code>绑定到了一起：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># kubectl get clusterrolebindings  cluster-admin -o yaml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">apiVersion: rbac.authorization.k8s.io/v1
+</span></span><span class="line"><span class="cl">kind: ClusterRoleBinding
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">  annotations:
+</span></span><span class="line"><span class="cl">    rbac.authorization.kubernetes.io/autoupdate: &#34;true&#34;
+</span></span><span class="line"><span class="cl">  creationTimestamp: &#34;2019-04-28T02:40:17Z&#34;
+</span></span><span class="line"><span class="cl">  labels:
+</span></span><span class="line"><span class="cl">    kubernetes.io/bootstrapping: rbac-defaults
+</span></span><span class="line"><span class="cl">  name: cluster-admin
+</span></span><span class="line"><span class="cl">  resourceVersion: &#34;98&#34;
+</span></span><span class="line"><span class="cl">  selfLink: /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/cluster-admin
+</span></span><span class="line"><span class="cl">  uid: f58a87a7-695e-11e9-91ca-005056ac1c1c
+</span></span><span class="line"><span class="cl">roleRef:
+</span></span><span class="line"><span class="cl">  apiGroup: rbac.authorization.k8s.io
+</span></span><span class="line"><span class="cl">  kind: ClusterRole
+</span></span><span class="line"><span class="cl">  name: cluster-admin
+</span></span><span class="line"><span class="cl">subjects:
+</span></span><span class="line"><span class="cl">- apiGroup: rbac.authorization.k8s.io
+</span></span><span class="line"><span class="cl">  kind: Group
+</span></span><span class="line"><span class="cl">  name: system:masters
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个绑定关系的意思是，属于<code>system:masters</code>group的用户，都拥有<code>cluster-admin</code>角色包含的权限。我们再看看角色<code>cluster-admin</code>的具体权限信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># kubectl get clusterrole cluster-admin -o yaml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">apiVersion: rbac.authorization.k8s.io/v1
+</span></span><span class="line"><span class="cl">kind: ClusterRole
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">  annotations:
+</span></span><span class="line"><span class="cl">    rbac.authorization.kubernetes.io/autoupdate: &#34;true&#34;
+</span></span><span class="line"><span class="cl">  creationTimestamp: &#34;2019-04-28T02:40:17Z&#34;
+</span></span><span class="line"><span class="cl">  labels:
+</span></span><span class="line"><span class="cl">    kubernetes.io/bootstrapping: rbac-defaults
+</span></span><span class="line"><span class="cl">  name: cluster-admin
+</span></span><span class="line"><span class="cl">  resourceVersion: &#34;44&#34;
+</span></span><span class="line"><span class="cl">  selfLink: /apis/rbac.authorization.k8s.io/v1/clusterroles/cluster-admin
+</span></span><span class="line"><span class="cl">  uid: f5523c21-695e-11e9-91ca-005056ac1c1c
+</span></span><span class="line"><span class="cl">rules:
+</span></span><span class="line"><span class="cl">- apiGroups:
+</span></span><span class="line"><span class="cl">  - &#39;*&#39;
+</span></span><span class="line"><span class="cl">  resources:
+</span></span><span class="line"><span class="cl">  - &#39;*&#39;
+</span></span><span class="line"><span class="cl">  verbs:
+</span></span><span class="line"><span class="cl">  - &#39;*&#39;
+</span></span><span class="line"><span class="cl">- nonResourceURLs:
+</span></span><span class="line"><span class="cl">  - &#39;*&#39;
+</span></span><span class="line"><span class="cl">  verbs:
+</span></span><span class="line"><span class="cl">  - &#39;*&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从<code>rules</code>列表可以看出，<code>cluster-admin</code>这个角色对所有资源都有无限制的操作权限。因此，使用了这个<code>kubeconfig file</code>的<code>kubectl</code>的请求就有了操控和管理整个集群的权限。</p>
+<h2 id="使用jwt-tokens进行身份验证">使用<code>JWT Tokens</code>进行身份验证</h2>
+<p>运行在<code>Pod</code>中的进程需要访问<code>API server</code>时，同样需要进行身份验证和授权检查。如何让<code>Pod</code>具有用户身份呢？通过给<code>Pod</code>指定<code>service account</code>来实现。<code>service account</code>是<code>Kubernetes</code>内置的一种 “服务账户”，它为<code>Pod</code>中的进程提供了一种身份标识。如果<code>Pod</code>没有显式的指定<code>service account</code>，系统会自动为其关联<code>default service account</code>。</p>
+<p>我们自己创建<code>service account</code>对象非常简单：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">//serviceaccount.yaml
+</span></span><span class="line"><span class="cl">apiVersion: v1
+</span></span><span class="line"><span class="cl">kind: ServiceAccount
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">  name: nginx-example
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># kubectl apply -f serviceaccount.yaml
+</span></span><span class="line"><span class="cl">serviceaccount/nginx-example created
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看刚刚创建的<code>service account</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># kubectl describe serviceaccounts nginx-example
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Name:                nginx-example
+</span></span><span class="line"><span class="cl">Namespace:           default
+</span></span><span class="line"><span class="cl">Labels:              &lt;none&gt;
+</span></span><span class="line"><span class="cl">Annotations:         kubectl.kubernetes.io/last-applied-configuration:
+</span></span><span class="line"><span class="cl">                       {&#34;apiVersion&#34;:&#34;v1&#34;,&#34;kind&#34;:&#34;ServiceAccount&#34;,&#34;metadata&#34;:{&#34;annotations&#34;:{},&#34;name&#34;:&#34;nginx-example&#34;,&#34;namespace&#34;:&#34;default&#34;}}
+</span></span><span class="line"><span class="cl">Image pull secrets:  &lt;none&gt;
+</span></span><span class="line"><span class="cl">Mountable secrets:   nginx-example-token-r2cv6
+</span></span><span class="line"><span class="cl">Tokens:              nginx-example-token-r2cv6
+</span></span><span class="line"><span class="cl">Events:              &lt;none&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当<code>service account</code>对象创建成功，<code>controller-manager</code>会发现这个新对象，然后为它生成<code>token</code>。<code>token</code>实际上是<code>secret</code>对象，内部包含了用来身份验证的<code>token</code>。<code>service account</code>对象的<code>Tokens</code>列引用的就是<code>controller-manager</code>为它创建的<code>token</code>。</p>
+<p>我们来看看<code>token</code>的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># kubectl get secrets nginx-example-token-r2cv6 -o yaml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">apiVersion: v1
+</span></span><span class="line"><span class="cl">data:
+</span></span><span class="line"><span class="cl">  ca.crt: (APISERVER&#39;S CA BASE64 ENCODED)
+</span></span><span class="line"><span class="cl">  namespace: ZGVmYXVsdA==
+</span></span><span class="line"><span class="cl">  token: (BEARER TOKEN BASE64 ENCODED)
+</span></span><span class="line"><span class="cl">kind: Secret
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">  ......
+</span></span><span class="line"><span class="cl">type: kubernetes.io/service-account-token
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，这个<code>secret</code>对象的<code>type</code>是<code>service-account-token</code>，包含了三部分数据：</p>
+<ul>
+<li><code>ca.crt</code>： <code>API Server</code>的<code>CA</code>证书，用于<code>Pod</code>中的进程访问<code>API Server</code>时对服务端证书进行校验</li>
+<li><code>namespace</code>： <code>secret</code>所在<code>namespace</code>，使用了<code>base64</code>编码</li>
+<li><code>token</code>：<code>JWT Tokens</code></li>
+</ul>
+<p><code>JWT Tokens</code> 是 <code>controller-manager</code> 用 <code>service account</code>私钥<code>sa.key</code>签发的，其中包含了用户的身份信息，<code>API Server</code>可以用<code>sa.pub</code>验证<code>token</code>，拿到用户身份信息，从而完成身份验证。</p>
+<p>如果是使用<code>kubeadm</code>安装的<code>Kubernetes</code>，我们可以在<code>/etc/kubernetes/manifests/</code>目录中的配置文件确认<code>sa.key</code>和<code>sa.pub</code>的作用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">spec:
+</span></span><span class="line"><span class="cl">  containers:
+</span></span><span class="line"><span class="cl">  - command:
+</span></span><span class="line"><span class="cl">    - kube-controller-manager
+</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl">    - --service-account-private-key-file=/etc/kubernetes/pki/sa.key
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># cat /etc/kubernetes/manifests/kube-apiserver.yaml
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">spec:
+</span></span><span class="line"><span class="cl">  containers:
+</span></span><span class="line"><span class="cl">  - command:
+</span></span><span class="line"><span class="cl">    - kube-apiserver
+</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl">    - --service-account-key-file=/etc/kubernetes/pki/sa.pub
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>controller-manager</code>用私钥<code>sa.key</code>签名，<code>API Server</code>用公钥<code>sa.pub</code>验签。</p>
+<p>运行在<code>Pod</code>中的进程在向<code>API server</code>发起<code>HTTP</code>请求时，<code>HTTP header</code>中会携带<code>token</code>，<code>API server</code>从<code>header</code>中拿到<code>token</code>，进行身份验证：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Authorization: Bearer [token]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>JWT Tokens</code>的是由用<code>.</code>分割的三部分组成：</p>
+<ul>
+<li>Header</li>
+<li>Payload</li>
+<li>Signature</li>
+</ul>
+<p>因此，一个<code>JWT Tokens</code>看起来是这样的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">xxxxxxx.yyyyyyyy.zzzzzzz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>Header</code>和<code>Payload</code>都是<code>base64</code>编码的<code>JSON</code>，以上面<code>nginx-example</code>关联的<code>token</code>为例，看看<code>Header</code>和<code>Payload</code>的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &#34; &#34; -f 7
+</span></span><span class="line"><span class="cl">eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im5naW54LWV4YW1wbGUtdG9rZW4tcjJjdjYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibmdpbngtZXhhbXBsZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjBmZWRlOWM1LTc2YjUtMTFlOS05MWNhLTAwNTA1NmFjMWMxYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0Om5naW54LWV4YW1wbGUifQ.VOjVQBr5PKg1WyZYtIW0Fos5fxFN4cYE3Mz9p1eWbQP6rQRQGDEiGX-LBuM6ECI9cpSL-F4nYQAL9vmIlA4vbAgS4OFgC4nwu8SzLu2FVeE7RDpguvsdAsj-4T_LxEGX1RPljGTpvlt8HRjTnp9K8W4dy7PyJQEB5XvCf-IVNAs3zESgmuJ7wJwO7mXQe5WdeqhI5vXjcZiXP97oH0VRYT1vTKVP-GooC5YfaNhU7rHoJ0gmR10xNqZjwKGsHKkq5maC5BOrXFLlHRqVRwm9-hRn-ZLgAoCwujCIpLvPaFUR8HaatzX4GQ_HWev2soJnk1qcav0smxfjC-fu540vZA
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &#34; &#34; -f 7 | cut -d &#34;.&#34; -f 1 | base64 -d | python -mjson.tool
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    &#34;alg&#34;: &#34;RS256&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kid&#34;: &#34;&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &#34; &#34; -f 7 | cut -d &#34;.&#34; -f 2 | base64 -d | python -mjson.tool
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    &#34;iss&#34;: &#34;kubernetes/serviceaccount&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/namespace&#34;: &#34;default&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/secret.name&#34;: &#34;nginx-example-token-r2cv6&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.name&#34;: &#34;nginx-example&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.uid&#34;: &#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&#34;,
+</span></span><span class="line"><span class="cl">    &#34;sub&#34;: &#34;system:serviceaccount:default:nginx-example&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>Header</code>中的<code>alg</code>指明了签名用到的加密算法，<code>Payload</code> 中包含了用户的身份信息，可以知道这个<code>service account</code>属于的<code>namespace</code>为<code>default</code>，名称为<code>nginx-example</code>。</p>
+<p>第三部分<code>Signature</code>的构造方式如下，如果加密算法选择了PKCS SHA：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PKCSSHA256(
+</span></span><span class="line"><span class="cl">  base64UrlEncode(header) + &#34;.&#34; +
+</span></span><span class="line"><span class="cl">  base64UrlEncode(payload),
+</span></span><span class="line"><span class="cl">  secret)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>controller-manager</code>用<code>sa.key</code>签名，<code>API Server</code>用公钥<code>sa.pub</code>验签，进行身份验证。</p>
+<p>如果先深入了解<code>JWT(JSON Web Token)</code>，建议阅读这篇文档<a class="link" href="https://blog.angular-university.io/angular-jwt/"  target="_blank" rel="noopener"
+    >&lt;JWT: The Complete Guide to JSON Web Tokens&gt;</a></p>
+<p><code>Pod</code>中的进程如何获得这个<code>token</code>呢？<code>Kubernetes</code>在创建<code>Pod</code>时，会将<code>service account token</code>映射到<code>Pod</code>的<code>/var/run/secrets/kubernetes.io/serviceaccount</code> 目录下。我们通过一个例子演示一下。</p>
+<p>创建<code>Pod</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// simple.yaml
+</span></span><span class="line"><span class="cl">apiVersion: v1
+</span></span><span class="line"><span class="cl">kind: Pod
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">    name: firstpod
+</span></span><span class="line"><span class="cl">spec:
+</span></span><span class="line"><span class="cl">    serviceAccountName: nginx-example
+</span></span><span class="line"><span class="cl">    containers:
+</span></span><span class="line"><span class="cl">    - image: nginx
+</span></span><span class="line"><span class="cl">      name: stan
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ kubectl apply -f simple.yaml
+</span></span><span class="line"><span class="cl">pod/firstpod created
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看<code>Pod</code>内<code>/var/run/secrets/kubernetes.io/serviceaccount</code>目录的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl exec firstpod -- ls  /var/run/secrets/kubernetes.io/serviceaccount
+</span></span><span class="line"><span class="cl">ca.crt
+</span></span><span class="line"><span class="cl">namespace
+</span></span><span class="line"><span class="cl">token
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看<code>Pod</code>内文件<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl exec firstpod -- cat  /var/run/secrets/kubernetes.io/serviceaccount/token | cut -d &#34;.&#34; -f 2 | base64 -d | python -mjson.tool
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    &#34;iss&#34;: &#34;kubernetes/serviceaccount&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/namespace&#34;: &#34;default&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/secret.name&#34;: &#34;nginx-example-token-r2cv6&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.name&#34;: &#34;nginx-example&#34;,
+</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.uid&#34;: &#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&#34;,
+</span></span><span class="line"><span class="cl">    &#34;sub&#34;: &#34;system:serviceaccount:default:nginx-example&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，映射进<code>Pod</code>中的<code>token</code>，正是我们在配置中通过<code>serviceAccountName</code>指定的<code>nginx-example</code>。<code>Pod</code>中的进程可以通过访问文件<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>拿到<code>token</code>。</p>
+<p>如何为<code>service account</code>授权？通过定义<code>service account</code>和<code>role</code>的绑定完成。本文简单演示一下，详细的说明参加<a class="link" href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/"  target="_blank" rel="noopener"
+    >官方文档</a>。</p>
+<p>创建<code>role</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// example-role.yaml
+</span></span><span class="line"><span class="cl">kind: Role
+</span></span><span class="line"><span class="cl">apiVersion: rbac.authorization.k8s.io/v1
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">  name: example-role
+</span></span><span class="line"><span class="cl">rules:
+</span></span><span class="line"><span class="cl">- apiGroups: [&#34;&#34;]
+</span></span><span class="line"><span class="cl">  resources: [&#34;pods&#34;]
+</span></span><span class="line"><span class="cl">  verbs: [&#34;get&#34;, &#34;watch&#34;, &#34;list&#34;]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ kubectl apply -f example-role.yaml
+</span></span><span class="line"><span class="cl">role.rbac.authorization.k8s.io/example-role created
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>role</code>可以理解为一组权限的集合，例如上面创建的<code>example-role</code>对<code>default</code> Namesapce内的<code>Pods</code>有<code>get</code>、<code>watch</code>和<code>list</code>操作权限。</p>
+<p>下一步就是将<code>service account</code>和<code>role</code>进行绑定：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">//example-rolebinding.yaml
+</span></span><span class="line"><span class="cl">kind: RoleBinding
+</span></span><span class="line"><span class="cl">apiVersion: rbac.authorization.k8s.io/v1
+</span></span><span class="line"><span class="cl">metadata:
+</span></span><span class="line"><span class="cl">  name: example-rolebinding
+</span></span><span class="line"><span class="cl">  namespace: default
+</span></span><span class="line"><span class="cl">subjects:
+</span></span><span class="line"><span class="cl">- kind: ServiceAccount
+</span></span><span class="line"><span class="cl">  name: nginx-example
+</span></span><span class="line"><span class="cl">  namespace: default
+</span></span><span class="line"><span class="cl">roleRef:
+</span></span><span class="line"><span class="cl">  kind: Role
+</span></span><span class="line"><span class="cl">  name: example-role
+</span></span><span class="line"><span class="cl">  apiGroup: rbac.authorization.k8s.io
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ kubectl apply -f example-rolebinding.yaml
+</span></span><span class="line"><span class="cl">rolebinding.rbac.authorization.k8s.io/example-rolebinding created
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过绑定的创建，<code>service account</code>就拥有了<code>role</code>定义的权限。</p>
+<h2 id="总结">总结</h2>
+<p>用户对<code>API server</code>的访问需要通过身份验证、授权和准入控制这三个阶段的检查。</p>
+<p>一般集群外部用户访问<code>API Server</code>使用客户端证书进行身份验证。<code>Kubernetes</code>各组件之间的通信都使用了<code>TLS</code>加密传输，同时支持基于证书的双向认证。因此<code>Kubernetes</code>的安装过程涉及很多证书的创建，本文分类介绍了这些证书的作用。</p>
+<p>集群内<code>Pod</code>中的进程访问<code>API server</code>时，使用<code>service account</code>关联的<code>token</code>进行身份验证。</p>
+<p>每个<code>Pod</code>都会关联一个<code>service account</code>，没有明确指定时使用<code>default</code>。当我们创建<code>service account</code>对象，<code>controller-manager</code>会为这个<code>service account</code>生成<code>Secret</code>，内部包含了用来身份验证的<code>JWT Tokens</code>。<code>Kubernetes</code>会将<code>token</code>文件<code>mount</code>到<code>Pod</code>的<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>，<code>Pod</code>内的进程在向<code>API server</code>发起的<code>HTTP</code>时，就可以在请求头中携带这个<code>token</code>。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/kubernetes/">kubernetes</a>
+        
+            <a href="/tags/security/">security</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/helm%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Helm的安装和使用</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8kubectl%E7%AE%A1%E7%90%86%E5%A4%9A%E9%9B%86%E7%BE%A4/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用kubectl管理多集群</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%9C%A8ubuntu%E4%B8%8A%E5%AE%89%E8%A3%85minikube/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">在Ubuntu上安装Minikube</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/kubernetes%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Kubernetes工作原理概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/pin-box-future%E8%A7%A3%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Pin-Box-Future解析</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的资'>
+<title>Docker单机网络模型动手实验</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Docker单机网络模型动手实验'>
+<meta property='og:description' content='容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的资'>
+<meta property='og:url' content='https://mazhen.tech/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2018-10-26T21:40:03&#43;08:00'/><meta property='article:modified_time' content='2018-10-26T21:40:03&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Docker单机网络模型动手实验">
+<meta name="twitter:description" content="容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的资">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#容器的本质">容器的本质</a></li>
+    <li><a href="#容器网络">容器网络</a>
+      <ol>
+        <li><a href="#veth-pairs">Veth Pairs</a></li>
+        <li><a href="#linux-bridge">Linux Bridge</a></li>
+        <li><a href="#iptables">iptables</a></li>
+      </ol>
+    </li>
+    <li><a href="#动手实验">动手实验</a>
+      <ol>
+        <li><a href="#场景一容器间的网络互通">场景一：容器间的网络互通</a></li>
+        <li><a href="#场景二从宿主机访问容器内网络">场景二：从宿主机访问“容器”内网络</a></li>
+        <li><a href="#场景三从容器内访问外网">场景三：从“容器”内访问外网</a></li>
+        <li><a href="#场景四从外部访问容器内暴露的服务">场景四：从外部访问“容器”内暴露的服务</a></li>
+        <li><a href="#测试环境恢复">测试环境恢复</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">Docker单机网络模型动手实验</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2018-10-26</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 10 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="容器的本质">容器的本质</h2>
+<p>容器的本质就是一个进程，只不过对它进行了<code>Linux Namesapce</code>隔离，让它看不到外面的世界，用<code>Cgroups</code>限制了它能使用的资源，同时利用系统调用<code>pivot_root</code>或<code>chroot</code>切换了进程的根目录，把容器镜像挂载为根文件系统<code>rootfs</code>。<code>rootfs</code>中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。<code>rootfs</code>打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112142723.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="docker"
+	
+	
+></p>
+<p>从上图可以看出，容器和虚拟机的最大区别就是，每个虚拟机都有独立的操作系统内核<code>Guest OS</code>，而容器只是一种特殊的进程，它们共享同一个操作系统内核。</p>
+<p>看清了容器的本质，很多问题就容易理解。例如我们执行 <code>docker exec</code> 命令能够进入运行中的容器，好像登录进独立的虚拟机一样。实际上这只不过是利用系统调用<code>setns</code>，让当前进程进入到容器进程的<code>Namesapce</code>中，它就能“看到”容器内部的情况了。</p>
+<p>关于容器涉及的基础技术，<a class="link" href="https://weibo.com/haoel"  target="_blank" rel="noopener"
+    >左耳朵耗子</a>多年前写的系列文章仍然很有参考价值：</p>
+<ul>
+<li><a class="link" href="https://coolshell.cn/articles/17010.html"  target="_blank" rel="noopener"
+    >DOCKER基础技术：LINUX NAMESPACE（上）</a></li>
+<li><a class="link" href="https://coolshell.cn/articles/17029.html"  target="_blank" rel="noopener"
+    >DOCKER基础技术：LINUX NAMESPACE（下）</a></li>
+<li><a class="link" href="https://coolshell.cn/articles/17049.html"  target="_blank" rel="noopener"
+    >DOCKER基础技术：LINUX CGROUP</a></li>
+<li><a class="link" href="https://coolshell.cn/articles/17061.html"  target="_blank" rel="noopener"
+    >DOCKER基础技术：AUFS</a></li>
+<li><a class="link" href="https://coolshell.cn/articles/17200.html"  target="_blank" rel="noopener"
+    >DOCKER基础技术：DEVICEMAPPER</a></li>
+</ul>
+<h2 id="容器网络">容器网络</h2>
+<p>如何让容器之间互相连接保持网络通畅，Docker有多种网络模型。对于单机上运行的多个容器，可以使用缺省的<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
+    >bridge网络驱动</a>。而容器的跨主机通信，一种常用的方式是利用<code>Overlay 网络</code>，基于物理网络的虚拟化网络来实现。</p>
+<p>本文会在单机上实验展示<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
+    >bridge网络模型</a>，揭示其背后的实现原理。<a class="link" href="/docker-overlay-networks" >下一篇文章</a>会演示容器如何利用<code>Overlay 网络</code>进行跨主机通信。</p>
+<p>我们按照下图创建网络拓扑，让容器之间网络互通，从容器内部可以访问外部资源，同时，容器内可以暴露服务让外部访问。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112143366.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="local"
+	
+	
+></p>
+<p>在开始动手实验之前，先简单介绍一下<code>bridge网络模型</code>会用到的Linux虚拟化网络技术。</p>
+<h3 id="veth-pairs">Veth Pairs</h3>
+<p><code>Veth</code>是成对出现的两张虚拟网卡，从一端发送的数据包，总会在另一端接收到。利用<code>Veth</code>的特性，我们可以将一端的虚拟网卡&quot;放入&quot;容器内，另一端接入虚拟交换机。这样，接入同一个虚拟交换机的容器之间就实现了网络互通。</p>
+<h3 id="linux-bridge">Linux Bridge</h3>
+<p>交换机是工作在数据链路层的网络设备，它转发的是二层网络包。最简单的转发策略是将到达交换机输入端口的报文，广播到所有的输出端口。当然更好的策略是在转发过程中进行学习，记录交换机端口和MAC地址的映射关系，这样在下次转发时就能够根据报文中的MAC地址，发送到对应的输出端口。</p>
+<p>我们可以认为<code>Linux bridge</code>就是虚拟交换机，连接在同一个<code>bridge</code>上的容器组成局域网，不同的<code>bridge</code>之间网络是隔离的。 <code>docker network create [NETWORK NAME]</code>实际上就是创建出虚拟交换机。</p>
+<h3 id="iptables">iptables</h3>
+<p>容器需要能够访问外部世界，同时也可以暴露服务让外界访问，这时就要用到<code>iptables</code>。另外，不同<code>bridge</code>之间的隔离也会用到<code>iptables</code>。</p>
+<p>我们说的<code>iptables</code>包含了用户态的配置工具(<code>/sbin/iptables</code>)和内核<code>netfilter</code>模块，通过使用<code>iptables</code>命令对内核的<code>netfilter</code>模块做规则配置。</p>
+<p><code>netfilter</code>允许在网络数据包处理流程的各个阶段插入hook函数，可以根据预先定义的规则对数据包进行修改、过滤或传送。</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112144668.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="iptables"
+	
+	
+></p>
+<p>从上图可以看出，网络包的处理流程有五个关键节点：</p>
+<ul>
+<li><code>PREROUTING</code>：数据包进入路由表之前</li>
+<li><code>INPUT</code>：通过路由表后目的地为本机</li>
+<li><code>FORWARDING</code>：通过路由表后，目的地不为本机</li>
+<li><code>OUTPUT</code>：由本机产生，向外转发</li>
+<li><code>POSTROUTIONG</code>：发送到网卡接口之前</li>
+</ul>
+<p><code>iptables</code> 提供了四种内置的表 <code>raw → mangle → nat → filter</code>，优先级从高到低：</p>
+<ul>
+<li><code>raw</code> 用于配置数据包，<code>raw</code>中的数据包不会被系统跟踪。不常用。</li>
+<li><code>mangle</code> 用于对特定数据包的修改。不常用。</li>
+<li><code>nat</code>: 用于网络地址转换（NAT）功能（端口映射，地址映射等）。</li>
+<li><code>filter</code>：一般的过滤功能，默认表。</li>
+</ul>
+<p>每个表可以设置在多个指定的节点，例如<code>filter</code>表可以设置在<code>INPUT</code>、<code>FORWARDING</code>、<code>OUTPUT</code>等节点。同一个节点中的多个表串联成<code>链</code>。</p>
+<p><code>iptables</code> 是按照<code>表</code>的维度来管理规则，<code>表</code>中包含多个<code>链</code>，<code>链</code>中包含<code>规则</code>列表。例如我们使用<code>sudo iptables -t filter -L</code> 查看<code>filter</code>表：</p>
+<p><img src="https://cdn.mazhen.tech/images/202207112144620.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="iptables"
+	
+	
+></p>
+<p>可以看到，<code>filter</code>表中包含三个<code>链</code>，每个<code>链</code>中定义了多条规则。由于<code>filter</code>是缺省表，上面的命令可以简化为：<code>sudo iptables -L</code>，即不通过<code>-t</code>指定表时，操作的就是<code>filter</code>表。</p>
+<p>在容器化网络场景，我们经常用到的是在<code>nat</code>表中设置<code>SNAT</code>和<code>DNAT</code>。源地址转换是发生在数据包离开机器被发送之前，因此<code>SNAT</code>只能设置在<code>POSTROUTIONG</code>阶段。<code>DNAT</code>是对目标地址的转换，需要在路由选择前完成，因此可以设置在<code>PREROUTING</code>和<code>OUTPUT</code>阶段。</p>
+<h2 id="动手实验">动手实验</h2>
+<p>有了前面的背景知识，我们就可以开始动手实验了。因为涉及到很多系统级设置，建议在一个“干净”的虚拟机内折腾，以免干扰到工作环境。我使用的实验环境是<code>Ubuntu 18.04.1 LTS</code>，不需要安装<code>docker</code>，我们使用系统命令模拟出容器网络环境。</p>
+<h3 id="场景一容器间的网络互通">场景一：容器间的网络互通</h3>
+<ul>
+<li><strong>创建“容器”</strong></li>
+</ul>
+<p>从前面的背景知识了解到，容器的本质是 <code>Namespace + Cgroups + rootfs</code>。因此本实验我们可以仅仅创建出<code>Namespace</code>网络隔离环境来模拟容器行为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns add docker0
+</span></span><span class="line"><span class="cl">sudo ip netns add docker1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看创建出的网络<code>Namesapce</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ls -l /var/run/netns
+</span></span><span class="line"><span class="cl">-r--r--r-- 1 root root 0 Nov 11 03:52 docker0
+</span></span><span class="line"><span class="cl">-r--r--r-- 1 root root 0 Nov 11 03:52 docker1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>创建Veth pairs</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip link add veth0 type veth peer name veth1
+</span></span><span class="line"><span class="cl">sudo ip link add veth2 type veth peer name veth3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看创建出的<code>Veth pairs</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ip addr show
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">3: veth1@veth0: &lt;BROADCAST,MULTICAST,M-DOWN&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+</span></span><span class="line"><span class="cl">    link/ether 3e:fe:2b:90:3e:b7 brd ff:ff:ff:ff:ff:ff
+</span></span><span class="line"><span class="cl">4: veth0@veth1: &lt;BROADCAST,MULTICAST,M-DOWN&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+</span></span><span class="line"><span class="cl">    link/ether 6a:a3:02:07:f4:92 brd ff:ff:ff:ff:ff:ff
+</span></span><span class="line"><span class="cl">5: veth3@veth2: &lt;BROADCAST,MULTICAST,M-DOWN&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+</span></span><span class="line"><span class="cl">    link/ether 76:14:e5:0e:26:98 brd ff:ff:ff:ff:ff:ff
+</span></span><span class="line"><span class="cl">6: veth2@veth3: &lt;BROADCAST,MULTICAST,M-DOWN&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+</span></span><span class="line"><span class="cl">    link/ether 6a:0a:84:0f:a7:f7 brd ff:ff:ff:ff:ff:ff
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>将Veth的一端放入“容器”</strong></li>
+</ul>
+<p>设置<code>Veth</code>一端的虚拟网卡的<code>Namespace</code>，相当于将这张网卡放入“容器”内：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip link set veth0 netns docker0
+</span></span><span class="line"><span class="cl">sudo ip link set veth2 netns docker1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看“容器” docker0 内的网卡：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo ip netns exec docker0 ip addr show
+</span></span><span class="line"><span class="cl">1: lo: &lt;LOOPBACK&gt; mtu 65536 qdisc noop state DOWN group default qlen 1000
+</span></span><span class="line"><span class="cl">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span class="line"><span class="cl">4: veth0@if3: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000
+</span></span><span class="line"><span class="cl">    link/ether 6a:a3:02:07:f4:92 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>ip netns exec docker0 ...</code>的意思是在网络<code>Namesapce</code> <code>docker0</code>的限制下执行后面跟着的命令，相当于在“容器”内执行命令。</p>
+<p>可以看到，<code>veth0</code>已经放入了“容器”docker0内。同样使用命令<code>sudo ip netns exec docker1 ip addr show</code>查看“容器”docker1内的网卡。</p>
+<p>同时，在宿主机上查看网卡<code>ip addr</code>，发现<code>veth0</code>和<code>veth2</code>已经消失，确实是放入“容器”内了。</p>
+<ul>
+<li><strong>创建bridge</strong></li>
+</ul>
+<p>安装<code>bridge</code>管理工具<code>brctl</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt-get install bridge-utils
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>创建bridge <code>br0</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo brctl addbr br0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>将Veth的另一端接入bridge</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo brctl addif br0 veth1
+</span></span><span class="line"><span class="cl">sudo brctl addif br0 veth3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看接入效果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo brctl show
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://cdn.mazhen.tech/images/202207112145791.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="brctl"
+	
+	
+></p>
+<p>两个网卡<code>veth1</code>和<code>veth3</code>已经“插”在<code>bridge</code>上。</p>
+<ul>
+<li><strong>为&quot;容器“内的网卡分配IP地址，并激活上线</strong></li>
+</ul>
+<p>docker0容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker0 ip addr add 172.18.0.2/24 dev veth0
+</span></span><span class="line"><span class="cl">sudo ip netns exec docker0 ip link set veth0 up
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>docker1容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker1 ip addr add 172.18.0.3/24 dev veth2
+</span></span><span class="line"><span class="cl">sudo ip netns exec docker1 ip link set veth2 up
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>Veth另一端的网卡激活上线</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip link set veth1 up
+</span></span><span class="line"><span class="cl">sudo ip link set veth3 up
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>为bridge分配IP地址，激活上线</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip addr add 172.18.0.1/24 dev br0
+</span></span><span class="line"><span class="cl">sudo ip link set br0 up
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>“容器”间的互通测试</li>
+</ul>
+<p>我们可以先设置监听<code>br0</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo tcpdump -i br0 -n
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从容器<code>docker0</code> <code>ping</code> 容器<code>docker1</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker0 ping -c 3 172.18.0.3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>br0</code>上监控到的网络流量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">05:53:10.859956 ARP, Request who-has 172.18.0.3 tell 172.18.0.2, length 28
+</span></span><span class="line"><span class="cl">05:53:10.859973 ARP, Reply 172.18.0.3 is-at 06:f4:01:c2:dd:6e, length 28
+</span></span><span class="line"><span class="cl">05:53:10.860030 IP 172.18.0.2 &gt; 172.18.0.3: ICMP echo request, id 1310, seq 1, length 64
+</span></span><span class="line"><span class="cl">05:53:10.860050 IP 172.18.0.3 &gt; 172.18.0.2: ICMP echo reply, id 1310, seq 1, length 64
+</span></span><span class="line"><span class="cl">05:53:11.878348 IP 172.18.0.2 &gt; 172.18.0.3: ICMP echo request, id 1310, seq 2, length 64
+</span></span><span class="line"><span class="cl">05:53:11.878365 IP 172.18.0.3 &gt; 172.18.0.2: ICMP echo reply, id 1310, seq 2, length 64
+</span></span><span class="line"><span class="cl">05:53:12.901334 IP 172.18.0.2 &gt; 172.18.0.3: ICMP echo request, id 1310, seq 3, length 64
+</span></span><span class="line"><span class="cl">05:53:12.901350 IP 172.18.0.3 &gt; 172.18.0.2: ICMP echo reply, id 1310, seq 3, length 64
+</span></span><span class="line"><span class="cl">05:53:16.006471 ARP, Request who-has 172.18.0.2 tell 172.18.0.3, length 28
+</span></span><span class="line"><span class="cl">05:53:16.006498 ARP, Reply 172.18.0.2 is-at c2:23:fe:ac:f5:4e, length 28
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，先是<code>172.18.0.2</code>发起的ARP请求，询问<code>172.18.0.3</code>的<code>MAC</code>地址，然后是<code>ICMP</code>的请求和响应，最后是<code>172.18.0.3</code>的ARP请求。因为接在同一个bridge <code>br0</code>上，所以是二层互通的局域网。</p>
+<p>同样，从容器<code>docker1</code> <code>ping</code> 容器<code>docker0</code>也是通的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker1 ping -c 3 172.18.0.2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="场景二从宿主机访问容器内网络">场景二：从宿主机访问“容器”内网络</h3>
+<p>在“容器”<code>docker0</code>内启动服务，监听80端口：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker0 nc -lp 80
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在宿主机上执行telnet，可以连接到<code>docker0</code>的80端口：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">telnet 172.18.0.2 80
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="场景三从容器内访问外网">场景三：从“容器”内访问外网</h3>
+<ul>
+<li><strong>配置内核参数，允许IP forwarding</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo sysctl net.ipv4.conf.all.forwarding=1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>配置iptables FORWARD规则</strong></li>
+</ul>
+<p>首先确认<code>iptables FORWARD</code>的缺省策略：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo iptables -L
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://cdn.mazhen.tech/images/202207112146892.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="iptables"
+	
+	
+></p>
+<p>如果缺省策略是<code>DROP</code>，需要设置为<code>ACCEPT</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo iptables -P FORWARD ACCEPT
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>缺省策略的含义是，在数据包没有匹配到规则时执行的缺省动作。</p>
+<ul>
+<li><strong>将bridge设置为“容器”的缺省网关</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker0 route add default gw 172.18.0.1 veth0
+</span></span><span class="line"><span class="cl">sudo ip netns exec docker1 route add default gw 172.18.0.1 veth2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看“容器”内的路由表：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$sudo ip netns exec docker0  route -n
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Kernel IP routing table
+</span></span><span class="line"><span class="cl">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+</span></span><span class="line"><span class="cl">0.0.0.0         172.18.0.1      0.0.0.0         UG    0      0        0 veth0
+</span></span><span class="line"><span class="cl">172.18.0.0      0.0.0.0         255.255.255.0   U     0      0        0 veth0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看出，“容器”内的缺省<code>Gateway</code>是<code>bridge</code>的IP地址，非<code>172.18.0.0/24</code>网段的数据包会路由给<code>bridge</code>。</p>
+<ul>
+<li><strong>配置iptables的SNAT规则</strong></li>
+</ul>
+<p>容器的IP地址外部并不认识，如果它要访问外网，需要在数据包离开前将源地址替换为宿主机的IP，这样外部主机才能用宿主机的IP作为目的地址发回响应。</p>
+<p>另外一个需要注意的问题，内核<code>netfilter</code>会追踪记录连接，我们在增加了SNAT规则时，系统会自动增加一个隐式的反向规则，这样返回的包会自动将宿主机的IP替换为容器IP。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo iptables -t nat -A POSTROUTING -s 172.18.0.0/24 ! -o br0 -j MASQUERADE
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的命令的含义是：在<code>nat</code>表的<code>POSTROUTING</code>链增加规则，当数据包的源地址为<code>172.18.0.0/24</code>网段，出口设备不是<code>br0</code>时，就执行<code>MASQUERADE</code>动作。</p>
+<p><code>MASQUERADE</code>也是一种源地址转换动作，它会动态选择宿主机的一个IP做源地址转换，而<code>SNAT</code>动作必须在命令中指定固定的IP地址。</p>
+<ul>
+<li><strong>从“容器”内访问外部地址</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker0 ping -c 3 123.125.115.110
+</span></span><span class="line"><span class="cl">sudo ip netns exec docker1 ping -c 3 123.125.115.110
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们确认在“容器”内是可以访问外部网络的。</p>
+<h3 id="场景四从外部访问容器内暴露的服务">场景四：从外部访问“容器”内暴露的服务</h3>
+<ul>
+<li><strong>配置iptables的DNAT规则</strong></li>
+</ul>
+<p>当外部通过宿主机的IP和端口访问容器内启动的服务时，在数据包进入<code>PREROUTING</code>阶段就要进行目的地址转换，将宿主机IP转换为容器IP。同样，系统会为我们自动增加一个隐式的反向规则，数据包在离开宿主机时自动做反向转换。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo iptables -t nat -A PREROUTING  ! -i br0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 172.18.0.2:80
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面命令的含义是：在<code>nat</code>表的<code>PREROUTING</code>链增加规则，当输入设备不是<code>br0</code>，目的端口为80时，做目的地址转换，将宿主机IP替换为容器IP。</p>
+<ul>
+<li><strong>从远程访问“容器”内暴露的服务</strong></li>
+</ul>
+<p>在“容器”docker0内启动服务：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker0 nc -lp 80
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在和宿主机同一个局域网的远程主机访问宿主机IP:80</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">telnet 192.168.31.183 80
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>确认可以访问到容器内启动的服务。</p>
+<h3 id="测试环境恢复">测试环境恢复</h3>
+<p>删除虚拟网络设备</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip link set br0 down
+</span></span><span class="line"><span class="cl">sudo brctl delbr br0
+</span></span><span class="line"><span class="cl">sudo ip link  del veth1
+</span></span><span class="line"><span class="cl">sudo ip link  del veth3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>iptablers</code>和<code>Namesapce</code>的配置在机器重启后被清除。</p>
+<h2 id="总结">总结</h2>
+<p>本文我们在介绍了<code>veth</code>、<code>Linux bridge</code>、<code>iptables</code>等概念后，亲自动手模拟出了<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
+    >docker bridge网络模型</a>，并测试了几种场景的网络互通。实际上<code>docker network</code> 就是使用了上述技术，帮我们创建和维护网络。通过动手实验，相信你对docker bridge网络理解的更加深入。</p>
+<p>下一篇我将动手实验容器如何<a class="link" href="/docker-overlay-networks" >利用<code>Overlay 网络</code>进行跨主机通信</a>。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/docker/">docker</a>
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/networking/">networking</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">容器技术创新漫谈</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker跨主机通信路由模式动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/docker%E8%B7%A8%E4%B8%BB%E6%9C%BAoverlay%E7%BD%91%E7%BB%9C%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Docker跨主机Overlay网络动手实验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">自己动手将谷歌k8s镜像同步到阿里云</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

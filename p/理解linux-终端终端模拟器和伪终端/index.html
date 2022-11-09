@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='你可能听说过 TTY 和 PTY 这些缩写，也在 /dev 目录下看到过 /dev/tty[n] 设备，大概知道它们和 Linux 终端的概念有关。可是你清楚 TTY、PTY 具体指的是什么，它们有什么区别'>
+<title>理解Linux 终端、终端模拟器和伪终端</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E7%90%86%E8%A7%A3linux-%E7%BB%88%E7%AB%AF%E7%BB%88%E7%AB%AF%E6%A8%A1%E6%8B%9F%E5%99%A8%E5%92%8C%E4%BC%AA%E7%BB%88%E7%AB%AF/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='理解Linux 终端、终端模拟器和伪终端'>
+<meta property='og:description' content='你可能听说过 TTY 和 PTY 这些缩写，也在 /dev 目录下看到过 /dev/tty[n] 设备，大概知道它们和 Linux 终端的概念有关。可是你清楚 TTY、PTY 具体指的是什么，它们有什么区别'>
+<meta property='og:url' content='https://mazhen.tech/p/%E7%90%86%E8%A7%A3linux-%E7%BB%88%E7%AB%AF%E7%BB%88%E7%AB%AF%E6%A8%A1%E6%8B%9F%E5%99%A8%E5%92%8C%E4%BC%AA%E7%BB%88%E7%AB%AF/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2021-07-12T11:46:39&#43;08:00'/><meta property='article:modified_time' content='2021-07-12T11:46:39&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="理解Linux 终端、终端模拟器和伪终端">
+<meta name="twitter:description" content="你可能听说过 TTY 和 PTY 这些缩写，也在 /dev 目录下看到过 /dev/tty[n] 设备，大概知道它们和 Linux 终端的概念有关。可是你清楚 TTY、PTY 具体指的是什么，它们有什么区别">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Mail.Ru</title><path d="M15.61 12c0 1.99-1.62 3.61-3.61 3.61-1.99 0-3.61-1.62-3.61-3.61 0-1.99 1.62-3.61 3.61-3.61 1.99 0 3.61 1.62 3.61 3.61M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12c2.424 0 4.761-.722 6.76-2.087l.034-.024-1.617-1.879-.027.017A9.494 9.494 0 0 1 12 21.54c-5.26 0-9.54-4.28-9.54-9.54 0-5.26 4.28-9.54 9.54-9.54 5.26 0 9.54 4.28 9.54 9.54a9.63 9.63 0 0 1-.225 2.05c-.301 1.239-1.169 1.618-1.82 1.568-.654-.053-1.42-.52-1.426-1.661V12A6.076 6.076 0 0 0 12 5.93 6.076 6.076 0 0 0 5.93 12 6.076 6.076 0 0 0 12 18.07a6.02 6.02 0 0 0 4.3-1.792 3.9 3.9 0 0 0 3.32 1.805c.874 0 1.74-.292 2.437-.821.719-.547 1.256-1.336 1.553-2.285.047-.154.135-.504.135-.507l.002-.013c.175-.76.253-1.52.253-2.457 0-6.617-5.383-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#回顾历史">回顾历史</a></li>
+    <li><a href="#终端模拟器terminal-emulator">终端模拟器(terminal emulator)</a></li>
+    <li><a href="#伪终端pseudo-terminal-pty">伪终端（pseudo terminal, PTY）</a></li>
+    <li><a href="#shell">Shell</a></li>
+    <li><a href="#配置-tty-设备">配置 TTY 设备</a></li>
+    <li><a href="#远程终端">远程终端</a></li>
+    <li><a href="#写在最后">写在最后</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%90%86%E8%A7%A3linux-%E7%BB%88%E7%AB%AF%E7%BB%88%E7%AB%AF%E6%A8%A1%E6%8B%9F%E5%99%A8%E5%92%8C%E4%BC%AA%E7%BB%88%E7%AB%AF/">理解Linux 终端、终端模拟器和伪终端</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2021-07-12</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 11 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>你可能听说过 <strong>TTY</strong> 和 <strong>PTY</strong> 这些缩写，也在 <code>/dev</code> 目录下看到过 <code>/dev/tty[n]</code> 设备，大概知道它们和 Linux 终端的概念有关。可是你清楚 <code>TTY</code>、<code>PTY</code> 具体指的是什么，它们有什么区别，以及它们和 <code>shell</code> 又是什么关系呢？为了理解这些，我们需要先回顾一下历史。</p>
+<h2 id="回顾历史">回顾历史</h2>
+<p>在计算机诞生之前，人们发明了 <a class="link" href="https://en.wikipedia.org/wiki/Teleprinter"  target="_blank" rel="noopener"
+    >Teleprinter(电传打字机)</a>，通过长长的电线点对点连接，发送和接收打印的信息，用于远距离传输电报信息。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241147437.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Teleprinter"
+	
+	
+></p>
+<p><code>Teleprinter</code> 也可以写成 <code>teletypewriter</code> 或 <code>teletype</code>。</p>
+<p>后来人们将 <code>Teleprinter</code> 连接到早期的大型计算机上，作为输入和输出设备，将输入的数据发送到计算机，并打印出响应。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241148337.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Teleprinter"
+	
+	
+></p>
+<p>在今天你很难想象程序的运行结果需要等到打印出来才能看到，<code>Teleprinter</code> 设备已经进了计算机博物馆。现在我们用 <strong>TTY</strong> 代表计算机终端（<strong>terminal</strong>），只是沿用了历史习惯，电传打字机（<strong>teletypewriter</strong>）曾经是计算机的终端，它的缩写便是 <strong>TTY</strong>(<strong>T</strong>ele<strong>TY</strong>pewriter)。</p>
+<p>为了把不同型号的电传打字机接入计算机，需要在操作系统内核安装驱动，为上层应用屏蔽所有的低层细节。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241149559.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>电传打字机通过两根电缆连接：一根用于向计算机发送指令，一根用于接收计算机的输出。这两根电缆插入 <strong>UART</strong> （Universal Asynchronous Receiver and Transmitter，通用异步接收和发送器）的串行接口连接到计算机。</p>
+<p>操作系统包含一个 <code>UART</code> 驱动程序，管理字节的物理传输，包括奇偶校验和流量控制。然后输入的字符序列被传递给 <code>TTY</code> 驱动，该驱动包含一个 <strong>line discipline</strong>。</p>
+<p><strong>line discipline</strong> 负责转换特殊字符（如退格、擦除字、清空行），并将收到的内容回传给电传打字机，以便用户可以看到输入的内容。<strong>line discipline</strong> 还负责对字符进行缓冲，当按下回车键时，缓冲的数据被传递给与 <code>TTY</code> 相关的前台用户进程。用户可以并行的执行几个进程，但每次只与一个进程交互，其他进程在后台工作。</p>
+<h2 id="终端模拟器terminal-emulator">终端模拟器(terminal emulator)</h2>
+<p>今天电传打字机已经进了博物馆，但 Linux/Unix 仍然保留了当初 TTY驱动和 <strong>line discipline</strong> 的设计和功能。终端不再是一个需要通过 UART 连接到计算机上物理设备。终端成为内核的一个模块，它可以直接向 TTY 驱动发送字符，并从 TTY 驱动读取响应然后打印到屏幕上。也就是说，用内核模块模拟物理终端设备，因此被称为<strong>终端模拟器</strong>(terminal emulator)。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241149126.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>上图是一个典型的Linux桌面系统。终端模拟器就像过去的物理终端一样，它监听来自键盘的事件将其发送到 TTY 驱动，并从 TTY 驱动读取响应，通过显卡驱动将结果渲染到显示器上。TTY驱动 和 <strong>line discipline</strong>的行为与原先一样，但不再有 UART 和 物理终端参与。</p>
+<p>如何看到一个终端模拟器呢？在 <code>Ubuntu 20</code> 桌面系统上，按 <code>Ctrl+Alt+F3</code> 就会得到一个由内核模拟的 TTY。Linux上这种模拟的文本终端也被称为<a class="link" href="https://en.wikipedia.org/wiki/Terminal_emulator#Virtual_consoles"  target="_blank" rel="noopener"
+    >虚拟终端（Virtual consoles）</a>。每个虚拟终端都由一个特殊的设备文件 <code>/dev/tty[n]</code> 所表示，与这个虚拟终端的交互，是通过对这个设备文件的读写操作，以及使用<code>ioctl</code>系统调用操作这个设备文件进行的。通过执行 <code>tty</code> 命令可以查看代表当前虚拟终端的设备文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tty
+</span></span><span class="line"><span class="cl">/dev/tty3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，当前终端的设备文件是 <code>/dev/tty3</code>，也就是通过 <code>Ctrl+Alt+F3</code> 得到的虚拟终端。</p>
+<p>你可以通过 <code>Ctrl+Alt+F3</code> 到 <code>Ctrl+Alt+F6</code> 在几个虚拟终端之间切换。按 <code>Ctrl+Alt+F2</code> 回到桌面环境。X 系统也是运行在一个终端模拟器上，在 <code>Ubuntu 20</code> 上它对应的设备是 <code>/dev/tty2</code>，这也是为什么使用 <code>Ctrl+Alt+F2</code> 可以切换到 X 系统的原因。</p>
+<p>我们可以看看 X 系统打开的文件中是否包含了设备文件 <code>/dev/tty2</code>。先查找 X 系统的 PID：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># ps aux | grep Xorg
+</span></span><span class="line"><span class="cl">mazhen      1404  0.1  0.6 741884 49996 tty2     Sl+  08:07   0:13 /usr/lib/xorg/Xorg vt2 -displayfd 3 -auth /run/user/1000/gdm/Xauthority -background none -noreset -keeptty -verbose 3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再看看这个进程(1404)打开了哪些文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># ll /proc/1404/fd
+</span></span><span class="line"><span class="cl">总用量 0
+</span></span><span class="line"><span class="cl">dr-x------ 2 mazhen mazhen  0 7月  10 08:07 ./
+</span></span><span class="line"><span class="cl">dr-xr-xr-x 9 mazhen mazhen  0 7月  10 08:07 ../
+</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 7月  10 08:07 0 -&gt; /dev/tty2
+</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 7月  10 08:07 1 -&gt; &#39;socket:[39965]&#39;
+</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 7月  10 10:09 10 -&gt; &#39;socket:[34615]&#39;
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，X 系统确实打开了 <code>/dev/tty2</code>。</p>
+<p>再做一个有趣的实验，在 tty3 下以 root 用户身份执行 echo 命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># echo &#34;hello from tty3&#34; &gt; /dev/tty4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再按 <code>Ctrl+Alt+F4</code> 切换到 tty4，能看到从 tty3 发送来的信息。</p>
+<h2 id="伪终端pseudo-terminal-pty">伪终端（pseudo terminal, PTY）</h2>
+<p><strong>终端模拟器(terminal emulator)</strong> 是运行在内核的模块，我们也可以让终端模拟程序运行在用户区。运行在用户区的终端模拟程序，就被称为<strong>伪终端（pseudo terminal, PTY）</strong>。</p>
+<p>PTY 运行在用户区，更加安全和灵活，同时仍然保留了 TTY 驱动和 <strong>line discipline</strong> 的功能。常用的伪终端有 xterm，gnome-terminal，以及远程终端 ssh。我们以 Ubuntu 桌面版提供的 gnome-terminal 为例，介绍伪终端如何与 TTY 驱动交互。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241149477.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>PTY 是通过打开特殊的设备文件 <code>/dev/ptmx</code> 创建，由一对双向的字符设备构成，称为 <code>PTY master</code> 和 <code>PTY slave</code>。</p>
+<p>gnome-terminal 持有 <code>PTY master</code> 的文件描述符 <code>/dev/ptmx</code>。
+gnome-terminal 负责监听键盘事件，通过<code>PTY master</code>接收或发送字符到 <code>PTY slave</code>，还会在屏幕上绘制来自<code>PTY master</code>的字符输出。</p>
+<p>gnome-terminal 会 fork 一个 shell 子进程，并让 shell 持有 <code>PTY slave</code> 的设备文件 <code>/dev/pts/[n]</code>，shell 通过 <code>PTY slave</code> 接收字符，并输出处理结果。</p>
+<p><code>PTY master</code> 和 <code>PTY slave</code> 之间是 TTY 驱动，会在 master 和 slave 之间复制数据，并进行会话管理和提供 <strong>line discipline</strong> 功能。</p>
+<p>在 gnome-terminal 中执行 tty 命令，可以看到代表<code>PTY slave</code>的设备文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tty
+</span></span><span class="line"><span class="cl">/dev/pts/0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>执行 <code>ps -l</code> 命令，也可以确认 shell 关联的伪终端是 <code>pts/0</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ps -l
+</span></span><span class="line"><span class="cl">F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+</span></span><span class="line"><span class="cl">0 S  1000    1842    1832  0  80   0 -  3423 do_wai pts/0    00:00:00 bash
+</span></span><span class="line"><span class="cl">0 R  1000    1897    1842  0  80   0 -  3626 -      pts/0    00:00:00 ps
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意到 TTY 这一列指出了当前进程的终端是 <code>pts/0</code>。</p>
+<p>我们以实际的例子，看看在 terminal 执行一个命令的全过程。</p>
+<ul>
+<li>我们在桌面启动终端程序 <code>gnome-terminal</code>，它向操作系统请求一个<code>PTY master</code>，并把 GUI 绘制在显示器上</li>
+<li><code>gnome-terminal</code> 启动子进程 <code>bash</code></li>
+<li><code>bash</code> 的标准输入、标准输出和标准错误都设置为 <code>PTY slave</code></li>
+<li><code>gnome-terminal</code> 监听键盘事件，并将输入的字符发送到<code>PTY master</code></li>
+<li><strong>line discipline</strong> 收到字符，进行缓冲。只有当你按下回车键时，它才会把缓冲的字符复制到<code>PTY slave</code>。</li>
+<li><strong>line discipline</strong> 在接收到字符的同时，也会把字符写回给<code>PTY master</code>。<code>gnome-terminal</code> 只会在屏幕上显示来自 <code>PTY master</code> 的东西。因此，<strong>line discipline</strong> 需要回传字符，以便让你看到你刚刚输入的内容。</li>
+<li>当你按下回车键时，TTY 驱动负责将缓冲的数据复制到<code>PTY slave</code></li>
+<li>bash 从标准输入读取输入的字符（例如 <code>ls -l</code> ）。注意，bash 在启动时已经将标准输入被设置为了<code>PTY slave</code></li>
+<li>bash 解释从输入读取的字符，发现需要运行 <code>ls</code></li>
+<li>bash fork 出 ls 进程。bash fork 出的进程拥有和 bash 相同的标准输入、标准输出和标准错误，也就是<code>PTY slave</code></li>
+<li>ls 运行，结果打印到标准输出，也就是<code>PTY slave</code></li>
+<li>TTY 驱动将字符复制到<code>PTY master</code></li>
+<li><code>gnome-terminal</code> 循环从 <code>PTY master</code> 读取字节，绘制到用户界面上。</li>
+</ul>
+<h2 id="shell">Shell</h2>
+<p>我们经常不去区分 terminal 和 Shell，会说打开一个 terminal，或打开一个 Shell。从前面介绍的命令执行过程可以看出，Shell 不处理键盘事件，也不负责字符的显示，这是 terminal 要为它处理好的。</p>
+<p>Shell是用户空间的应用程序，通常由 terminal fork出来，是 terminal 的子进程。Shell用来提示用户输入，解释用户输入的字符，然后处理来自底层操作系统的输出。</p>
+<p>通常我们使用较多的 shell 有 Bash、Zsh 和 sh。</p>
+<h2 id="配置-tty-设备">配置 TTY 设备</h2>
+<p>内核将使用 TTY 驱动来处理 terminal 和 Shell 之间的通信。<strong>line discipline</strong> 是 TTY 驱动的一个逻辑组件。<strong>line discipline</strong> 主要有以下功能：</p>
+<ul>
+<li>当用户输入时，字符会被回传到<code>PTY master</code></li>
+<li><strong>line discipline</strong> 会在内存中缓冲这些字符。当用户按回车键时，它才将这些字符发送到<code>PTY slave</code></li>
+<li><strong>line discipline</strong> 可以拦截处理一些特殊的功能键，例如：
+<ul>
+<li>当用户按 <code>CTRL+c</code> 时，它向连接到 <code>PTY slave</code> 的进程发送 <code>kill -2（SIGINT）</code> 信号</li>
+<li>当用户按 <code>CTRL+w</code> 时，它删除用户输入的最后一个字</li>
+<li>当用户按 <code>CTRL+z</code> 时，它向连接到 <code>PTY slave</code> 的进程发送 <code>kill -STOP</code>信号</li>
+<li>当用户按退格键时，它从缓冲区中删除该字符，并向<code>PTY master</code>发送删除最后一个字符的指令</li>
+</ul>
+</li>
+</ul>
+<p>我们可以使用命令行工具 <code>stty</code> 查询和配置 TTY，包括 <strong>line discipline</strong> 规则。在 terminal 执行 <code>stty -a</code> 命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stty -a
+</span></span><span class="line"><span class="cl">speed 38400 baud; rows 40; columns 80; line = 0;
+</span></span><span class="line"><span class="cl">intr = ^C; quit = ^\; erase = ^?; kill = ^U; eof = ^D; eol = &lt;undef&gt;;
+</span></span><span class="line"><span class="cl">eol2 = &lt;undef&gt;; swtch = &lt;undef&gt;; start = ^Q; stop = ^S; susp = ^Z; rprnt = ^R;
+</span></span><span class="line"><span class="cl">werase = ^W; lnext = ^V; discard = ^O; min = 1; time = 0;
+</span></span><span class="line"><span class="cl">-parenb -parodd -cmspar cs8 -hupcl -cstopb cread -clocal -crtscts
+</span></span><span class="line"><span class="cl">-ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr icrnl ixon -ixoff
+</span></span><span class="line"><span class="cl">-iuclc -ixany -imaxbel iutf8
+</span></span><span class="line"><span class="cl">opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
+</span></span><span class="line"><span class="cl">isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt
+</span></span><span class="line"><span class="cl">echoctl echoke -flusho -extproc
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>-a</code> 标志告诉 <code>stty</code> 返回所有的设置，包括TTY 的特征和 <strong>line discipline</strong> 规则。</p>
+<p>让我们看一下第一行：</p>
+<ul>
+<li><strong>speed</strong> 表示波特率。当 terminal 和计算机通过物理线路连接时，speed 后的数字表示物理线路的波特率。波特率对 PTY 来说是没有意义。</li>
+<li><strong>rows, columns</strong> 表示 terminal 的行数和列数，以字符为单位。</li>
+<li><strong>line</strong> 表示<strong>line discipline</strong> 的类型。0 是 <code>N_TTY</code>。</li>
+</ul>
+<p><code>stty</code> 能够对 terminal 进行设置，让我们做个简单的测试验证一下。在第一个 terminal 中使用 vi 编辑一个文件。vi 在启动时会查询当前 terminal 的大小，以便 vi 能填满整个窗口。这时候我们在另一个 terminal 中输入：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># stty -F /dev/pts/0 rows 20
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个命令将终端 <code>pts/0</code> 的行数设置为原来的一半，这将更新内核中 TTY 的数据结构，并向 vi 发送一个 <code>SIGWINCH</code> 信号，vi 接收到该信号后将根据 TTY 新的行列数重新绘制自己，这时 vi 就只使用了可用窗口区域的上半部分。</p>
+<p><code>stty -a</code> 输出的第二行给出了 <strong>line discipline</strong> 能处理的所有特殊字符，包含了键的绑定。例如 <code>intr = ^C</code> 是指将 <code>CTRL+c</code> 映射到 <code>kill -2 (SIGINT)</code> 信号。你也可以更改这个绑定，例如执行 <code>stty intr o</code> 命令，将发送 <code>SIGINT</code> 信号的键从 <code>CTRL+c</code> 换成了字符 <code>o</code>。</p>
+<p>最后，<code>stty -a</code> 列出了一系列 <strong>line discipline</strong> 规则的开关。<code>-</code> 表示开关是关闭的，否则开关就是打开的。所有的开关在 <code>man stty</code>中都有解释。我举其中一个简单的例子，<code>echo</code> 是指示 <strong>line discipline</strong> 将字符回传的规则，我们可以执行命令关闭 <code>echo</code> 规则：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stty -echo
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这时候你再输入一些东西，屏幕上什么也不会出现。<strong>line discipline</strong> 不会将字符回传给 <code>PTY master</code>，因此 terminal 不会再显示我们输入的内容。然而其他一切都照常进行。例如你输入 <code>ls</code>，在输入时看不到字符 <code>ls</code>，然后你输入回车后，仍然会看到 <code>ls</code> 的输出。执行命令恢复 <code>echo</code> 规则：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stty echo
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以通过 <code>stty raw</code> 命令来禁用所有的 <strong>line discipline</strong> 规则，这样的终端被称为 <code>raw terminal</code>。像 vi 这样的编辑器会将终端设置为 raw ，因为它需要自己处理字符。后面介绍的远程终端也是需要一个 <code>raw terminal</code>，同样会禁用所有的 <strong>line discipline</strong> 规则。</p>
+<h2 id="远程终端">远程终端</h2>
+<p>我们经常通过 ssh 连接到一个远程主机，这时候远程主机上的 <code>ssh server</code> 就是一个伪终端 PTY，它同样持有 <code>PTY master</code>，但 <code>ssh server</code> 不再监听键盘事件，以及在屏幕上绘制输出结果，而是通过 TCP 连接，向 <code>ssh client</code> 发送或接收字符。</p>
+<p><img src="https://cdn.mazhen.tech/images/202209241150827.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>我们简单梳理一下远程终端是如何执行命令的。</p>
+<ol>
+<li>
+<p>用户在客户端的 terminal 中输入 ssh 命令，经过 <code>PTY master</code>、TTY 驱动，到达 <code>PTY slave</code>。bash 的标准输入已经设置为了 <code>PTY slave</code>，它从标准输入读取字符序列并解释执行，发现需要启动 ssh 客户端，并请求和远程服务器建 TCP 连接。</p>
+</li>
+<li>
+<p>服务器端接收客户端的 TCP 连接请求，向内核申请创建 PTY，获得一对设备文件描述符。让 <code>ssh server</code> 持有 <code>PTY master</code>，<code>ssh server</code> fork 出的子进程 bash 持有 <code>PTY slave</code>。bash 的标准输入、标准输出和标准错误都设置为了<code>PTY slave</code>。</p>
+</li>
+<li>
+<p>当用户在客户端的 terminal 中输入命令 <code>ls -l</code> 和回车键，这些字符经过 <code>PTY master</code> 到达 TTY 驱动。我们需要禁用客户端 <strong>line discipline</strong> 的所有规则，也就是说客户端的 <strong>line discipline</strong> 不会对特殊字符回车键做处理，而是让命令 <code>ls -l</code> 和回车键一起到达 <code>PTY slave</code>。<code>ssh client</code> 从 <code>PTY slave</code> 读取字符序列，通过网络，发送给 <code>ssh server</code>。</p>
+</li>
+<li>
+<p><code>ssh server</code> 将从 TCP 连接上接收到的字节写入<code>PTY master</code>。TTY 驱动对字节进行缓冲，直到收到特殊字符回车键。</p>
+</li>
+<li>
+<p>由于服务器端的 <strong>line discipline</strong> 没有禁用 <code>echo</code> 规则，所以 TTY 驱动还会将收到的字符写回<code>PTY master</code>，<code>ssh server</code> 从 <code>PTY master</code> 读取字符，将这些字符通过 TCP 连接发回客户端。注意，这是发回的字符不是 <code>ls -l</code> 命令的执行结果，而是 <code>ls -l</code> 本身的回显，让客户端能看到自己的输入。</p>
+</li>
+<li>
+<p>在服务器端 TTY 驱动将字符序列传送给 <code>PTY slave</code>，bash 从 <code>PTY slave</code>读取字符，解释并执行命令 <code>ls -l</code>。bash fork 出 <code>ls</code> 子进程，该子进程的标准输入、标准输出和标准错误同样设置为了 <code>PTY slave</code>。<code>ls -l</code> 命令的执行结果写入标准输出 <code>PTY slave</code>，然后执行结果通过 TTY 驱动到达 <code>PTY master</code>，再由 <code>ssh server</code> 通过 TCP 连接发送给 <code>ssh client</code>。</p>
+</li>
+</ol>
+<p>注意在客户端，我们在屏幕上看到的所有字符都来自于远程服务器。包括我们输入的内容，也是远程服务器上的 <strong>line discipline</strong> 应用 <code>echo</code> 规则的结果，将这些字符回显了回来。表面看似简单的在远程终端上执行了一条命令，实际上底下确是波涛汹涌。</p>
+<h2 id="写在最后">写在最后</h2>
+<p>简单回顾总结一下本文的主要内容：</p>
+<ul>
+<li>电传打字机（TTY）是物理设备，最初是为电报设计的，后来被连接到计算机上，发送输入和获取输出。</li>
+<li>电传打字机（TTY）现在被运行在内核中的模块所模拟，被称为<strong>终端模拟器(terminal emulator)</strong>。</li>
+<li><strong>伪终端（pseudo terminal, PTY）</strong> 是运行在用户区的终端模拟程序。</li>
+<li><code>Shell</code> 由 <code>terminal</code> fork 出来，是 <code>terminal</code> 的子进程。<code>Shell</code> 不处理键盘事件，也不负责字符的显示，这些是由 <code>terminal</code> 处理。<code>Shell</code> 负责解释执行用户输入的字符。</li>
+<li>可以使用 <code>stty</code> 命令对 TTY 设备进行配置。</li>
+<li>远程终端 <code>ssh</code> 也是一种<strong>伪终端 PTY</strong>。</li>
+</ul>
+<p>相信通过这篇文章，你已经能够理解终端、终端模拟器和伪终端的区别和联系。如果想进一步探究低层实现，可以阅读 TTY 驱动的源码 <a class="link" href="https://github.com/torvalds/linux/blob/master/drivers/tty/tty_io.c"  target="_blank" rel="noopener"
+    >drivers/tty/tty_io.c</a>和 <code>line discipline</code> 的源码 <a class="link" href="https://github.com/torvalds/linux/blob/master/drivers/tty/n_tty.c"  target="_blank" rel="noopener"
+    >drivers/tty/n_tty.c</a>。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-%E4%BF%A1%E5%8F%B7signal/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux 信号(Signal)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入理解 Page Cache</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2022 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
