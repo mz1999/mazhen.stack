@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>mq on mazhen.tech</title>
-        <link>https://mazhen.tech/tags/mq/</link>
-        <description>Recent content in mq on mazhen.tech</description>
+        <title>pulsar on mazhen.tech</title>
+        <link>https://mazhen.tech/tags/pulsar/</link>
+        <description>Recent content in pulsar on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-CN</language>
-        <lastBuildDate>Sat, 17 Sep 2022 16:42:59 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/mq/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 17 Sep 2022 16:42:59 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/pulsar/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>BookKeeper实现分析</title>
         <link>https://mazhen.tech/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/</link>
         <pubDate>Sat, 17 Sep 2022 16:42:59 +0800</pubDate>
