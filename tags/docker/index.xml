@@ -12,201 +12,206 @@
         <pubDate>Mon, 22 Aug 2022 16:24:52 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/</guid>
-        <description>&lt;script type=&#34;text/javascript&#34; src= &#39;//js/pdf-js/build/pdf.js&#39;&gt;&lt;/script&gt;
+        <description>&lt;script type=&#34;text/javascript&#34; src=&#39;https://mazhen.tech/js/pdf-js/build/pdf.js&#39;&gt;&lt;/script&gt;
 &lt;style&gt;
-#the-canvas {
-  border: 1px solid black;
-  direction: ltr;
-  width: 100%;
-  height: auto;
-  display: none;
-}
+  #the-canvas {
+    border: 1px solid black;
+    direction: ltr;
+    width: 100%;
+    height: auto;
+    display: none;
+  }
 
-#paginator {
-  display: none;
-  text-align: center;
-  margin-bottom: 10px;
-}
+  #paginator {
+    display: none;
+    text-align: center;
+    margin-bottom: 10px;
+  }
 
-#loadingWrapper {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 350px;
-}
+  #loadingWrapper {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 350px;
+  }
 
-#loading {
-  display: inline-block;
-  width: 50px;
-  height: 50px;
-  border: 3px solid #d2d0d0;;
-  border-radius: 50%;
-  border-top-color: #383838;
-  animation: spin 1s ease-in-out infinite;
-  -webkit-animation: spin 1s ease-in-out infinite;
-}
+  #loading {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid #d2d0d0;
+    ;
+    border-radius: 50%;
+    border-top-color: #383838;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+  }
 
-@keyframes spin {
-  to { -webkit-transform: rotate(360deg); }
-}
-@-webkit-keyframes spin {
-  to { -webkit-transform: rotate(360deg); }
-}
+  @keyframes spin {
+    to {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  @-webkit-keyframes spin {
+    to {
+      -webkit-transform: rotate(360deg);
+    }
+  }
 &lt;/style&gt;
 
 &lt;div id=&#34;paginator&#34;&gt;
-    &lt;button id=&#34;prev&#34;&gt;Previous&lt;/button&gt;
-    &lt;button id=&#34;next&#34;&gt;Next&lt;/button&gt;
-    &amp;nbsp; &amp;nbsp;
-    &lt;span&gt;Page: &lt;span id=&#34;page_num&#34;&gt;&lt;/span&gt; / &lt;span id=&#34;page_count&#34;&gt;&lt;/span&gt;&lt;/span&gt;
+  &lt;button id=&#34;prev&#34;&gt;Previous&lt;/button&gt;
+  &lt;button id=&#34;next&#34;&gt;Next&lt;/button&gt;
+  &amp;nbsp; &amp;nbsp;
+  &lt;span&gt;Page: &lt;span id=&#34;page_num&#34;&gt;&lt;/span&gt; / &lt;span id=&#34;page_count&#34;&gt;&lt;/span&gt;&lt;/span&gt;
 &lt;/div&gt;
 &lt;div id=&#34;embed-pdf-container&#34;&gt;
-    &lt;div id=&#34;loadingWrapper&#34;&gt;
-      &lt;div id=&#34;loading&#34;&gt;&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;canvas id=&#34;the-canvas&#34;&gt;&lt;/canvas&gt;
+  &lt;div id=&#34;loadingWrapper&#34;&gt;
+    &lt;div id=&#34;loading&#34;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;canvas id=&#34;the-canvas&#34;&gt;&lt;/canvas&gt;
 &lt;/div&gt;
 
 &lt;script type=&#34;text/javascript&#34;&gt;
-window.onload = function() {
+  window.onload = function () {
+    
+    
+    var url = &#34;https:\/\/mazhen.tech&#34; + &#39;.\/pdf\/202209241626966.pdf&#39;;
 
-
-var url = &#34;https:\/\/mazhen.tech&#34; + &#39;https:\/\/cdn.mazhen.tech\/images\/202209241626966.pdf&#39;;
-
-var hidePaginator = &#34;&#34; === &#34;true&#34;;
-var hideLoader = &#34;&#34; === &#34;true&#34;;
-var selectedPageNum = parseInt(&#34;&#34;) || 1;
-
-
-var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
-
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
-
-
-var pdfDoc = null,
-    pageNum = selectedPageNum,
-    pageRendering = false,
-    pageNumPending = null,
-    scale = 3,
-    canvas = document.getElementById(&#39;the-canvas&#39;),
-    ctx = canvas.getContext(&#39;2d&#39;),
-    paginator = document.getElementById(&#34;paginator&#34;),
-    loadingWrapper = document.getElementById(&#39;loadingWrapper&#39;);
-
-
-
-showPaginator();
-showLoader();
-
-
-
-function renderPage(num) {
-  pageRendering = true;
-  
-  pdfDoc.getPage(num).then(function(page) {
-    var viewport = page.getViewport({scale: scale});
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+    var hidePaginator = &#34;&#34; === &#34;true&#34;;
+    var hideLoader = &#34;&#34; === &#34;true&#34;;
+    var selectedPageNum = parseInt(&#34;&#34;) || 1;
 
     
-    var renderContext = {
-      canvasContext: ctx,
-      viewport: viewport
-    };
-    var renderTask = page.render(renderContext);
+    var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
 
     
-    renderTask.promise.then(function() {
-      pageRendering = false;
-      showContent();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
+
+    
+    var pdfDoc = null,
+      pageNum = selectedPageNum,
+      pageRendering = false,
+      pageNumPending = null,
+      scale = 3,
+      canvas = document.getElementById(&#39;the-canvas&#39;),
+      ctx = canvas.getContext(&#39;2d&#39;),
+      paginator = document.getElementById(&#34;paginator&#34;),
+      loadingWrapper = document.getElementById(&#39;loadingWrapper&#39;);
+
+
+    
+    showPaginator();
+    showLoader();
+
+    
+
+    function renderPage(num) {
+      pageRendering = true;
       
-      if (pageNumPending !== null) {
+      pdfDoc.getPage(num).then(function (page) {
+        var viewport = page.getViewport({ scale: scale });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
         
-        renderPage(pageNumPending);
-        pageNumPending = null;
+        var renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        var renderTask = page.render(renderContext);
+
+        
+        renderTask.promise.then(function () {
+          pageRendering = false;
+          showContent();
+
+          if (pageNumPending !== null) {
+            
+            renderPage(pageNumPending);
+            pageNumPending = null;
+          }
+        });
+      });
+
+      
+      document.getElementById(&#39;page_num&#39;).textContent = num;
+    }
+
+    
+
+    function showContent() {
+      loadingWrapper.style.display = &#39;none&#39;;
+      canvas.style.display = &#39;block&#39;;
+    }
+
+    
+
+    function showLoader() {
+      if (hideLoader) return
+      loadingWrapper.style.display = &#39;flex&#39;;
+      canvas.style.display = &#39;none&#39;;
+    }
+
+    
+
+    function showPaginator() {
+      if (hidePaginator) return
+      paginator.style.display = &#39;block&#39;;
+    }
+
+    
+
+    function queueRenderPage(num) {
+      if (pageRendering) {
+        pageNumPending = num;
+      } else {
+        renderPage(num);
       }
+    }
+
+    
+
+    function onPrevPage() {
+      if (pageNum &lt;= 1) {
+        return;
+      }
+      pageNum--;
+      queueRenderPage(pageNum);
+    }
+    document.getElementById(&#39;prev&#39;).addEventListener(&#39;click&#39;, onPrevPage);
+
+    
+
+    function onNextPage() {
+      if (pageNum &gt;= pdfDoc.numPages) {
+        return;
+      }
+      pageNum++;
+      queueRenderPage(pageNum);
+    }
+    document.getElementById(&#39;next&#39;).addEventListener(&#39;click&#39;, onNextPage);
+
+    
+
+    pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
+      pdfDoc = pdfDoc_;
+      var numPages = pdfDoc.numPages;
+      document.getElementById(&#39;page_count&#39;).textContent = numPages;
+
+      
+      if (pageNum &gt; numPages) {
+        pageNum = numPages
+      }
+
+      
+      renderPage(pageNum);
     });
-  });
-
-  
-  document.getElementById(&#39;page_num&#39;).textContent = num;
-}
-
-
-
-function showContent() {
-  loadingWrapper.style.display = &#39;none&#39;;
-  canvas.style.display = &#39;block&#39;;
-}
-
-
-
-function showLoader() {
-  if(hideLoader) return
-  loadingWrapper.style.display = &#39;flex&#39;;
-  canvas.style.display = &#39;none&#39;;
-}
-
-
-
-function showPaginator() {
-  if(hidePaginator) return
-  paginator.style.display = &#39;block&#39;;
-}
-
-
-
-function queueRenderPage(num) {
-  if (pageRendering) {
-    pageNumPending = num;
-  } else {
-    renderPage(num);
   }
-}
-
-
-
-function onPrevPage() {
-  if (pageNum &lt;= 1) {
-    return;
-  }
-  pageNum--;
-  queueRenderPage(pageNum);
-}
-document.getElementById(&#39;prev&#39;).addEventListener(&#39;click&#39;, onPrevPage);
-
-
-
-function onNextPage() {
-  if (pageNum &gt;= pdfDoc.numPages) {
-    return;
-  }
-  pageNum++;
-  queueRenderPage(pageNum);
-}
-document.getElementById(&#39;next&#39;).addEventListener(&#39;click&#39;, onNextPage);
-
-
-
-pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
-  pdfDoc = pdfDoc_;
-  var numPages = pdfDoc.numPages;
-  document.getElementById(&#39;page_count&#39;).textContent = numPages;
-  
-  
-  if(pageNum &gt; numPages) {
-    pageNum = numPages
-  }
-
-  
-  renderPage(pageNum);
-});
-}
 
 &lt;/script&gt;
-
 </description>
         </item>
         <item>
