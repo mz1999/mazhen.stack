@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='飞腾芯片 &#43; 银河麒麟OS是目前国产自主可控市场上的主流基础平台。飞腾芯片是aarch64架构，是支持64位的ARM芯片。银河麒麟是基于Ubun'>
-<title>在国产飞腾平台上编译安装nginx</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Nginx 常用命令 Nginx的指令格式为 nginx [options argument]。 查看帮助 1 ./sbin/nginx -? 使用指定的配置文件 1 ./sbin/nginx -c filename 指定运行目录 1 ./sbin/nginx -p /home/mazhen/nginx/ 设置配置指令，覆盖配置文'>
+<title>Nginx的基本使用</title>
 
-<link rel='canonical' href='https://mazhen.tech/p/%E5%9C%A8%E5%9B%BD%E4%BA%A7%E9%A3%9E%E8%85%BE%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx/'>
+<link rel='canonical' href='https://mazhen.tech/p/nginx%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='在国产飞腾平台上编译安装nginx'>
-<meta property='og:description' content='飞腾芯片 &#43; 银河麒麟OS是目前国产自主可控市场上的主流基础平台。飞腾芯片是aarch64架构，是支持64位的ARM芯片。银河麒麟是基于Ubun'>
-<meta property='og:url' content='https://mazhen.tech/p/%E5%9C%A8%E5%9B%BD%E4%BA%A7%E9%A3%9E%E8%85%BE%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx/'>
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Nginx的基本使用'>
+<meta property='og:description' content='Nginx 常用命令 Nginx的指令格式为 nginx [options argument]。 查看帮助 1 ./sbin/nginx -? 使用指定的配置文件 1 ./sbin/nginx -c filename 指定运行目录 1 ./sbin/nginx -p /home/mazhen/nginx/ 设置配置指令，覆盖配置文'>
+<meta property='og:url' content='https://mazhen.tech/p/nginx%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/'>
 <meta property='og:site_name' content='mazhen.tech'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='nginx' /><meta property='article:published_time' content='2019-04-02T09:45:05&#43;08:00'/><meta property='article:modified_time' content='2019-04-02T09:45:05&#43;08:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='nginx' /><meta property='article:published_time' content='2022-11-11T17:26:02&#43;08:00'/><meta property='article:modified_time' content='2022-11-11T17:26:02&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
-    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="在国产飞腾平台上编译安装nginx">
-<meta name="twitter:description" content="飞腾芯片 &#43; 银河麒麟OS是目前国产自主可控市场上的主流基础平台。飞腾芯片是aarch64架构，是支持64位的ARM芯片。银河麒麟是基于Ubun">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Nginx的基本使用">
+<meta name="twitter:description" content="Nginx 常用命令 Nginx的指令格式为 nginx [options argument]。 查看帮助 1 ./sbin/nginx -? 使用指定的配置文件 1 ./sbin/nginx -c filename 指定运行目录 1 ./sbin/nginx -p /home/mazhen/nginx/ 设置配置指令，覆盖配置文">
     <link rel="shortcut icon" href="/favicon.png" />
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
@@ -331,7 +331,40 @@ if (!doNotTrack) {
     </ol>
 </aside>
 
-    
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#nginx-常用命令">Nginx 常用命令</a></li>
+    <li><a href="#热部署">热部署</a></li>
+    <li><a href="#日志切割">日志切割</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
 
             <main class="main full-width">
     <article class="main-article">
@@ -350,7 +383,7 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/%E5%9C%A8%E5%9B%BD%E4%BA%A7%E9%A3%9E%E8%85%BE%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx/">在国产飞腾平台上编译安装nginx</a>
+            <a href="/p/nginx%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">Nginx的基本使用</a>
         </h2>
     
         
@@ -372,7 +405,7 @@ if (!doNotTrack) {
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published">2019-04-02</time>
+                <time class="article-time--published">2022-11-11</time>
             </div>
         
 
@@ -402,53 +435,157 @@ if (!doNotTrack) {
     <section class="article-content">
     
     
-    <p><a class="link" href="http://www.phytium.com.cn"  target="_blank" rel="noopener"
-    >飞腾芯片</a> + <a class="link" href="http://www.kylinos.cn/"  target="_blank" rel="noopener"
-    >银河麒麟OS</a>是目前国产自主可控市场上的主流基础平台。飞腾芯片是<a class="link" href="https://en.wikipedia.org/wiki/ARM_architecture#AArch64"  target="_blank" rel="noopener"
-    >aarch64</a>架构，是支持64位的<a class="link" href="https://en.wikipedia.org/wiki/ARM_architecture"  target="_blank" rel="noopener"
-    >ARM</a>芯片。银河麒麟是基于Ubuntu的发行版。因此可以认为<code>飞腾芯片</code> + <code>银河麒麟OS</code>相当于 <code>ARM64</code> + <code>Ubuntu</code>。</p>
-<p>本文介绍在飞腾平台上编译安装nginx的步骤。</p>
+    <h2 id="nginx-常用命令">Nginx 常用命令</h2>
+<p>Nginx的指令格式为 <code>nginx [options argument]</code>。</p>
 <ul>
-<li><strong>下载nginx源码</strong></li>
+<li><strong>查看帮助</strong></li>
 </ul>
-<p>从<a class="link" href="http://nginx.org/en/download.html"  target="_blank" rel="noopener"
-    >http://nginx.org/en/download.html</a>下载当前稳定版本的源码，例如</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">wget http://nginx.org/download/nginx-1.14.2.tar.gz
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>解压nginx源码：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">tar -zxvf nginx-1.14.2.tar.gz
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./sbin/nginx  -?
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
-<li><strong>nginx配置文件的语法高亮</strong></li>
+<li><strong>使用指定的配置文件</strong></li>
 </ul>
-<p>将nginx源码目录下<code>contrib/vim/</code>的所有内容，copy到用户的<code>$HOME/.vim</code>目录，可以实现nginx配置文件在<code>vim</code>中的语法高亮。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./sbin/nginx -c filename
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>指定运行目录</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./sbin/nginx -p /home/mazhen/nginx/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>设置配置指令</strong>，覆盖配置文件中的指令</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./sbin/nginx -g directives
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>向 Nginx 发送信号</strong></li>
+</ul>
+<p>我们可以向 Nginx 进程发送信号，控制运行中的 Nginx。一种方法是使用 <code>kill</code> 命令，也可以使用 <code>nginx -s</code> ：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 重新加载配置</span>
+</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s reload
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 立即停止服务</span>
+</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s stop
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 优雅停止服务</span>
+</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s quit
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 重新开始记录日志文件</span>
+</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s reopen
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>测试配置文件是否有语法错误</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./sbin/nginx  -t/-T
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>打印nginx版本</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./sbin/nginx  -v/-V
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="热部署">热部署</h2>
+<p>在不停机的情况下升级正在运行的 Nginx 版本，就是热部署。</p>
+<p>首先查看正在运行的 Nginx：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">mkdir ~/.vim
-</span></span><span class="line"><span class="cl">cp -r contrib/vim/*  ~/.vim/
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ps aux <span class="p">|</span> grep nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4376</span>  0.0  0.0   <span class="m">9896</span>  <span class="m">2372</span> ?        Ss   16:47   0:00 nginx: master process ./sbin/nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4402</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4403</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4404</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4405</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4407</span>  0.0  0.0  <span class="m">12184</span>  <span class="m">2316</span> pts/0    S+   16:51   0:00 grep --color<span class="o">=</span>auto nginx
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>再使用<code>vim</code>打开<code>nginx.conf</code>，可以看到配置文件已经可以语法高亮。</p>
-<ul>
-<li><strong>编译前的配置</strong></li>
-</ul>
-<p>查看编译配置支持的参数</p>
+</div><p>备份现有 Nginx 的二进制文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">cp nginx nginx.old
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>将构建好的最新版 Nginx 的二进制文件拷贝到 <code>$nginx/sbin</code> 目录：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">cp ~/works/nginx-1.22.1/objs/nginx ~/nginx/sbin/ -f
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>给正在运行的Nginx的 master 进程发送信号，通知它我们要开始进行热部署：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nb">kill</span> -USR2  <span class="m">4376</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这时候 Nginx master 进程会使用新的二进制文件，启动新的 master 进程。新的 master 会生成新的 worker，同时，老的worker并没有退出，也在运行中，但不再监听 80/443 端口，请求会平滑的过度到新 worker 中。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -463,78 +600,32 @@ if (!doNotTrack) {
 </span><span class="lnt">10
 </span><span class="lnt">11
 </span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-v" data-lang="v"><span class="line"><span class="cl"><span class="err">$</span> <span class="p">.</span><span class="o">/</span><span class="nv">configure</span> <span class="o">--</span><span class="nv">help</span> <span class="o">|</span> <span class="nv">more</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="o">--</span><span class="nv">help</span>                             <span class="nv">print</span> <span class="nv">this</span> <span class="nv">message</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">prefix</span><span class="o">=</span><span class="nc">PATH</span>                      <span class="nv">set</span> <span class="nv">installation</span> <span class="nv">prefix</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">sbin</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                   <span class="nv">set</span> <span class="nv">nginx</span> <span class="nv">binary</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">modules</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                <span class="nv">set</span> <span class="nv">modules</span> <span class="nv">path</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">conf</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                   <span class="nv">set</span> <span class="nv">nginx</span><span class="p">.</span><span class="nv">conf</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="kt">error</span><span class="o">-</span><span class="nv">log</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>              <span class="nv">set</span> <span class="kt">error</span> <span class="nv">log</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">pid</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                    <span class="nv">set</span> <span class="nv">nginx</span><span class="p">.</span><span class="nv">pid</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="k">lock</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                   <span class="nv">set</span> <span class="nv">nginx</span><span class="p">.</span><span class="k">lock</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">user</span><span class="o">=</span><span class="nc">USER</span>                        <span class="nv">set</span> <span class="nv">non</span><span class="o">-</span><span class="nv">privileged</span> <span class="nv">user</span> <span class="k">for</span>
-</span></span><span class="line"><span class="cl">                                     <span class="nv">worker</span> <span class="nv">processes</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">group</span><span class="o">=</span><span class="nc">GROUP</span>                      <span class="nv">set</span> <span class="nv">non</span><span class="o">-</span><span class="nv">privileged</span> <span class="nv">group</span> <span class="k">for</span>
-</span></span><span class="line"><span class="cl">                                     <span class="nv">worker</span> <span class="nv">processes</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">build</span><span class="o">=</span><span class="nc">NAME</span>                       <span class="nv">set</span> <span class="nv">build</span> <span class="nv">name</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">builddir</span><span class="o">=</span><span class="nc">DIR</span>                     <span class="nv">set</span> <span class="nv">build</span> <span class="nv">directory</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">select_module</span>               <span class="nv">enable</span> <span class="k">select</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">without</span><span class="o">-</span><span class="nv">select_module</span>            <span class="nv">disable</span> <span class="k">select</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">poll_module</span>                 <span class="nv">enable</span> <span class="nv">poll</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">without</span><span class="o">-</span><span class="nv">poll_module</span>              <span class="nv">disable</span> <span class="nv">poll</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">......</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">libatomic</span>                   <span class="nv">force</span> <span class="nv">libatomic_ops</span> <span class="nv">library</span> <span class="nv">usage</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">libatomic</span><span class="o">=</span><span class="nc">DIR</span>               <span class="nv">set</span> <span class="nv">path</span> <span class="nv">to</span> <span class="nv">libatomic_ops</span> <span class="nv">library</span> <span class="nv">sources</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">openssl</span><span class="o">=</span><span class="nc">DIR</span>                 <span class="nv">set</span> <span class="nv">path</span> <span class="nv">to</span> <span class="nc">OpenSSL</span> <span class="nv">library</span> <span class="nv">sources</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">openssl</span><span class="o">-</span><span class="nv">opt</span><span class="o">=</span><span class="nc">OPTIONS</span>         <span class="nv">set</span> <span class="nv">additional</span> <span class="nv">build</span> <span class="nv">options</span> <span class="k">for</span> <span class="nc">OpenSSL</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">debug</span>                       <span class="nv">enable</span> <span class="nv">debug</span> <span class="nv">logging</span>
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ps aux <span class="p">|</span> grep nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4376</span>  0.0  0.0   <span class="m">9896</span>  <span class="m">2536</span> ?        Ss   16:47   0:00 nginx: master process ./sbin/nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4402</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4403</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4404</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4405</span>  0.0  0.0  <span class="m">10324</span>  <span class="m">2104</span> ?        S    16:50   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4454</span>  0.0  0.0   <span class="m">9768</span>  <span class="m">6024</span> ?        S    16:59   0:00 nginx: master process ./sbin/nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4455</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4456</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4457</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4458</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4461</span>  0.0  0.0  <span class="m">12184</span>  <span class="m">2436</span> pts/0    S+   16:59   0:00 grep --color<span class="o">=</span>auto nginx
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><code>--with</code>开头的模块缺省不包括在编译结果中，如果想使用需要在编译配置时显示的指定。<code>--without</code>开头的模块则相反，如果不想包含在编译结果中需要显示设定。</p>
-<p>例如我们可以这样进行编译前设置：</p>
+</div><p>向老的 Nginx master 发送信号，让它优雅关闭 worker 进程。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">./configure --prefix=/home/adp/nginx  --with-http_ssl_module
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nb">kill</span> -WINCH <span class="m">4376</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>设置了nginx的安装目录，需要<code>http_ssl</code>模块。</p>
-<p>如果报错缺少<code>OpenSSL</code>，需要先安装<code>libssl</code>。在<code>/etc/apt/sources.list.d</code>目录下增加支持<code>ARM64</code>的apt源，例如国内的清华，创建<code>tsinghua.list</code>，内容如下：</p>
+</div><p>这时候再查看 Nginx 进程：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -547,178 +638,41 @@ if (!doNotTrack) {
 </span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial-security main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial-updates main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial-backports main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial-security main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial-updates main multiverse restricted universe
-</span></span><span class="line"><span class="cl">deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial-backports main multiverse restricted universe
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ps aux <span class="p">|</span> grep nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4376</span>  0.0  0.0   <span class="m">9896</span>  <span class="m">2536</span> ?        Ss   16:47   0:00 nginx: master process ./sbin/nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4454</span>  0.0  0.0   <span class="m">9768</span>  <span class="m">6024</span> ?        S    16:59   0:00 nginx: master process ./sbin/nginx
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4455</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4456</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4457</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4458</span>  0.0  0.0  <span class="m">10216</span>  <span class="m">1980</span> ?        S    16:59   0:00 nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen      <span class="m">4475</span>  0.0  0.0  <span class="m">12184</span>  <span class="m">2292</span> pts/0    S+   17:07   0:00 grep --color<span class="o">=</span>auto nginx
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>执行命令安装<code>OpenSSL</code>：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo apt-get update
-</span></span><span class="line"><span class="cl">$ sudo apt-get install libssl-dev
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><code>configure</code>命令执行完后，会生成中间文件，放在目录<code>objs</code>下。其中最重要的是<code>ngx_modules.c</code>文件，它决定了最终那些模块会编译进<code>nginx</code>。</p>
-<ul>
-<li>执行编译</li>
-</ul>
-<p>在nginx目录下执行<code>make</code>编译：</p>
+</div><p>老的 worker 已经优雅退出，所有的请求已经切换到了新升级的 Nginx 中。</p>
+<p>老的 master 仍然在运行，如果需要，我们可以向它发送 reload 信号，回退到老版本的 Nginx。</p>
+<h2 id="日志切割">日志切割</h2>
+<p>首先使用 <code>mv</code> 命令，备份旧的日志：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ make
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">mv access.log  bak.log
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>编译成功的<code>nginx</code>二进制文件在<code>objs</code>目录下。如果是做nginx的升级，可以直接将这个二进制文件copy到nginx的安装目录中。</p>
-<ul>
-<li>安装</li>
-</ul>
-<p>在nginx目录下执行<code>make install</code>进行安装：</p>
+</div><p>Linux 文件系统中，改名并不会影响已经打开文件的写入操作，因为内核 inode 不变，这样操作不会出现丢日志的情况。</p>
+<p>然后给运行中的 Nginx 发送 reopen 信号：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ make install
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./nginx -s reopen
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>安装完成后，我们到<code>--prefix</code>指定的目录中查看安装结果：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tree -L 1 /home/adp/nginx
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">nginx/
-</span></span><span class="line"><span class="cl">├── conf
-</span></span><span class="line"><span class="cl">├── html
-</span></span><span class="line"><span class="cl">├── logs
-</span></span><span class="line"><span class="cl">└── sbin
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>验证安装结果</li>
-</ul>
-<p>编辑<code>nginx/conf/nginx.conf</code>文件，设置监听端口为<code>8080</code>：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">http {
-</span></span><span class="line"><span class="cl">    ...
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    server {
-</span></span><span class="line"><span class="cl">        listen       8080;
-</span></span><span class="line"><span class="cl">        server_name  localhost;
-</span></span><span class="line"><span class="cl">...
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>启动nginx</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">./sbin/nginx
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>访问默认首页：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl -I http://localhost:8080
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">HTTP/1.1 200 OK
-</span></span><span class="line"><span class="cl">Server: nginx/1.14.2
-</span></span><span class="line"><span class="cl">Date: Tue, 02 Apr 2019 08:38:02 GMT
-</span></span><span class="line"><span class="cl">Content-Type: text/html
-</span></span><span class="line"><span class="cl">Content-Length: 612
-</span></span><span class="line"><span class="cl">Last-Modified: Tue, 02 Apr 2019 08:30:04 GMT
-</span></span><span class="line"><span class="cl">Connection: keep-alive
-</span></span><span class="line"><span class="cl">ETag: &#34;5ca31d8c-264&#34;
-</span></span><span class="line"><span class="cl">Accept-Ranges: bytes
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>其他常用命令：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># 查看帮助
-</span></span><span class="line"><span class="cl">$ ./sbin/nginx  -?
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 重新加载配置
-</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s reload
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 立即停止服务
-</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s stop
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 优雅停止服务
-</span></span><span class="line"><span class="cl">$ ./sbin/nginx -s quit
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 测试配置文件是否有语法错误
-</span></span><span class="line"><span class="cl">$ ./sbin/nginx  -t/-T
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 打印nginx版本、编译信息
-</span></span><span class="line"><span class="cl">$ ./sbin/nginx  -v/-V
-</span></span></code></pre></td></tr></table>
-</div>
-</div>
+</div><p>Nginx 会重新生成 <code>access.log</code> 日志文件。</p>
+<p>一般会写一个 <code>bash</code> 脚本，通过配置 crontab，每日进行日志切割。</p>
+
 </section>
 
 
@@ -762,12 +716,12 @@ if (!doNotTrack) {
             
                 
 <article class="">
-    <a href="/p/nginx%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
+    <a href="/p/nginx%E7%9A%84%E7%BC%96%E8%AF%91%E5%92%8C%E5%AE%89%E8%A3%85/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Nginx的基本使用</h2>
+            <h2 class="article-title">Nginx的编译和安装</h2>
         </div>
     </a>
 </article>
@@ -775,12 +729,12 @@ if (!doNotTrack) {
             
                 
 <article class="">
-    <a href="/p/nginx%E7%9A%84%E7%BC%96%E8%AF%91%E5%92%8C%E5%AE%89%E8%A3%85/">
+    <a href="/p/%E5%9C%A8%E5%9B%BD%E4%BA%A7%E9%A3%9E%E8%85%BE%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Nginx的编译和安装</h2>
+            <h2 class="article-title">在国产飞腾平台上编译安装nginx</h2>
         </div>
     </a>
 </article>
