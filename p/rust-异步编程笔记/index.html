@@ -615,11 +615,38 @@ if (!doNotTrack) {
 </div>
 </div><h2 id="pin">Pin</h2>
 <p><code>Future</code> 被每个 <code>await</code> 分成多段，执行到 <code>await</code> 可能因为资源没准备好而让出 CPU 暂停执行，随后该 <code>future</code> 可能被调度到其他线程接着执行。所以 <code>future</code> 结构中需要保存跨await的数据，形成了自引用结构。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202209201453379.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="future"
+	
+	
+></p>
 <p>自引用结构不能被移动，否则内部引用因为指向移动前的地址，引发不可控的问题。所以future需要被pin住，不能移动。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202209201529136.webp"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Self-Referential Structure"
+	
+	
+></p>
 <p>如何让 <code>future</code> 不被move？ 方法调用时只传递引用，那么就没有移动 <code>future</code>。但是通过可变引用仍然可以使用 replace，swap 等方式移动数据。那么用 <code>Pin</code> 包装可变引用 <code>Pin&lt;&amp;mut T&gt;</code>，让用户没法拿到 <code>&amp;mut T</code>，就把这个漏洞堵上了。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202209201445723.webp"
+	
+	
+	
+	loading="lazy"
+	
+		alt="pin"
+	
+	
+></p>
 <p>总之 <code>Pin&lt;&amp;mut T&gt;</code> 不是数据的 owner，也没法获得 <code>&amp;mut T</code>，所以就不能移动 T。</p>
 <p>注意，<code>Pin</code> 拿住的是一个可以解引用成 T 的指针类型 P，而不是直接拿原本的类型 T。Pin 本身是可 move 的，T 被 pin 住，不能 move。</p>
 <h2 id="async-runtime的内部实现">async runtime的内部实现</h2>

@@ -1527,11 +1527,38 @@ PCRE库支持正则表达式。如果我们在配置文件nginx.conf中使用了
 &lt;/div&gt;
 &lt;/div&gt;&lt;h2 id=&#34;pin&#34;&gt;Pin&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;Future&lt;/code&gt; 被每个 &lt;code&gt;await&lt;/code&gt; 分成多段，执行到 &lt;code&gt;await&lt;/code&gt; 可能因为资源没准备好而让出 CPU 暂停执行，随后该 &lt;code&gt;future&lt;/code&gt; 可能被调度到其他线程接着执行。所以 &lt;code&gt;future&lt;/code&gt; 结构中需要保存跨await的数据，形成了自引用结构。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201453379.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;future&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;自引用结构不能被移动，否则内部引用因为指向移动前的地址，引发不可控的问题。所以future需要被pin住，不能移动。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201529136.webp&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Self-Referential Structure&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;如何让 &lt;code&gt;future&lt;/code&gt; 不被move？ 方法调用时只传递引用，那么就没有移动 &lt;code&gt;future&lt;/code&gt;。但是通过可变引用仍然可以使用 replace，swap 等方式移动数据。那么用 &lt;code&gt;Pin&lt;/code&gt; 包装可变引用 &lt;code&gt;Pin&amp;lt;&amp;amp;mut T&amp;gt;&lt;/code&gt;，让用户没法拿到 &lt;code&gt;&amp;amp;mut T&lt;/code&gt;，就把这个漏洞堵上了。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201445723.webp&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;pin&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;总之 &lt;code&gt;Pin&amp;lt;&amp;amp;mut T&amp;gt;&lt;/code&gt; 不是数据的 owner，也没法获得 &lt;code&gt;&amp;amp;mut T&lt;/code&gt;，所以就不能移动 T。&lt;/p&gt;
 &lt;p&gt;注意，&lt;code&gt;Pin&lt;/code&gt; 拿住的是一个可以解引用成 T 的指针类型 P，而不是直接拿原本的类型 T。Pin 本身是可 move 的，T 被 pin 住，不能 move。&lt;/p&gt;
 &lt;h2 id=&#34;async-runtime的内部实现&#34;&gt;async runtime的内部实现&lt;/h2&gt;
