@@ -310,7 +310,16 @@
 &lt;p&gt;通过&lt;code&gt;std::mem::swap()&lt;/code&gt;方法交换了两个可变借用 &lt;strong&gt;&amp;amp;mut&lt;/strong&gt; 的内容，也发生了move。&lt;/p&gt;
 &lt;h2 id=&#34;为什么要pin&#34;&gt;为什么要Pin&lt;/h2&gt;
 &lt;p&gt;自引用结构体，move了以后会出问题。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201529136.webp&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;所以需要 Pin，不能move。&lt;/p&gt;
 &lt;h2 id=&#34;怎么-pin-住的&#34;&gt;怎么 Pin 住的&lt;/h2&gt;
 &lt;p&gt;保证 T 不会被move，需要避免两种情况：&lt;/p&gt;

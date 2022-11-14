@@ -1051,7 +1051,16 @@
     &gt;CS245&lt;/a&gt;的预修课。国内很少有讲数据库内部实现的书，这门课的教材值得阅读。当然最好的学习方法是理论联系实践，多去读 &lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;TiDB&lt;/a&gt; 的源代码:)&lt;/p&gt;
 &lt;p&gt;一般查询处理可以简单的划分为以下几个步骤：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011706716.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;对SQL进行语法分析，将查询语句转换成&lt;strong&gt;抽象语法树&lt;/strong&gt;。&lt;/li&gt;
 &lt;li&gt;把&lt;strong&gt;抽象语法树&lt;/strong&gt;转换成&lt;strong&gt;关系代数表达式树&lt;/strong&gt;，这就是初始的&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。&lt;/li&gt;
@@ -1168,7 +1177,16 @@
 &lt;li&gt;投影（projection） π&lt;!-- raw HTML omitted --&gt;L&lt;!-- raw HTML omitted --&gt;，其中&lt;code&gt;L&lt;/code&gt;是&lt;code&gt;&amp;lt;SelList&amp;gt;&lt;/code&gt;中的属性列表，对于这个查询只有一个属性&lt;code&gt;name&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;我们得到下面的关系代数表达式树：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011707826.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;h3 id=&#34;逻辑查询计划的改进&#34;&gt;逻辑查询计划的改进&lt;/h3&gt;
 &lt;p&gt;当我们把查询语句转换成关系代数表达式时，得到了一个初始的&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。现在我们可以使用关系代数中的多个&lt;strong&gt;代数定律&lt;/strong&gt;改进&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;这里仅仅列出一小部分这样的&lt;strong&gt;代数定律&lt;/strong&gt;，它们可以将一个表达式树转换成一个&lt;strong&gt;等价&lt;/strong&gt;的表达式树。&lt;/p&gt;
@@ -1206,7 +1224,16 @@
 &lt;p&gt;对于本例使用到的定律比较简单。先将选择的两部分分解为 σ&lt;!-- raw HTML omitted --&gt;employees.emp_no = salaries.emp_no&lt;!-- raw HTML omitted --&gt;
 和 σ&lt;!-- raw HTML omitted --&gt;salary &amp;gt; 7000&lt;!-- raw HTML omitted --&gt;，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S)&lt;/p&gt;
 &lt;p&gt;从右向左使用，把&lt;strong&gt;笛卡尔积&lt;/strong&gt;转换成&lt;strong&gt;连接&lt;/strong&gt;。使用了两个定律后，得到优化后的逻辑查询计划如下图：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011708287.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;h3 id=&#34;物理查询计划的生成&#34;&gt;物理查询计划的生成&lt;/h3&gt;
 &lt;p&gt;这一步我们需要把&lt;strong&gt;逻辑查询计划&lt;/strong&gt;转换成&lt;strong&gt;物理查询计划&lt;/strong&gt;。通常由逻辑计划可以得到多个物理计划，我们需要对每个物理计划进行评估，选择具有最小估计代价的物理查询计划。&lt;/p&gt;
 &lt;h4 id=&#34;基于代价的物理计划选择&#34;&gt;基于代价的物理计划选择&lt;/h4&gt;
@@ -1261,7 +1288,16 @@
 &lt;p&gt;投影结点的任务比较明确，输出包含指定列的关系。&lt;/p&gt;
 &lt;p&gt;除了将逻辑查询计划的结点转换成物理运算符，在选择物理计划时还要考虑数据如何在运算符之间流动（中间结果保存到磁盘或流水线方式），物理运算符的执行顺序等。这些细节本文就不再讨论。&lt;/p&gt;
 &lt;p&gt;最后，假定我们在所有选择的组合中，确定了其中一个作为最优的物理查询计划，然后就可以把它交给查询执行器真正的执行了：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011710602.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;h2 id=&#34;写在最后&#34;&gt;写在最后&lt;/h2&gt;
 &lt;p&gt;本文把关系数据库查询处理涉及的基础知识进行了梳理，希望对你理解 &lt;code&gt;TiDB&lt;/code&gt; 的代码能有所帮助。&lt;/p&gt;
 &lt;p&gt;数据库是一个非常迷人的领域，它有很强的理论基础，同时又涉及大量的工程实践，可以说是最复杂的系统软件之一。我相信能开发数据库是很多程序员的梦想。梦想还是要有的，让我们一起努力吧！&lt;/p&gt;
@@ -2680,7 +2716,16 @@
 &lt;ul&gt;
 &lt;li&gt;逻辑运算符可能有多种候选的物理算子供选择，如下表：&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011441145.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;有些物理算子会根据参与运算的属性、属性的顺序等因素，生成多种物理执行计划，例如&lt;code&gt;Join&lt;/code&gt;的物理算子会根据参与连接的表的顺序，生成多种可能的执行计划。&lt;/li&gt;
 &lt;/ul&gt;
@@ -2724,7 +2769,16 @@
 &lt;li&gt;&lt;code&gt;logic.preparePossibleProperties()&lt;/code&gt;：裁剪参与运算的属性，从而尽可能早的裁减掉成物理计划搜索路径上的分支&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;logic.deriveStats()&lt;/code&gt;：为每个逻辑计划节点生成统计信息，为评估物理计划的代价做准备&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;![&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011441188.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;logic.findBestTask&lt;/code&gt;：生成执行代价最小的&lt;code&gt;task&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -2774,7 +2828,16 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;首先枚举可能的物理执行计划&lt;code&gt;p.self.exhaustPhysicalPlans&lt;/code&gt;，然后遍历每种候选计划，找到代价最小的&lt;code&gt;task&lt;/code&gt;。这是个递归的过程，当前节点的代价是由所有子节点的代价组成的，所以在遍历的过程中，又会调用&lt;code&gt;child.findBestTask(pp.getChildReqProps(i))&lt;/code&gt;找到子节点的最佳&lt;code&gt;task&lt;/code&gt;。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011442083.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;如何评估物理执行计划的代价呢？根据参与运算的关系（表）的统计信息进行评估。代价评估相关逻辑涉及的代码：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;计算关系的统计信息：&lt;code&gt;plan/stats.go&lt;/code&gt;&lt;/li&gt;
@@ -2912,11 +2975,22 @@
 	
 	loading=&#34;lazy&#34;
 	
+		alt=&#34;img&#34;
+	
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;可以看出，&lt;code&gt;TiDB&lt;/code&gt;的基础工作和最突出的创新在TiKV，理论上有了这个KV，可以把单机版的SQl引擎实现方式搬过来，就有了一个可扩展的分布式数据库。&lt;/p&gt;
 &lt;p&gt;那就看看&lt;code&gt;TiKV&lt;/code&gt;的架构：用&lt;code&gt;RocksDB&lt;/code&gt;作为单机存储引擎，然后上层用&lt;code&gt;Raft&lt;/code&gt;实现了一个分布式、强一致性的K/V。有了这个很强大的分布式K/V，在上面实现了&lt;code&gt;MVCC&lt;/code&gt;层，就是对每个Key加了&lt;code&gt;version&lt;/code&gt;，然后基于MVCC层最终实现了分布式事务。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011430515.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;code&gt;RocksDB&lt;/code&gt;内部用的是&lt;code&gt;LSM-Tree&lt;/code&gt;，写入性能肯定比MySQL的&lt;code&gt;B+ tree&lt;/code&gt;好。读取性能看实现的优化情况了，不过&lt;code&gt;RocksDB&lt;/code&gt;是Facebook做的，应该没啥问题。&lt;/p&gt;

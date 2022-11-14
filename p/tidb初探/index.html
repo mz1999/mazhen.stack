@@ -421,11 +421,22 @@ if (!doNotTrack) {
 	
 	loading="lazy"
 	
+		alt="img"
+	
 	
 ></p>
 <p>可以看出，<code>TiDB</code>的基础工作和最突出的创新在TiKV，理论上有了这个KV，可以把单机版的SQl引擎实现方式搬过来，就有了一个可扩展的分布式数据库。</p>
 <p>那就看看<code>TiKV</code>的架构：用<code>RocksDB</code>作为单机存储引擎，然后上层用<code>Raft</code>实现了一个分布式、强一致性的K/V。有了这个很强大的分布式K/V，在上面实现了<code>MVCC</code>层，就是对每个Key加了<code>version</code>，然后基于MVCC层最终实现了分布式事务。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011430515.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <ul>
 <li>
 <p><code>RocksDB</code>内部用的是<code>LSM-Tree</code>，写入性能肯定比MySQL的<code>B+ tree</code>好。读取性能看实现的优化情况了，不过<code>RocksDB</code>是Facebook做的，应该没啥问题。</p>

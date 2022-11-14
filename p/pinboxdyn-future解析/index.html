@@ -744,7 +744,16 @@ if (!doNotTrack) {
 <p>通过<code>std::mem::swap()</code>方法交换了两个可变借用 <strong>&amp;mut</strong> 的内容，也发生了move。</p>
 <h2 id="为什么要pin">为什么要Pin</h2>
 <p>自引用结构体，move了以后会出问题。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202209201529136.webp"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>所以需要 Pin，不能move。</p>
 <h2 id="怎么-pin-住的">怎么 Pin 住的</h2>
 <p>保证 T 不会被move，需要避免两种情况：</p>

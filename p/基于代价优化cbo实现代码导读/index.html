@@ -409,7 +409,16 @@ if (!doNotTrack) {
 <ul>
 <li>逻辑运算符可能有多种候选的物理算子供选择，如下表：</li>
 </ul>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011441145.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <ul>
 <li>有些物理算子会根据参与运算的属性、属性的顺序等因素，生成多种物理执行计划，例如<code>Join</code>的物理算子会根据参与连接的表的顺序，生成多种可能的执行计划。</li>
 </ul>
@@ -453,7 +462,16 @@ if (!doNotTrack) {
 <li><code>logic.preparePossibleProperties()</code>：裁剪参与运算的属性，从而尽可能早的裁减掉成物理计划搜索路径上的分支</li>
 <li><code>logic.deriveStats()</code>：为每个逻辑计划节点生成统计信息，为评估物理计划的代价做准备</li>
 </ul>
-<p>![<!-- raw HTML omitted --></p>
+<p><img src="https://cdn.mazhen.tech/images/202207011441188.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <ul>
 <li><code>logic.findBestTask</code>：生成执行代价最小的<code>task</code></li>
 </ul>
@@ -503,7 +521,16 @@ if (!doNotTrack) {
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>首先枚举可能的物理执行计划<code>p.self.exhaustPhysicalPlans</code>，然后遍历每种候选计划，找到代价最小的<code>task</code>。这是个递归的过程，当前节点的代价是由所有子节点的代价组成的，所以在遍历的过程中，又会调用<code>child.findBestTask(pp.getChildReqProps(i))</code>找到子节点的最佳<code>task</code>。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011442083.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>如何评估物理执行计划的代价呢？根据参与运算的关系（表）的统计信息进行评估。代价评估相关逻辑涉及的代码：</p>
 <ul>
 <li>计算关系的统计信息：<code>plan/stats.go</code></li>

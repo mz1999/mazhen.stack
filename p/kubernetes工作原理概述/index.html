@@ -416,20 +416,74 @@ if (!doNotTrack) {
 </ul>
 <p><code>Kubernetes</code> 集群的所有状态信息都存储在 <code>etcd</code>，其他组件对 <code>etcd</code> 的访问，必须通过 <code>kube-apiserver</code>。</p>
 <p><code>Kubelet</code> 运行在所有节点上，它通过容器运行时（例如Docker），让应用真正的在节点上运行起来。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207221735647.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>下面通过一个简单的例子，描述 <code>Kubernetes</code> 的各个组件，是如何协作完成工作的。</p>
 <p>用户将 <code>YAML</code> 提交给 <code>kube-apiserver</code>，<code>YAML</code> 经过校验后转换为 <code>API 对象</code>，存储在 <code>etcd</code> 中。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207221736723.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>kube-controller-manager</code> 是负责编排的组件，当它发现有新提交的应用，会根据配置的要求生成对应的 <code>Pod</code> 对象。<code>Pod</code> 是 <code>Kubernetes</code> 调度管理的最小单元，可以简单的认为，<code>Pod</code> 就是一个虚拟机，其中运行着关系紧密的进程，共同组成用户的应用。例如Web应用进程和日志收集agent，可以包含在一个<code>Pod</code>中。<code>Pod</code> 对象也存储在 <code>etcd</code> 中。本例子中用户定义 <code>replicas</code> 为2，也就是用户期待有两个 <code>Pod</code> 实例。</p>
 <p>其实<code>kube-controller-manager</code> 内部一直在做循环检查，只要发现有应用没有对应的 <code>Pod</code>，或者 <code>Pod</code> 的数量不满足用户的期望，它都会进行适当的调整，创建或删除<code>Pod</code> 对象。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207221737027.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>kube-scheduler</code> 负责 <code>Pod</code> 的调度。<code>kube-scheduler</code> 发现有新的 <code>Pod</code> 出现，它会按照调度算法，为每个 <code>Pod</code> 寻找一个最合适的节点（Node）。<code>kube-scheduler</code> 对一个 <code>Pod</code> 的调度成功，实际上就是在 <code>Pod</code> 对象上记录了调度结果的节点名称。注意，<code>Pod</code> 调度成功，只是在 <code>Pod</code> 上标记了节点的名字，<code>Pod</code> 是否真正在节点上运行，就不是<code>kube-scheduler</code>的责任了。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207221738974.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>Kubelet</code> 运行在所有节点上，它会订阅所有 <code>Pod</code> 对象的变化，当发现一个 <code>Pod</code> 与 <code>Node</code> 绑定，也就是这个 <code>Pod</code> 上标记了<code>Node</code>的名字，而这个被绑定的 <code>Node</code> 就是它自己，<code>Kubelet</code> 就会在这个节点将 <code>Pod</code> 启动。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207221738844.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>至此，用户提交的应用在<code>Kubernetes</code>集群中就运行起来了。</p>
 <p>同时，上述的过程一直在循环往复。例如，用户更新了 <code>YAML</code>，将 <code>replicas</code> 改为3，并将更新后的 <code>YAML</code> 再次提交。<code>kube-controller-manager</code>会发现实际运行的 <code>Pod</code> 数量与用户的期望不符，它会生成一个新的 <code>Pod</code> 对象。紧接着 <code>kube-scheduler</code> 发现一个没有绑定节点的 <code>Pod</code>，它会按照调度算法为这个<code>Pod</code>寻找一个最佳节点完成绑定。最后，某个<code>Kubelet</code> 发现新绑定节点的 <code>Pod</code> 应该在本节点上运行，它会通过接口调用<code>Docker</code>完成 <code>Pod</code> 的启动。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207221739125.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>上面就是 <code>Kubernetes</code> 基本工作流程的简单描述，希望对你理解它的工作原理有所帮助。</p>
 
 </section>

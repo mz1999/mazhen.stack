@@ -442,7 +442,16 @@ if (!doNotTrack) {
     <p>在Linux上做网络应用的性能优化时，一般都会对TCP相关的内核参数进行调节，特别是和缓冲、队列有关的参数。网上搜到的文章会告诉你需要修改哪些参数，但我们经常是知其然而不知其所以然，每次照抄过来后，可能很快就忘记或混淆了它们的含义。本文尝试总结TCP队列缓冲相关的内核参数，从协议栈的角度梳理它们，希望可以更容易的理解和记忆。注意，本文内容均来源于参考文档，没有去读相关的内核源码做验证，不能保证内容严谨正确。作为Java程序员没读过内核源码是硬伤。</p>
 <p>下面我以server端为视角，从<strong>连接建立</strong>、<strong>数据包接收</strong>和<strong>数据包发送</strong>这3条路径对参数进行归类梳理。</p>
 <h3 id="一连接建立">一、连接建立</h3>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011113863.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>简单看下连接的建立过程，客户端向server发送<code>SYN</code>包，server回复<code>SYN＋ACK</code>，同时将这个处于<code>SYN_RECV</code>状态的连接保存到半连接队列。客户端返回<code>ACK</code>包完成三次握手，server将<code>ESTABLISHED</code>状态的连接移入<code>accept</code>队列，等待应用调用<code>accept()</code>。</p>
 <p>可以看到建立连接涉及两个队列：</p>
 <ul>
@@ -467,7 +476,16 @@ if (!doNotTrack) {
 <p>另外，为了应对<code>SYN flooding</code>（即客户端只发送SYN包发起握手而不回应ACK完成连接建立，填满server端的半连接队列，让它无法处理正常的握手请求），Linux实现了一种称为<code>SYN cookie</code>的机制，通过<code>net.ipv4.tcp_syncookies</code>控制，设置为1表示开启。简单说<code>SYN cookie</code>就是将连接信息编码在<code>ISN</code>(initial sequence number)中返回给客户端，这时server不需要将半连接保存在队列中，而是利用客户端随后发来的ACK带回的<code>ISN</code>还原连接信息，以完成连接的建立，避免了半连接队列被攻击<code>SYN</code>包填满。对于一去不复返的客户端握手，不理它就是了。</p>
 <h3 id="二数据包的接收">二、数据包的接收</h3>
 <p>先看看接收数据包经过的路径：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011113357.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>数据包的接收，从下往上经过了三层：网卡驱动、系统内核空间，最后到用户态空间的应用。Linux内核使用<code>sk_buff</code>(<a class="link" href="http://vger.kernel.org/~davem/skb.html"  target="_blank" rel="noopener"
     >socket kernel buffers</a>)数据结构描述一个数据包。当一个新的数据包到达，<code>NIC</code>（network interface controller）调用<code>DMA engine</code>，通过<code>Ring Buffer</code>将数据包放置到内核内存区。<code>Ring Buffer</code>的大小固定，它不包含实际的数据包，而是包含了指向<code>sk_buff</code>的描述符。当<code>Ring Buffer</code>满的时候，新来的数据包将给丢弃。一旦数据包被成功接收，<code>NIC</code>发起中断，由内核的中断处理程序将数据包传递给IP层。经过IP层的处理，数据包被放入队列等待TCP层处理。每个数据包经过TCP层一系列复杂的步骤，更新TCP状态机，最终到达<code>recv Buffer</code>，等待被应用接收处理。有一点需要注意，数据包到达<code>recv Buffer</code>，TCP就会回<code>ACK</code>确认，既TCP的<code>ACK</code>表示数据包已经被操作系统内核收到，但并不确保应用层一定收到数据（例如这个时候系统crash），因此一般建议应用协议层也要设计自己的<code>ACK</code>确认机制。</p>
 <p>上面就是一个相当简化的数据包接收流程，让我们逐层看看队列缓冲有关的参数。</p>
@@ -485,7 +503,16 @@ if (!doNotTrack) {
 </code></pre>
 <p>详细的说明参考内核文档<a class="link" href="https://www.kernel.org/doc/Documentation/networking/bonding.txt"  target="_blank" rel="noopener"
     >Linux Ethernet Bonding Driver HOWTO</a>。我们可以通过<code>cat /proc/net/bonding/bond0</code>查看本机的Bonding模式：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011114466.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>一般很少需要开发去设置网卡Bonding模式，自己实验的话可以参考<a class="link" href="http://linux.cloudibee.com/2009/10/linux-network-bonding-setup-guide/"  target="_blank" rel="noopener"
     >这篇文档</a></p>
 <ol start="2">
@@ -493,7 +520,16 @@ if (!doNotTrack) {
 </ol>
 <p>随着网络的带宽的不断提升，单核CPU已经不能满足网卡的需求，这时通过多队列网卡驱动的支持，可以将每个队列通过中断绑定到不同的CPU核上，充分利用多核提升数据包的处理能力。</p>
 <p>首先查看网卡是否支持多队列，使用<code>lspci -vvv</code>命令，找到<code>Ethernet controller</code>项：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011115916.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>如果有MSI-X， Enable+ 并且Count &gt; 1，则该网卡是多队列网卡。</p>
 <p>然后查看是否打开了网卡多队列。使用命令<code>cat /proc/interrupts</code>，如果看到eth0-TxRx-0表明多队列支持已经打开：</p>
 <p><img src="https://cdn.mazhen.tech/images/202207011115744.png"
@@ -501,6 +537,8 @@ if (!doNotTrack) {
 	
 	
 	loading="lazy"
+	
+		alt="img"
 	
 	
 ></p>
@@ -595,7 +633,16 @@ echo &quot;80&quot; &gt; /proc/irq/106/smp_affinity
 <p>BDP / (1 – 1 / 2<!-- raw HTML omitted -->tcp_adv_win_scale<!-- raw HTML omitted -->)</p>
 <h3 id="三数据包的发送">三、数据包的发送</h3>
 <p>发送数据包经过的路径：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207011117967.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>和接收数据的路径相反，数据包的发送从上往下也经过了三层：用户态空间的应用、系统内核空间、最后到网卡驱动。应用先将数据写入TCP <code>send buffer</code>，TCP层将<code>send buffer</code>中的数据构建成数据包转交给IP层。IP层会将待发送的数据包放入队列<code>QDisc</code>(queueing discipline)。数据包成功放入<code>QDisc</code>后，指向数据包的描述符<code>sk_buff</code>被放入<code>Ring Buffer</code>输出队列，随后网卡驱动调用<code>DMA engine</code>将数据发送到网络链路上。</p>
 <p>同样我们逐层来梳理队列缓冲有关的参数。</p>
 <ol>

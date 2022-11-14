@@ -484,20 +484,74 @@
 &lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt; 集群的所有状态信息都存储在 &lt;code&gt;etcd&lt;/code&gt;，其他组件对 &lt;code&gt;etcd&lt;/code&gt; 的访问，必须通过 &lt;code&gt;kube-apiserver&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Kubelet&lt;/code&gt; 运行在所有节点上，它通过容器运行时（例如Docker），让应用真正的在节点上运行起来。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221735647.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;下面通过一个简单的例子，描述 &lt;code&gt;Kubernetes&lt;/code&gt; 的各个组件，是如何协作完成工作的。&lt;/p&gt;
 &lt;p&gt;用户将 &lt;code&gt;YAML&lt;/code&gt; 提交给 &lt;code&gt;kube-apiserver&lt;/code&gt;，&lt;code&gt;YAML&lt;/code&gt; 经过校验后转换为 &lt;code&gt;API 对象&lt;/code&gt;，存储在 &lt;code&gt;etcd&lt;/code&gt; 中。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221736723.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;kube-controller-manager&lt;/code&gt; 是负责编排的组件，当它发现有新提交的应用，会根据配置的要求生成对应的 &lt;code&gt;Pod&lt;/code&gt; 对象。&lt;code&gt;Pod&lt;/code&gt; 是 &lt;code&gt;Kubernetes&lt;/code&gt; 调度管理的最小单元，可以简单的认为，&lt;code&gt;Pod&lt;/code&gt; 就是一个虚拟机，其中运行着关系紧密的进程，共同组成用户的应用。例如Web应用进程和日志收集agent，可以包含在一个&lt;code&gt;Pod&lt;/code&gt;中。&lt;code&gt;Pod&lt;/code&gt; 对象也存储在 &lt;code&gt;etcd&lt;/code&gt; 中。本例子中用户定义 &lt;code&gt;replicas&lt;/code&gt; 为2，也就是用户期待有两个 &lt;code&gt;Pod&lt;/code&gt; 实例。&lt;/p&gt;
 &lt;p&gt;其实&lt;code&gt;kube-controller-manager&lt;/code&gt; 内部一直在做循环检查，只要发现有应用没有对应的 &lt;code&gt;Pod&lt;/code&gt;，或者 &lt;code&gt;Pod&lt;/code&gt; 的数量不满足用户的期望，它都会进行适当的调整，创建或删除&lt;code&gt;Pod&lt;/code&gt; 对象。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221737027.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;kube-scheduler&lt;/code&gt; 负责 &lt;code&gt;Pod&lt;/code&gt; 的调度。&lt;code&gt;kube-scheduler&lt;/code&gt; 发现有新的 &lt;code&gt;Pod&lt;/code&gt; 出现，它会按照调度算法，为每个 &lt;code&gt;Pod&lt;/code&gt; 寻找一个最合适的节点（Node）。&lt;code&gt;kube-scheduler&lt;/code&gt; 对一个 &lt;code&gt;Pod&lt;/code&gt; 的调度成功，实际上就是在 &lt;code&gt;Pod&lt;/code&gt; 对象上记录了调度结果的节点名称。注意，&lt;code&gt;Pod&lt;/code&gt; 调度成功，只是在 &lt;code&gt;Pod&lt;/code&gt; 上标记了节点的名字，&lt;code&gt;Pod&lt;/code&gt; 是否真正在节点上运行，就不是&lt;code&gt;kube-scheduler&lt;/code&gt;的责任了。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221738974.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Kubelet&lt;/code&gt; 运行在所有节点上，它会订阅所有 &lt;code&gt;Pod&lt;/code&gt; 对象的变化，当发现一个 &lt;code&gt;Pod&lt;/code&gt; 与 &lt;code&gt;Node&lt;/code&gt; 绑定，也就是这个 &lt;code&gt;Pod&lt;/code&gt; 上标记了&lt;code&gt;Node&lt;/code&gt;的名字，而这个被绑定的 &lt;code&gt;Node&lt;/code&gt; 就是它自己，&lt;code&gt;Kubelet&lt;/code&gt; 就会在这个节点将 &lt;code&gt;Pod&lt;/code&gt; 启动。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221738844.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;至此，用户提交的应用在&lt;code&gt;Kubernetes&lt;/code&gt;集群中就运行起来了。&lt;/p&gt;
 &lt;p&gt;同时，上述的过程一直在循环往复。例如，用户更新了 &lt;code&gt;YAML&lt;/code&gt;，将 &lt;code&gt;replicas&lt;/code&gt; 改为3，并将更新后的 &lt;code&gt;YAML&lt;/code&gt; 再次提交。&lt;code&gt;kube-controller-manager&lt;/code&gt;会发现实际运行的 &lt;code&gt;Pod&lt;/code&gt; 数量与用户的期望不符，它会生成一个新的 &lt;code&gt;Pod&lt;/code&gt; 对象。紧接着 &lt;code&gt;kube-scheduler&lt;/code&gt; 发现一个没有绑定节点的 &lt;code&gt;Pod&lt;/code&gt;，它会按照调度算法为这个&lt;code&gt;Pod&lt;/code&gt;寻找一个最佳节点完成绑定。最后，某个&lt;code&gt;Kubelet&lt;/code&gt; 发现新绑定节点的 &lt;code&gt;Pod&lt;/code&gt; 应该在本节点上运行，它会通过接口调用&lt;code&gt;Docker&lt;/code&gt;完成 &lt;code&gt;Pod&lt;/code&gt; 的启动。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221739125.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;上面就是 &lt;code&gt;Kubernetes&lt;/code&gt; 基本工作流程的简单描述，希望对你理解它的工作原理有所帮助。&lt;/p&gt;
 </description>
         </item>
@@ -536,11 +590,29 @@
 &lt;p&gt;从每个进程的角度来看，地址空间中只有自身一个进程，它不会感知到其他进程的存在。由于&lt;code&gt;内核空间&lt;/code&gt;被所有进程共享，为了防止进程修改彼此的数据而造成相互干扰，用户进程不能直接操作或读取&lt;code&gt;内核空间&lt;/code&gt;中的数据。同时由于内核管理着所有硬件资源，也不能让用户进程直接执行&lt;code&gt;内核空间&lt;/code&gt;中的代码。操作系统应该如何做到这种限制呢？&lt;/p&gt;
 &lt;p&gt;实际上，操作系统的实现依赖 &lt;code&gt;CPU&lt;/code&gt; 提供的功能。现代的&lt;code&gt;CPU&lt;/code&gt;体系架构都提供几种特权级别，每个特权级别有各种限制。各级别可以看作是环，内环能够访问更多的功能，外环则较少，被称为&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Protection_ring&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;protection rings&lt;/a&gt;：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112207458.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Intel&lt;/code&gt; 的 &lt;code&gt;CPU&lt;/code&gt; 提供了4种特权级别， &lt;code&gt;Linux&lt;/code&gt; 只使用了 &lt;code&gt;Ring0&lt;/code&gt; 和 &lt;code&gt;Ring3&lt;/code&gt; 两个级别。&lt;code&gt;Ring 0&lt;/code&gt; 拥有最多的特权，它可以直接和CPU、内存等物理硬件交互。 &lt;code&gt;Ring 0&lt;/code&gt; 被称为&lt;code&gt;内核态&lt;/code&gt;，操作系统内核正是运行在&lt;code&gt;Ring 0&lt;/code&gt;。&lt;code&gt;Ring 3&lt;/code&gt;被称为&lt;code&gt;用户态&lt;/code&gt;，应用程序运行在&lt;code&gt;用户态&lt;/code&gt;。&lt;/p&gt;
 &lt;h3 id=&#34;系统调用&#34;&gt;系统调用&lt;/h3&gt;
 &lt;p&gt;在&lt;code&gt;用户态&lt;/code&gt;禁止直接访问&lt;code&gt;内核态&lt;/code&gt;，也就是说不同通过普通的函数调用方式调用内核代码，而必须使用&lt;strong&gt;系统调用&lt;/strong&gt;陷入（&lt;code&gt;trap&lt;/code&gt;）内核，完成从&lt;code&gt;用户态&lt;/code&gt;到&lt;code&gt;内核态&lt;/code&gt;的切换。内核首先检查进程是否允许执行想要的操作，然后代表进程执行所需的操作，完成后再返回到&lt;code&gt;用户态&lt;/code&gt;。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112207187.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;除了代表用户程序执行代码之外，内核还可以由硬件中断激活，然后在&lt;code&gt;中断上下文&lt;/code&gt;中运行。另外除了普通进程，系统中还有&lt;code&gt;内核线程&lt;/code&gt;在运行。&lt;code&gt;内核线程&lt;/code&gt;不与任何特定的用户空间进程相关联。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;CPU&lt;/code&gt; 在任何时间点上的活动必然为下列三者之一 ：&lt;/p&gt;
 &lt;ul&gt;
@@ -561,9 +633,27 @@
     &gt;Hypervisor&lt;/a&gt;或者叫&lt;code&gt;VMM&lt;/code&gt;，virtual machine monitor）的物理设施我们称之为&lt;code&gt;Host&lt;/code&gt;，安装在&lt;code&gt;Hypervisor&lt;/code&gt;之上的虚拟机称为&lt;code&gt;Guest&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;根据&lt;code&gt;Hypervisor&lt;/code&gt;在系统中的位置，可以将它归类为&lt;code&gt;type-1&lt;/code&gt;或&lt;code&gt;type-2&lt;/code&gt;型。如果&lt;code&gt;hypervisor&lt;/code&gt;直接运行在硬件之上，它通常被认为是&lt;code&gt;Type-1&lt;/code&gt;型。如果&lt;code&gt;hypervisor&lt;/code&gt;作为一个单独的层运行在操作系统之上，它将被认为是&lt;code&gt;Type 2&lt;/code&gt;型。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Type-1&lt;/code&gt;型&lt;code&gt;Hypervisor&lt;/code&gt;的概念图：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112208073.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Type-2&lt;/code&gt;型&lt;code&gt;Hypervisor&lt;/code&gt;的概念图：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112209569.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;h3 id=&#34;kvm--qemu&#34;&gt;KVM &amp;amp; QEMU&lt;/h3&gt;
 &lt;p&gt;实际上&lt;code&gt;Type-1&lt;/code&gt;和&lt;code&gt;Type-2&lt;/code&gt;并没有严格的区分，像最常见的虚拟化软件 &lt;a class=&#34;link&#34; href=&#34;https://www.linux-kvm.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;KVM&lt;/a&gt;（Kernel-based Virtual Machine）是一个&lt;code&gt;Linux&lt;/code&gt;内核模块，加载&lt;code&gt;KVM&lt;/code&gt;后&lt;code&gt;Linux&lt;/code&gt;内核就转换成了&lt;code&gt;Type-1 hypervisor&lt;/code&gt;。同时，&lt;code&gt;Linux&lt;/code&gt;还是一个通用的操作系统，也可以认为&lt;code&gt;KVM&lt;/code&gt;是运行在&lt;code&gt;Linux&lt;/code&gt;之上的&lt;code&gt;Type-2 hypervisor&lt;/code&gt;。&lt;/p&gt;
@@ -572,7 +662,16 @@
 &lt;p&gt;值得注意的是，&lt;code&gt;QEMU&lt;/code&gt; 有两种运行模式：&lt;code&gt;仿真模式&lt;/code&gt;和&lt;code&gt;虚拟化模式&lt;/code&gt;。在仿真模式下，&lt;code&gt;QEMU&lt;/code&gt;可以在一个&lt;code&gt;Intel&lt;/code&gt;的&lt;code&gt;Host&lt;/code&gt;上运行&lt;code&gt;ARM&lt;/code&gt;或&lt;code&gt;MIPS&lt;/code&gt;虚拟机。这是怎么做到的呢？实际上，&lt;code&gt;QEMU&lt;/code&gt; 通过 &lt;code&gt;TCG&lt;/code&gt;（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/QEMU#Tiny_Code_Generator&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Tiny Code Generator&lt;/a&gt;）技术进行了二进制代码转换，可以认为这是一种高级语言的&lt;code&gt;VM&lt;/code&gt;，就像&lt;code&gt;JVM&lt;/code&gt;。例如可以将运行在&lt;code&gt;ARM&lt;/code&gt;上的二进制转换为一种中间字节码，然后让它运行在&lt;code&gt;Host&lt;/code&gt;的&lt;code&gt;Intel CPU&lt;/code&gt;上。很明显，这种二进制代码转换有着巨大的性能开销。&lt;/p&gt;
 &lt;p&gt;相对应的，&lt;code&gt;QEMU&lt;/code&gt;的另一种是虚拟化模式，它借助&lt;code&gt;KVM&lt;/code&gt;完成处理器的虚拟化。由于和CPU的体系结构紧密关联，虚拟化模式能够带来更好的性能，限制是&lt;code&gt;Guest&lt;/code&gt;必须使用和&lt;code&gt;Host&lt;/code&gt;一样的CPU体系机构。这就是我们最常用到的虚拟化技术栈：&lt;code&gt;KVM/QEMU&lt;/code&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112209527.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;KVM&lt;/code&gt; 和 &lt;code&gt;QEMU&lt;/code&gt; 有两种交互方式：通过设备文件&lt;code&gt;/dev/kvm&lt;/code&gt; 和通过内存映射页面。&lt;code&gt;QEMU&lt;/code&gt; 和 &lt;code&gt;KVM&lt;/code&gt;之间的大块数据传递会使用内存映射页面。&lt;code&gt;/dev/kvm&lt;/code&gt;是&lt;code&gt;KVM&lt;/code&gt;暴露的主要API，它支持一系列&lt;code&gt;ioctl&lt;/code&gt;接口，&lt;code&gt;QEMU&lt;/code&gt; 使用这些接口和&lt;code&gt;KVM&lt;/code&gt;交互。&lt;code&gt;/dev/kvm&lt;/code&gt; API分为三个层次：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;System Level&lt;/strong&gt;: 用于&lt;code&gt;KVM&lt;/code&gt;全局状态的维护，例如创建 &lt;code&gt;VM&lt;/code&gt;；&lt;/li&gt;
@@ -625,11 +724,29 @@
     &gt;KataContainers&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.openstack.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;OpenStack&lt;/a&gt;在2017年底发布的 &lt;code&gt;KataContainers&lt;/code&gt; 项目，最初是由 &lt;code&gt;Intel ClearContainer&lt;/code&gt; 和 &lt;code&gt;Hyper runV&lt;/code&gt; 两个项目合并而产生的。在&lt;code&gt;Kubernetes&lt;/code&gt;场景下，一个&lt;code&gt;Pod&lt;/code&gt;对应于&lt;code&gt;Kata Containers&lt;/code&gt;启动的一个轻量化虚拟机，&lt;code&gt;Pod&lt;/code&gt;中的容器，就是运行在这个轻量级虚拟机里的进程。每个&lt;code&gt;Pod&lt;/code&gt;都运行在独立的操作系统内核上，从而达到安全隔离的目的。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112211690.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;可以看出，&lt;code&gt;KataContainers&lt;/code&gt; 依赖 &lt;code&gt;KVM/QEMU&lt;/code&gt;技术栈。&lt;/p&gt;
 &lt;p&gt;amazon最近开源的&lt;a class=&#34;link&#34; href=&#34;https://firecracker-microvm.github.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Firecracker&lt;/a&gt;也是为了实现在 functions-based services 场景下，多租户安全隔离的容器。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112212515.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Firecracker&lt;/code&gt;同样依赖&lt;code&gt;KVM&lt;/code&gt;，然后它没有用到&lt;code&gt;QEMU&lt;/code&gt;，因为&lt;code&gt;Firecracker&lt;/code&gt;本身就是&lt;code&gt;QEMU&lt;/code&gt;的替代实现。&lt;code&gt;Firecracker&lt;/code&gt;是一个比&lt;code&gt;QEMU&lt;/code&gt;更轻量级的&lt;code&gt;VMM&lt;/code&gt;，它只仿真了4个设备：&lt;code&gt;virtio-net&lt;/code&gt;，&lt;code&gt;virtio-block&lt;/code&gt;，&lt;code&gt;serial console&lt;/code&gt;和一个按钮的键盘，仅仅用来停止&lt;code&gt;microVM&lt;/code&gt;。理论上，&lt;code&gt;KataContainers&lt;/code&gt;可以用&lt;code&gt;Firecracker&lt;/code&gt;换掉它现在使用的&lt;code&gt;QEMU&lt;/code&gt;，从而将 &lt;code&gt;Firecracker&lt;/code&gt;整合进&lt;code&gt;Kubernetes&lt;/code&gt;生态圈。&lt;/p&gt;
 &lt;p&gt;其实Google早就没有使用&lt;code&gt;QEMU&lt;/code&gt;，而且对&lt;code&gt;KVM&lt;/code&gt;进行了深度定制。我们可以从这篇介绍看出端倪：&lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/blog/products/gcp/7-ways-we-harden-our-kvm-hypervisor-at-google-cloud-security-in-plaintext&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;7 ways we harden our KVM hypervisor at Google Cloud: security in plaintext&lt;/a&gt;&lt;/p&gt;
@@ -655,7 +772,16 @@
 &lt;p&gt;虽然 &lt;code&gt;gVisor&lt;/code&gt; 今年才开源，但它已经在&lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/appengine/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Google App Engine&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/functions/docs/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Google Cloud Functions&lt;/a&gt;运行了多年。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112213737.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;gVisor&lt;/code&gt;作为运行应用的安全沙箱，扮演着&lt;code&gt;Virtual kernel&lt;/code&gt;的角色。同时&lt;code&gt;gVisor&lt;/code&gt; 包含了一个兼容&lt;a class=&#34;link&#34; href=&#34;https://www.opencontainers.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Open Container Initiative (OCI)&lt;/a&gt; 的运行时&lt;code&gt;runsc&lt;/code&gt;，因此可以用它替换掉 Docker 的 &lt;code&gt;runc&lt;/code&gt;，整合进&lt;code&gt;Kubernetes&lt;/code&gt;生态圈，为&lt;code&gt;Kubernetes&lt;/code&gt;带来另一种安全容器的实现方案。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Kata Containers&lt;/code&gt;和&lt;code&gt;gVisor&lt;/code&gt;的本质都是为容器提供一个独立的操作系统内核，避免容器共享宿主机的内核而产生安全风险。&lt;code&gt;KataContainers&lt;/code&gt;使用了传统的虚拟化技术，&lt;code&gt;gVisor&lt;/code&gt;则自己实现了一个运行在用户态、极小的内核。&lt;code&gt;gVisor&lt;/code&gt;比&lt;code&gt;KataContainers&lt;/code&gt;更加轻量级，根据这个&lt;a class=&#34;link&#34; href=&#34;https://www.youtube.com/watch?v=pWyJahTWa4I&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -668,7 +794,16 @@
 &lt;/ul&gt;
 &lt;p&gt;因为&lt;code&gt;gVisor&lt;/code&gt;基于拦截系统调用的实现原理，它并不适合系统调用密集的应用。&lt;/p&gt;
 &lt;p&gt;最后，对于像我这样没有读过Linux内核代码的后端程序员，&lt;code&gt;gVisor&lt;/code&gt;是一个很好的窥探内核内部实现的窗口，又激起了我研究内核的兴趣。Twitter上看到有人和我有类似的看法：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207112214087.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;希望下次能分享&lt;code&gt;gVisor&lt;/code&gt;深入研究系列。保持好奇心，Stay hungry. Stay foolish.&lt;/p&gt;
 </description>
         </item>

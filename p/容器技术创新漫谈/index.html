@@ -477,11 +477,29 @@ if (!doNotTrack) {
 <p>从每个进程的角度来看，地址空间中只有自身一个进程，它不会感知到其他进程的存在。由于<code>内核空间</code>被所有进程共享，为了防止进程修改彼此的数据而造成相互干扰，用户进程不能直接操作或读取<code>内核空间</code>中的数据。同时由于内核管理着所有硬件资源，也不能让用户进程直接执行<code>内核空间</code>中的代码。操作系统应该如何做到这种限制呢？</p>
 <p>实际上，操作系统的实现依赖 <code>CPU</code> 提供的功能。现代的<code>CPU</code>体系架构都提供几种特权级别，每个特权级别有各种限制。各级别可以看作是环，内环能够访问更多的功能，外环则较少，被称为<a class="link" href="https://en.wikipedia.org/wiki/Protection_ring"  target="_blank" rel="noopener"
     >protection rings</a>：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112207458.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>Intel</code> 的 <code>CPU</code> 提供了4种特权级别， <code>Linux</code> 只使用了 <code>Ring0</code> 和 <code>Ring3</code> 两个级别。<code>Ring 0</code> 拥有最多的特权，它可以直接和CPU、内存等物理硬件交互。 <code>Ring 0</code> 被称为<code>内核态</code>，操作系统内核正是运行在<code>Ring 0</code>。<code>Ring 3</code>被称为<code>用户态</code>，应用程序运行在<code>用户态</code>。</p>
 <h3 id="系统调用">系统调用</h3>
 <p>在<code>用户态</code>禁止直接访问<code>内核态</code>，也就是说不同通过普通的函数调用方式调用内核代码，而必须使用<strong>系统调用</strong>陷入（<code>trap</code>）内核，完成从<code>用户态</code>到<code>内核态</code>的切换。内核首先检查进程是否允许执行想要的操作，然后代表进程执行所需的操作，完成后再返回到<code>用户态</code>。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112207187.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>除了代表用户程序执行代码之外，内核还可以由硬件中断激活，然后在<code>中断上下文</code>中运行。另外除了普通进程，系统中还有<code>内核线程</code>在运行。<code>内核线程</code>不与任何特定的用户空间进程相关联。</p>
 <p><code>CPU</code> 在任何时间点上的活动必然为下列三者之一 ：</p>
 <ul>
@@ -502,9 +520,27 @@ if (!doNotTrack) {
     >Hypervisor</a>或者叫<code>VMM</code>，virtual machine monitor）的物理设施我们称之为<code>Host</code>，安装在<code>Hypervisor</code>之上的虚拟机称为<code>Guest</code>。</p>
 <p>根据<code>Hypervisor</code>在系统中的位置，可以将它归类为<code>type-1</code>或<code>type-2</code>型。如果<code>hypervisor</code>直接运行在硬件之上，它通常被认为是<code>Type-1</code>型。如果<code>hypervisor</code>作为一个单独的层运行在操作系统之上，它将被认为是<code>Type 2</code>型。</p>
 <p><code>Type-1</code>型<code>Hypervisor</code>的概念图：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112208073.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>Type-2</code>型<code>Hypervisor</code>的概念图：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112209569.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <h3 id="kvm--qemu">KVM &amp; QEMU</h3>
 <p>实际上<code>Type-1</code>和<code>Type-2</code>并没有严格的区分，像最常见的虚拟化软件 <a class="link" href="https://www.linux-kvm.org/"  target="_blank" rel="noopener"
     >KVM</a>（Kernel-based Virtual Machine）是一个<code>Linux</code>内核模块，加载<code>KVM</code>后<code>Linux</code>内核就转换成了<code>Type-1 hypervisor</code>。同时，<code>Linux</code>还是一个通用的操作系统，也可以认为<code>KVM</code>是运行在<code>Linux</code>之上的<code>Type-2 hypervisor</code>。</p>
@@ -513,7 +549,16 @@ if (!doNotTrack) {
 <p>值得注意的是，<code>QEMU</code> 有两种运行模式：<code>仿真模式</code>和<code>虚拟化模式</code>。在仿真模式下，<code>QEMU</code>可以在一个<code>Intel</code>的<code>Host</code>上运行<code>ARM</code>或<code>MIPS</code>虚拟机。这是怎么做到的呢？实际上，<code>QEMU</code> 通过 <code>TCG</code>（<a class="link" href="https://en.wikipedia.org/wiki/QEMU#Tiny_Code_Generator"  target="_blank" rel="noopener"
     >Tiny Code Generator</a>）技术进行了二进制代码转换，可以认为这是一种高级语言的<code>VM</code>，就像<code>JVM</code>。例如可以将运行在<code>ARM</code>上的二进制转换为一种中间字节码，然后让它运行在<code>Host</code>的<code>Intel CPU</code>上。很明显，这种二进制代码转换有着巨大的性能开销。</p>
 <p>相对应的，<code>QEMU</code>的另一种是虚拟化模式，它借助<code>KVM</code>完成处理器的虚拟化。由于和CPU的体系结构紧密关联，虚拟化模式能够带来更好的性能，限制是<code>Guest</code>必须使用和<code>Host</code>一样的CPU体系机构。这就是我们最常用到的虚拟化技术栈：<code>KVM/QEMU</code></p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112209527.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>KVM</code> 和 <code>QEMU</code> 有两种交互方式：通过设备文件<code>/dev/kvm</code> 和通过内存映射页面。<code>QEMU</code> 和 <code>KVM</code>之间的大块数据传递会使用内存映射页面。<code>/dev/kvm</code>是<code>KVM</code>暴露的主要API，它支持一系列<code>ioctl</code>接口，<code>QEMU</code> 使用这些接口和<code>KVM</code>交互。<code>/dev/kvm</code> API分为三个层次：</p>
 <ul>
 <li><strong>System Level</strong>: 用于<code>KVM</code>全局状态的维护，例如创建 <code>VM</code>；</li>
@@ -566,11 +611,29 @@ if (!doNotTrack) {
     >KataContainers</a>。</p>
 <p><a class="link" href="https://www.openstack.org/"  target="_blank" rel="noopener"
     >OpenStack</a>在2017年底发布的 <code>KataContainers</code> 项目，最初是由 <code>Intel ClearContainer</code> 和 <code>Hyper runV</code> 两个项目合并而产生的。在<code>Kubernetes</code>场景下，一个<code>Pod</code>对应于<code>Kata Containers</code>启动的一个轻量化虚拟机，<code>Pod</code>中的容器，就是运行在这个轻量级虚拟机里的进程。每个<code>Pod</code>都运行在独立的操作系统内核上，从而达到安全隔离的目的。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112211690.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>可以看出，<code>KataContainers</code> 依赖 <code>KVM/QEMU</code>技术栈。</p>
 <p>amazon最近开源的<a class="link" href="https://firecracker-microvm.github.io/"  target="_blank" rel="noopener"
     >Firecracker</a>也是为了实现在 functions-based services 场景下，多租户安全隔离的容器。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112212515.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>Firecracker</code>同样依赖<code>KVM</code>，然后它没有用到<code>QEMU</code>，因为<code>Firecracker</code>本身就是<code>QEMU</code>的替代实现。<code>Firecracker</code>是一个比<code>QEMU</code>更轻量级的<code>VMM</code>，它只仿真了4个设备：<code>virtio-net</code>，<code>virtio-block</code>，<code>serial console</code>和一个按钮的键盘，仅仅用来停止<code>microVM</code>。理论上，<code>KataContainers</code>可以用<code>Firecracker</code>换掉它现在使用的<code>QEMU</code>，从而将 <code>Firecracker</code>整合进<code>Kubernetes</code>生态圈。</p>
 <p>其实Google早就没有使用<code>QEMU</code>，而且对<code>KVM</code>进行了深度定制。我们可以从这篇介绍看出端倪：<a class="link" href="https://cloud.google.com/blog/products/gcp/7-ways-we-harden-our-kvm-hypervisor-at-google-cloud-security-in-plaintext"  target="_blank" rel="noopener"
     >7 ways we harden our KVM hypervisor at Google Cloud: security in plaintext</a></p>
@@ -596,7 +659,16 @@ if (!doNotTrack) {
 <p>虽然 <code>gVisor</code> 今年才开源，但它已经在<a class="link" href="https://cloud.google.com/appengine/"  target="_blank" rel="noopener"
     >Google App Engine</a> 和 <a class="link" href="https://cloud.google.com/functions/docs/"  target="_blank" rel="noopener"
     >Google Cloud Functions</a>运行了多年。</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112213737.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p><code>gVisor</code>作为运行应用的安全沙箱，扮演着<code>Virtual kernel</code>的角色。同时<code>gVisor</code> 包含了一个兼容<a class="link" href="https://www.opencontainers.org/"  target="_blank" rel="noopener"
     >Open Container Initiative (OCI)</a> 的运行时<code>runsc</code>，因此可以用它替换掉 Docker 的 <code>runc</code>，整合进<code>Kubernetes</code>生态圈，为<code>Kubernetes</code>带来另一种安全容器的实现方案。</p>
 <p><code>Kata Containers</code>和<code>gVisor</code>的本质都是为容器提供一个独立的操作系统内核，避免容器共享宿主机的内核而产生安全风险。<code>KataContainers</code>使用了传统的虚拟化技术，<code>gVisor</code>则自己实现了一个运行在用户态、极小的内核。<code>gVisor</code>比<code>KataContainers</code>更加轻量级，根据这个<a class="link" href="https://www.youtube.com/watch?v=pWyJahTWa4I"  target="_blank" rel="noopener"
@@ -609,7 +681,16 @@ if (!doNotTrack) {
 </ul>
 <p>因为<code>gVisor</code>基于拦截系统调用的实现原理，它并不适合系统调用密集的应用。</p>
 <p>最后，对于像我这样没有读过Linux内核代码的后端程序员，<code>gVisor</code>是一个很好的窥探内核内部实现的窗口，又激起了我研究内核的兴趣。Twitter上看到有人和我有类似的看法：</p>
-<!-- raw HTML omitted -->
+<p><img src="https://cdn.mazhen.tech/images/202207112214087.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></p>
 <p>希望下次能分享<code>gVisor</code>深入研究系列。保持好奇心，Stay hungry. Stay foolish.</p>
 
 </section>

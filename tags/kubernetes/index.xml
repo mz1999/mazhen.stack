@@ -1508,20 +1508,74 @@
 &lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;Kubernetes&lt;/code&gt; 集群的所有状态信息都存储在 &lt;code&gt;etcd&lt;/code&gt;，其他组件对 &lt;code&gt;etcd&lt;/code&gt; 的访问，必须通过 &lt;code&gt;kube-apiserver&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Kubelet&lt;/code&gt; 运行在所有节点上，它通过容器运行时（例如Docker），让应用真正的在节点上运行起来。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221735647.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;下面通过一个简单的例子，描述 &lt;code&gt;Kubernetes&lt;/code&gt; 的各个组件，是如何协作完成工作的。&lt;/p&gt;
 &lt;p&gt;用户将 &lt;code&gt;YAML&lt;/code&gt; 提交给 &lt;code&gt;kube-apiserver&lt;/code&gt;，&lt;code&gt;YAML&lt;/code&gt; 经过校验后转换为 &lt;code&gt;API 对象&lt;/code&gt;，存储在 &lt;code&gt;etcd&lt;/code&gt; 中。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221736723.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;kube-controller-manager&lt;/code&gt; 是负责编排的组件，当它发现有新提交的应用，会根据配置的要求生成对应的 &lt;code&gt;Pod&lt;/code&gt; 对象。&lt;code&gt;Pod&lt;/code&gt; 是 &lt;code&gt;Kubernetes&lt;/code&gt; 调度管理的最小单元，可以简单的认为，&lt;code&gt;Pod&lt;/code&gt; 就是一个虚拟机，其中运行着关系紧密的进程，共同组成用户的应用。例如Web应用进程和日志收集agent，可以包含在一个&lt;code&gt;Pod&lt;/code&gt;中。&lt;code&gt;Pod&lt;/code&gt; 对象也存储在 &lt;code&gt;etcd&lt;/code&gt; 中。本例子中用户定义 &lt;code&gt;replicas&lt;/code&gt; 为2，也就是用户期待有两个 &lt;code&gt;Pod&lt;/code&gt; 实例。&lt;/p&gt;
 &lt;p&gt;其实&lt;code&gt;kube-controller-manager&lt;/code&gt; 内部一直在做循环检查，只要发现有应用没有对应的 &lt;code&gt;Pod&lt;/code&gt;，或者 &lt;code&gt;Pod&lt;/code&gt; 的数量不满足用户的期望，它都会进行适当的调整，创建或删除&lt;code&gt;Pod&lt;/code&gt; 对象。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221737027.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;kube-scheduler&lt;/code&gt; 负责 &lt;code&gt;Pod&lt;/code&gt; 的调度。&lt;code&gt;kube-scheduler&lt;/code&gt; 发现有新的 &lt;code&gt;Pod&lt;/code&gt; 出现，它会按照调度算法，为每个 &lt;code&gt;Pod&lt;/code&gt; 寻找一个最合适的节点（Node）。&lt;code&gt;kube-scheduler&lt;/code&gt; 对一个 &lt;code&gt;Pod&lt;/code&gt; 的调度成功，实际上就是在 &lt;code&gt;Pod&lt;/code&gt; 对象上记录了调度结果的节点名称。注意，&lt;code&gt;Pod&lt;/code&gt; 调度成功，只是在 &lt;code&gt;Pod&lt;/code&gt; 上标记了节点的名字，&lt;code&gt;Pod&lt;/code&gt; 是否真正在节点上运行，就不是&lt;code&gt;kube-scheduler&lt;/code&gt;的责任了。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221738974.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Kubelet&lt;/code&gt; 运行在所有节点上，它会订阅所有 &lt;code&gt;Pod&lt;/code&gt; 对象的变化，当发现一个 &lt;code&gt;Pod&lt;/code&gt; 与 &lt;code&gt;Node&lt;/code&gt; 绑定，也就是这个 &lt;code&gt;Pod&lt;/code&gt; 上标记了&lt;code&gt;Node&lt;/code&gt;的名字，而这个被绑定的 &lt;code&gt;Node&lt;/code&gt; 就是它自己，&lt;code&gt;Kubelet&lt;/code&gt; 就会在这个节点将 &lt;code&gt;Pod&lt;/code&gt; 启动。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221738844.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;至此，用户提交的应用在&lt;code&gt;Kubernetes&lt;/code&gt;集群中就运行起来了。&lt;/p&gt;
 &lt;p&gt;同时，上述的过程一直在循环往复。例如，用户更新了 &lt;code&gt;YAML&lt;/code&gt;，将 &lt;code&gt;replicas&lt;/code&gt; 改为3，并将更新后的 &lt;code&gt;YAML&lt;/code&gt; 再次提交。&lt;code&gt;kube-controller-manager&lt;/code&gt;会发现实际运行的 &lt;code&gt;Pod&lt;/code&gt; 数量与用户的期望不符，它会生成一个新的 &lt;code&gt;Pod&lt;/code&gt; 对象。紧接着 &lt;code&gt;kube-scheduler&lt;/code&gt; 发现一个没有绑定节点的 &lt;code&gt;Pod&lt;/code&gt;，它会按照调度算法为这个&lt;code&gt;Pod&lt;/code&gt;寻找一个最佳节点完成绑定。最后，某个&lt;code&gt;Kubelet&lt;/code&gt; 发现新绑定节点的 &lt;code&gt;Pod&lt;/code&gt; 应该在本节点上运行，它会通过接口调用&lt;code&gt;Docker&lt;/code&gt;完成 &lt;code&gt;Pod&lt;/code&gt; 的启动。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207221739125.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;p&gt;上面就是 &lt;code&gt;Kubernetes&lt;/code&gt; 基本工作流程的简单描述，希望对你理解它的工作原理有所帮助。&lt;/p&gt;
 </description>
         </item>
