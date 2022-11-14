@@ -520,7 +520,7 @@
     
     
     
-    var url = &#39;.\/pdf\/202209241047269.pdf&#39;;
+    var url = &#39;\/pdf\/202209241047269.pdf&#39;;
 
     var hidePaginator = &#34;&#34; === &#34;true&#34;;
     var hideLoader = &#34;&#34; === &#34;true&#34;;
@@ -1516,7 +1516,7 @@
     
     
     
-    var url = &#39;.\/pdf\/202207011702216.pdf&#39;;
+    var url = &#39;\/pdf\/202207011702216.pdf&#39;;
 
     var hidePaginator = &#34;&#34; === &#34;true&#34;;
     var hideLoader = &#34;&#34; === &#34;true&#34;;
