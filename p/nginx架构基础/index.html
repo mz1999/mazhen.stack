@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Go中的引用类型不是指针，而是对指针的包装，在它的内部通过指针引用底层数据结构。每一种引用类型也包含一些其他的field，用来管理底层的数据'>
-<title>Go语言的引用类型</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Nginx 进程模型 Nginx其实有两种进程结构，一种是单进程结构，一种是多进程结构。单进程结构只适合我们做开发调试，在生产环境下，为了保持 Nginx 足够健壮'>
+<title>Nginx架构基础</title>
 
-<link rel='canonical' href='https://mazhen.tech/p/go%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/'>
+<link rel='canonical' href='https://mazhen.tech/p/nginx%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Go语言的引用类型'>
-<meta property='og:description' content='Go中的引用类型不是指针，而是对指针的包装，在它的内部通过指针引用底层数据结构。每一种引用类型也包含一些其他的field，用来管理底层的数据'>
-<meta property='og:url' content='https://mazhen.tech/p/go%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/'>
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Nginx架构基础'>
+<meta property='og:description' content='Nginx 进程模型 Nginx其实有两种进程结构，一种是单进程结构，一种是多进程结构。单进程结构只适合我们做开发调试，在生产环境下，为了保持 Nginx 足够健壮'>
+<meta property='og:url' content='https://mazhen.tech/p/nginx%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/'>
 <meta property='og:site_name' content='mazhen.tech'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='golang' /><meta property='article:published_time' content='2018-03-05T14:20:18&#43;08:00'/><meta property='article:modified_time' content='2018-03-05T14:20:18&#43;08:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='nginx' /><meta property='article:published_time' content='2022-11-18T11:16:48&#43;08:00'/><meta property='article:modified_time' content='2022-11-18T11:16:48&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
-    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Go语言的引用类型">
-<meta name="twitter:description" content="Go中的引用类型不是指针，而是对指针的包装，在它的内部通过指针引用底层数据结构。每一种引用类型也包含一些其他的field，用来管理底层的数据">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Nginx架构基础">
+<meta name="twitter:description" content="Nginx 进程模型 Nginx其实有两种进程结构，一种是单进程结构，一种是多进程结构。单进程结构只适合我们做开发调试，在生产环境下，为了保持 Nginx 足够健壮">
     <link rel="shortcut icon" href="/favicon.png" />
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
@@ -331,7 +331,42 @@ if (!doNotTrack) {
     </ol>
 </aside>
 
-    
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#nginx-进程模型">Nginx 进程模型</a></li>
+    <li><a href="#请求处理流程">请求处理流程</a></li>
+    <li><a href="#nginx-进程管理">Nginx 进程管理</a></li>
+    <li><a href="#nginx-配置更新流程">Nginx 配置更新流程</a></li>
+    <li><a href="#nginx-热部署流程">Nginx 热部署流程</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
 
             <main class="main full-width">
     <article class="main-article">
@@ -350,7 +385,7 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/go%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/">Go语言的引用类型</a>
+            <a href="/p/nginx%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">Nginx架构基础</a>
         </h2>
     
         
@@ -372,7 +407,7 @@ if (!doNotTrack) {
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published">2018-03-05</time>
+                <time class="article-time--published">2022-11-18</time>
             </div>
         
 
@@ -387,7 +422,7 @@ if (!doNotTrack) {
 
 
                 <time class="article-time--reading">
-                    阅读时长: 3 分钟
+                    阅读时长: 5 分钟
                 </time>
             </div>
         
@@ -402,21 +437,20 @@ if (!doNotTrack) {
     <section class="article-content">
     
     
-    <p>Go中的引用类型不是指针，而是对指针的包装，在它的内部通过指针引用底层数据结构。每一种引用类型也包含一些其他的<code>field</code>，用来管理底层的数据结构。</p>
-<p>看一个例子比较直观：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">s := []string{&#34;a&#34;,&#34;b&#34;, &#34;c&#34;}
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>简单解释一下这段代码。先初始化一个<code>slice</code>，然后使用<code>unsafe.Pointer(&amp;s)</code>把<code>slice</code>的指针转换为通用指针<code>Pointer</code>。<a class="link" href="https://golang.org/pkg/unsafe/#Pointer"  target="_blank" rel="noopener"
-    >Pointer</a>是可以代表任何数据类型的指针。最后把<code>Pointer</code>强制转换为<code>*reflect.SliceHeader</code>。<a class="link" href="https://golang.org/pkg/reflect/#SliceHeader"  target="_blank" rel="noopener"
-    >SliceHeader</a>代表的是<code>slice</code>运行时数据结构，定义如下：</p>
+    <h2 id="nginx-进程模型">Nginx 进程模型</h2>
+<p><img src="https://cdn.mazhen.tech/images/202211161536855.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="process model"
+	
+	
+></p>
+<p>Nginx其实有两种进程结构，一种是单进程结构，一种是多进程结构。单进程结构只适合我们做开发调试，在生产环境下，为了保持 Nginx 足够健壮，以及可以利用到 CPU 的多核特性，我们用到的是多进程架构的Nginx。</p>
+<p>多进程架构的Nginx，有一个父进程 master process，master 会有很多子进程，这些子进程分为两类，一类是worker 进程，一类是 cache 相关的进程。</p>
+<p>在一个四核的Linux服务器上查看Nginx进程：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -424,203 +458,136 @@ if (!doNotTrack) {
 </span><span class="lnt">3
 </span><span class="lnt">4
 </span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">type SliceHeader struct {
-</span></span><span class="line"><span class="cl"> Data uintptr
-</span></span><span class="line"><span class="cl"> Len  int
-</span></span><span class="line"><span class="cl"> Cap  int
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ps -ef --forest <span class="p">|</span> grep nginx
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20875</span>   <span class="m">13073</span>  <span class="m">0</span> 15:25 pts/0    00:00:00          <span class="p">|</span>   <span class="se">\_</span> grep --color<span class="o">=</span>auto nginx
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20862</span>       <span class="m">1</span>  <span class="m">0</span> 15:25 ?        00:00:00 nginx: master process ./sbin/nginx
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20863</span>   <span class="m">20862</span>  <span class="m">0</span> 15:25 ?        00:00:00  <span class="se">\_</span> nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20864</span>   <span class="m">20862</span>  <span class="m">0</span> 15:25 ?        00:00:00  <span class="se">\_</span> nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20865</span>   <span class="m">20862</span>  <span class="m">0</span> 15:25 ?        00:00:00  <span class="se">\_</span> nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20866</span>   <span class="m">20862</span>  <span class="m">0</span> 15:25 ?        00:00:00  <span class="se">\_</span> nginx: worker process
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20867</span>   <span class="m">20862</span>  <span class="m">0</span> 15:25 ?        00:00:00  <span class="se">\_</span> nginx: cache manager process
+</span></span><span class="line"><span class="cl">mazhen     <span class="m">20868</span>   <span class="m">20862</span>  <span class="m">0</span> 15:25 ?        00:00:00  <span class="se">\_</span> nginx: cache loader process
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>可以看到，<code>SliceHeader</code>内部有一个用来指向底层数组的指针<code>Data</code>，另外还有两个属性<code>Len</code>和<code>Cap</code>用来保存<code>slice</code>的内部状态。</p>
-<p>上面的代码运行结果如下：</p>
-<p><code>&amp;reflect.SliceHeader{Data:0xc420078180, Len:3, Cap:3}</code></p>
-<p><code>slice</code>可以自动扩容，当底层数组容量不够时，会自动创建一个新的数组替换。让我们做个实验：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">s := []string{&#34;a&#34;,&#34;b&#34;, &#34;c&#34;}
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl">fmt.Println()
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">s = append(s, &#34;d&#34;)
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl">fmt.Println()
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">s = append(s, &#34;e&#34;)
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl">fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl">fmt.Println()
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>运行结果如下：</p>
-<p><img src="https://cdn.mazhen.tech/images/202207011422594.png"
+</div><p>可以看到，Nginx 的 master 进程创建了4个 worker 进程，以及用来管理磁盘内容缓存的缓存helper进程。</p>
+<p>为什么Nginx使用的是多进程结构，而不是多线程结构呢？因为多线程结构，线程之间是共享同一个进程地址空间，当某一个第三方模块出现了地址空间的断错误时，会导致整个Nginx进程挂掉，而多进程模型就不会出现这样的问题，Nginx的第三方模块通常不会在 master 进程中加入自己的功能代码。</p>
+<p><strong>master</strong> 进程执行一些特权操作，比如读取配置以及绑定端口，它管理 worker 进程的，负责监控每个 worke进程是否在正常工作，是否需要重载配置文件，以及做热部署等。</p>
+<p><strong>worker</strong> 进程处理真正的请求，从磁盘读取内容或往磁盘中写入内容，以及与上游服务器通信。</p>
+<p><strong>cache manager</strong> 进程会周期性地运行，从磁盘缓存中删除条目，以保证缓存没有超过配置的大小。</p>
+<p><strong>cache loader</strong> 进程在启动时运行，用于将磁盘上的缓存加载到内存中，随后退出。</p>
+<p>Nginx 采用了事件驱动的模型，它希望 worker 进程的数量和 CPU 一致，并且每一个 worker 进程与某一颗CPU绑定，worker 进程以非阻塞的方式处理多个连接，减少了上下文切换，同时更好的利用到了 CPU 缓存，减少缓存失效。</p>
+<h2 id="请求处理流程">请求处理流程</h2>
+<p><img src="https://cdn.mazhen.tech/images/202211171050526.png"
 	
 	
 	
 	loading="lazy"
 	
+		alt="request process"
+	
 	
 ></p>
-<p>对于初始化容量为3的<code>slice</code>，在向这个<code>slice</code> append 新元素时，底层会创建一个容量翻倍的新数组，并将原先的内容复制过来，再将新元素<code>append</code>到最后。我们可以看到这个<code>slice</code>内部保存底层数组的指针在第一次<code>append</code>后，指向了新的地址。当再向它<code>append</code>新元素时，由于底层数组还有空间，内部指针保持不变，只是更新<code>Len</code>属性为5。</p>
-<p>在Go中进行函数调用时，参数都是按值传递的。对于引用类型也是按值传递，会复制引用本身，但不会复制引用指向的底层数据结构。还是看代码：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">func foo(s []string) {
-</span></span><span class="line"><span class="cl"> fmt.Println(&#34;======= func foo =======&#34;)
-</span></span><span class="line"><span class="cl"> s = append(s, &#34;f&#34;)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;&amp;s: %p \n&#34;, &amp;s)
-</span></span><span class="line"><span class="cl"> fmt.Println(&#34;========================\n&#34;)
-</span></span><span class="line"><span class="cl">}
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">func main() {
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   ......
-</span></span><span class="line"><span class="cl">   
-</span></span><span class="line"><span class="cl"> s = append(s, &#34;e&#34;)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;&amp;s: %p \n&#34;, &amp;s)
-</span></span><span class="line"><span class="cl"> fmt.Println()
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> foo(s)
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;&amp;s: %p \n&#34;, &amp;s)
-</span></span><span class="line"><span class="cl">}
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>运行结果为：</p>
-<p><img src="https://cdn.mazhen.tech/images/202207011422106.png"
+<p>Nginx 使用的是非阻塞的事件驱动处理引擎，需要用状态机来把这个请求正确的识别和处理。Nginx 内部有三个状态机，分别是处理4层 TCP 流量的传输层状态机，处理7层流量的HTTP状态机和处理邮件的email 状态机。</p>
+<p>worker 进程首先等待监听套接字上的事件，新接入的连接会触发事件，然后连接分配到一个状态机。</p>
+<p><img src="https://cdn.mazhen.tech/images/202211171113018.png"
 	
 	
 	
 	loading="lazy"
 	
+		alt="state machine"
+	
 	
 ></p>
-<p>在函数调用时，传递给函数的<code>slice</code>进行了复制，函数的参数是一个新的<code>slice</code>，但<code>slice</code>内部指针指向的底层数组还是同一个。</p>
-<p>完整的示例代码在<a class="link" href="https://play.golang.org/p/qwwSuskLfCa"  target="_blank" rel="noopener"
-    >https://play.golang.org/p/qwwSuskLfCa</a>，可以在Playground中直接运行。</p>
-<p>Go语言的引用类型有<code>slice</code>, <code>map</code>, <code>channel</code>, <code>interface</code>和<code>function</code>。技术上，<a class="link" href="https://golang.org/pkg/reflect/#StringHeader"  target="_blank" rel="noopener"
-    >string</a>也是引用类型：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">type StringHeader struct {
-</span></span><span class="line"><span class="cl">        Data uintptr
-</span></span><span class="line"><span class="cl">        Len  int
-</span></span><span class="line"><span class="cl">}
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>有时候为了性能优化，可以利用<code>[]byte</code>和<code>string</code>头部结构的“部分相同”，以非安全的指针类型转换来实现类型变更，避免底层数组的复制。例如 <code>TiDB</code> 中就使用了这个<a class="link" href="https://github.com/pingcap/tidb/blob/master/util/hack/hack.go"  target="_blank" rel="noopener"
-    >技巧</a>：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// String converts slice to string without copy.
-</span></span><span class="line"><span class="cl">// Use at your own risk.
-</span></span><span class="line"><span class="cl">func String(b []byte) (s string) {
-</span></span><span class="line"><span class="cl"> if len(b) == 0 {
-</span></span><span class="line"><span class="cl">  return &#34;&#34;
-</span></span><span class="line"><span class="cl"> }
-</span></span><span class="line"><span class="cl"> pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&amp;b))
-</span></span><span class="line"><span class="cl"> pstring := (*reflect.StringHeader)(unsafe.Pointer(&amp;s))
-</span></span><span class="line"><span class="cl"> pstring.Data = pbytes.Data
-</span></span><span class="line"><span class="cl"> pstring.Len = pbytes.Len
-</span></span><span class="line"><span class="cl"> return
-</span></span><span class="line"><span class="cl">}
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">// Slice converts string to slice without copy.
-</span></span><span class="line"><span class="cl">// Use at your own risk.
-</span></span><span class="line"><span class="cl">func Slice(s string) (b []byte) {
-</span></span><span class="line"><span class="cl"> pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&amp;b))
-</span></span><span class="line"><span class="cl"> pstring := (*reflect.StringHeader)(unsafe.Pointer(&amp;s))
-</span></span><span class="line"><span class="cl"> pbytes.Data = pstring.Data
-</span></span><span class="line"><span class="cl"> pbytes.Len = pstring.Len
-</span></span><span class="line"><span class="cl"> pbytes.Cap = pstring.Len
-</span></span><span class="line"><span class="cl"> return
-</span></span><span class="line"><span class="cl">}
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>上面两个函数实现了<code>[]byte</code>和<code>string</code>的互相转换，不需要底层数组的copy。</p>
+<p>状态机本质上是告诉 Nginx 如何处理请求的指令集。解析出的请求是要访问静态资源，那么就去磁盘加载静态资源，更多的时候 Nginx 是作为负载均衡或者反向代理使用，这个时候请求会通过4层或7层协议，传输到上游服务器。对于每一个处理完成的请求，Nginx会记录 access 日志和 error 日志。</p>
+<h2 id="nginx-进程管理">Nginx 进程管理</h2>
+<p>Linux 上多进程之间进行通讯，可以使用共享内存和信号。Nginx 在做进程间的管理时，使用了信号。我们可以使用 kill 命令直接向 master 进程和 worker 进程发送信号，也可以使用 nginx 命令行。</p>
+<p>master 进程接收处理的信号：</p>
+<ul>
+<li>
+<p><strong>CHLD</strong>  在 Linux 系统中，当子进程终止的时候，会向父进程发送 CHLD 信号。master 进程启动的 worker 进程，所以 master 是 worker 的父进程。如果 worker 进程由于一些原因意外退出，那么 master 进程会立刻收到通知，可以重新启动一个新的 worker进程。</p>
+</li>
+<li>
+<p><strong>TERM</strong> 和 <strong>INT</strong>  立刻终止 worker 和 master 进程。</p>
+</li>
+<li>
+<p><strong>QUIT</strong> 优雅的停止 worker 和 master 进程。worker 不会向客户端发送 reset 立即结束连接。</p>
+</li>
+<li>
+<p><strong>HUP</strong> 重新加载配置文件</p>
+</li>
+<li>
+<p><strong>USR1</strong> 重新打开日志文件，做日志文件的切割</p>
+</li>
+<li>
+<p><strong>USR2</strong> 通知 master 开始进行热部署</p>
+</li>
+<li>
+<p><strong>WINCH</strong> 在热部署过程中，通知旧的 master ，让它优雅关闭 worker 进程</p>
+</li>
+</ul>
+<p>我们也可以通过 <code>nginx -s</code> 命令向 master 进程发送信号。在 Nginx 启动过程中， Nginx 会把 master 的 PID 记录在文件中，这个文件的默认位置是 <code>$nginx/logs/nginx.pid</code> 。 当我们执行 <code>nginx -s</code> 命令时，<code>nginx</code> 命令会去读取 <code>nginx.pid</code> 文件中 master 进程的 PID，然后向 master 进程发送对应的信号。下面是 <code>nginx -s</code> 命令对应的信号：</p>
+<ul>
+<li><strong>reload</strong> - HUP</li>
+<li><strong>reopen</strong> - USR1</li>
+<li><strong>stop</strong> - TERM</li>
+<li><strong>quit</strong> -  QUIT</li>
+</ul>
+<p>使用 <code>nginx -s</code>  和 直接使用 kill 命令向 master 进程发送信号，效果是一样的。</p>
+<p>注意，<strong>USR2</strong> 和 <strong>WINCH</strong> 没有对应的 <code>nginx -s</code> 命令，只能通过 kill 命令直接向 master 进程发送。</p>
+<p>worker 进程能接收的信号：</p>
+<ul>
+<li>TERM 和 INT</li>
+<li>QUIT</li>
+<li>USR1</li>
+<li>WINCH</li>
+</ul>
+<p>worker 进程收到这些信号，会产生和发给 master 一样的效果。但我们通常不会直接向 worker 进程发送信号，而是通过 master 进程来管理 worker 进程，master 进程收到信号以后，会再把信号转发给 worker 进程。</p>
+<h2 id="nginx-配置更新流程">Nginx 配置更新流程</h2>
+<p><img src="https://cdn.mazhen.tech/images/202211171726947.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="reload"
+	
+	
+></p>
+<p>当更改了 Nginx 配置文件后，我们都会执行 <code>nginx -s reload</code> 命令重新加载配置文件。Nginx 不会停止服务，在处理新的请求的同时，平滑的进行配置文件的更新。</p>
+<p>执行 <code>nginx -s reload</code> 命令，会向 master 进程发送 SIGHUP 信号。当 master 进程接收 SIGHUP信号后，会做如下处理：</p>
+<ol>
+<li>检查配置文件语法是否正确。</li>
+<li>master 加载配置，启动一组新的 worker 进程。这些 worker 进程马上开始接收新连接和处理网络请求。子进程可以共享使用父进程已经打开的端口，所以新的 worker 可以和老的worker监听同样的端口。</li>
+<li>master 向旧的 worker 发送 QUIT 信号，让旧的 worker 优雅退出。</li>
+<li>旧的 worker 进程停止接收新连接，完成现有连接的处理后结束进程。</li>
+</ol>
+<h2 id="nginx-热部署流程">Nginx 热部署流程</h2>
+<p><img src="https://cdn.mazhen.tech/images/202211171739417.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="hot deploy"
+	
+	
+></p>
+<p>Nginx 支持热部署，在升级的过程中也实现了高可用性，不导致任何连接丢失，停机时间或服务中断。热部署的流程如下：</p>
+<ol>
+<li>备份旧的 nginx 二进制文件，将新的nginx二进制文件拷贝到 <code>$nginx_home/sbin</code>目录。</li>
+<li>向 master 进程发送 USR2 信号。</li>
+<li>master 进程用新的nginx文件启动新的master进程，新的master进程会启动新的worker进程。</li>
+<li>向旧的 master 进程发送 WINCH 信号，让它优雅的关闭旧的 worker 进程。此时旧的 master 仍然在运行。</li>
+<li>如果想回滚到旧版本，可以向旧的 master 发送 HUP 信号，向新的master 发送QUIT信号。</li>
+<li>如果一切正常，可以向旧的 master 发送 QUIT 信号，关闭旧的 master。</li>
+</ol>
 
 </section>
 
@@ -629,7 +596,9 @@ if (!doNotTrack) {
     
     <section class="article-tags">
         
-            <a href="/tags/golang/">golang</a>
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/nginx/">nginx</a>
         
     </section>
 
@@ -660,32 +629,6 @@ if (!doNotTrack) {
     <h2 class="section-title">相关文章</h2>
     <div class="related-content">
         <div class="flex article-list--tile">
-            
-                
-<article class="">
-    <a href="/p/golang-error%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Golang error处理实践</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/nginx%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Nginx架构基础</h2>
-        </div>
-    </a>
-</article>
-
             
                 
 <article class="">
@@ -721,6 +664,32 @@ if (!doNotTrack) {
 
         <div class="article-details">
             <h2 class="article-title">Nginx的基本使用</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/nginx%E7%9A%84%E7%BC%96%E8%AF%91%E5%92%8C%E5%AE%89%E8%A3%85/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Nginx的编译和安装</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%9C%A8%E5%9B%BD%E4%BA%A7%E9%A3%9E%E8%85%BE%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">在国产飞腾平台上编译安装nginx</h2>
         </div>
     </a>
 </article>

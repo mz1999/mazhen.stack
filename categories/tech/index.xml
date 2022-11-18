@@ -6,7 +6,166 @@
         <description>Recent content in tech on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-CN</language>
-        <lastBuildDate>Wed, 16 Nov 2022 10:56:47 +0800</lastBuildDate><atom:link href="https://mazhen.tech/categories/tech/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 18 Nov 2022 11:16:48 +0800</lastBuildDate><atom:link href="https://mazhen.tech/categories/tech/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Nginx架构基础</title>
+        <link>https://mazhen.tech/p/nginx%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/</link>
+        <pubDate>Fri, 18 Nov 2022 11:16:48 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/nginx%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/</guid>
+        <description>&lt;h2 id=&#34;nginx-进程模型&#34;&gt;Nginx 进程模型&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202211161536855.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;process model&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Nginx其实有两种进程结构，一种是单进程结构，一种是多进程结构。单进程结构只适合我们做开发调试，在生产环境下，为了保持 Nginx 足够健壮，以及可以利用到 CPU 的多核特性，我们用到的是多进程架构的Nginx。&lt;/p&gt;
+&lt;p&gt;多进程架构的Nginx，有一个父进程 master process，master 会有很多子进程，这些子进程分为两类，一类是worker 进程，一类是 cache 相关的进程。&lt;/p&gt;
+&lt;p&gt;在一个四核的Linux服务器上查看Nginx进程：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ps -ef --forest &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep nginx
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20875&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;13073&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 pts/0    00:00:00          &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;   &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; grep --color&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;auto nginx
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;       &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00 nginx: master process ./sbin/nginx
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20863&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; nginx: worker process
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20864&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; nginx: worker process
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20865&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; nginx: worker process
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20866&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; nginx: worker process
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20867&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; nginx: cache manager process
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mazhen     &lt;span class=&#34;m&#34;&gt;20868&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;20862&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 15:25 ?        00:00:00  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; nginx: cache loader process
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以看到，Nginx 的 master 进程创建了4个 worker 进程，以及用来管理磁盘内容缓存的缓存helper进程。&lt;/p&gt;
+&lt;p&gt;为什么Nginx使用的是多进程结构，而不是多线程结构呢？因为多线程结构，线程之间是共享同一个进程地址空间，当某一个第三方模块出现了地址空间的断错误时，会导致整个Nginx进程挂掉，而多进程模型就不会出现这样的问题，Nginx的第三方模块通常不会在 master 进程中加入自己的功能代码。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;master&lt;/strong&gt; 进程执行一些特权操作，比如读取配置以及绑定端口，它管理 worker 进程的，负责监控每个 worke进程是否在正常工作，是否需要重载配置文件，以及做热部署等。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;worker&lt;/strong&gt; 进程处理真正的请求，从磁盘读取内容或往磁盘中写入内容，以及与上游服务器通信。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;cache manager&lt;/strong&gt; 进程会周期性地运行，从磁盘缓存中删除条目，以保证缓存没有超过配置的大小。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;cache loader&lt;/strong&gt; 进程在启动时运行，用于将磁盘上的缓存加载到内存中，随后退出。&lt;/p&gt;
+&lt;p&gt;Nginx 采用了事件驱动的模型，它希望 worker 进程的数量和 CPU 一致，并且每一个 worker 进程与某一颗CPU绑定，worker 进程以非阻塞的方式处理多个连接，减少了上下文切换，同时更好的利用到了 CPU 缓存，减少缓存失效。&lt;/p&gt;
+&lt;h2 id=&#34;请求处理流程&#34;&gt;请求处理流程&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202211171050526.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;request process&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Nginx 使用的是非阻塞的事件驱动处理引擎，需要用状态机来把这个请求正确的识别和处理。Nginx 内部有三个状态机，分别是处理4层 TCP 流量的传输层状态机，处理7层流量的HTTP状态机和处理邮件的email 状态机。&lt;/p&gt;
+&lt;p&gt;worker 进程首先等待监听套接字上的事件，新接入的连接会触发事件，然后连接分配到一个状态机。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202211171113018.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;state machine&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;状态机本质上是告诉 Nginx 如何处理请求的指令集。解析出的请求是要访问静态资源，那么就去磁盘加载静态资源，更多的时候 Nginx 是作为负载均衡或者反向代理使用，这个时候请求会通过4层或7层协议，传输到上游服务器。对于每一个处理完成的请求，Nginx会记录 access 日志和 error 日志。&lt;/p&gt;
+&lt;h2 id=&#34;nginx-进程管理&#34;&gt;Nginx 进程管理&lt;/h2&gt;
+&lt;p&gt;Linux 上多进程之间进行通讯，可以使用共享内存和信号。Nginx 在做进程间的管理时，使用了信号。我们可以使用 kill 命令直接向 master 进程和 worker 进程发送信号，也可以使用 nginx 命令行。&lt;/p&gt;
+&lt;p&gt;master 进程接收处理的信号：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;CHLD&lt;/strong&gt;  在 Linux 系统中，当子进程终止的时候，会向父进程发送 CHLD 信号。master 进程启动的 worker 进程，所以 master 是 worker 的父进程。如果 worker 进程由于一些原因意外退出，那么 master 进程会立刻收到通知，可以重新启动一个新的 worker进程。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;TERM&lt;/strong&gt; 和 &lt;strong&gt;INT&lt;/strong&gt;  立刻终止 worker 和 master 进程。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;QUIT&lt;/strong&gt; 优雅的停止 worker 和 master 进程。worker 不会向客户端发送 reset 立即结束连接。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;HUP&lt;/strong&gt; 重新加载配置文件&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;USR1&lt;/strong&gt; 重新打开日志文件，做日志文件的切割&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;USR2&lt;/strong&gt; 通知 master 开始进行热部署&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;WINCH&lt;/strong&gt; 在热部署过程中，通知旧的 master ，让它优雅关闭 worker 进程&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我们也可以通过 &lt;code&gt;nginx -s&lt;/code&gt; 命令向 master 进程发送信号。在 Nginx 启动过程中， Nginx 会把 master 的 PID 记录在文件中，这个文件的默认位置是 &lt;code&gt;$nginx/logs/nginx.pid&lt;/code&gt; 。 当我们执行 &lt;code&gt;nginx -s&lt;/code&gt; 命令时，&lt;code&gt;nginx&lt;/code&gt; 命令会去读取 &lt;code&gt;nginx.pid&lt;/code&gt; 文件中 master 进程的 PID，然后向 master 进程发送对应的信号。下面是 &lt;code&gt;nginx -s&lt;/code&gt; 命令对应的信号：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;reload&lt;/strong&gt; - HUP&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;reopen&lt;/strong&gt; - USR1&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;stop&lt;/strong&gt; - TERM&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;quit&lt;/strong&gt; -  QUIT&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;使用 &lt;code&gt;nginx -s&lt;/code&gt;  和 直接使用 kill 命令向 master 进程发送信号，效果是一样的。&lt;/p&gt;
+&lt;p&gt;注意，&lt;strong&gt;USR2&lt;/strong&gt; 和 &lt;strong&gt;WINCH&lt;/strong&gt; 没有对应的 &lt;code&gt;nginx -s&lt;/code&gt; 命令，只能通过 kill 命令直接向 master 进程发送。&lt;/p&gt;
+&lt;p&gt;worker 进程能接收的信号：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;TERM 和 INT&lt;/li&gt;
+&lt;li&gt;QUIT&lt;/li&gt;
+&lt;li&gt;USR1&lt;/li&gt;
+&lt;li&gt;WINCH&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;worker 进程收到这些信号，会产生和发给 master 一样的效果。但我们通常不会直接向 worker 进程发送信号，而是通过 master 进程来管理 worker 进程，master 进程收到信号以后，会再把信号转发给 worker 进程。&lt;/p&gt;
+&lt;h2 id=&#34;nginx-配置更新流程&#34;&gt;Nginx 配置更新流程&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202211171726947.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;reload&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;当更改了 Nginx 配置文件后，我们都会执行 &lt;code&gt;nginx -s reload&lt;/code&gt; 命令重新加载配置文件。Nginx 不会停止服务，在处理新的请求的同时，平滑的进行配置文件的更新。&lt;/p&gt;
+&lt;p&gt;执行 &lt;code&gt;nginx -s reload&lt;/code&gt; 命令，会向 master 进程发送 SIGHUP 信号。当 master 进程接收 SIGHUP信号后，会做如下处理：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;检查配置文件语法是否正确。&lt;/li&gt;
+&lt;li&gt;master 加载配置，启动一组新的 worker 进程。这些 worker 进程马上开始接收新连接和处理网络请求。子进程可以共享使用父进程已经打开的端口，所以新的 worker 可以和老的worker监听同样的端口。&lt;/li&gt;
+&lt;li&gt;master 向旧的 worker 发送 QUIT 信号，让旧的 worker 优雅退出。&lt;/li&gt;
+&lt;li&gt;旧的 worker 进程停止接收新连接，完成现有连接的处理后结束进程。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;nginx-热部署流程&#34;&gt;Nginx 热部署流程&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202211171739417.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;hot deploy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Nginx 支持热部署，在升级的过程中也实现了高可用性，不导致任何连接丢失，停机时间或服务中断。热部署的流程如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;备份旧的 nginx 二进制文件，将新的nginx二进制文件拷贝到 &lt;code&gt;$nginx_home/sbin&lt;/code&gt;目录。&lt;/li&gt;
+&lt;li&gt;向 master 进程发送 USR2 信号。&lt;/li&gt;
+&lt;li&gt;master 进程用新的nginx文件启动新的master进程，新的master进程会启动新的worker进程。&lt;/li&gt;
+&lt;li&gt;向旧的 master 进程发送 WINCH 信号，让它优雅的关闭旧的 worker 进程。此时旧的 master 仍然在运行。&lt;/li&gt;
+&lt;li&gt;如果想回滚到旧版本，可以向旧的 master 发送 HUP 信号，向新的master 发送QUIT信号。&lt;/li&gt;
+&lt;li&gt;如果一切正常，可以向旧的 master 发送 QUIT 信号，关闭旧的 master。&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        <item>
         <title>Nginx反向代理配置</title>
         <link>https://mazhen.tech/p/nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E9%85%8D%E7%BD%AE/</link>
         <pubDate>Wed, 16 Nov 2022 10:56:47 +0800</pubDate>
