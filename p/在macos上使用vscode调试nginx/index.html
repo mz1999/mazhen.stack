@@ -538,7 +538,30 @@ if (!doNotTrack) {
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="配置vscode">配置VSCode</h2>
-<p>使用 VSCode 打开 nginx 源码，点击菜单 &ldquo;Run -&gt; Starting Debugging&rdquo;，在提升中选择 <code>LLDB</code>，创建出 <code>launch.json</code>，编辑该文件进行debug配置。将 &ldquo;program&rdquo; 设置为上一步编译出带有debug信息的nginx。</p>
+<p>首先参考 <a class="link" href="https://code.visualstudio.com/docs/cpp/config-clang-mac"  target="_blank" rel="noopener"
+    >VSCode 官方文档</a>，完成 VS Code C++ 开发环境的配置。</p>
+<ul>
+<li>确认本机是否已经安装了 Clang 编译器：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 确认是否安装了Clang</span>
+</span></span><span class="line"><span class="cl">$ clang --version 
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装开发者命令行工具，包括Clang、git等</span>
+</span></span><span class="line"><span class="cl">$ xcode-select --install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>安装 <a class="link" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools"  target="_blank" rel="noopener"
+    >C++ extension for VS Code</a>。</li>
+</ul>
+<p>完成C++开发环境准备后，使用 VSCode 打开 nginx 源码，点击菜单 &ldquo;Run -&gt; Starting Debugging&rdquo;，在提示中选择 <code>LLDB</code>，创建出 <code>launch.json</code>，编辑该文件进行 debug 配置。将 &ldquo;program&rdquo; 设置为上一步编译出带有debug信息的nginx。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -577,7 +600,7 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>现在就可以在代码中设置断点，再次点击 &ldquo;Run -&gt; Starting Debugging&rdquo;，调试Nginx了。</p>
+</div><p>现在就可以在代码中设置断点，再次点击 &ldquo;Run -&gt; Starting Debugging&rdquo;，开始调试 Nginx 吧。</p>
 <p><img src="https://cdn.mazhen.tech/images/202211211116679.png"
 	
 	
