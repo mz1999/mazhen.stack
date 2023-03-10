@@ -433,17 +433,17 @@ if (!doNotTrack) {
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Get the value of tokutime for right now.  We want this to be fast, so we
 </span></span></span><span class="line"><span class="cl"><span class="c1">// expose the implementation as RDTSC.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">static</span> <span class="kr">inline</span> <span class="n">tokutime_t</span> <span class="nf">toku_time_now</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">static</span> <span class="kr">inline</span> <span class="kt">tokutime_t</span> <span class="nf">toku_time_now</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#if defined(__x86_64__) || defined(__i386__)
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="kt">uint32_t</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="n">__asm__</span> <span class="n">__volatile__</span><span class="p">(</span><span class="s">&#34;rdtsc&#34;</span> <span class="o">:</span> <span class="s">&#34;=a&#34;</span><span class="p">(</span><span class="n">lo</span><span class="p">),</span> <span class="s">&#34;=d&#34;</span><span class="p">(</span><span class="n">hi</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__asm__</span> <span class="nf">__volatile__</span><span class="p">(</span><span class="s">&#34;rdtsc&#34;</span> <span class="o">:</span> <span class="s">&#34;=a&#34;</span><span class="p">(</span><span class="n">lo</span><span class="p">),</span> <span class="s">&#34;=d&#34;</span><span class="p">(</span><span class="n">hi</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">hi</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span> <span class="o">|</span> <span class="n">lo</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#elif defined(__aarch64__)
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="kt">uint64_t</span> <span class="n">result</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="kr">__asm</span> <span class="n">__volatile__</span><span class="p">(</span><span class="s">&#34;mrs %[rt], cntvct_el0&#34;</span> <span class="o">:</span> <span class="p">[</span> <span class="n">rt</span> <span class="p">]</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">result</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">__asm</span> <span class="nf">__volatile__</span><span class="p">(</span><span class="s">&#34;mrs %[rt], cntvct_el0&#34;</span> <span class="o">:</span> <span class="p">[</span> <span class="n">rt</span> <span class="p">]</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">result</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#elif defined(__powerpc__)
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="k">return</span> <span class="n">__ppc_get_timebase</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="k">return</span> <span class="nf">__ppc_get_timebase</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#elif defined(__s390x__)
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="kt">uint64_t</span> <span class="n">result</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;stckf %0&#34;</span> <span class="o">:</span> <span class="s">&#34;=Q&#34;</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">:</span> <span class="o">:</span> <span class="s">&#34;cc&#34;</span><span class="p">);</span>
@@ -472,7 +472,7 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="nf">loongarch_cpu_cpp_builtins</span> <span class="p">(</span><span class="n">cpp_reader</span> <span class="o">*</span><span class="n">pfile</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="p">...</span>
-</span></span><span class="line"><span class="cl">  <span class="n">builtin_define</span> <span class="p">(</span><span class="s">&#34;__loongarch__&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">builtin_define</span> <span class="p">(</span><span class="s">&#34;__loongarch__&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
@@ -503,7 +503,7 @@ if (!doNotTrack) {
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#elif defined(__loongarch__)
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="k">struct</span> <span class="n">timeval</span> <span class="n">tv</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="n">gettimeofday</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tv</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">gettimeofday</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tv</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">tv</span><span class="p">.</span><span class="n">tv_sec</span><span class="o">*</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="mi">1000000</span><span class="o">+</span><span class="n">tv</span><span class="p">.</span><span class="n">tv_usec</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#else
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="cp">#error No implementation for this platform
@@ -674,7 +674,7 @@ if (!doNotTrack) {
         
             2014 - 
         
-        2022 mazhen.tech
+        2023 mazhen.tech
     </section>
     
     <section class="powerby">

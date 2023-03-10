@@ -461,7 +461,7 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">ngx_module_s</span>          <span class="n">ngx_module_t</span><span class="p">;</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">ngx_module_s</span>          <span class="kt">ngx_module_t</span><span class="p">;</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>而 <code>ngx_module_s</code> 在 <code>src/core/ngx_module.h</code> 中定义：</p>
@@ -497,31 +497,31 @@ if (!doNotTrack) {
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">ngx_module_s</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>            <span class="n">ctx_index</span><span class="p">;</span>                        <span class="c1">// 模块在同类型模块数组中的索引序号
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">index</span><span class="p">;</span>                            <span class="c1">// 模块在所有模块数组中的索引序号
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>            <span class="n">ctx_index</span><span class="p">;</span>                        <span class="c1">// 模块在同类型模块数组中的索引序号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">index</span><span class="p">;</span>                            <span class="c1">// 模块在所有模块数组中的索引序号
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span>                 <span class="o">*</span><span class="n">name</span><span class="p">;</span>                             <span class="c1">// 模块的名称
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">spare0</span><span class="p">;</span>                           <span class="c1">// 保留变量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">spare1</span><span class="p">;</span>                           <span class="c1">// 保留变量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">version</span><span class="p">;</span>                          <span class="c1">// 模块的版本号 目前只有一种，默认为1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">spare0</span><span class="p">;</span>                           <span class="c1">// 保留变量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">spare1</span><span class="p">;</span>                           <span class="c1">// 保留变量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">version</span><span class="p">;</span>                          <span class="c1">// 模块的版本号 目前只有一种，默认为1
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">const</span> <span class="kt">char</span>           <span class="o">*</span><span class="n">signature</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">void</span>                 <span class="o">*</span><span class="n">ctx</span><span class="p">;</span>                              <span class="c1">// 模块的上下文 不同的模块指向不同的上下文
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_command_t</span>        <span class="o">*</span><span class="n">commands</span><span class="p">;</span>                         <span class="c1">// 模块的命令集，指向一个 ngx_command_t 结构数组
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">type</span><span class="p">;</span>                             <span class="c1">// 模块类型 
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_master</span><span class="p">)(</span><span class="n">ngx_log_t</span> <span class="o">*</span><span class="n">log</span><span class="p">);</span>     <span class="c1">// master进程启动时回调
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_module</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// 初始化模块时回调
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_process</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span><span class="c1">// worker进程启动时回调
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_thread</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// 线程启动时回调（nginx暂时无多线程模式）
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                <span class="p">(</span><span class="o">*</span><span class="n">exit_thread</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// 线程退出时回调
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                <span class="p">(</span><span class="o">*</span><span class="n">exit_process</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span><span class="c1">// worker进程退出时回调
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                <span class="p">(</span><span class="o">*</span><span class="n">exit_master</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// master进程退出时回调
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">uintptr_t</span>             <span class="n">spare_hook0</span><span class="p">;</span>                      <span class="c1">// 保留字段
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">uintptr_t</span>             <span class="n">spare_hook1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">uintptr_t</span>             <span class="n">spare_hook2</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">uintptr_t</span>             <span class="n">spare_hook3</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">uintptr_t</span>             <span class="n">spare_hook4</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">uintptr_t</span>             <span class="n">spare_hook5</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">uintptr_t</span>             <span class="n">spare_hook6</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">uintptr_t</span>             <span class="n">spare_hook7</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_command_t</span>        <span class="o">*</span><span class="n">commands</span><span class="p">;</span>                         <span class="c1">// 模块的命令集，指向一个 ngx_command_t 结构数组
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">type</span><span class="p">;</span>                             <span class="c1">// 模块类型 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_master</span><span class="p">)(</span><span class="kt">ngx_log_t</span> <span class="o">*</span><span class="n">log</span><span class="p">);</span>     <span class="c1">// master进程启动时回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_module</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// 初始化模块时回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_process</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span><span class="c1">// worker进程启动时回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_int_t</span>           <span class="p">(</span><span class="o">*</span><span class="n">init_thread</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// 线程启动时回调（nginx暂时无多线程模式）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                <span class="p">(</span><span class="o">*</span><span class="n">exit_thread</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// 线程退出时回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                <span class="p">(</span><span class="o">*</span><span class="n">exit_process</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span><span class="c1">// worker进程退出时回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                <span class="p">(</span><span class="o">*</span><span class="n">exit_master</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span> <span class="c1">// master进程退出时回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uintptr_t</span>             <span class="n">spare_hook0</span><span class="p">;</span>                      <span class="c1">// 保留字段
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uintptr_t</span>             <span class="n">spare_hook1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uintptr_t</span>             <span class="n">spare_hook2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uintptr_t</span>             <span class="n">spare_hook3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uintptr_t</span>             <span class="n">spare_hook4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uintptr_t</span>             <span class="n">spare_hook5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uintptr_t</span>             <span class="n">spare_hook6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uintptr_t</span>             <span class="n">spare_hook7</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -533,7 +533,7 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">ngx_command_s</span>         <span class="n">ngx_command_t</span><span class="p">;</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">ngx_command_s</span>         <span class="kt">ngx_command_t</span><span class="p">;</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>而 <code>ngx_command_s</code> 在 <code>src/core/ngx_conf_file.h</code> 中定义：</p>
@@ -557,15 +557,15 @@ if (!doNotTrack) {
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">ngx_command_s</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 配置项的名称
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_str_t</span>             <span class="n">name</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_str_t</span>             <span class="n">name</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 配置项的类型
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">type</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">type</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 配置项解析处理函数
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span>               <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">set</span><span class="p">)(</span><span class="n">ngx_conf_t</span> <span class="o">*</span><span class="n">cf</span><span class="p">,</span> <span class="n">ngx_command_t</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">conf</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span>               <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">set</span><span class="p">)(</span><span class="kt">ngx_conf_t</span> <span class="o">*</span><span class="n">cf</span><span class="p">,</span> <span class="kt">ngx_command_t</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">conf</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 用于指示配置项所处内存的相对偏移位置
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">conf</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">conf</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 表示当前配置项在整个存储配置项的结构体中的偏移位置
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_uint_t</span>            <span class="n">offset</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_uint_t</span>            <span class="n">offset</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 配置项读取后的处理方法 必须是ngx_conf_post_t结构体的指针
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                 <span class="o">*</span><span class="n">post</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
@@ -669,12 +669,12 @@ if (!doNotTrack) {
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>             <span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>             <span class="n">name</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 解析配置项前Nginx框架会调用
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>               <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">create_conf</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>               <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">create_conf</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 解析配置项完成后，Nginx框架会调用
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span>               <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">init_conf</span><span class="p">)(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">conf</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">ngx_core_module_t</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span>               <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">init_conf</span><span class="p">)(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">conf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="kt">ngx_core_module_t</span><span class="p">;</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>ngx_core_module_t</code> 是以配置项的解析作为基础的。 <code>create_conf</code> 回调方法来创建存储配置项的数据结构，<code>init_conf</code>回调方法使用解析出的配置项初始化核心模块功能。例如核心模块<code>ngx_core_module</code> （src/core/nginx.c）的 <code>ctx</code> 实例化为 <code>ngx_core_module_ctx</code>，定义了 <code>ngx_core_module_create_conf</code> 和 <code>ngx_core_module_init_conf</code> 回调方法。</p>
@@ -687,8 +687,8 @@ if (!doNotTrack) {
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="n">ngx_core_module_t</span>  <span class="n">ngx_core_module_ctx</span> <span class="o">=</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_string</span><span class="p">(</span><span class="s">&#34;core&#34;</span><span class="p">),</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">ngx_core_module_t</span>  <span class="n">ngx_core_module_ctx</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ngx_string</span><span class="p">(</span><span class="s">&#34;core&#34;</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">    <span class="n">ngx_core_module_create_conf</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="n">ngx_core_module_init_conf</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
@@ -728,7 +728,7 @@ if (!doNotTrack) {
 </span><span class="lnt">28
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="n">ngx_http_module_t</span>  <span class="n">ngx_http_core_module_ctx</span> <span class="o">=</span> <span class="p">{</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">ngx_http_module_t</span>  <span class="n">ngx_http_core_module_ctx</span> <span class="o">=</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">ngx_http_core_preconfiguration</span><span class="p">,</span>        <span class="cm">/* preconfiguration */</span>
 </span></span><span class="line"><span class="cl">    <span class="n">ngx_http_core_postconfiguration</span><span class="p">,</span>       <span class="cm">/* postconfiguration */</span>
 </span></span><span class="line"><span class="cl">
@@ -742,7 +742,7 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl">    <span class="n">ngx_http_core_merge_loc_conf</span>           <span class="cm">/* merge location configuration */</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">ngx_module_t</span>  <span class="n">ngx_http_core_module</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="kt">ngx_module_t</span>  <span class="n">ngx_http_core_module</span> <span class="o">=</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">NGX_MODULE_V1</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="o">&amp;</span><span class="n">ngx_http_core_module_ctx</span><span class="p">,</span>             <span class="cm">/* module context */</span>
 </span></span><span class="line"><span class="cl">    <span class="n">ngx_http_core_commands</span><span class="p">,</span>                <span class="cm">/* module directives */</span>
@@ -786,7 +786,7 @@ if (!doNotTrack) {
 </span><span class="lnt">21
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ngx_module_t</span> <span class="o">*</span><span class="n">ngx_modules</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">ngx_module_t</span> <span class="o">*</span><span class="n">ngx_modules</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="o">&amp;</span><span class="n">ngx_core_module</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="o">&amp;</span><span class="n">ngx_errlog_module</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="o">&amp;</span><span class="n">ngx_conf_module</span><span class="p">,</span>
@@ -831,14 +831,14 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">ngx_cdecl</span>
 </span></span><span class="line"><span class="cl"><span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="o">*</span><span class="n">argv</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_buf_t</span>        <span class="o">*</span><span class="n">b</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_log_t</span>        <span class="o">*</span><span class="n">log</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>        <span class="n">i</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_cycle_t</span>      <span class="o">*</span><span class="n">cycle</span><span class="p">,</span> <span class="n">init_cycle</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_conf_dump_t</span>  <span class="o">*</span><span class="n">cd</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_core_conf_t</span>  <span class="o">*</span><span class="n">ccf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_buf_t</span>        <span class="o">*</span><span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_log_t</span>        <span class="o">*</span><span class="n">log</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>        <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_cycle_t</span>      <span class="o">*</span><span class="n">cycle</span><span class="p">,</span> <span class="n">init_cycle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_conf_dump_t</span>  <span class="o">*</span><span class="n">cd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_core_conf_t</span>  <span class="o">*</span><span class="n">ccf</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_debug_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ngx_debug_init</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>     
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
@@ -862,7 +862,7 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="o">*</span><span class="n">argv</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>    
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">ngx_preinit_modules</span><span class="p">()</span> <span class="o">!=</span> <span class="n">NGX_OK</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">ngx_preinit_modules</span><span class="p">()</span> <span class="o">!=</span> <span class="n">NGX_OK</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
@@ -926,56 +926,56 @@ if (!doNotTrack) {
 </span><span class="lnt">51
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">ngx_cycle_s</span> <span class="n">ngx_cycle_t</span><span class="p">;</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">ngx_cycle_s</span> <span class="kt">ngx_cycle_t</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">ngx_cycle_s</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 保存着所有模块存储配置项的结构体的指针，它首先是一个数组，每个数组成员又是一个指针，这个指针指向另一个存储着指针的数组
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span>                  <span class="o">****</span><span class="n">conf_ctx</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_pool_t</span>               <span class="o">*</span><span class="n">pool</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_pool_t</span>               <span class="o">*</span><span class="n">pool</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_log_t</span>                <span class="o">*</span><span class="n">log</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_log_t</span>                 <span class="n">new_log</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_log_t</span>                <span class="o">*</span><span class="n">log</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_log_t</span>                 <span class="n">new_log</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">log_use_stderr</span><span class="p">;</span>  <span class="cm">/* unsigned  log_use_stderr:1; */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">log_use_stderr</span><span class="p">;</span>  <span class="cm">/* unsigned  log_use_stderr:1; */</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_connection_t</span>        <span class="o">**</span><span class="n">files</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_connection_t</span>         <span class="o">*</span><span class="n">free_connections</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">free_connection_n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_connection_t</span>        <span class="o">**</span><span class="n">files</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_connection_t</span>         <span class="o">*</span><span class="n">free_connections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">free_connection_n</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="c1">// 模块数组
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ngx_module_t</span>            <span class="o">**</span><span class="n">modules</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">modules_n</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">modules_used</span><span class="p">;</span>    <span class="cm">/* unsigned  modules_used:1; */</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">ngx_module_t</span>            <span class="o">**</span><span class="n">modules</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">modules_n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">modules_used</span><span class="p">;</span>    <span class="cm">/* unsigned  modules_used:1; */</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_queue_t</span>               <span class="n">reusable_connections_queue</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">reusable_connections_n</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">time_t</span>                    <span class="n">connections_reuse_time</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_queue_t</span>               <span class="n">reusable_connections_queue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">reusable_connections_n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">time_t</span>                    <span class="n">connections_reuse_time</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_array_t</span>               <span class="n">listening</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_array_t</span>               <span class="n">paths</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_array_t</span>               <span class="n">listening</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_array_t</span>               <span class="n">paths</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_array_t</span>               <span class="n">config_dump</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_rbtree_t</span>              <span class="n">config_dump_rbtree</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_rbtree_node_t</span>         <span class="n">config_dump_sentinel</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_array_t</span>               <span class="n">config_dump</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_rbtree_t</span>              <span class="n">config_dump_rbtree</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_rbtree_node_t</span>         <span class="n">config_dump_sentinel</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_list_t</span>                <span class="n">open_files</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_list_t</span>                <span class="n">shared_memory</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_list_t</span>                <span class="n">open_files</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_list_t</span>                <span class="n">shared_memory</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">connection_n</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>                <span class="n">files_n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">connection_n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>                <span class="n">files_n</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_connection_t</span>         <span class="o">*</span><span class="n">connections</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_event_t</span>              <span class="o">*</span><span class="n">read_events</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_event_t</span>              <span class="o">*</span><span class="n">write_events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_connection_t</span>         <span class="o">*</span><span class="n">connections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_event_t</span>              <span class="o">*</span><span class="n">read_events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_event_t</span>              <span class="o">*</span><span class="n">write_events</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_cycle_t</span>              <span class="o">*</span><span class="n">old_cycle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_cycle_t</span>              <span class="o">*</span><span class="n">old_cycle</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">conf_file</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">conf_param</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">conf_prefix</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">prefix</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">error_log</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">lock_file</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_str_t</span>                 <span class="n">hostname</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">conf_file</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">conf_param</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">conf_prefix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">prefix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">error_log</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">lock_file</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_str_t</span>                 <span class="n">hostname</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -1015,10 +1015,10 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="o">*</span><span class="n">argv</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>    
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
-</span></span><span class="line"><span class="cl">    <span class="n">cycle</span> <span class="o">=</span> <span class="n">ngx_init_cycle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">init_cycle</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cycle</span> <span class="o">=</span> <span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">init_cycle</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">cycle</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">ngx_test_config</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">ngx_log_stderr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#34;configuration file %s test failed&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">ngx_log_stderr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#34;configuration file %s test failed&#34;</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">                           <span class="n">init_cycle</span><span class="p">.</span><span class="n">conf_file</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
@@ -1060,12 +1060,12 @@ if (!doNotTrack) {
 </span><span class="lnt">26
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ngx_cycle_t</span> <span class="o">*</span>
-</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">ngx_cycle_t</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">//配置上下文
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_ctx</span> <span class="o">=</span> <span class="n">ngx_pcalloc</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">ngx_max_module</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">));</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_ctx</span> <span class="o">=</span> <span class="nf">ngx_pcalloc</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">ngx_max_module</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">//处理core模块，cycle-&gt;conf_ctx用于存放所有CORE模块的配置
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
@@ -1076,9 +1076,9 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl">        <span class="c1">//只有ngx_core_module有create_conf回调函数,这个会调用函数会创建ngx_core_conf_t结构，
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//用于存储整个配置文件main scope范围内的信息，比如worker_processes，worker_cpu_affinity等
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">module</span><span class="o">-&gt;</span><span class="n">create_conf</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">rv</span> <span class="o">=</span> <span class="n">module</span><span class="o">-&gt;</span><span class="n">create_conf</span><span class="p">(</span><span class="n">cycle</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">rv</span> <span class="o">=</span> <span class="n">module</span><span class="o">-&gt;</span><span class="nf">create_conf</span><span class="p">(</span><span class="n">cycle</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">rv</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                <span class="n">ngx_destroy_pool</span><span class="p">(</span><span class="n">pool</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">ngx_destroy_pool</span><span class="p">(</span><span class="n">pool</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">            <span class="p">}</span>
 </span></span><span class="line"><span class="cl">            <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_ctx</span><span class="p">[</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">rv</span><span class="p">;</span>
@@ -1114,14 +1114,14 @@ if (!doNotTrack) {
 </span><span class="lnt">21
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ngx_cycle_t</span> <span class="o">*</span>
-</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">ngx_cycle_t</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">//conf表示当前解析到的配置命令上下文，包括命令，命令参数等
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">conf</span><span class="p">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">ngx_array_create</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ngx_str_t</span><span class="p">));</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">conf</span><span class="p">.</span><span class="n">args</span> <span class="o">=</span> <span class="nf">ngx_array_create</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">ngx_str_t</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
-</span></span><span class="line"><span class="cl">    <span class="n">conf</span><span class="p">.</span><span class="n">temp_pool</span> <span class="o">=</span> <span class="n">ngx_create_pool</span><span class="p">(</span><span class="n">NGX_CYCLE_POOL_SIZE</span><span class="p">,</span> <span class="n">log</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">conf</span><span class="p">.</span><span class="n">temp_pool</span> <span class="o">=</span> <span class="nf">ngx_create_pool</span><span class="p">(</span><span class="n">NGX_CYCLE_POOL_SIZE</span><span class="p">,</span> <span class="n">log</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="n">conf</span><span class="p">.</span><span class="n">ctx</span> <span class="o">=</span> <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_ctx</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="n">conf</span><span class="p">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">;</span>
@@ -1130,7 +1130,7 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl">    <span class="n">conf</span><span class="p">.</span><span class="n">module_type</span> <span class="o">=</span> <span class="n">NGX_CORE_MODULE</span><span class="p">;</span>  <span class="c1">//conf.module_type指示将要解析这个类型模块的指令
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">conf</span><span class="p">.</span><span class="n">cmd_type</span> <span class="o">=</span> <span class="n">NGX_MAIN_CONF</span><span class="p">;</span>  <span class="c1">//conf.cmd_type指示将要解析的指令的类型
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">//真正开始解析配置文件中的每个命令
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">ngx_conf_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">conf</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_file</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NGX_CONF_OK</span><span class="p">)</span> <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nf">ngx_conf_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">conf</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_file</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NGX_CONF_OK</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">     <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
@@ -1179,8 +1179,8 @@ if (!doNotTrack) {
 </span><span class="lnt">25
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ngx_cycle_t</span> <span class="o">*</span>
-</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">ngx_cycle_t</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">//初始化所有core module模块的config结构。调用ngx_core_module_t的init_conf,
@@ -1192,12 +1192,12 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="n">module</span> <span class="o">=</span> <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">ctx</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">module</span><span class="o">-&gt;</span><span class="n">init_conf</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">module</span><span class="o">-&gt;</span><span class="n">init_conf</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">module</span><span class="o">-&gt;</span><span class="nf">init_conf</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">                                  <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">conf_ctx</span><span class="p">[</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">index</span><span class="p">])</span>
 </span></span><span class="line"><span class="cl">                <span class="o">==</span> <span class="n">NGX_CONF_ERROR</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">            <span class="p">{</span>
 </span></span><span class="line"><span class="cl">                <span class="n">environ</span> <span class="o">=</span> <span class="n">senv</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">                <span class="n">ngx_destroy_cycle_pools</span><span class="p">(</span><span class="o">&amp;</span><span class="n">conf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">ngx_destroy_cycle_pools</span><span class="p">(</span><span class="o">&amp;</span><span class="n">conf</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">            <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
@@ -1221,13 +1221,13 @@ if (!doNotTrack) {
 </span><span class="lnt">10
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ngx_cycle_t</span> <span class="o">*</span>
-</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">ngx_cycle_t</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_cycle</span><span class="p">(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">old_cycle</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">ngx_init_modules</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NGX_OK</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">ngx_init_modules</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NGX_OK</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="cm">/* fatal */</span>
-</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -1251,13 +1251,13 @@ if (!doNotTrack) {
 </span><span class="lnt">13
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ngx_int_t</span>
-</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_modules</span><span class="p">(</span><span class="n">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">)</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">ngx_int_t</span>
+</span></span><span class="line"><span class="cl"><span class="nf">ngx_init_modules</span><span class="p">(</span><span class="kt">ngx_cycle_t</span> <span class="o">*</span><span class="n">cycle</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">ngx_uint_t</span>  <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">ngx_uint_t</span>  <span class="n">i</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">init_module</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">init_module</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NGX_OK</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">cycle</span><span class="o">-&gt;</span><span class="n">modules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="nf">init_module</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NGX_OK</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">NGX_ERROR</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">            <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
@@ -1430,7 +1430,7 @@ if (!doNotTrack) {
         
             2014 - 
         
-        2022 mazhen.tech
+        2023 mazhen.tech
     </section>
     
     <section class="powerby">

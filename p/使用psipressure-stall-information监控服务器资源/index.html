@@ -598,35 +598,35 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl">      <span class="k">struct</span> <span class="n">pollfd</span> <span class="n">fds</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">      <span class="n">fds</span><span class="p">.</span><span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&#34;/proc/pressure/io&#34;</span><span class="p">,</span> <span class="n">O_RDWR</span> <span class="o">|</span> <span class="n">O_NONBLOCK</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">fds</span><span class="p">.</span><span class="n">fd</span> <span class="o">=</span> <span class="nf">open</span><span class="p">(</span><span class="s">&#34;/proc/pressure/io&#34;</span><span class="p">,</span> <span class="n">O_RDWR</span> <span class="o">|</span> <span class="n">O_NONBLOCK</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">fds</span><span class="p">.</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">              <span class="n">printf</span><span class="p">(</span><span class="s">&#34;/proc/pressure/io open error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                      <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">              <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;/proc/pressure/io open error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                      <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">              <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
 </span></span><span class="line"><span class="cl">      <span class="n">fds</span><span class="p">.</span><span class="n">events</span> <span class="o">=</span> <span class="n">POLLPRI</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">write</span><span class="p">(</span><span class="n">fds</span><span class="p">.</span><span class="n">fd</span><span class="p">,</span> <span class="n">trig</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">trig</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">              <span class="n">printf</span><span class="p">(</span><span class="s">&#34;/proc/pressure/io write error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                      <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nf">write</span><span class="p">(</span><span class="n">fds</span><span class="p">.</span><span class="n">fd</span><span class="p">,</span> <span class="n">trig</span><span class="p">,</span> <span class="nf">strlen</span><span class="p">(</span><span class="n">trig</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;/proc/pressure/io write error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                      <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">              <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">      <span class="n">printf</span><span class="p">(</span><span class="s">&#34;waiting for events...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;waiting for events...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">              <span class="n">n</span> <span class="o">=</span> <span class="n">poll</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fds</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">              <span class="n">n</span> <span class="o">=</span> <span class="nf">poll</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fds</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">              <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                      <span class="n">printf</span><span class="p">(</span><span class="s">&#34;poll error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">                      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;poll error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">                      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">              <span class="p">}</span>
 </span></span><span class="line"><span class="cl">              <span class="k">if</span> <span class="p">(</span><span class="n">fds</span><span class="p">.</span><span class="n">revents</span> <span class="o">&amp;</span> <span class="n">POLLERR</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                      <span class="n">printf</span><span class="p">(</span><span class="s">&#34;got POLLERR, event source is gone</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;got POLLERR, event source is gone</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">                      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">              <span class="p">}</span>
 </span></span><span class="line"><span class="cl">              <span class="k">if</span> <span class="p">(</span><span class="n">fds</span><span class="p">.</span><span class="n">revents</span> <span class="o">&amp;</span> <span class="n">POLLPRI</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                      <span class="n">printf</span><span class="p">(</span><span class="s">&#34;event triggered!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;event triggered!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">              <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                      <span class="n">printf</span><span class="p">(</span><span class="s">&#34;unknown event received: 0x%x</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">fds</span><span class="p">.</span><span class="n">revents</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;unknown event received: 0x%x</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">fds</span><span class="p">.</span><span class="n">revents</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">                      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">              <span class="p">}</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
@@ -850,7 +850,7 @@ if (!doNotTrack) {
         
             2014 - 
         
-        2022 mazhen.tech
+        2023 mazhen.tech
     </section>
     
     <section class="powerby">

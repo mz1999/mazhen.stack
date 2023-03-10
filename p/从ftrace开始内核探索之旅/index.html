@@ -570,11 +570,11 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/*
 </span></span></span><span class="line"><span class="cl"><span class="cm"> * Tracepoint for do_fork:
 </span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
-</span></span><span class="line"><span class="cl"><span class="n">TRACE_EVENT</span><span class="p">(</span><span class="n">sched_process_fork</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="nf">TRACE_EVENT</span><span class="p">(</span><span class="n">sched_process_fork</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="n">TP_PROTO</span><span class="p">(</span><span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">parent</span><span class="p">,</span> <span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">child</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">TP_PROTO</span><span class="p">(</span><span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">parent</span><span class="p">,</span> <span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">child</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="n">TP_ARGS</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">TP_ARGS</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="p">);</span>
 </span></span></code></pre></td></tr></table>
@@ -620,16 +620,16 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="nf">_do_fork</span><span class="p">(</span><span class="k">struct</span> <span class="n">kernel_clone_args</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">	<span class="p">...</span>
-</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="n">copy_process</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">NUMA_NO_NODE</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">	<span class="n">add_latent_entropy</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="nf">copy_process</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">NUMA_NO_NODE</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">add_latent_entropy</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">	<span class="cm">/*
 </span></span></span><span class="line"><span class="cl"><span class="cm">	 * Do this prior waking up the new thread - the thread pointer
 </span></span></span><span class="line"><span class="cl"><span class="cm">	 * might get invalid after that point, if the thread exits quickly.
 </span></span></span><span class="line"><span class="cl"><span class="cm">	 */</span>
-</span></span><span class="line"><span class="cl">	<span class="n">trace_sched_process_fork</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">trace_sched_process_fork</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">p</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="n">pid</span> <span class="o">=</span> <span class="n">get_task_pid</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">PIDTYPE_PID</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="n">pid</span> <span class="o">=</span> <span class="nf">get_task_pid</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">PIDTYPE_PID</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -679,13 +679,13 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/*
 </span></span></span><span class="line"><span class="cl"><span class="cm"> * Tracepoint for task switches, performed by the scheduler:
 </span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
-</span></span><span class="line"><span class="cl"><span class="n">TRACE_EVENT</span><span class="p">(</span><span class="n">sched_switch</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="nf">TRACE_EVENT</span><span class="p">(</span><span class="n">sched_switch</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="n">TP_PROTO</span><span class="p">(</span><span class="kt">bool</span> <span class="n">preempt</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">TP_PROTO</span><span class="p">(</span><span class="kt">bool</span> <span class="n">preempt</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">		 <span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">prev</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">		 <span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">next</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="n">TP_ARGS</span><span class="p">(</span><span class="n">preempt</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="n">next</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">TP_ARGS</span><span class="p">(</span><span class="n">preempt</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="n">next</span><span class="p">),</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>TRACE_EVENT</code> 宏会根据事件名称 <code>sched_switch</code> 生成 tracepoint 方法 <code>trace_sched_switch()</code>，在源码中查找该方法，发现在 <code>kernel/sched/core.c</code> 的 <a class="link" href="https://github.com/torvalds/linux/blob/bcf876870b95592b52519ed4aafcf9d95999bc9c/kernel/sched/core.c#L4216"  target="_blank" rel="noopener"
@@ -718,15 +718,15 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="n">__sched</span> <span class="n">notrace</span> <span class="nf">__schedule</span><span class="p">(</span><span class="kt">bool</span> <span class="n">preempt</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">likely</span><span class="p">(</span><span class="n">prev</span> <span class="o">!=</span> <span class="n">next</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">likely</span><span class="p">(</span><span class="n">prev</span> <span class="o">!=</span> <span class="n">next</span><span class="p">))</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">		<span class="n">rq</span><span class="o">-&gt;</span><span class="n">nr_switches</span><span class="o">++</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="p">...</span>
-</span></span><span class="line"><span class="cl">        <span class="n">trace_sched_switch</span><span class="p">(</span><span class="n">preempt</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="n">next</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">trace_sched_switch</span><span class="p">(</span><span class="n">preempt</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="n">next</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="p">...</span>
 </span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">		<span class="p">...</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="n">balance_callback</span><span class="p">(</span><span class="n">rq</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">balance_callback</span><span class="p">(</span><span class="n">rq</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -898,7 +898,7 @@ if (!doNotTrack) {
         
             2014 - 
         
-        2022 mazhen.tech
+        2023 mazhen.tech
     </section>
     
     <section class="powerby">

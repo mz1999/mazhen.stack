@@ -551,9 +551,9 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">sighandler_t</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="kt">sighandler_t</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">sighandler_t</span> <span class="nf">signal</span><span class="p">(</span><span class="kt">int</span> <span class="n">signum</span><span class="p">,</span> <span class="n">sighandler_t</span> <span class="n">handler</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">sighandler_t</span> <span class="nf">signal</span><span class="p">(</span><span class="kt">int</span> <span class="n">signum</span><span class="p">,</span> <span class="kt">sighandler_t</span> <span class="n">handler</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>例如下面的例子，程序捕获了信号 SIGINT ，并且只是输出不做其他处理，这样在键盘上按 <code>Ctrl+C</code> 并不能让程序退出：</p>
@@ -595,17 +595,17 @@ if (!doNotTrack) {
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">sig_handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">signo</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">signo</span> <span class="o">==</span> <span class="n">SIGINT</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="n">printf</span><span class="p">(</span><span class="s">&#34;received SIGINT</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">           <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;received SIGINT</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">sig_handler</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">sig_handler</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Process is sleeping</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Process is sleeping</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="n">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">           <span class="nf">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -1041,7 +1041,7 @@ if (!doNotTrack) {
         
             2014 - 
         
-        2022 mazhen.tech
+        2023 mazhen.tech
     </section>
     
     <section class="powerby">
