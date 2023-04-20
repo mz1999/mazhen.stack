@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -29,16 +29,19 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/tags/db/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/</loc>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -51,7 +54,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
-    <lastmod>2023-03-10T22:35:11+08:00</lastmod>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%B4%E5%90%88%E7%AC%AC%E4%B8%89%E6%96%B9%E8%BF%9E%E6%8E%A5%E6%B1%A0/</loc>
     <lastmod>2023-03-10T22:35:11+08:00</lastmod>
