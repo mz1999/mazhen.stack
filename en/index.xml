@@ -5,6 +5,6 @@
         <link>https://mazhen.tech/en/</link>
         <description>Recent content on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
-        <language>zh-CN</language><atom:link href="https://mazhen.tech/en/index.xml" rel="self" type="application/rss+xml" />
+        <language>en</language><atom:link href="https://mazhen.tech/en/index.xml" rel="self" type="application/rss+xml" />
     </channel>
 </rss>

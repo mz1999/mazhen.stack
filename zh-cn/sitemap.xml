@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,20 +28,20 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/db/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
-  </url><url>
     <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
   </url><url>
-    <loc>https://mazhen.tech/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/jdk/</loc>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/macos/</loc>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -54,6 +54,15 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/</loc>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/db/</loc>
+    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/</loc>
     <lastmod>2023-04-20T18:35:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%B4%E5%90%88%E7%AC%AC%E4%B8%89%E6%96%B9%E8%BF%9E%E6%8E%A5%E6%B1%A0/</loc>

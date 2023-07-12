@@ -5,7 +5,7 @@
         <link>https://mazhen.tech/tags/kubernetes/</link>
         <description>Recent content in kubernetes on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
-        <language>zh-CN</language>
+        <language>zh-cn</language>
         <lastBuildDate>Tue, 11 Jun 2019 09:36:01 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Helm的安装和使用</title>
         <link>https://mazhen.tech/p/helm%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/</link>
