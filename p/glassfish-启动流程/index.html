@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas'>
+<title>Glassfish 启动流程</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Glassfish 启动流程'>
+<meta property='og:description' content='asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas'>
+<meta property='og:url' content='https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='glassfish' /><meta property='article:published_time' content='2023-07-21T15:32:57&#43;08:00'/><meta property='article:modified_time' content='2023-07-21T15:32:57&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Glassfish 启动流程">
+<meta name="twitter:description" content="asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#asadmin-执行流程">asadmin 执行流程</a></li>
+    <li><a href="#主进程启动流程">主进程启动流程</a>
+      <ol>
+        <li><a href="#创建-glassfishruntime">创建 GlassFishRuntime</a></li>
+        <li><a href="#创建-glassfish-实例">创建 GlassFish 实例</a></li>
+        <li><a href="#启动-glassfish-实例">启动 Glassfish 实例</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Glassfish 启动流程</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2023-07-21</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><a class="link" href="https://glassfish.org/docs/latest/reference-manual.html#asadmin"  target="_blank" rel="noopener"
+    >asadmin</a> 是 <a class="link" href="https://glassfish.org/"  target="_blank" rel="noopener"
+    >GlassFish</a> 的命令行工具，它提供了一系列子命令，使用 <code>asadmin</code> 可以让你完成 <code>Glassfish</code> 的所有管理任务。</p>
+<p>使用 <code>asadmin</code> 的子命令 <a class="link" href="https://glassfish.org/docs/latest/reference-manual.html#start-domain"  target="_blank" rel="noopener"
+    >start-domain</a> 可以启动 <code>GlassFish</code>。下面将描述 <code>GlassFish</code>启动过程的主要流程。先从 <code>asadmin</code> 命令的执行开始。</p>
+<h2 id="asadmin-执行流程">asadmin 执行流程</h2>
+<p><code>asadmin</code> 命令的入口是  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java"  target="_blank" rel="noopener"
+    >org.glassfish.admin.cli.AsadminMain</a>， 包含在 <code>${AS_INSTALL_LIB}/client/appserver-cli.jar</code>包中。</p>
+<p><code>AsadminMain</code> 执行的主要流程如下：</p>
+<p><img src="https://cdn.mazhen.tech/images/202307191450899.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="AsadminMain"
+	
+	
+></p>
+<p>其中的一些关键点：</p>
+<ul>
+<li>
+<p>调用<code>CLICommand.getCommand()</code>获得启动服务器的子命令。<code>asadmin</code> 的所有子命令的都继承自<a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/cli/src/main/java/com/sun/enterprise/admin/cli/CLICommand.java"  target="_blank" rel="noopener"
+    >com.sun.enterprise.admin.cli.CLICommand</a> ，从下列目录或 Jar 中加载：</p>
+<ul>
+<li>
+<p>${com.sun.aas.installRoot}/lib/asadmin</p>
+</li>
+<li>
+<p>${com.sun.aas.installRoot}/modules/admin-cli.jar</p>
+</li>
+</ul>
+</li>
+<li>
+<p>所有子命令的执行都是调用<code>CLICommand.execute(String... argv)</code> 。</p>
+</li>
+<li>
+<p>启动 <code>GlassFish</code> 的子命令实现类为<a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/server-mgmt/src/main/java/com/sun/enterprise/admin/servermgmt/cli/StartDomainCommand.java"  target="_blank" rel="noopener"
+    >StartDomainCommand</a>，内部调用 <code>GFLauncher.launch()</code>启动服务器。</p>
+</li>
+<li>
+<p>最终 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/launcher/src/main/java/com/sun/enterprise/admin/launcher/GFLauncher.java"  target="_blank" rel="noopener"
+    >GFLauncher</a> 使用 <a class="link" href="https://docs.oracle.com/javase/8/docs/api/index.html?java/lang/ProcessBuilder.html"  target="_blank" rel="noopener"
+    >ProcessBuilder</a> 启动一个新的进程，就是 GlassFish 的主进程。这个新进程的入口是<a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
+    >com.sun.enterprise.glassfish.bootstrap.ASMain</a>。</p>
+</li>
+</ul>
+<p>另外，如果设置了 <code>verbose</code> 或 <code>watchdog</code> 参数，作为父进程的<code>asadmin</code> 不会退出，一直等到 GlassFish 运行结束：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// If verbose, hang around until the domain stops
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="o">(</span><span class="n">getInfo</span><span class="o">().</span><span class="na">isVerboseOrWatchdog</span><span class="o">())</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wait</span><span class="o">(</span><span class="n">glassFishProcess</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>下面分析 <code>GlassFish</code> 主进程的启动流程。</p>
+<h2 id="主进程启动流程">主进程启动流程</h2>
+<p><code>GlassFish</code> 主进程的入口是 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
+    >com.sun.enterprise.glassfish.bootstrap.ASMain</a> 的 <code>main</code>方法，启动过程的主要流程如下：</p>
+<p><img src="https://cdn.mazhen.tech/images/202307210950607.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="glassfish startup"
+	
+	
+></p>
+<p>启动过程比较复杂，但主要步骤很清晰：</p>
+<ol>
+<li>使用 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java"  target="_blank" rel="noopener"
+    >RuntimeBuilder</a> 创建 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java"  target="_blank" rel="noopener"
+    >GlassFishRuntime</a></li>
+<li>使用 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java"  target="_blank" rel="noopener"
+    >GlassFishRuntime</a> 创建 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFish.java"  target="_blank" rel="noopener"
+    >GlassFish</a> 实例</li>
+<li>调用 <code>GlassFish.start()</code> 启动 <code>Glassfish</code> 实例</li>
+</ol>
+<h3 id="创建-glassfishruntime">创建 GlassFishRuntime</h3>
+<p>创建 <code>GlassFishRuntime</code> 的主要步骤包括：</p>
+<ol>
+<li>创建 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java"  target="_blank" rel="noopener"
+    >RuntimeBuilder</a></li>
+<li>创建并初始化  OSGi <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java"  target="_blank" rel="noopener"
+    >Framework</a></li>
+<li>加载 OSGi bundles</li>
+<li>启动 OSGi <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java"  target="_blank" rel="noopener"
+    >Framework</a></li>
+<li>启动 bundles 中的 <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java"  target="_blank" rel="noopener"
+    >BundleActivator</a></li>
+<li>在 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java"  target="_blank" rel="noopener"
+    >HK2Main</a> 的启动过程中查找并注册 HK2 modules</li>
+</ol>
+<p>在创建 <code>GlassFishRuntime</code>的过程中，<a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/OSGiGlassFishRuntimeBuilder.java"  target="_blank" rel="noopener"
+    >OSGiGlassFishRuntimeBuilder</a> 会创建并初始化 OSGi <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java"  target="_blank" rel="noopener"
+    >Framework</a> ，然后使用 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java"  target="_blank" rel="noopener"
+    >BundleProvisioner</a> 的 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java#L169"  target="_blank" rel="noopener"
+    >installBundles() </a> 方法向 OSGi 安装 GlassFish 的所有 bundles。</p>
+<p><code>BundleProvisioner</code>从哪里找到要加载的 bundles？<code>config/osgi.properties</code> 文件中的 <code>glassfish.osgi.auto.install</code> 属性定义了 OSGi bundles 的加载路径。<code>BundleProvisioner.discoverJars() </code> 方法会扫描这些路径，发现需要加载的 Jar 包。</p>
+<p>在完成 bundles 的加载后，<code>OSGiGlassFishRuntimeBuilder</code>会调用 <code>Framework.start()</code> 启动 OSGi <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java"  target="_blank" rel="noopener"
+    >Framework</a>。 Framework 的启动过程中，bundles 中的 <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java"  target="_blank" rel="noopener"
+    >BundleActivator</a> 会被启动。其中两个重要的 <code>BundleActivator</code> 是：</p>
+<ul>
+<li><a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java"  target="_blank" rel="noopener"
+    >GlassFishMainActivator</a></li>
+<li><a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java"  target="_blank" rel="noopener"
+    >HK2Main</a></li>
+</ul>
+<p><a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java"  target="_blank" rel="noopener"
+    >GlassFishMainActivator</a> 启动过程中会向 OSGi 中注册 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/EmbeddedOSGiGlassFishRuntime.java"  target="_blank" rel="noopener"
+    >EmbeddedOSGiGlassFishRuntime</a>。</p>
+<p><a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java"  target="_blank" rel="noopener"
+    >HK2Main</a> 会创建 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java"  target="_blank" rel="noopener"
+    >ModulesRegistry</a>。<a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java"  target="_blank" rel="noopener"
+    >ModulesRegistry</a> 是 HK2 的关键组件，HK2 中的 modules 都注册在这里。在 OSGi 环境下，ModulesRegistry 的具体实现类是 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java"  target="_blank" rel="noopener"
+    >OSGiModulesRegistryImpl</a>，它会从所有 bundle Jar 的 <code>META-INF/hk2-locator</code> 目录中查找并注册该 bundle 包含的 HK2 modules。</p>
+<p><code>ModulesRegistry</code> 和 <code>HK2Main</code> 都会注册为 OSGi 的 service。</p>
+<h3 id="创建-glassfish-实例">创建 GlassFish 实例</h3>
+<p>通过<code>GlassFishRuntime.newGlassFish()</code> 创建出 GlassFish 实例，这个过程主要做了两件事：</p>
+<ol>
+<li>创建出 HK2 的 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java"  target="_blank" rel="noopener"
+    >ServiceLocator</a></li>
+<li>从 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java"  target="_blank" rel="noopener"
+    >ServiceLocator</a> 获取 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java"  target="_blank" rel="noopener"
+    >ModuleStartup</a></li>
+</ol>
+<p>在 <code>EmbeddedOSGiGlassFishRuntime</code> 中使用 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java#L44"  target="_blank" rel="noopener"
+    >ModulesRegistry.newServiceLocator()</a> 创建出 <code>ServiceLocator</code>，然后从 <code>ServiceLocator</code> 获取 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java"  target="_blank" rel="noopener"
+    >ModuleStartup</a>。在 GlassFish 启动场景获取的是 <code>ModuleStartup</code> 的一个具体实现 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/kernel/src/main/java/com/sun/enterprise/v3/server/AppServerStartup.java"  target="_blank" rel="noopener"
+    >AppServerStartup</a>。</p>
+<p><code>ServiceLocator</code> 是 HK2 service 的注册表，它提供了一系列获取 HK2 service 的方法。</p>
+<p>HK2 Module 和 Service 的关系可以看作是容器和内容的关系。Module（容器）包含了一组 Service（内容），并且负责将这些 Service 注册到 <code>ServiceLocator</code> 中。当一个 Module 被初始化时，它的所有 Service 都会被注册到 <code>ServiceLocator</code> 中，然后这些 Service 就可以被其他 Service 查找和使用。</p>
+<p>最后将 <code>AppServerStartup</code> 和 <code>ServiceLocator</code> 作为构造函数的参数，创建出 <code>GlassFish</code> 实例。</p>
+<h3 id="启动-glassfish-实例">启动 Glassfish 实例</h3>
+<p>使用 <code>GlassFish.start()</code> 启动 <code>Glassfish</code> 实例。其中最关键的步骤是调用 <code>AppServerStartup.start()</code>，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。</p>
+<p><code>AppServerStartup.start()</code> 运行完成，所有 service 启动，Glassfish 完成启动并运行。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">java</a>
+        
+            <a href="/tags/glassfish/">glassfish</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">在macOS上编译和调试OpenJDK</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Java EE应用服务器的事务管理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%B4%E5%90%88%E7%AC%AC%E4%B8%89%E6%96%B9%E8%BF%9E%E6%8E%A5%E6%B1%A0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">应用服务器整合第三方连接池</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">BookKeeper实现分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/atomikos%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E4%BD%BF%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Atomikos在微服务场景下的使用</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2023 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -6,7 +6,159 @@
         <description>Recent content in tech on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Tue, 11 Jul 2023 17:26:22 +0800</lastBuildDate><atom:link href="https://mazhen.tech/categories/tech/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 21 Jul 2023 15:32:57 +0800</lastBuildDate><atom:link href="https://mazhen.tech/categories/tech/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Glassfish 启动流程</title>
+        <link>https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</link>
+        <pubDate>Fri, 21 Jul 2023 15:32:57 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</guid>
+        <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#asadmin&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;asadmin&lt;/a&gt; 是 &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFish&lt;/a&gt; 的命令行工具，它提供了一系列子命令，使用 &lt;code&gt;asadmin&lt;/code&gt; 可以让你完成 &lt;code&gt;Glassfish&lt;/code&gt; 的所有管理任务。&lt;/p&gt;
+&lt;p&gt;使用 &lt;code&gt;asadmin&lt;/code&gt; 的子命令 &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#start-domain&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;start-domain&lt;/a&gt; 可以启动 &lt;code&gt;GlassFish&lt;/code&gt;。下面将描述 &lt;code&gt;GlassFish&lt;/code&gt;启动过程的主要流程。先从 &lt;code&gt;asadmin&lt;/code&gt; 命令的执行开始。&lt;/p&gt;
+&lt;h2 id=&#34;asadmin-执行流程&#34;&gt;asadmin 执行流程&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;asadmin&lt;/code&gt; 命令的入口是  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;org.glassfish.admin.cli.AsadminMain&lt;/a&gt;， 包含在 &lt;code&gt;${AS_INSTALL_LIB}/client/appserver-cli.jar&lt;/code&gt;包中。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;AsadminMain&lt;/code&gt; 执行的主要流程如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202307191450899.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;AsadminMain&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;其中的一些关键点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;调用&lt;code&gt;CLICommand.getCommand()&lt;/code&gt;获得启动服务器的子命令。&lt;code&gt;asadmin&lt;/code&gt; 的所有子命令的都继承自&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/cli/src/main/java/com/sun/enterprise/admin/cli/CLICommand.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.sun.enterprise.admin.cli.CLICommand&lt;/a&gt; ，从下列目录或 Jar 中加载：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;${com.sun.aas.installRoot}/lib/asadmin&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;${com.sun.aas.installRoot}/modules/admin-cli.jar&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;所有子命令的执行都是调用&lt;code&gt;CLICommand.execute(String... argv)&lt;/code&gt; 。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;启动 &lt;code&gt;GlassFish&lt;/code&gt; 的子命令实现类为&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/server-mgmt/src/main/java/com/sun/enterprise/admin/servermgmt/cli/StartDomainCommand.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;StartDomainCommand&lt;/a&gt;，内部调用 &lt;code&gt;GFLauncher.launch()&lt;/code&gt;启动服务器。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;最终 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/launcher/src/main/java/com/sun/enterprise/admin/launcher/GFLauncher.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GFLauncher&lt;/a&gt; 使用 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/javase/8/docs/api/index.html?java/lang/ProcessBuilder.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ProcessBuilder&lt;/a&gt; 启动一个新的进程，就是 GlassFish 的主进程。这个新进程的入口是&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;另外，如果设置了 &lt;code&gt;verbose&lt;/code&gt; 或 &lt;code&gt;watchdog&lt;/code&gt; 参数，作为父进程的&lt;code&gt;asadmin&lt;/code&gt; 不会退出，一直等到 GlassFish 运行结束：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// If verbose, hang around until the domain stops
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;getInfo&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;().&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;isVerboseOrWatchdog&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;())&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;wait&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;glassFishProcess&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;下面分析 &lt;code&gt;GlassFish&lt;/code&gt; 主进程的启动流程。&lt;/p&gt;
+&lt;h2 id=&#34;主进程启动流程&#34;&gt;主进程启动流程&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;GlassFish&lt;/code&gt; 主进程的入口是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt; 的 &lt;code&gt;main&lt;/code&gt;方法，启动过程的主要流程如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202307210950607.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;glassfish startup&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;启动过程比较复杂，但主要步骤很清晰：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;使用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;RuntimeBuilder&lt;/a&gt; 创建 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishRuntime&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;使用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishRuntime&lt;/a&gt; 创建 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFish.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFish&lt;/a&gt; 实例&lt;/li&gt;
+&lt;li&gt;调用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;创建-glassfishruntime&#34;&gt;创建 GlassFishRuntime&lt;/h3&gt;
+&lt;p&gt;创建 &lt;code&gt;GlassFishRuntime&lt;/code&gt; 的主要步骤包括：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;创建 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;创建并初始化  OSGi &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Framework&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;加载 OSGi bundles&lt;/li&gt;
+&lt;li&gt;启动 OSGi &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Framework&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;启动 bundles 中的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BundleActivator&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;在 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HK2Main&lt;/a&gt; 的启动过程中查找并注册 HK2 modules&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在创建 &lt;code&gt;GlassFishRuntime&lt;/code&gt;的过程中，&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/OSGiGlassFishRuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;OSGiGlassFishRuntimeBuilder&lt;/a&gt; 会创建并初始化 OSGi &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Framework&lt;/a&gt; ，然后使用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BundleProvisioner&lt;/a&gt; 的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java#L169&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;installBundles() &lt;/a&gt; 方法向 OSGi 安装 GlassFish 的所有 bundles。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BundleProvisioner&lt;/code&gt;从哪里找到要加载的 bundles？&lt;code&gt;config/osgi.properties&lt;/code&gt; 文件中的 &lt;code&gt;glassfish.osgi.auto.install&lt;/code&gt; 属性定义了 OSGi bundles 的加载路径。&lt;code&gt;BundleProvisioner.discoverJars() &lt;/code&gt; 方法会扫描这些路径，发现需要加载的 Jar 包。&lt;/p&gt;
+&lt;p&gt;在完成 bundles 的加载后，&lt;code&gt;OSGiGlassFishRuntimeBuilder&lt;/code&gt;会调用 &lt;code&gt;Framework.start()&lt;/code&gt; 启动 OSGi &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Framework&lt;/a&gt;。 Framework 的启动过程中，bundles 中的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BundleActivator&lt;/a&gt; 会被启动。其中两个重要的 &lt;code&gt;BundleActivator&lt;/code&gt; 是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishMainActivator&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HK2Main&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishMainActivator&lt;/a&gt; 启动过程中会向 OSGi 中注册 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/EmbeddedOSGiGlassFishRuntime.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;EmbeddedOSGiGlassFishRuntime&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HK2Main&lt;/a&gt; 会创建 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModulesRegistry&lt;/a&gt;。&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModulesRegistry&lt;/a&gt; 是 HK2 的关键组件，HK2 中的 modules 都注册在这里。在 OSGi 环境下，ModulesRegistry 的具体实现类是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;OSGiModulesRegistryImpl&lt;/a&gt;，它会从所有 bundle Jar 的 &lt;code&gt;META-INF/hk2-locator&lt;/code&gt; 目录中查找并注册该 bundle 包含的 HK2 modules。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ModulesRegistry&lt;/code&gt; 和 &lt;code&gt;HK2Main&lt;/code&gt; 都会注册为 OSGi 的 service。&lt;/p&gt;
+&lt;h3 id=&#34;创建-glassfish-实例&#34;&gt;创建 GlassFish 实例&lt;/h3&gt;
+&lt;p&gt;通过&lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt; 创建出 GlassFish 实例，这个过程主要做了两件事：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;创建出 HK2 的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;从 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ServiceLocator&lt;/a&gt; 获取 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModuleStartup&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在 &lt;code&gt;EmbeddedOSGiGlassFishRuntime&lt;/code&gt; 中使用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java#L44&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModulesRegistry.newServiceLocator()&lt;/a&gt; 创建出 &lt;code&gt;ServiceLocator&lt;/code&gt;，然后从 &lt;code&gt;ServiceLocator&lt;/code&gt; 获取 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModuleStartup&lt;/a&gt;。在 GlassFish 启动场景获取的是 &lt;code&gt;ModuleStartup&lt;/code&gt; 的一个具体实现 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/kernel/src/main/java/com/sun/enterprise/v3/server/AppServerStartup.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;AppServerStartup&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ServiceLocator&lt;/code&gt; 是 HK2 service 的注册表，它提供了一系列获取 HK2 service 的方法。&lt;/p&gt;
+&lt;p&gt;HK2 Module 和 Service 的关系可以看作是容器和内容的关系。Module（容器）包含了一组 Service（内容），并且负责将这些 Service 注册到 &lt;code&gt;ServiceLocator&lt;/code&gt; 中。当一个 Module 被初始化时，它的所有 Service 都会被注册到 &lt;code&gt;ServiceLocator&lt;/code&gt; 中，然后这些 Service 就可以被其他 Service 查找和使用。&lt;/p&gt;
+&lt;p&gt;最后将 &lt;code&gt;AppServerStartup&lt;/code&gt; 和 &lt;code&gt;ServiceLocator&lt;/code&gt; 作为构造函数的参数，创建出 &lt;code&gt;GlassFish&lt;/code&gt; 实例。&lt;/p&gt;
+&lt;h3 id=&#34;启动-glassfish-实例&#34;&gt;启动 Glassfish 实例&lt;/h3&gt;
+&lt;p&gt;使用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例。其中最关键的步骤是调用 &lt;code&gt;AppServerStartup.start()&lt;/code&gt;，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;AppServerStartup.start()&lt;/code&gt; 运行完成，所有 service 启动，Glassfish 完成启动并运行。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>在macOS上编译和调试OpenJDK</title>
         <link>https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/</link>
         <pubDate>Tue, 11 Jul 2023 17:26:22 +0800</pubDate>

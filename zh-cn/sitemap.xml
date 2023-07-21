@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,20 +28,20 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
+    <loc>https://mazhen.tech/tags/glassfish/</loc>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</loc>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
+  </url><url>
     <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/jdk/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/macos/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -54,6 +54,12 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2023-07-21T15:32:57+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/jdk/</loc>
+    <lastmod>2023-07-11T17:26:22+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/macos/</loc>
     <lastmod>2023-07-11T17:26:22+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/</loc>
