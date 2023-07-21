@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='界面概览 快捷键 描述 cmd &#43; shift &#43; e 文件资源管理器 cmd &#43; shift &#43; f 跨文件搜索 ctrl &#43; shift &#43; g 源代码管理 cmd &#43; shift &#43; d 启动和调试 cmd &#43; shift &#43; x 扩展管理 cmd &#43; shift &#43; p 查找并运行'>
-<title>vs code 快捷键</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish.
+The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command.
+asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.
+The main process of AsadminMain execution is as follows:'>
+<title>GlassFish Startup Process</title>
 
-<link rel='canonical' href='https://mazhen.tech/p/vs-code-%E5%BF%AB%E6%8D%B7%E9%94%AE/'>
+<link rel='canonical' href='https://mazhen.tech/p/glassfish-startup-process/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='vs code 快捷键'>
-<meta property='og:description' content='界面概览 快捷键 描述 cmd &#43; shift &#43; e 文件资源管理器 cmd &#43; shift &#43; f 跨文件搜索 ctrl &#43; shift &#43; g 源代码管理 cmd &#43; shift &#43; d 启动和调试 cmd &#43; shift &#43; x 扩展管理 cmd &#43; shift &#43; p 查找并运行'>
-<meta property='og:url' content='https://mazhen.tech/p/vs-code-%E5%BF%AB%E6%8D%B7%E9%94%AE/'>
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='GlassFish Startup Process'>
+<meta property='og:description' content='asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish.
+The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command.
+asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.
+The main process of AsadminMain execution is as follows:'>
+<meta property='og:url' content='https://mazhen.tech/p/glassfish-startup-process/'>
 <meta property='og:site_name' content='mazhen.tech'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='tools' /><meta property='article:published_time' content='2019-05-16T10:56:00&#43;08:00'/><meta property='article:modified_time' content='2019-05-16T10:56:00&#43;08:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='glassfish' /><meta property='article:published_time' content='2023-07-21T16:48:55&#43;08:00'/><meta property='article:modified_time' content='2023-07-21T16:48:55&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
-    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="vs code 快捷键">
-<meta name="twitter:description" content="界面概览 快捷键 描述 cmd &#43; shift &#43; e 文件资源管理器 cmd &#43; shift &#43; f 跨文件搜索 ctrl &#43; shift &#43; g 源代码管理 cmd &#43; shift &#43; d 启动和调试 cmd &#43; shift &#43; x 扩展管理 cmd &#43; shift &#43; p 查找并运行">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="GlassFish Startup Process">
+<meta name="twitter:description" content="asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish.
+The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command.
+asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.
+The main process of AsadminMain execution is as follows:">
     <link rel="shortcut icon" href="/favicon.png" />
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
@@ -353,26 +362,14 @@ if (!doNotTrack) {
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#界面概览">界面概览</a></li>
-    <li><a href="#命令行的使用">命令行的使用</a></li>
-    <li><a href="#光标移动">光标移动</a></li>
-    <li><a href="#文本选择">文本选择</a></li>
-    <li><a href="#删除操作">删除操作</a></li>
-    <li><a href="#代码行编辑">代码行编辑</a></li>
-    <li><a href="#创建多个光标">创建多个光标</a></li>
-    <li><a href="#文件跳转">文件跳转</a></li>
-    <li><a href="#行跳转">行跳转</a></li>
-    <li><a href="#符号跳转">符号跳转</a></li>
-    <li><a href="#代码自动补全">代码自动补全</a></li>
-    <li><a href="#代码折叠">代码折叠</a></li>
-    <li><a href="#搜索">搜索</a></li>
-    <li><a href="#编辑器操作">编辑器操作</a></li>
-    <li><a href="#专注模式">专注模式</a></li>
-    <li><a href="#命令面板">命令面板</a></li>
-    <li><a href="#窗口管理">窗口管理</a></li>
-    <li><a href="#集成终端">集成终端</a></li>
-    <li><a href="#任务管理">任务管理</a></li>
-    <li><a href="#鼠标操作">鼠标操作</a></li>
+    <li><a href="#asadmin-execution-process">asadmin Execution Process</a></li>
+    <li><a href="#main-process-startup-process">Main Process Startup Process</a>
+      <ol>
+        <li><a href="#creating-glassfishruntime">Creating GlassFishRuntime</a></li>
+        <li><a href="#creating-glassfish-instance">Creating GlassFish Instance</a></li>
+        <li><a href="#starting-glassfish-instance">Starting GlassFish Instance</a></li>
+      </ol>
+    </li>
   </ol>
 </nav>
         </div>
@@ -400,7 +397,7 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/vs-code-%E5%BF%AB%E6%8D%B7%E9%94%AE/">vs code 快捷键</a>
+            <a href="/p/glassfish-startup-process/">GlassFish Startup Process</a>
         </h2>
     
         
@@ -422,7 +419,7 @@ if (!doNotTrack) {
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published">2019-05-16</time>
+                <time class="article-time--published">2023-07-21</time>
             </div>
         
 
@@ -437,7 +434,7 @@ if (!doNotTrack) {
 
 
                 <time class="article-time--reading">
-                    阅读时长: 3 分钟
+                    阅读时长: 4 分钟
                 </time>
             </div>
         
@@ -452,565 +449,148 @@ if (!doNotTrack) {
     <section class="article-content">
     
     
-    <h2 id="界面概览">界面概览</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + shift + e</td>
-<td>文件资源管理器</td>
-</tr>
-<tr>
-<td>cmd + shift + f</td>
-<td>跨文件搜索</td>
-</tr>
-<tr>
-<td>ctrl + shift + g</td>
-<td>源代码管理</td>
-</tr>
-<tr>
-<td>cmd + shift + d</td>
-<td>启动和调试</td>
-</tr>
-<tr>
-<td>cmd + shift + x</td>
-<td>扩展管理</td>
-</tr>
-<tr>
-<td>cmd + shift + p</td>
-<td>查找并运行所有命令</td>
-</tr>
-<tr>
-<td>cmd + j</td>
-<td>打开、关闭panel</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="命令行的使用">命令行的使用</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>code $path</td>
-<td>新窗口中打开这个文件或文件夹</td>
-</tr>
-<tr>
-<td>code -r $path</td>
-<td>窗口复用打开文件</td>
-</tr>
-<tr>
-<td>code -r -g $file:lineno</td>
-<td>打开文件，跳转到指定行</td>
-</tr>
-<tr>
-<td>code -r -d $file1 $file2</td>
-<td>比较两个文件</td>
-</tr>
-<tr>
-<td>ls</td>
-<td>code -</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="光标移动">光标移动</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>option + 左/右方向键</td>
-<td>针对单词的光标移动</td>
-</tr>
-<tr>
-<td>cmd + 左/右方向键</td>
-<td>移动到行首、行尾</td>
-</tr>
-<tr>
-<td>cmd + shift + \</td>
-<td>在花括号之间跳转</td>
-</tr>
-<tr>
-<td>cmd + 上/下方向键</td>
-<td>移动到文档的第一行、最后一行</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="文本选择">文本选择</h2>
-<p>shift + 光标移动</p>
-<h2 id="删除操作">删除操作</h2>
-<p>可以先选择，再删除</p>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + fn + del</td>
-<td>删除到行尾</td>
-</tr>
-<tr>
-<td>cmd + del</td>
-<td>删除到行首</td>
-</tr>
-<tr>
-<td>option + del</td>
-<td>向前删除单词</td>
-</tr>
-<tr>
-<td>option + fn + del</td>
-<td>向后删除单词</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="代码行编辑">代码行编辑</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + shift + k</td>
-<td>删除行</td>
-</tr>
-<tr>
-<td>cmd + x</td>
-<td>剪切行</td>
-</tr>
-<tr>
-<td>cmd + enter</td>
-<td>在当前行下一行新开始一行</td>
-</tr>
-<tr>
-<td>cmd + shift + enter</td>
-<td>在当前行上一行新开始一行</td>
-</tr>
-<tr>
-<td>option +  上/下方向键</td>
-<td>将当前行上下移动</td>
-</tr>
-<tr>
-<td>option + shift + 上/下方向键</td>
-<td>将当前行上下复制</td>
-</tr>
-<tr>
-<td>cmd + /</td>
-<td>将一行代码注释</td>
-</tr>
-<tr>
-<td>option + shift + a</td>
-<td>注释整块代码</td>
-</tr>
-<tr>
-<td>option + shift + f</td>
-<td>代码格式化</td>
-</tr>
-<tr>
-<td>cmd+k cmd+f</td>
-<td>选中代码格式化</td>
-</tr>
-<tr>
-<td>ctrl + t</td>
-<td>光标前后字符调换位置</td>
-</tr>
-<tr>
-<td>cmd+shift+p transform to up/low case</td>
-<td>转换大小写</td>
-</tr>
-<tr>
-<td>ctrl + j</td>
-<td>合并代码行</td>
-</tr>
-<tr>
-<td>cmd + u</td>
-<td>撤销光标移动</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="创建多个光标">创建多个光标</h2>
+    <p><a class="link" href="https://glassfish.org/docs/latest/reference-manual.html#asadmin"  target="_blank" rel="noopener"
+    >asadmin</a> is a command-line tool for  <a class="link" href="https://glassfish.org/"  target="_blank" rel="noopener"
+    >GlassFish</a> , which provides a series of subcommands. Using <code>asadmin</code>, you can complete all management tasks of <code>GlassFish</code>.</p>
+<p>The subcommand <a class="link" href="https://glassfish.org/docs/latest/reference-manual.html#start-domain"  target="_blank" rel="noopener"
+    >start-domain</a> of <code>asadmin</code> can start <code>GlassFish</code>. The following will describe the main process of <code>GlassFish</code> startup, starting from the execution of the <code>asadmin</code> command.</p>
+<h2 id="asadmin-execution-process">asadmin Execution Process</h2>
+<p>The entry point of the <code>asadmin</code> command is  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java"  target="_blank" rel="noopener"
+    >org.glassfish.admin.cli.AsadminMain</a>, which is included in the <code>${AS_INSTALL_LIB}/client/appserver-cli.jar</code> package.</p>
+<p>The main process of <code>AsadminMain</code> execution is as follows:</p>
+<p><img src="https://raw.githubusercontent.com/mz1999/material/master/images/202307211620151.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="AsadminMain"
+	
+	
+></p>
+<p>Some key points:</p>
 <ul>
-<li>使用鼠标</li>
-</ul>
-<p><code>option + 鼠标左键</code></p>
+<li>
+<p>The <code>CLICommand.getCommand()</code> is called to obtain the subcommand to start the GlassFish. All subcommands of <code>asadmin</code> inherit from <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/cli/src/main/java/com/sun/enterprise/admin/cli/CLICommand.java"  target="_blank" rel="noopener"
+    >com.sun.enterprise.admin.cli.CLICommand</a> and are loaded from the following directories or Jars:</p>
 <ul>
-<li>使用键盘</li>
-</ul>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + option + 上/下方向键</td>
-<td>创建多个光标</td>
-</tr>
-<tr>
-<td>cmd + d</td>
-<td>选中相同单词，并创建多个光标</td>
-</tr>
-<tr>
-<td>option + shift+ i</td>
-<td>在选择的多行后创建光标</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="文件跳转">文件跳转</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ctrl + tab</td>
-<td>文件标签之间跳转</td>
-</tr>
-<tr>
-<td>cmd + p</td>
-<td>打开文件列表</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="行跳转">行跳转</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ctrl + g</td>
-<td>跳转到指定行</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="符号跳转">符号跳转</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + shift + o</td>
-<td>当前文件所有符号列表</td>
-</tr>
-<tr>
-<td>@:</td>
-<td>符号列表@后输入冒号，符号分类排列</td>
-</tr>
-<tr>
-<td>cmd + t</td>
-<td>在多个文件进行符号跳转</td>
-</tr>
-<tr>
-<td>cmd + F12</td>
-<td>跳转到函数的实现位置</td>
-</tr>
-<tr>
-<td>shift + F12</td>
-<td>函数引用列表</td>
-</tr>
-<tr>
-<td>ctrl + -</td>
-<td>跳回上一次光标所在位置</td>
-</tr>
-<tr>
-<td>ctrl + shift + -</td>
-<td>跳回下一次光标所在位置</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="代码自动补全">代码自动补全</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ctrl+ space</td>
-<td>调出建议列表</td>
-</tr>
-<tr>
-<td>cmd + shift + space</td>
-<td>调出参数预览窗口</td>
-</tr>
-<tr>
-<td>cmd + .</td>
-<td>快速修复建议列表</td>
-</tr>
-<tr>
-<td>F2</td>
-<td>函数名重构</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="代码折叠">代码折叠</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd+ option + [</td>
-<td>最内层折叠</td>
-</tr>
-<tr>
-<td>cmd + option + ]</td>
-<td>最内层展开</td>
-</tr>
-<tr>
-<td>cmd+k cmd+0</td>
-<td>全部折叠</td>
-</tr>
-<tr>
-<td>cmd+k cmd+j</td>
-<td>全部展开</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="搜索">搜索</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + f</td>
-<td>搜索</td>
-</tr>
-<tr>
-<td>cmd + g</td>
-<td>搜索，光标在编辑器内跳转</td>
-</tr>
-<tr>
-<td>cmd + option + f</td>
-<td>查找替换</td>
-</tr>
-<tr>
-<td>cmd + shift + f</td>
-<td>多文件搜索</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="编辑器操作">编辑器操作</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + \</td>
-<td>拆分编辑器</td>
-</tr>
-<tr>
-<td>option + cmd + 左/右方向键</td>
-<td>编辑器间切换</td>
-</tr>
-<tr>
-<td>cmd + num</td>
-<td>在拆分的编辑器窗口跳转</td>
-</tr>
-<tr>
-<td>Cmd +/-</td>
-<td>缩放整个工作区</td>
-</tr>
-<tr>
-<td>cmd + shift + p <code>reset zoom</code></td>
-<td>重置缩放</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="专注模式">专注模式</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + b</td>
-<td>打开或者关闭整个视图</td>
-</tr>
-<tr>
-<td>cmd + j</td>
-<td>打开或者关闭面板</td>
-</tr>
-<tr>
-<td>cmd+shift+p <code>Toggle Zen Mode</code></td>
-<td>切换禅模式</td>
-</tr>
-<tr>
-<td>cmd+shift+p <code>Toggle Centered Layout</code></td>
-<td>切换剧中布局</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="命令面板">命令面板</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd + shift + p</td>
-<td>命令面板</td>
-</tr>
-</tbody>
-</table></div>
-<p>命令面板的第一个符合对应着不同的功能：</p>
-<ul>
-<li><code>?</code> 列出所有可用功能</li>
-<li><code>&gt;</code> 用于显示所有的命令</li>
-<li><code>@</code> 用于显示和跳转文件中的 “符号”（Symbols）</li>
-<li><code>@:</code> 可以把符号们按类别归类</li>
-<li><code>#</code> 用于显示和跳转工作区中的 “符号”（Symbols）。</li>
-<li><code>:</code> 用于跳转到当前文件中的某一行。</li>
-<li><code>edt</code> 显示所有已经打开的文件</li>
-<li><code>edt active</code> 显示当前活动组中的文件</li>
-<li><code>ext</code> 插件的管理</li>
-<li><code>ext install</code> 搜索和安装插件。</li>
-<li><code>task</code> 任务</li>
-<li><code>debug</code> 调试功能</li>
-<li><code>term</code>创建和管理终端实例</li>
-<li><code>view</code> 打开各个 UI 组件</li>
-</ul>
-<h2 id="窗口管理">窗口管理</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ctrl + w</td>
-<td>窗口切换</td>
-</tr>
-<tr>
-<td>ctrl + r</td>
-<td>切换文件夹</td>
-</tr>
-<tr>
-<td>ctrl+r cmd+enter</td>
-<td>新建窗口打开文件夹</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="集成终端">集成终端</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ctrl + `</td>
-<td>切换集成终端</td>
-</tr>
-<tr>
-<td>ctrl + shift + `</td>
-<td>新建集成终端</td>
-</tr>
-<tr>
-<td>cmd+shift+p <code>Run Active File In Active Terminal</code></td>
-<td>在集成终端中运行当前脚本</td>
-</tr>
-<tr>
-<td>cmd+shift+p <code>Run Selected Text In Active Terminal</code></td>
-<td>在集成终端中运行所选文本</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="任务管理">任务管理</h2>
-<div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>快捷键</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>cmd+shift+p <code>run task</code></td>
-<td>自动检测当前项目中可运行的任务</td>
-</tr>
-<tr>
-<td>cmd+shift+p <code>Configure Task</code></td>
-<td>配置任务</td>
-</tr>
-<tr>
-<td>Cmd + Shift + b</td>
-<td>运行默认的生成任务（build task）</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="鼠标操作">鼠标操作</h2>
-<ul>
-<li>文本选择
-<ul>
-<li>双击鼠标，选中单词</li>
-<li>三击鼠标，选中一行</li>
-<li>四击鼠标，选中整个文档</li>
-<li>单击行号，选中行</li>
+<li>
+<p>${com.sun.aas.installRoot}/lib/asadmin</p>
+</li>
+<li>
+<p>${com.sun.aas.installRoot}/modules/admin-cli.jar</p>
+</li>
 </ul>
 </li>
-<li>文本编辑
-<ul>
-<li>选中后可以拖动文本到指定区域</li>
-<li>拖动过程中按<code>option</code>，变成复制文本到指定区域</li>
-</ul>
+<li>
+<p>All subcommands are executed by calling <code>CLICommand.execute(String... argv)</code>.</p>
 </li>
-<li>在悬停窗口上按下<code>cmd</code>，提示函数的实现</li>
+<li>
+<p>The implementation class of the subcommand to start <code>GlassFish</code> is <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/server-mgmt/src/main/java/com/sun/enterprise/admin/servermgmt/cli/StartDomainCommand.java"  target="_blank" rel="noopener"
+    >StartDomainCommand</a>, which internally calls <code>GFLauncher.launch()</code> to start the <code>GlassFish</code>.</p>
+</li>
+<li>
+<p>Finally, <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/launcher/src/main/java/com/sun/enterprise/admin/launcher/GFLauncher.java"  target="_blank" rel="noopener"
+    >GFLauncher</a> uses <a class="link" href="https://docs.oracle.com/javase/8/docs/api/index.html?java/lang/ProcessBuilder.html"  target="_blank" rel="noopener"
+    >ProcessBuilder</a>  to start a new process, which is the main process of <code>GlassFish</code>. The entry point of this new process is <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
+    >com.sun.enterprise.glassfish.bootstrap.ASMain</a>.</p>
+</li>
 </ul>
+<p>In addition, if the <code>verbose</code> or <code>watchdog</code>  is set, the parent process <code>asadmin</code> will not exit and will wait until <code>GlassFish</code> runs to the end:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// If verbose, hang around until the domain stops
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="o">(</span><span class="n">getInfo</span><span class="o">().</span><span class="na">isVerboseOrWatchdog</span><span class="o">())</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wait</span><span class="o">(</span><span class="n">glassFishProcess</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, we analyze the startup process of the <code>GlassFish</code> main process.</p>
+<h2 id="main-process-startup-process">Main Process Startup Process</h2>
+<p>The entry point of the <code>GlassFish</code> main process is the <code>main</code> method of  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
+    >com.sun.enterprise.glassfish.bootstrap.ASMain</a> , and the main process of the startup process is as follows:</p>
+<p><img src="https://raw.githubusercontent.com/mz1999/material/master/images/202307211631595.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="glassfish startup"
+	
+	
+></p>
+<p>The startup process is complicated, but the main steps are clear:</p>
+<ol>
+<li>Create <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java"  target="_blank" rel="noopener"
+    >GlassFishRuntime</a> using <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java"  target="_blank" rel="noopener"
+    >RuntimeBuilder</a></li>
+<li>Create a  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFish.java"  target="_blank" rel="noopener"
+    >GlassFish</a> instance using <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java"  target="_blank" rel="noopener"
+    >GlassFishRuntime</a></li>
+<li>Start the <code>Glassfish</code> instance by calling <code>GlassFish.start()</code></li>
+</ol>
+<h3 id="creating-glassfishruntime">Creating GlassFishRuntime</h3>
+<p>The main steps to create <code>GlassFishRuntime</code> include:</p>
+<ol>
+<li>Create <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java"  target="_blank" rel="noopener"
+    >RuntimeBuilder</a></li>
+<li>Create and initialize the OSGi <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java"  target="_blank" rel="noopener"
+    >Framework</a></li>
+<li>Load OSGi bundles</li>
+<li>Start the OSGi <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java"  target="_blank" rel="noopener"
+    >Framework</a></li>
+<li>Start the <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java"  target="_blank" rel="noopener"
+    >BundleActivator</a> in the bundles</li>
+<li>During the startup process of <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java"  target="_blank" rel="noopener"
+    >HK2Main</a>, it searches for and registers HK2 modules.</li>
+</ol>
+<p>During the creation of <code>GlassFishRuntime</code>, <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/OSGiGlassFishRuntimeBuilder.java"  target="_blank" rel="noopener"
+    >OSGiGlassFishRuntimeBuilder</a> will create and initialize the OSGi Framework, and then use the <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java#L169"  target="_blank" rel="noopener"
+    >installBundles() </a> method of <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java"  target="_blank" rel="noopener"
+    >BundleProvisioner</a> to install all bundles of GlassFish to OSGi.</p>
+<p>Where does <code>BundleProvisioner</code> find the bundles to load? The <code>glassfish.osgi.auto.install</code> property in the <code>${com.sun.aas.installRoot}/config/osgi.properties</code> file defines the loading path of OSGi bundles. The <code>discoverJars()</code> method of <code>BundleProvisioner</code> will scan these paths and discover the Jar packages that need to be loaded.</p>
+<p>After completing the loading of bundles, <code>OSGiGlassFishRuntimeBuilder</code> will call <code>Framework.start()</code> to start the OSGi Framework. During the startup process of the OSGi Framework, the  <a class="link" href="https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java"  target="_blank" rel="noopener"
+    >BundleActivator</a>  in the bundles will be started. Two important <code>BundleActivators</code> are:</p>
+<ul>
+<li><a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java"  target="_blank" rel="noopener"
+    >GlassFishMainActivator</a></li>
+<li><a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java"  target="_blank" rel="noopener"
+    >HK2Main</a></li>
+</ul>
+<p>During the startup process of <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java"  target="_blank" rel="noopener"
+    >GlassFishMainActivator</a> , <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/EmbeddedOSGiGlassFishRuntime.java"  target="_blank" rel="noopener"
+    >EmbeddedOSGiGlassFishRuntime</a> will be registered in OSGi.</p>
+<p><a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java"  target="_blank" rel="noopener"
+    >HK2Main</a> will create <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java"  target="_blank" rel="noopener"
+    >ModulesRegistry</a>. <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java"  target="_blank" rel="noopener"
+    >ModulesRegistry</a> is a key component of HK2. All modules in HK2 are registered here. In the OSGi environment, the specific implementation class of <code>ModulesRegistry</code> is  <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java"  target="_blank" rel="noopener"
+    >OSGiModulesRegistryImpl</a>, which will find and register the HK2 modules contained in the <code>META-INF/hk2-locator</code> directory of all bundle Jars.</p>
+<p><code>ModulesRegistry</code> and <code>HK2Main</code> will be registered as OSGi&rsquo;s service.</p>
+<h3 id="creating-glassfish-instance">Creating GlassFish Instance</h3>
+<p>Create a GlassFish instance through <code>GlassFishRuntime.newGlassFish()</code>. This process mainly does two things:</p>
+<ol>
+<li>Create HK2&rsquo;s <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java"  target="_blank" rel="noopener"
+    >ServiceLocator</a></li>
+<li>Get <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java"  target="_blank" rel="noopener"
+    >ModuleStartup</a> from <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java"  target="_blank" rel="noopener"
+    >ServiceLocator</a></li>
+</ol>
+<p>In <code>EmbeddedOSGiGlassFishRuntime</code>, use  <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java#L44"  target="_blank" rel="noopener"
+    >ModulesRegistry.newServiceLocator()</a> to create <code>ServiceLocator</code>, and then get <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java"  target="_blank" rel="noopener"
+    >ModuleStartup</a> from <code>ServiceLocator</code>. In the GlassFish startup scenario, the specific implementation of <code>ModuleStartup</code> is <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/kernel/src/main/java/com/sun/enterprise/v3/server/AppServerStartup.java"  target="_blank" rel="noopener"
+    >AppServerStartup</a>.</p>
+<p><code>ServiceLocator</code> is the registry of HK2 services, which provides a series of methods to get HK2 service.</p>
+<p>The relationship between HK2 <code>Module</code> and <code>Service</code> can be regarded as the relationship between container and content. <code>Module</code> (container) contains a group of <code>Service</code> (content) and is responsible for registering these Services in <code>ServiceLocator</code>. When a <code>Module</code> is initialized, all its Services will be registered in <code>ServiceLocator</code>, and then these Services can be found and used by other Services.</p>
+<p>Finally, create a GlassFish instance with <code>AppServerStartup</code> and <code>ServiceLocator</code> as the parameters of the constructor.</p>
+<h3 id="starting-glassfish-instance">Starting GlassFish Instance</h3>
+<p>Use <code>GlassFish.start()</code> to start the <code>Glassfish</code> instance. The most critical step is to call <code>AppServerStartup.start()</code>, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.</p>
+<p>After <code>AppServerStartup.start()</code> runs, all services start, and Glassfish completes startup and runs.</p>
 
 </section>
 
@@ -1019,7 +599,9 @@ if (!doNotTrack) {
     
     <section class="article-tags">
         
-            <a href="/tags/tools/">tools</a>
+            <a href="/tags/java/">java</a>
+        
+            <a href="/tags/glassfish/">glassfish</a>
         
     </section>
 
@@ -1050,19 +632,6 @@ if (!doNotTrack) {
     <h2 class="section-title">相关文章</h2>
     <div class="related-content">
         <div class="flex article-list--tile">
-            
-                
-<article class="">
-    <a href="/p/glassfish-startup-process/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">GlassFish Startup Process</h2>
-        </div>
-    </a>
-</article>
-
             
                 
 <article class="">
@@ -1111,6 +680,19 @@ if (!doNotTrack) {
 
         <div class="article-details">
             <h2 class="article-title">应用服务器整合第三方连接池</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">BookKeeper实现分析</h2>
         </div>
     </a>
 </article>

@@ -6,7 +6,157 @@
         <description>Recent content in java on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Fri, 21 Jul 2023 15:32:57 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/java/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 21 Jul 2023 16:48:55 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/java/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>GlassFish Startup Process</title>
+        <link>https://mazhen.tech/p/glassfish-startup-process/</link>
+        <pubDate>Fri, 21 Jul 2023 16:48:55 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/glassfish-startup-process/</guid>
+        <description>&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#asadmin&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;asadmin&lt;/a&gt; is a command-line tool for  &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFish&lt;/a&gt; , which provides a series of subcommands. Using &lt;code&gt;asadmin&lt;/code&gt;, you can complete all management tasks of &lt;code&gt;GlassFish&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The subcommand &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#start-domain&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;start-domain&lt;/a&gt; of &lt;code&gt;asadmin&lt;/code&gt; can start &lt;code&gt;GlassFish&lt;/code&gt;. The following will describe the main process of &lt;code&gt;GlassFish&lt;/code&gt; startup, starting from the execution of the &lt;code&gt;asadmin&lt;/code&gt; command.&lt;/p&gt;
+&lt;h2 id=&#34;asadmin-execution-process&#34;&gt;asadmin Execution Process&lt;/h2&gt;
+&lt;p&gt;The entry point of the &lt;code&gt;asadmin&lt;/code&gt; command is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;org.glassfish.admin.cli.AsadminMain&lt;/a&gt;, which is included in the &lt;code&gt;${AS_INSTALL_LIB}/client/appserver-cli.jar&lt;/code&gt; package.&lt;/p&gt;
+&lt;p&gt;The main process of &lt;code&gt;AsadminMain&lt;/code&gt; execution is as follows:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/mz1999/material/master/images/202307211620151.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;AsadminMain&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Some key points:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;code&gt;CLICommand.getCommand()&lt;/code&gt; is called to obtain the subcommand to start the GlassFish. All subcommands of &lt;code&gt;asadmin&lt;/code&gt; inherit from &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/cli/src/main/java/com/sun/enterprise/admin/cli/CLICommand.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.sun.enterprise.admin.cli.CLICommand&lt;/a&gt; and are loaded from the following directories or Jars:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;${com.sun.aas.installRoot}/lib/asadmin&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;${com.sun.aas.installRoot}/modules/admin-cli.jar&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;All subcommands are executed by calling &lt;code&gt;CLICommand.execute(String... argv)&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The implementation class of the subcommand to start &lt;code&gt;GlassFish&lt;/code&gt; is &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/server-mgmt/src/main/java/com/sun/enterprise/admin/servermgmt/cli/StartDomainCommand.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;StartDomainCommand&lt;/a&gt;, which internally calls &lt;code&gt;GFLauncher.launch()&lt;/code&gt; to start the &lt;code&gt;GlassFish&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Finally, &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/admin/launcher/src/main/java/com/sun/enterprise/admin/launcher/GFLauncher.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GFLauncher&lt;/a&gt; uses &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/javase/8/docs/api/index.html?java/lang/ProcessBuilder.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ProcessBuilder&lt;/a&gt;  to start a new process, which is the main process of &lt;code&gt;GlassFish&lt;/code&gt;. The entry point of this new process is &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In addition, if the &lt;code&gt;verbose&lt;/code&gt; or &lt;code&gt;watchdog&lt;/code&gt;  is set, the parent process &lt;code&gt;asadmin&lt;/code&gt; will not exit and will wait until &lt;code&gt;GlassFish&lt;/code&gt; runs to the end:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// If verbose, hang around until the domain stops
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;getInfo&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;().&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;isVerboseOrWatchdog&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;())&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;wait&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;glassFishProcess&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Next, we analyze the startup process of the &lt;code&gt;GlassFish&lt;/code&gt; main process.&lt;/p&gt;
+&lt;h2 id=&#34;main-process-startup-process&#34;&gt;Main Process Startup Process&lt;/h2&gt;
+&lt;p&gt;The entry point of the &lt;code&gt;GlassFish&lt;/code&gt; main process is the &lt;code&gt;main&lt;/code&gt; method of  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt; , and the main process of the startup process is as follows:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/mz1999/material/master/images/202307211631595.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;glassfish startup&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;The startup process is complicated, but the main steps are clear:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishRuntime&lt;/a&gt; using &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Create a  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFish.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFish&lt;/a&gt; instance using &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/GlassFishRuntime.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishRuntime&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Start the &lt;code&gt;Glassfish&lt;/code&gt; instance by calling &lt;code&gt;GlassFish.start()&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;creating-glassfishruntime&#34;&gt;Creating GlassFishRuntime&lt;/h3&gt;
+&lt;p&gt;The main steps to create &lt;code&gt;GlassFishRuntime&lt;/code&gt; include:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Create and initialize the OSGi &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Framework&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Load OSGi bundles&lt;/li&gt;
+&lt;li&gt;Start the OSGi &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/launch/Framework.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Framework&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Start the &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BundleActivator&lt;/a&gt; in the bundles&lt;/li&gt;
+&lt;li&gt;During the startup process of &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HK2Main&lt;/a&gt;, it searches for and registers HK2 modules.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;During the creation of &lt;code&gt;GlassFishRuntime&lt;/code&gt;, &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/OSGiGlassFishRuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;OSGiGlassFishRuntimeBuilder&lt;/a&gt; will create and initialize the OSGi Framework, and then use the &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java#L169&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;installBundles() &lt;/a&gt; method of &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/BundleProvisioner.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BundleProvisioner&lt;/a&gt; to install all bundles of GlassFish to OSGi.&lt;/p&gt;
+&lt;p&gt;Where does &lt;code&gt;BundleProvisioner&lt;/code&gt; find the bundles to load? The &lt;code&gt;glassfish.osgi.auto.install&lt;/code&gt; property in the &lt;code&gt;${com.sun.aas.installRoot}/config/osgi.properties&lt;/code&gt; file defines the loading path of OSGi bundles. The &lt;code&gt;discoverJars()&lt;/code&gt; method of &lt;code&gt;BundleProvisioner&lt;/code&gt; will scan these paths and discover the Jar packages that need to be loaded.&lt;/p&gt;
+&lt;p&gt;After completing the loading of bundles, &lt;code&gt;OSGiGlassFishRuntimeBuilder&lt;/code&gt; will call &lt;code&gt;Framework.start()&lt;/code&gt; to start the OSGi Framework. During the startup process of the OSGi Framework, the  &lt;a class=&#34;link&#34; href=&#34;https://github.com/osgi/osgi/blob/main/org.osgi.framework/src/org/osgi/framework/BundleActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;BundleActivator&lt;/a&gt;  in the bundles will be started. Two important &lt;code&gt;BundleActivators&lt;/code&gt; are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishMainActivator&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HK2Main&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;During the startup process of &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/GlassFishMainActivator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;GlassFishMainActivator&lt;/a&gt; , &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/osgi/EmbeddedOSGiGlassFishRuntime.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;EmbeddedOSGiGlassFishRuntime&lt;/a&gt; will be registered in OSGi.&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/HK2Main.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;HK2Main&lt;/a&gt; will create &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModulesRegistry&lt;/a&gt;. &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModulesRegistry&lt;/a&gt; is a key component of HK2. All modules in HK2 are registered here. In the OSGi environment, the specific implementation class of &lt;code&gt;ModulesRegistry&lt;/code&gt; is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;OSGiModulesRegistryImpl&lt;/a&gt;, which will find and register the HK2 modules contained in the &lt;code&gt;META-INF/hk2-locator&lt;/code&gt; directory of all bundle Jars.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ModulesRegistry&lt;/code&gt; and &lt;code&gt;HK2Main&lt;/code&gt; will be registered as OSGi&amp;rsquo;s service.&lt;/p&gt;
+&lt;h3 id=&#34;creating-glassfish-instance&#34;&gt;Creating GlassFish Instance&lt;/h3&gt;
+&lt;p&gt;Create a GlassFish instance through &lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt;. This process mainly does two things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create HK2&amp;rsquo;s &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Get &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModuleStartup&lt;/a&gt; from &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;In &lt;code&gt;EmbeddedOSGiGlassFishRuntime&lt;/code&gt;, use  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/ModulesRegistry.java#L44&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModulesRegistry.newServiceLocator()&lt;/a&gt; to create &lt;code&gt;ServiceLocator&lt;/code&gt;, and then get &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-core/src/main/java/com/sun/enterprise/module/bootstrap/ModuleStartup.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ModuleStartup&lt;/a&gt; from &lt;code&gt;ServiceLocator&lt;/code&gt;. In the GlassFish startup scenario, the specific implementation of &lt;code&gt;ModuleStartup&lt;/code&gt; is &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/kernel/src/main/java/com/sun/enterprise/v3/server/AppServerStartup.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;AppServerStartup&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ServiceLocator&lt;/code&gt; is the registry of HK2 services, which provides a series of methods to get HK2 service.&lt;/p&gt;
+&lt;p&gt;The relationship between HK2 &lt;code&gt;Module&lt;/code&gt; and &lt;code&gt;Service&lt;/code&gt; can be regarded as the relationship between container and content. &lt;code&gt;Module&lt;/code&gt; (container) contains a group of &lt;code&gt;Service&lt;/code&gt; (content) and is responsible for registering these Services in &lt;code&gt;ServiceLocator&lt;/code&gt;. When a &lt;code&gt;Module&lt;/code&gt; is initialized, all its Services will be registered in &lt;code&gt;ServiceLocator&lt;/code&gt;, and then these Services can be found and used by other Services.&lt;/p&gt;
+&lt;p&gt;Finally, create a GlassFish instance with &lt;code&gt;AppServerStartup&lt;/code&gt; and &lt;code&gt;ServiceLocator&lt;/code&gt; as the parameters of the constructor.&lt;/p&gt;
+&lt;h3 id=&#34;starting-glassfish-instance&#34;&gt;Starting GlassFish Instance&lt;/h3&gt;
+&lt;p&gt;Use &lt;code&gt;GlassFish.start()&lt;/code&gt; to start the &lt;code&gt;Glassfish&lt;/code&gt; instance. The most critical step is to call &lt;code&gt;AppServerStartup.start()&lt;/code&gt;, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.&lt;/p&gt;
+&lt;p&gt;After &lt;code&gt;AppServerStartup.start()&lt;/code&gt; runs, all services start, and Glassfish completes startup and runs.&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>Glassfish 启动流程</title>
         <link>https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</link>
         <pubDate>Fri, 21 Jul 2023 15:32:57 +0800</pubDate>
