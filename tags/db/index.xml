@@ -24,7 +24,7 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;我在 &lt;a class=&#34;link&#34; href=&#34;https://jakartaone.org/zh/2023/chinese/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Jakarta EE 中文技术大会上&lt;/a&gt;的分享 《Jakarta EE应用服务器的事务处理》&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;iframe src=&#34;https://www.slideshare.net/slideshow/embed_code/key/CxuoWmKnfPnxSh?hostedIn=slideshare&amp;page=upload&#34; width=&#34;476&#34; height=&#34;400&#34; frameborder=&#34;0&#34; marginwidth=&#34;0&#34; marginheight=&#34;0&#34; scrolling=&#34;no&#34;&gt;&lt;/iframe&gt;
 </description>
         </item>
         <item>
@@ -1439,13 +1439,13 @@
 &lt;h4 id=&#34;专门的关系运算&#34;&gt;专门的关系运算&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;选择&lt;/strong&gt;（selection)，当&lt;strong&gt;选择&lt;/strong&gt;操作符应用到关系&lt;code&gt;R&lt;/code&gt;上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及&lt;code&gt;R&lt;/code&gt;中属性的条件&lt;code&gt;C&lt;/code&gt;，表示为 σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R )&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;选择&lt;/strong&gt;（selection)，当&lt;strong&gt;选择&lt;/strong&gt;操作符应用到关系&lt;code&gt;R&lt;/code&gt;上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及&lt;code&gt;R&lt;/code&gt;中属性的条件&lt;code&gt;C&lt;/code&gt;，表示为 σ&lt;sub&gt;C&lt;/sub&gt;( R )&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;投影&lt;/strong&gt; （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系&lt;code&gt;R&lt;/code&gt;中的部分列。表达式 π&lt;!-- raw HTML omitted --&gt;A1,A2,&amp;hellip;,An&lt;!-- raw HTML omitted --&gt; ( R ) 的值是这样一个关系，它只包含关系&lt;code&gt;R&lt;/code&gt;属性&lt;code&gt;A1,A2,...An&lt;/code&gt;所代表的列。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;投影&lt;/strong&gt; （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系&lt;code&gt;R&lt;/code&gt;中的部分列。表达式 π&lt;sub&gt;A1,A2,&amp;hellip;,An&lt;/sub&gt; ( R ) 的值是这样一个关系，它只包含关系&lt;code&gt;R&lt;/code&gt;属性&lt;code&gt;A1,A2,...An&lt;/code&gt;所代表的列。&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;θ连接&lt;/strong&gt;，关系R和关系S满足条件C的&lt;strong&gt;θ连接&lt;/strong&gt;可以用这样的符号来表示： R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;θ连接&lt;/strong&gt;，关系R和关系S满足条件C的&lt;strong&gt;θ连接&lt;/strong&gt;可以用这样的符号来表示： R ⋈&lt;sub&gt;C&lt;/sub&gt; S&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;θ连接&lt;/strong&gt;的结果这样构造：&lt;/p&gt;
@@ -1507,7 +1507,7 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;R ⋈ &lt;!-- raw HTML omitted --&gt; A&amp;lt;D  AND  R.B ≠ S.B&lt;!-- raw HTML omitted --&gt; S 的结果是：&lt;/p&gt;
+&lt;p&gt;R ⋈ &lt;sub&gt; A&amp;lt;D  AND  R.B ≠ S.B&lt;/sub&gt; S 的结果是：&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -1532,7 +1532,7 @@
 &lt;/table&gt;
 &lt;p&gt;有两类常用的连接运算：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;等值连接&lt;/strong&gt;（equijoin）：比较运算符为 &lt;code&gt;=&lt;/code&gt; 的连接运算称为等值连接。例如： R ⋈ &lt;!-- raw HTML omitted --&gt;R.A = S.B &lt;!-- raw HTML omitted --&gt; S 是从关系R与S的笛卡尔积中选取A、B属性值相等的那些元组。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;等值连接&lt;/strong&gt;（equijoin）：比较运算符为 &lt;code&gt;=&lt;/code&gt; 的连接运算称为等值连接。例如： R ⋈ &lt;sub&gt;R.A = S.B &lt;/sub&gt; S 是从关系R与S的笛卡尔积中选取A、B属性值相等的那些元组。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;自然连接&lt;/strong&gt;（Natural join）：自然连接是一种特殊的等值连接，两个关系中进行比较的分量必须是相同的属性组，并在结果中把重复的属性列去掉。关系R和S的自然连接表示为  &lt;code&gt;R ⋈ S&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;关系R&lt;/p&gt;
@@ -1616,8 +1616,8 @@
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;消除重复操作符&lt;/strong&gt;（duplicated-elimination operator）用 &lt;code&gt;δ(R)&lt;/code&gt; 来返回一个没有重复元组的关系&lt;code&gt;R&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;聚集操作符&lt;/strong&gt; （aggregation operator）用来汇总或者聚集关系某一列中出现的值，有 &lt;code&gt;SUM&lt;/code&gt;，&lt;code&gt;AVG&lt;/code&gt;，&lt;code&gt;MIN&lt;/code&gt;，&lt;code&gt;MAX&lt;/code&gt;，&lt;code&gt;COUNT&lt;/code&gt; 等&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;分组操作&lt;/strong&gt;（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 &lt;code&gt;γ&lt;/code&gt; 是组合了&lt;strong&gt;分组&lt;/strong&gt;和&lt;strong&gt;聚合操作&lt;/strong&gt;的一个算子。例如表达式： γ &lt;!-- raw HTML omitted --&gt;gender, COUNT(emp_no)-&amp;gt;count&lt;!-- raw HTML omitted --&gt;(employees) 代表把性别（&lt;code&gt;gender&lt;/code&gt;）作为分组属性，然后对每一个分组进行&lt;code&gt;COUNT(emp_no)&lt;/code&gt;的操作。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;排序算子&lt;/strong&gt;（sorting operator）如果关系&lt;code&gt;R&lt;/code&gt;的模式是 &lt;code&gt;R(A,B,C)&lt;/code&gt;，那么 τ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) 就把&lt;code&gt;R&lt;/code&gt;中的元组按照属性&lt;code&gt;C&lt;/code&gt;的值排序。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分组操作&lt;/strong&gt;（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 &lt;code&gt;γ&lt;/code&gt; 是组合了&lt;strong&gt;分组&lt;/strong&gt;和&lt;strong&gt;聚合操作&lt;/strong&gt;的一个算子。例如表达式： γ &lt;sub&gt;gender, COUNT(emp_no)-&amp;gt;count&lt;/sub&gt;(employees) 代表把性别（&lt;code&gt;gender&lt;/code&gt;）作为分组属性，然后对每一个分组进行&lt;code&gt;COUNT(emp_no)&lt;/code&gt;的操作。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;排序算子&lt;/strong&gt;（sorting operator）如果关系&lt;code&gt;R&lt;/code&gt;的模式是 &lt;code&gt;R(A,B,C)&lt;/code&gt;，那么 τ&lt;sub&gt;C&lt;/sub&gt;( R ) 就把&lt;code&gt;R&lt;/code&gt;中的元组按照属性&lt;code&gt;C&lt;/code&gt;的值排序。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id=&#34;关系代数小结&#34;&gt;关系代数小结&lt;/h3&gt;
 &lt;p&gt;上面的知识有些枯燥，但非常容易理解，因为我们经常使用关系数据库，已经接受了这些概念。掌握了一些关系代数的知识，在阅读&lt;code&gt;TiDB&lt;/code&gt;源码时，当看到&lt;code&gt;selection&lt;/code&gt;、&lt;code&gt;projection&lt;/code&gt; 这些术语就能一下想到它们对应的关系代数运算符。&lt;/p&gt;
@@ -1759,8 +1759,8 @@
 &lt;p&gt;现在将上一步生成的语法树转换成&lt;strong&gt;关系代数表达式树&lt;/strong&gt;，也就是&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。对于示例SQL的抽象语法树转换过程如下：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;&amp;lt;FromList&amp;gt;&lt;/code&gt; 中涉及的关系&lt;code&gt;employees&lt;/code&gt;和&lt;code&gt;salaries&lt;/code&gt;做笛卡尔积运算&lt;/li&gt;
-&lt;li&gt;选择（selection）运算 σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;，其中&lt;code&gt;C&lt;/code&gt;被替换成&lt;code&gt;&amp;lt;Condition&amp;gt;&lt;/code&gt;表达式，即&lt;code&gt;employees.emp_no = salaries.emp_no AND salary &amp;gt; 7000&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;投影（projection） π&lt;!-- raw HTML omitted --&gt;L&lt;!-- raw HTML omitted --&gt;，其中&lt;code&gt;L&lt;/code&gt;是&lt;code&gt;&amp;lt;SelList&amp;gt;&lt;/code&gt;中的属性列表，对于这个查询只有一个属性&lt;code&gt;name&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;选择（selection）运算 σ&lt;sub&gt;C&lt;/sub&gt;，其中&lt;code&gt;C&lt;/code&gt;被替换成&lt;code&gt;&amp;lt;Condition&amp;gt;&lt;/code&gt;表达式，即&lt;code&gt;employees.emp_no = salaries.emp_no AND salary &amp;gt; 7000&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;投影（projection） π&lt;sub&gt;L&lt;/sub&gt;，其中&lt;code&gt;L&lt;/code&gt;是&lt;code&gt;&amp;lt;SelList&amp;gt;&lt;/code&gt;中的属性列表，对于这个查询只有一个属性&lt;code&gt;name&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;我们得到下面的关系代数表达式树：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011707826.png&#34;
@@ -1786,29 +1786,29 @@
 &lt;ul&gt;
 &lt;li&gt;涉及选择的定律&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C1 AND C2&lt;!-- raw HTML omitted --&gt; = σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;(σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;( R ))&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C1 OR C2&lt;!-- raw HTML omitted --&gt; = (σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;( R ) ∪ (σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;( R ) )&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;(σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;( R )) = σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;(σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;( R ))&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C1 AND C2&lt;/sub&gt; = σ&lt;sub&gt;C1&lt;/sub&gt;(σ&lt;sub&gt;C2&lt;/sub&gt;( R ))&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C1 OR C2&lt;/sub&gt; = (σ&lt;sub&gt;C1&lt;/sub&gt;( R ) ∪ (σ&lt;sub&gt;C2&lt;/sub&gt;( R ) )&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C1&lt;/sub&gt;(σ&lt;sub&gt;C2&lt;/sub&gt;( R )) = σ&lt;sub&gt;C2&lt;/sub&gt;(σ&lt;sub&gt;C1&lt;/sub&gt;( R ))&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;下推选择&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;在表达式中下推选择是查询优化器最强有力的工具。&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S ) = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) × S&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ⋈ S) = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) ⋈ S&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ⋈&lt;!-- raw HTML omitted --&gt;D&lt;!-- raw HTML omitted --&gt; S) = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) ⋈&lt;!-- raw HTML omitted --&gt;D&lt;!-- raw HTML omitted --&gt; S&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C&lt;/sub&gt;( R × S ) = σ&lt;sub&gt;C&lt;/sub&gt;( R ) × S&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C&lt;/sub&gt;( R ⋈ S) = σ&lt;sub&gt;C&lt;/sub&gt;( R ) ⋈ S&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C&lt;/sub&gt;( R ⋈&lt;sub&gt;D&lt;/sub&gt; S) = σ&lt;sub&gt;C&lt;/sub&gt;( R ) ⋈&lt;sub&gt;D&lt;/sub&gt; S&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;涉及连接和笛卡尔积的定律&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S)&lt;/p&gt;
+&lt;p&gt;R ⋈&lt;sub&gt;C&lt;/sub&gt; S = σ&lt;sub&gt;C&lt;/sub&gt;( R × S)&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;涉及消除重复的定律&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;δ(R×S) = δ( R ) × δ(S)&lt;/p&gt;
-&lt;p&gt;δ(R⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;S) = δ( R ) ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; δ(S)&lt;/p&gt;
+&lt;p&gt;δ(R⋈&lt;sub&gt;C&lt;/sub&gt;S) = δ( R ) ⋈&lt;sub&gt;C&lt;/sub&gt; δ(S)&lt;/p&gt;
 &lt;p&gt;另外还有涉及投影的定律、涉及分组和聚集的定律。这部分有些理论化，可以参考这篇&lt;a class=&#34;link&#34; href=&#34;https://pingcap.com/blog-cn/tidb-source-code-reading-7/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《TiDB 源码阅读系列文章（七）基于规则的优化》&lt;/a&gt;看看 &lt;code&gt;TiDB&lt;/code&gt; 具体是怎么做的。&lt;/p&gt;
-&lt;p&gt;对于本例使用到的定律比较简单。先将选择的两部分分解为 σ&lt;!-- raw HTML omitted --&gt;employees.emp_no = salaries.emp_no&lt;!-- raw HTML omitted --&gt;
-和 σ&lt;!-- raw HTML omitted --&gt;salary &amp;gt; 7000&lt;!-- raw HTML omitted --&gt;，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S)&lt;/p&gt;
+&lt;p&gt;对于本例使用到的定律比较简单。先将选择的两部分分解为 σ&lt;sub&gt;employees.emp_no = salaries.emp_no&lt;/sub&gt;
+和 σ&lt;sub&gt;salary &amp;gt; 7000&lt;/sub&gt;，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈&lt;sub&gt;C&lt;/sub&gt; S = σ&lt;sub&gt;C&lt;/sub&gt;( R × S)&lt;/p&gt;
 &lt;p&gt;从右向左使用，把&lt;strong&gt;笛卡尔积&lt;/strong&gt;转换成&lt;strong&gt;连接&lt;/strong&gt;。使用了两个定律后，得到优化后的逻辑查询计划如下图：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011708287.png&#34;
 	
@@ -1852,7 +1852,7 @@
 &lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;σ&lt;/code&gt;选择结点一般有两种选择：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;可以简单的用物理过滤运算符&lt;code&gt;Filter( C )&lt;/code&gt;替代 σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R )&lt;/li&gt;
+&lt;li&gt;可以简单的用物理过滤运算符&lt;code&gt;Filter( C )&lt;/code&gt;替代 σ&lt;sub&gt;C&lt;/sub&gt;( R )&lt;/li&gt;
 &lt;li&gt;如果&lt;code&gt;C&lt;/code&gt;是一个带有比较运算符的条件，例如 &lt;code&gt;A = 100&lt;/code&gt;，并且属性&lt;code&gt;A&lt;/code&gt;上有索引，可以把比较运算合并到&lt;strong&gt;扫描运算符&lt;/strong&gt;：&lt;code&gt;IndexScan(R, A = 100)&lt;/code&gt;。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;对于本例，&lt;code&gt;salary&lt;/code&gt; 一般都不会建立索引，因此可以把&lt;code&gt;σ( salary &amp;gt; 7000 )&lt;/code&gt; 替换为 &lt;code&gt;Filter( salary &amp;gt; 7000 )&lt;/code&gt;&lt;/p&gt;

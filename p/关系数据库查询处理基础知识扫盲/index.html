@@ -653,13 +653,13 @@ if (!doNotTrack) {
 <h4 id="专门的关系运算">专门的关系运算</h4>
 <ul>
 <li>
-<p><strong>选择</strong>（selection)，当<strong>选择</strong>操作符应用到关系<code>R</code>上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及<code>R</code>中属性的条件<code>C</code>，表示为 σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R )</p>
+<p><strong>选择</strong>（selection)，当<strong>选择</strong>操作符应用到关系<code>R</code>上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及<code>R</code>中属性的条件<code>C</code>，表示为 σ<sub>C</sub>( R )</p>
 </li>
 <li>
-<p><strong>投影</strong> （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系<code>R</code>中的部分列。表达式 π<!-- raw HTML omitted -->A1,A2,&hellip;,An<!-- raw HTML omitted --> ( R ) 的值是这样一个关系，它只包含关系<code>R</code>属性<code>A1,A2,...An</code>所代表的列。</p>
+<p><strong>投影</strong> （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系<code>R</code>中的部分列。表达式 π<sub>A1,A2,&hellip;,An</sub> ( R ) 的值是这样一个关系，它只包含关系<code>R</code>属性<code>A1,A2,...An</code>所代表的列。</p>
 </li>
 <li>
-<p><strong>θ连接</strong>，关系R和关系S满足条件C的<strong>θ连接</strong>可以用这样的符号来表示： R ⋈<!-- raw HTML omitted -->C<!-- raw HTML omitted --> S</p>
+<p><strong>θ连接</strong>，关系R和关系S满足条件C的<strong>θ连接</strong>可以用这样的符号来表示： R ⋈<sub>C</sub> S</p>
 </li>
 </ul>
 <p><strong>θ连接</strong>的结果这样构造：</p>
@@ -721,7 +721,7 @@ if (!doNotTrack) {
 </tr>
 </tbody>
 </table></div>
-<p>R ⋈ <!-- raw HTML omitted --> A&lt;D  AND  R.B ≠ S.B<!-- raw HTML omitted --> S 的结果是：</p>
+<p>R ⋈ <sub> A&lt;D  AND  R.B ≠ S.B</sub> S 的结果是：</p>
 <div class="table-wrapper"><table>
 <thead>
 <tr>
@@ -746,7 +746,7 @@ if (!doNotTrack) {
 </table></div>
 <p>有两类常用的连接运算：</p>
 <ol>
-<li><strong>等值连接</strong>（equijoin）：比较运算符为 <code>=</code> 的连接运算称为等值连接。例如： R ⋈ <!-- raw HTML omitted -->R.A = S.B <!-- raw HTML omitted --> S 是从关系R与S的笛卡尔积中选取A、B属性值相等的那些元组。</li>
+<li><strong>等值连接</strong>（equijoin）：比较运算符为 <code>=</code> 的连接运算称为等值连接。例如： R ⋈ <sub>R.A = S.B </sub> S 是从关系R与S的笛卡尔积中选取A、B属性值相等的那些元组。</li>
 <li><strong>自然连接</strong>（Natural join）：自然连接是一种特殊的等值连接，两个关系中进行比较的分量必须是相同的属性组，并在结果中把重复的属性列去掉。关系R和S的自然连接表示为  <code>R ⋈ S</code></li>
 </ol>
 <p>关系R</p>
@@ -830,8 +830,8 @@ if (!doNotTrack) {
 <ul>
 <li><strong>消除重复操作符</strong>（duplicated-elimination operator）用 <code>δ(R)</code> 来返回一个没有重复元组的关系<code>R</code></li>
 <li><strong>聚集操作符</strong> （aggregation operator）用来汇总或者聚集关系某一列中出现的值，有 <code>SUM</code>，<code>AVG</code>，<code>MIN</code>，<code>MAX</code>，<code>COUNT</code> 等</li>
-<li><strong>分组操作</strong>（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 <code>γ</code> 是组合了<strong>分组</strong>和<strong>聚合操作</strong>的一个算子。例如表达式： γ <!-- raw HTML omitted -->gender, COUNT(emp_no)-&gt;count<!-- raw HTML omitted -->(employees) 代表把性别（<code>gender</code>）作为分组属性，然后对每一个分组进行<code>COUNT(emp_no)</code>的操作。</li>
-<li><strong>排序算子</strong>（sorting operator）如果关系<code>R</code>的模式是 <code>R(A,B,C)</code>，那么 τ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R ) 就把<code>R</code>中的元组按照属性<code>C</code>的值排序。</li>
+<li><strong>分组操作</strong>（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 <code>γ</code> 是组合了<strong>分组</strong>和<strong>聚合操作</strong>的一个算子。例如表达式： γ <sub>gender, COUNT(emp_no)-&gt;count</sub>(employees) 代表把性别（<code>gender</code>）作为分组属性，然后对每一个分组进行<code>COUNT(emp_no)</code>的操作。</li>
+<li><strong>排序算子</strong>（sorting operator）如果关系<code>R</code>的模式是 <code>R(A,B,C)</code>，那么 τ<sub>C</sub>( R ) 就把<code>R</code>中的元组按照属性<code>C</code>的值排序。</li>
 </ul>
 <h3 id="关系代数小结">关系代数小结</h3>
 <p>上面的知识有些枯燥，但非常容易理解，因为我们经常使用关系数据库，已经接受了这些概念。掌握了一些关系代数的知识，在阅读<code>TiDB</code>源码时，当看到<code>selection</code>、<code>projection</code> 这些术语就能一下想到它们对应的关系代数运算符。</p>
@@ -973,8 +973,8 @@ if (!doNotTrack) {
 <p>现在将上一步生成的语法树转换成<strong>关系代数表达式树</strong>，也就是<strong>逻辑查询计划</strong>。对于示例SQL的抽象语法树转换过程如下：</p>
 <ul>
 <li><code>&lt;FromList&gt;</code> 中涉及的关系<code>employees</code>和<code>salaries</code>做笛卡尔积运算</li>
-<li>选择（selection）运算 σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->，其中<code>C</code>被替换成<code>&lt;Condition&gt;</code>表达式，即<code>employees.emp_no = salaries.emp_no AND salary &gt; 7000</code></li>
-<li>投影（projection） π<!-- raw HTML omitted -->L<!-- raw HTML omitted -->，其中<code>L</code>是<code>&lt;SelList&gt;</code>中的属性列表，对于这个查询只有一个属性<code>name</code></li>
+<li>选择（selection）运算 σ<sub>C</sub>，其中<code>C</code>被替换成<code>&lt;Condition&gt;</code>表达式，即<code>employees.emp_no = salaries.emp_no AND salary &gt; 7000</code></li>
+<li>投影（projection） π<sub>L</sub>，其中<code>L</code>是<code>&lt;SelList&gt;</code>中的属性列表，对于这个查询只有一个属性<code>name</code></li>
 </ul>
 <p>我们得到下面的关系代数表达式树：</p>
 <p><img src="https://cdn.mazhen.tech/images/202207011707826.png"
@@ -1000,29 +1000,29 @@ if (!doNotTrack) {
 <ul>
 <li>涉及选择的定律</li>
 </ul>
-<p>σ<!-- raw HTML omitted -->C1 AND C2<!-- raw HTML omitted --> = σ<!-- raw HTML omitted -->C1<!-- raw HTML omitted -->(σ<!-- raw HTML omitted -->C2<!-- raw HTML omitted -->( R ))</p>
-<p>σ<!-- raw HTML omitted -->C1 OR C2<!-- raw HTML omitted --> = (σ<!-- raw HTML omitted -->C1<!-- raw HTML omitted -->( R ) ∪ (σ<!-- raw HTML omitted -->C2<!-- raw HTML omitted -->( R ) )</p>
-<p>σ<!-- raw HTML omitted -->C1<!-- raw HTML omitted -->(σ<!-- raw HTML omitted -->C2<!-- raw HTML omitted -->( R )) = σ<!-- raw HTML omitted -->C2<!-- raw HTML omitted -->(σ<!-- raw HTML omitted -->C1<!-- raw HTML omitted -->( R ))</p>
+<p>σ<sub>C1 AND C2</sub> = σ<sub>C1</sub>(σ<sub>C2</sub>( R ))</p>
+<p>σ<sub>C1 OR C2</sub> = (σ<sub>C1</sub>( R ) ∪ (σ<sub>C2</sub>( R ) )</p>
+<p>σ<sub>C1</sub>(σ<sub>C2</sub>( R )) = σ<sub>C2</sub>(σ<sub>C1</sub>( R ))</p>
 <ul>
 <li>下推选择</li>
 </ul>
 <p>在表达式中下推选择是查询优化器最强有力的工具。</p>
-<p>σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R × S ) = σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R ) × S</p>
-<p>σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R ⋈ S) = σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R ) ⋈ S</p>
-<p>σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R ⋈<!-- raw HTML omitted -->D<!-- raw HTML omitted --> S) = σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R ) ⋈<!-- raw HTML omitted -->D<!-- raw HTML omitted --> S</p>
+<p>σ<sub>C</sub>( R × S ) = σ<sub>C</sub>( R ) × S</p>
+<p>σ<sub>C</sub>( R ⋈ S) = σ<sub>C</sub>( R ) ⋈ S</p>
+<p>σ<sub>C</sub>( R ⋈<sub>D</sub> S) = σ<sub>C</sub>( R ) ⋈<sub>D</sub> S</p>
 <ul>
 <li>涉及连接和笛卡尔积的定律</li>
 </ul>
-<p>R ⋈<!-- raw HTML omitted -->C<!-- raw HTML omitted --> S = σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R × S)</p>
+<p>R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)</p>
 <ul>
 <li>涉及消除重复的定律</li>
 </ul>
 <p>δ(R×S) = δ( R ) × δ(S)</p>
-<p>δ(R⋈<!-- raw HTML omitted -->C<!-- raw HTML omitted -->S) = δ( R ) ⋈<!-- raw HTML omitted -->C<!-- raw HTML omitted --> δ(S)</p>
+<p>δ(R⋈<sub>C</sub>S) = δ( R ) ⋈<sub>C</sub> δ(S)</p>
 <p>另外还有涉及投影的定律、涉及分组和聚集的定律。这部分有些理论化，可以参考这篇<a class="link" href="https://pingcap.com/blog-cn/tidb-source-code-reading-7/"  target="_blank" rel="noopener"
     >《TiDB 源码阅读系列文章（七）基于规则的优化》</a>看看 <code>TiDB</code> 具体是怎么做的。</p>
-<p>对于本例使用到的定律比较简单。先将选择的两部分分解为 σ<!-- raw HTML omitted -->employees.emp_no = salaries.emp_no<!-- raw HTML omitted -->
-和 σ<!-- raw HTML omitted -->salary &gt; 7000<!-- raw HTML omitted -->，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈<!-- raw HTML omitted -->C<!-- raw HTML omitted --> S = σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R × S)</p>
+<p>对于本例使用到的定律比较简单。先将选择的两部分分解为 σ<sub>employees.emp_no = salaries.emp_no</sub>
+和 σ<sub>salary &gt; 7000</sub>，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)</p>
 <p>从右向左使用，把<strong>笛卡尔积</strong>转换成<strong>连接</strong>。使用了两个定律后，得到优化后的逻辑查询计划如下图：</p>
 <p><img src="https://cdn.mazhen.tech/images/202207011708287.png"
 	
@@ -1066,7 +1066,7 @@ if (!doNotTrack) {
 </ul>
 <p><code>σ</code>选择结点一般有两种选择：</p>
 <ol>
-<li>可以简单的用物理过滤运算符<code>Filter( C )</code>替代 σ<!-- raw HTML omitted -->C<!-- raw HTML omitted -->( R )</li>
+<li>可以简单的用物理过滤运算符<code>Filter( C )</code>替代 σ<sub>C</sub>( R )</li>
 <li>如果<code>C</code>是一个带有比较运算符的条件，例如 <code>A = 100</code>，并且属性<code>A</code>上有索引，可以把比较运算合并到<strong>扫描运算符</strong>：<code>IndexScan(R, A = 100)</code>。</li>
 </ol>
 <p>对于本例，<code>salary</code> 一般都不会建立索引，因此可以把<code>σ( salary &gt; 7000 )</code> 替换为 <code>Filter( salary &gt; 7000 )</code></p>

@@ -24,7 +24,7 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;我在 &lt;a class=&#34;link&#34; href=&#34;https://jakartaone.org/zh/2023/chinese/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Jakarta EE 中文技术大会上&lt;/a&gt;的分享 《Jakarta EE应用服务器的事务处理》&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;iframe src=&#34;https://www.slideshare.net/slideshow/embed_code/key/CxuoWmKnfPnxSh?hostedIn=slideshare&amp;page=upload&#34; width=&#34;476&#34; height=&#34;400&#34; frameborder=&#34;0&#34; marginwidth=&#34;0&#34; marginheight=&#34;0&#34; scrolling=&#34;no&#34;&gt;&lt;/iframe&gt;
 </description>
         </item>
         <item>
@@ -5854,8 +5854,31 @@ PCRE库支持正则表达式。如果我们在配置文件nginx.conf中使用了
 &lt;p&gt;可以通过查看 &lt;code&gt;/proc/meminfo&lt;/code&gt; 文件获知 &lt;strong&gt;Page Cache&lt;/strong&gt; 相关的各种指标。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;/proc&lt;/code&gt; 是伪文件系统（Pseudo filesystems ）。Linux 通过伪文件系统，让系统和内核信息在用户空间可用。使用 &lt;code&gt;free&lt;/code&gt;、&lt;code&gt;vmstat&lt;/code&gt;等命令查看到的内存信息，数据实际上都来自 &lt;code&gt;/proc/meminfo&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;我们看一个示例：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;
+$ cat /proc/meminfo 
+MemTotal:        8052564 kB
+MemFree:          129804 kB
+MemAvailable:    4956164 kB
+&lt;b&gt;Buffers:          175932 kB&lt;/b&gt;
+&lt;b&gt;Cached:          4896824 kB&lt;/b&gt;
+SwapCached:           40 kB
+Active:          2748728 kB  &lt;- Active(anon) + Active(file)
+Inactive:        4676540 kB  &lt;- Inactive(anon) +Inactive(file)  
+&lt;b&gt;Active(anon):       3432 kB&lt;/b&gt;
+&lt;b&gt;Inactive(anon):  2513172 kB&lt;/b&gt;
+&lt;b&gt;Active(file):    2745296 kB&lt;/b&gt;
+&lt;b&gt;Inactive(file):  2163368 kB&lt;/b&gt;
+Unevictable:       65496 kB
+Mlocked:               0 kB
+SwapTotal:       2097148 kB
+SwapFree:        2095868 kB
+Dirty:                12 kB
+Writeback:             0 kB
+&lt;b&gt;AnonPages:       2411440 kB&lt;/b&gt;
+Mapped:           761076 kB
+&lt;b&gt;Shmem:            170868 kB&lt;/b&gt;
+...
+&lt;/pre&gt;
 &lt;p&gt;关于 &lt;code&gt;/proc/meminfo&lt;/code&gt; 每一项的详细解释，可以查看 [Linux 内核文档 - The /proc Filesystem](&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/filesystems/proc.html#meminfo&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;The /proc Filesystem — The Linux Kernel documentation&lt;/a&gt;)。我们重点看一下 &lt;strong&gt;Page Cache&lt;/strong&gt; 相关的字段。&lt;/p&gt;
 &lt;p&gt;当前系统 Page Cache 等于 Buffers + Cached 之和 ：&lt;/p&gt;
@@ -6921,8 +6944,31 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
     &gt;2008年就加入了内核&lt;/a&gt;，但很多应用开发工程师仍然不知道它的存在。本文就给你介绍一下&lt;code&gt;Ftrace&lt;/code&gt;的基本使用。&lt;/p&gt;
 &lt;h2 id=&#34;ftrace初体验&#34;&gt;Ftrace初体验&lt;/h2&gt;
 &lt;p&gt;先用一个例子体验一下&lt;code&gt;Ftrace&lt;/code&gt;的使用简单，且功能强大。使用 root 用户进入&lt;code&gt;/sys/kernel/debug/tracing&lt;/code&gt;目录，执行 &lt;code&gt;echo&lt;/code&gt; 和 &lt;code&gt;cat&lt;/code&gt; 命令：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo _do_fork &gt; set_graph_function&lt;/b&gt;
+# &lt;b&gt;echo function_graph &gt; current_tracer&lt;/b&gt;
+# &lt;b&gt;cat trace | head -20&lt;/b&gt;
+# tracer: function_graph
+#
+# CPU  DURATION                  FUNCTION CALLS
+# |     |   |                     |   |   |   |
+ 3)               |  _do_fork() {
+ 3)               |    copy_process() {
+ 3)   0.895 us    |      _raw_spin_lock_irq();
+ 3)               |      recalc_sigpending() {
+ 3)   0.740 us    |        recalc_sigpending_tsk();
+ 3)   2.248 us    |      }
+ 3)               |      dup_task_struct() {
+ 3)   0.775 us    |        tsk_fork_get_node();
+ 3)               |        kmem_cache_alloc_node() {
+ 3)               |          _cond_resched() {
+ 3)   0.740 us    |            rcu_all_qs();
+ 3)   2.117 us    |          }
+ 3)   0.701 us    |          should_failslab();
+ 3)   2.023 us    |          memcg_kmem_get_cache();
+ 3)   0.889 us    |          memcg_kmem_put_cache();
+ 3) + 12.206 us   |        }
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;我们使用&lt;code&gt;Ftrace&lt;/code&gt;的&lt;code&gt;function_graph&lt;/code&gt;功能显示了内核函数 &lt;code&gt;_do_fork()&lt;/code&gt; 所有子函数调用。左边的第一列是执行函数的 CPU，第二列 &lt;code&gt;DURATION&lt;/code&gt; 显示在相应函数中花费的时间。我们注意到最后一行的耗时之前有个 &lt;code&gt;+&lt;/code&gt; 号，提示用户注意延迟高的函数。&lt;code&gt;+&lt;/code&gt; 代表耗时大于 &lt;code&gt;10 μs&lt;/code&gt;。如果耗时大于 &lt;code&gt;100 μs&lt;/code&gt;，则显示 &lt;code&gt;!&lt;/code&gt; 号。&lt;/p&gt;
 &lt;p&gt;我们知道，&lt;code&gt;fork&lt;/code&gt; 是建立父进程的一个完整副本，然后作为子进程执行。那么&lt;code&gt;_do_fork()&lt;/code&gt;的第一件大事就是调用 &lt;code&gt;copy_process()&lt;/code&gt; 复制父进程的数据结构，从上面输出的调用链信息也验证了这一点。&lt;/p&gt;
 &lt;p&gt;使用完后执行下面的命令关闭&lt;code&gt;function_graph&lt;/code&gt;：&lt;/p&gt;
@@ -6955,8 +7001,27 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;我使用的系统是&lt;code&gt;Ubuntu 20.04.2 LTS&lt;/code&gt;，可以看到，为了保持兼容，&lt;code&gt;tracefs&lt;/code&gt;同时挂载到了&lt;code&gt;/sys/kernel/tracing&lt;/code&gt;和&lt;code&gt;/sys/kernel/debug/tracing&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;tracefs&lt;/code&gt;下的文件主要分两类：控制文件和输出文件。这些文件的名字都很直观，像前面例子通过 &lt;code&gt;current_tracer&lt;/code&gt; 设置当前要使用的 tracer，然后从 &lt;code&gt;trace&lt;/code&gt;中读取结果。还有像 &lt;code&gt;available_tracers&lt;/code&gt; 包含了当前内核可用的 tracer，可以设置 &lt;code&gt;trace_options&lt;/code&gt; 自定义输出。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;ls -F /sys/kernel/tracing/&lt;/b&gt;
+available_events            max_graph_depth         stack_max_size
+available_filter_functions  options/                stack_trace
+available_tracers           per_cpu/                stack_trace_filter
+buffer_percent              printk_formats          synthetic_events
+buffer_size_kb              README                  timestamp_mode
+buffer_total_size_kb        saved_cmdlines          trace
+current_tracer              saved_cmdlines_size     trace_clock
+dynamic_events              saved_tgids             trace_marker
+dyn_ftrace_total_info       set_event               trace_marker_raw
+enabled_functions           set_event_notrace_pid   trace_options
+error_log                   set_event_pid           trace_pipe
+events/                     set_ftrace_filter       trace_stat/
+free_buffer                 set_ftrace_notrace      tracing_cpumask
+function_profile_enabled    set_ftrace_notrace_pid  tracing_max_latency
+hwlat_detector/             set_ftrace_pid          tracing_on
+instances/                  set_graph_function      tracing_thresh
+kprobe_events               set_graph_notrace       uprobe_events
+kprobe_profile              snapshot                uprobe_profile
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;本文后面的示例假定你已经处在了&lt;code&gt;/sys/kernel/tracing&lt;/code&gt;或&lt;code&gt;/sys/kernel/debug/tracing&lt;/code&gt;目录下。&lt;/p&gt;
 &lt;h2 id=&#34;函数跟踪&#34;&gt;函数跟踪&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;Ftrace&lt;/code&gt; 实际上代表的就是&lt;code&gt;function trace&lt;/code&gt;（函数跟踪），因此函数追踪是&lt;code&gt;Ftrace&lt;/code&gt;最初的一个主要功能。&lt;/p&gt;
@@ -6975,30 +7040,110 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
     &gt;ring buffer&lt;/a&gt;，所有的跟踪信息都存储在&lt;strong&gt;ring buffer&lt;/strong&gt;中。用户通过 &lt;code&gt;tracefs&lt;/code&gt; 文件系统接口访问函数跟踪的输出结果。&lt;/p&gt;
 &lt;p&gt;你可能已经意识到，如果每个内核函数入口都加入跟踪代码，必然会非常影响内核的性能，幸好&lt;code&gt;Ftrace&lt;/code&gt;支持动态跟踪功能。如果启用了&lt;strong&gt;CONFIG_DYNAMIC_FTRACE&lt;/strong&gt;选项，编译内核时所有的&lt;code&gt;mcount/fentry&lt;/code&gt;调用点都会被收集记录。在内核的初始化启动过程中，会根据编译期记录的列表，将&lt;code&gt;mcount/fentry&lt;/code&gt;调用点替换为&lt;strong&gt;NOP&lt;/strong&gt;指令。&lt;strong&gt;NOP&lt;/strong&gt;就是 &lt;code&gt;no-operation&lt;/code&gt;，不做任何事，直接转到下一条指令。因此在没有开启跟踪功能的情况下，&lt;code&gt;Ftrace&lt;/code&gt;不会对内核性能产生任何影响。在开启追踪功能时，&lt;code&gt;Ftrace&lt;/code&gt;才会将&lt;strong&gt;NOP&lt;/strong&gt;指令替换为&lt;code&gt;mcount/fentry&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;启用函数追踪功能，只需要将 &lt;code&gt;current_tracer&lt;/code&gt; 文件的内容设置为 &amp;ldquo;function&amp;rdquo;：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo function &gt; current_tracer&lt;/b&gt;
+# &lt;b&gt;cat trace | head -20&lt;/b&gt;
+# tracer: function
+#
+# entries-in-buffer/entries-written: 204981/2728851   #P:4
+#
+#                                _-----=&gt; irqs-off
+#                               / _----=&gt; need-resched
+#                              | / _---=&gt; hardirq/softirq
+#                              || / _--=&gt; preempt-depth
+#                              ||| /     delay
+#           TASK-PID     CPU#  ||||   TIMESTAMP  FUNCTION
+#              | |         |   ||||      |         |
+            sshd-1388    [000] .... 44388.890787: _cond_resched &lt;-__flush_work
+            curl-7231    [001] .... 44389.399226: PageHuge &lt;-find_get_entry
+            curl-7231    [001] .... 44389.399227: fsnotify_parent &lt;-vfs_read
+            curl-7231    [001] .... 44389.399227: _cond_resched &lt;-copy_page_to_iter
+            curl-7231    [001] .... 44389.399227: rcu_all_qs &lt;-_cond_resched
+            curl-7231    [001] .... 44389.399228: vmacache_find &lt;-find_vma
+            curl-7231    [001] .... 44389.399228: atime_needs_update &lt;-touch_atime
+            curl-7231    [001] .... 44389.399228: current_time &lt;-atime_needs_update
+
+# &lt;b&gt; echo nop &gt; current_tracer &lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;文件头已经很好的解释了每一列的含义。前两项是被追踪的任务名称和 PID，大括号内是执行跟踪的CPU。&lt;code&gt;TIMESTAMP&lt;/code&gt; 是启动后的时间，后面是被追踪的函数，它的调用者在 &lt;code&gt;&amp;lt;-&lt;/code&gt; 之后。&lt;/p&gt;
 &lt;p&gt;我们可以设置 &lt;code&gt;set_ftrace_filter&lt;/code&gt; 选择想要跟踪的函数：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo &#39;*sleep&#39; &gt; set_ftrace_filter&lt;/b&gt;
+# &lt;b&gt;echo function &gt; current_tracer&lt;/b&gt;
+# &lt;b&gt;cat trace_pipe&lt;/b&gt;
+
+sleep-9445    [001] .... 45978.125872: common_nsleep &lt;-__x64_sys_clock_nanosleep
+sleep-9445    [001] .... 45978.125873: hrtimer_nanosleep &lt;-common_nsleep
+sleep-9445    [001] .... 45978.125873: do_nanosleep &lt;-hrtimer_nanosleep
+ cron-568     [002] .... 45978.504262: __x64_sys_clock_nanosleep &lt;-do_syscall_64
+ cron-568     [002] .... 45978.504264: common_nsleep &lt;-__x64_sys_clock_nanosleep
+ cron-568     [002] .... 45978.504264: hrtimer_nanosleep &lt;-common_nsleep
+ cron-568     [002] .... 45978.504264: do_nanosleep &lt;-hrtimer_nanosleep
+sleep-9448    [001] .... 45978.885085: __x64_sys_clock_nanosleep &lt;-do_syscall_64
+sleep-9448    [001] .... 45978.885087: common_nsleep &lt;-__x64_sys_clock_nanosleep
+sleep-9448    [001] .... 45978.885087: hrtimer_nanosleep &lt;-common_nsleep
+
+# &lt;b&gt;echo nop &gt; current_tracer&lt;/b&gt;
+# &lt;b&gt;echo &gt; set_ftrace_filter&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;code&gt;trace_pipe&lt;/code&gt; 包含了与 &lt;code&gt;trace&lt;/code&gt; 相同的输出，从这个文件的读取会返回一个无尽的事件流，它也会消耗事件，所以在读取一次后，它们就不再在跟踪缓冲区中了。&lt;/p&gt;
 &lt;p&gt;也许你只想跟踪一个特定的进程，可以通过设置 &lt;code&gt;set_ftrace_pid&lt;/code&gt; 内容为PID指定想追踪的特定进程。让 tracer 只追踪PID列在这个文件中的线程：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo [PID] &gt; set_ftrace_pid&lt;/b&gt;
+# &lt;b&gt;echo function &gt; current_tracer&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;如果设置了 &lt;code&gt;function-fork&lt;/code&gt; 选项，那么当一个 PID 被列在 &lt;code&gt;set_ftrace_pid&lt;/code&gt; 这个文件中时，其子任务的 PID 将被自动添加到这个文件中，并且子任务也将被 tracer 追踪。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo function-fork &gt; trace_options&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;取消&lt;code&gt;function-fork&lt;/code&gt; 选项：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo nofunction-fork &gt; trace_options&lt;/b&gt;
+# &lt;b&gt;cat trace_options&lt;/b&gt;
+...
+noevent-fork
+nopause-on-trace
+function-trace
+&lt;b&gt;nofunction-fork&lt;/b&gt;
+nodisplay-graph
+nostacktrace
+...
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;取消 &lt;code&gt;set_ftrace_pid&lt;/code&gt; 的设置：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo &gt; set_ftrace_pid&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&#34;ftrace-function_graph&#34;&gt;Ftrace function_graph&lt;/h2&gt;
 &lt;p&gt;文章开始例子已经展示过，&lt;code&gt;function_graph&lt;/code&gt; 可以打印出函数的调用图，揭示代码的流程。&lt;code&gt;function_graph&lt;/code&gt; 不仅跟踪函数的输入，而且跟踪函数的返回，这使得 tracer 能够知道被调用的函数的深度。&lt;code&gt;function_graph&lt;/code&gt; 可以让人更容易跟踪内核的执行流程。&lt;/p&gt;
 &lt;p&gt;我们再看一个例子：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo try_to_wake_up &gt; set_graph_function&lt;/b&gt;
+# &lt;b&gt;echo function_graph &gt; current_tracer&lt;/b&gt;
+# &lt;b&gt;cat trace | head -20&lt;/b&gt;
+# tracer: function_graph
+#
+# CPU  DURATION                  FUNCTION CALLS
+# |     |   |                     |   |   |   |
+ 0)               |  try_to_wake_up() {
+ 0)   1.083 us    |    ttwu_queue_wakelist();
+ 0)   0.622 us    |    update_rq_clock();
+ 0)               |    ttwu_do_activate() {
+ 0)               |      enqueue_task_fair() {
+ 0)               |        enqueue_entity() {
+ 0)   0.616 us    |          update_curr();
+ 0)   0.602 us    |          update_cfs_group();
+ 0)   0.662 us    |          account_entity_enqueue();
+ 0)   0.652 us    |          place_entity();
+ 0)   0.697 us    |          __enqueue_entity();
+ 0) + 12.890 us   |        }
+ 0)   0.672 us    |        hrtick_update();
+ 0) + 17.781 us   |      }
+ 0)               |      ttwu_do_wakeup() {
+ 0)               |        check_preempt_curr() {
+
+# &lt;b&gt;echo nop &gt; current_tracer&lt;/b&gt;
+# &lt;b&gt;echo &gt; set_graph_function&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;前面提到过，函数耗时大于 10 μs，前面会有 + 号提醒用户注意，其他的符号还有：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;$&lt;/strong&gt; ：延迟大于1秒&lt;/li&gt;
@@ -7010,12 +7155,66 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;/ul&gt;
 &lt;h2 id=&#34;函数profiler&#34;&gt;函数Profiler&lt;/h2&gt;
 &lt;p&gt;函数Profiler提供了内核函数调用的统计数据，可以观察哪些内核函数正在被使用，并能发现哪些函数的执行耗时最长。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# echo nop &gt; current_tracer
+# echo 1 &gt; function_profile_enabled
+# echo 0 &gt; function_profile_enabled
+# echo &gt; set_ftrace_filter
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;这里有一个要注意的地方，确保使用的是 &lt;code&gt;0 &amp;gt;&lt;/code&gt;，而不是 &lt;code&gt;0&amp;gt;&lt;/code&gt;。这两者的含义不一样，&lt;code&gt;0&amp;gt;&lt;/code&gt;是对文件描述符 &lt;code&gt;0&lt;/code&gt; 的重定向。同样要避免使用 &lt;code&gt;1&amp;gt;&lt;/code&gt;，因为这是对文件描述符 &lt;code&gt;1&lt;/code&gt; 的重定向。&lt;/p&gt;
 &lt;p&gt;现在可以从 &lt;code&gt;trace_stat&lt;/code&gt; 目录中读取 profile 的统计数据。在这个目录中，profile 数据按照 CPU 保存在名为 function[n] 文件中。我使用的4核CPU，看一下profile 结果：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;ls  trace_stat/&lt;/b&gt;
+function0  function1  function2  function3
+# &lt;b&gt;head trace_stat/function*&lt;/b&gt;
+==&gt; trace_stat/function0 &lt;==
+  Function                               Hit    Time            Avg             s^2
+  --------                               ---    ----            ---             ---
+  tcp_sendmsg                            202    3791.163 us     18.768 us       659.733 us  
+  tcp_sendmsg_locked                     202    3521.863 us     17.434 us       638.307 us  
+  tcp_recvmsg                            125    2238.773 us     17.910 us       1062.699 us 
+  tcp_push                               202    2168.569 us     10.735 us       467.879 us  
+  tcp_write_xmit                          47    2107.768 us     44.846 us       414.934 us  
+  tcp_v4_do_rcv                           49    871.318 us      17.782 us       126.562 us  
+  tcp_send_ack                            50    849.091 us      16.981 us       164.986 us  
+  tcp_rcv_established                     49    827.212 us      16.881 us       117.427 us  
+
+==&gt; trace_stat/function1 &lt;==
+  Function                               Hit    Time            Avg             s^2
+--------                               ---    ----            ---             ---
+  tcp_recvmsg                            312    3110.497 us     9.969 us        281.015 us  
+  tcp_sendmsg                             86    1412.005 us     16.418 us       370.310 us  
+  tcp_sendmsg_locked                      86    1313.847 us     15.277 us       362.495 us  
+  tcp_send_ack                            47    863.222 us      18.366 us       121.567 us  
+  tcp_v4_do_rcv                           60    825.359 us      13.755 us       102.550 us  
+  tcp_write_xmit                          28    807.609 us      28.843 us       336.106 us  
+  tcp_push                                86    805.776 us      9.369 us        299.815 us  
+  tcp_rcv_established                     60    777.510 us      12.958 us       99.129 us   
+
+==&gt; trace_stat/function2 &lt;==
+  Function                               Hit    Time            Avg             s^2
+--------                               ---    ----            ---             ---
+  tcp_v4_rcv                            1618    27858.95 us     17.218 us       253.487 us  
+  tcp_v4_do_rcv                         1216    22528.58 us     18.526 us       226.243 us  
+  tcp_rcv_established                   1184    20535.08 us     17.343 us       210.765 us  
+  tcp_send_ack                           487    7558.698 us     15.520 us       111.035 us  
+  tcp_write_xmit                         328    6281.810 us     19.151 us       656.192 us  
+  tcp_tasklet_func                       162    4258.312 us     26.285 us       797.278 us  
+  tcp_ack                                575    4148.714 us     7.215 us        27.061 us   
+  tcp_tsq_handler                        162    4123.507 us     25.453 us       791.961 us  
+
+==&gt; trace_stat/function3 &lt;==
+  Function                               Hit    Time            Avg             s^2
+--------                               ---    ----            ---             ---
+  tcp_recvmsg                            567    5773.997 us     10.183 us       397.950 us  
+  tcp_send_ack                           127    1881.700 us     14.816 us       133.317 us  
+  tcp_v4_do_rcv                          133    1783.527 us     13.409 us       86.122 us   
+  tcp_rcv_established                    133    1690.142 us     12.707 us       83.527 us   
+  tcp_sendmsg                             54    1652.290 us     30.597 us       698.120 us  
+  tcp_sendmsg_locked                      54    1574.276 us     29.153 us       666.451 us  
+  tcp_write_xmit                          40    1184.827 us     29.620 us       354.719 us  
+  tcp_push                                54    1129.465 us     20.916 us       486.157 us  
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;第一行是每一列的名称，分别是函数名称（Function），调用次数（Hit），函数的总时间（Time）、平均函数时间（Avg）和标准差（s^2）。输出结果显示，&lt;code&gt;tcp_sendmsg()&lt;/code&gt; 在3个 CPU 上都是最频繁的，&lt;code&gt;tcp_v4_rcv()&lt;/code&gt; 在 CPU2 上被调用了1618次，平均延迟为 &lt;code&gt;17.218 us&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;最后要注意一点，在使用 Ftrace Profiler 时，尽量通过 &lt;code&gt;set_ftrace_filter&lt;/code&gt; 限制 profile 的范围，避免对所有的内核函数都进行 profile。&lt;/p&gt;
 &lt;h2 id=&#34;追踪点-tracepoints&#34;&gt;追踪点 Tracepoints&lt;/h2&gt;
@@ -7025,8 +7224,19 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
     &gt;TRACE_EVENT() 宏添加内核 tracepoints&lt;/a&gt;，不用创建自定义内核模块，使用 &lt;code&gt;Event Tracing&lt;/code&gt; 基础设施来注册埋点函数。&lt;/p&gt;
 &lt;p&gt;现在内核中的&lt;strong&gt;Tracepoints&lt;/strong&gt;都使用了 &lt;code&gt;TRACE_EVENT()&lt;/code&gt; 宏来定义，tracepoints 记录的上下文信息作为 &lt;strong&gt;Trace events&lt;/strong&gt; 进入 &lt;code&gt;Event Tracing&lt;/code&gt; 基础设施，这样我们就可以复用 Ftrace 的 tracefs ，通过文件接口来配置 tracepoint events，并使用 trace 或 trace_pipe 文件查看事件输出。&lt;/p&gt;
 &lt;p&gt;所有的 tracepoint events 的控制文件都在 events 目录下，按照类别以子目录形式组织：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;ls -F events/&lt;/b&gt;
+alarmtimer/    ftrace/          iwlwifi/        oom/             smbus/
+block/         gpio/            iwlwifi_data/   page_isolation/  sock/
+bpf_test_run/  gvt/             iwlwifi_io/     pagemap/         spi/
+bridge/        hda/             iwlwifi_msg/    page_pool/       swiotlb/
+btrfs/         hda_controller/  iwlwifi_ucode/  percpu/          sync_trace/
+cfg80211/      hda_intel/       jbd2/           power/           syscalls/
+cgroup/        header_event     kmem/           printk/          task/
+clk/           header_page      kvm/            pwm/             tcp/
+
+...
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;我们以 &lt;code&gt;events/sched/sched_process_fork&lt;/code&gt; 事件为例，该事件是在 &lt;code&gt;include/trace/events/sched.h&lt;/code&gt; 中由 &lt;code&gt;TRACE_EVENT&lt;/code&gt; 宏所&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/bcf876870b95592b52519ed4aafcf9d95999bc9c/include/trace/events/sched.h#L287&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;定义&lt;/a&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -7112,24 +7322,92 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;在 &lt;code&gt;events/sched/sched_process_fork&lt;/code&gt; 目录下，有这个事件的控制文件：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;ls events/sched/sched_process_fork&lt;/b&gt;
+enable  filter  format  hist  id  inject  trigger
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;我们演示如何通过 &lt;code&gt;enable&lt;/code&gt; 文件开启和关闭这个 tracepoint 事件：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo 1 &gt; events/sched/sched_process_fork/enable&lt;/b&gt;
+# &lt;b&gt;cat trace_pipe&lt;/b&gt;
+   bash-14414   [000] .... 109721.823843: sched_process_fork: comm=bash pid=14414 child_comm=bash child_pid=24001
+   bash-14468   [002] .... 109730.405810: sched_process_fork: comm=bash pid=14468 child_comm=bash child_pid=24002
+   bash-14468   [002] .... 109737.925336: sched_process_fork: comm=bash pid=14468 child_comm=bash child_pid=24003
+test.sh-24003   [000] .... 109737.968891: sched_process_fork: comm=test.sh pid=24003 child_comm=test.sh child_pid=24004
+   curl-24004   [002] .... 109737.975038: sched_process_fork: comm=curl pid=24004 child_comm=curl child_pid=24005
+   ...
+
+# &lt;b&gt;echo 0 &gt; events/sched/sched_process_fork/enable&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;前五列分别是进程名称，PID，CPU ID，irqs-off 等标志位，timestamp 和 tracepoint 事件名称。其余部分是 tracepoint 格式字符串，包含当前这个 tracepoint 记录的重要信息。格式字符串可以在 &lt;code&gt;events/sched/sched_process_fork/format&lt;/code&gt; 文件中查看：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;cat events/sched/sched_process_fork/format&lt;/b&gt;
+name: sched_process_fork
+ID: 315
+format:
+	field:unsigned short common_type;	offset:0;	size:2;	signed:0;
+	field:unsigned char common_flags;	offset:2;	size:1;	signed:0;
+	field:unsigned char common_preempt_count;	offset:3;	size:1;	signed:0;
+	field:int common_pid;	offset:4;	size:4;	signed:1;
+
+	field:char parent_comm[16];	offset:8;	size:16;	signed:1;
+	field:pid_t parent_pid;	offset:24;	size:4;	signed:1;
+	field:char child_comm[16];	offset:28;	size:16;	signed:1;
+	field:pid_t child_pid;	offset:44;	size:4;	signed:1;
+
+print fmt: &#34;comm=%s pid=%d child_comm=%s child_pid=%d&#34;, REC-&gt;parent_comm, REC-&gt;parent_pid, REC-&gt;child_comm, REC-&gt;child_pid
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;通过这个 format 文件，我们可以了解这个 tracepoint 事件每个字段的含义。&lt;/p&gt;
 &lt;p&gt;我们再演示一个使用 &lt;code&gt;trigger&lt;/code&gt; 控制文件的例子：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;echo &#39;hist:key=parent_pid&#39; &gt; events/sched/sched_process_fork/trigger&lt;/b&gt;
+# [do some working]
+# &lt;b&gt;cat events/sched/sched_process_fork/hist&lt;/b&gt;
+# event histogram
+#
+# trigger info: hist:keys=parent_pid:vals=hitcount:sort=hitcount:size=2048 [active]
+#
+
+{ parent_pid:        572 } hitcount:          1
+{ parent_pid:      24494 } hitcount:          1
+{ parent_pid:      24497 } hitcount:          1
+{ parent_pid:      14414 } hitcount:          1
+{ parent_pid:      24505 } hitcount:          1
+{ parent_pid:      14053 } hitcount:          1
+{ parent_pid:      24527 } hitcount:          1
+{ parent_pid:      24501 } hitcount:          1
+{ parent_pid:      24510 } hitcount:          2
+{ parent_pid:      24508 } hitcount:          3
+{ parent_pid:      24493 } hitcount:         24
+
+Totals:
+    Hits: 37
+    Entries: 11
+    Dropped: 0
+
+# remove triger
+# &lt;b&gt;echo &#39;!hist:key=parent_pid&#39; &gt; events/sched/sched_process_fork/trigger&lt;/b&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;这个例子使用了 hist triggers，通过 sched_process_fork 事件来统计 _do_fork 的次数，并按照进程ID生成直方图。输出显示了 PID 24493 在追踪期间 fork 了24个子进程，最后几行显示了统计数据。&lt;/p&gt;
 &lt;p&gt;关于 Hist Triggers 的详细介绍可以参考文档 &lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/trace/histogram.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Event Histograms&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;我的系统内核版本是 &lt;code&gt;5.8.0-59-generic&lt;/code&gt;，当前可用的 tracepoints events 有2547个：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code&gt;
+# &lt;b&gt;cat available_events&lt;/b&gt;
+btrfs:btrfs_transaction_commit
+btrfs:btrfs_inode_new
+btrfs:btrfs_inode_request
+btrfs:btrfs_inode_evict
+btrfs:btrfs_get_extent
+btrfs:btrfs_handle_em_exist
+btrfs:btrfs_get_extent_show_fi_regular
+btrfs:btrfs_truncate_show_fi_regular
+btrfs:btrfs_get_extent_show_fi_inline
+...
+
+# &lt;b&gt;cat available_events | wc -l&lt;/b&gt;
+2547
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/trace/events.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Event Tracing&lt;/a&gt; 基础设施应该是 Ftrace 的另一大贡献，它提供的 &lt;code&gt;TRACE_EVENT&lt;/code&gt; 宏统一了内核 tracepoint 的实现方式，为 tracepoint events 提供了基础支持。&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf&lt;/a&gt; 的 tracepoint events 也是基于 Ftrace 实现的。&lt;/p&gt;
@@ -15718,13 +15996,13 @@ Enjoy it!&lt;/p&gt;
 &lt;h4 id=&#34;专门的关系运算&#34;&gt;专门的关系运算&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;选择&lt;/strong&gt;（selection)，当&lt;strong&gt;选择&lt;/strong&gt;操作符应用到关系&lt;code&gt;R&lt;/code&gt;上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及&lt;code&gt;R&lt;/code&gt;中属性的条件&lt;code&gt;C&lt;/code&gt;，表示为 σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R )&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;选择&lt;/strong&gt;（selection)，当&lt;strong&gt;选择&lt;/strong&gt;操作符应用到关系&lt;code&gt;R&lt;/code&gt;上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及&lt;code&gt;R&lt;/code&gt;中属性的条件&lt;code&gt;C&lt;/code&gt;，表示为 σ&lt;sub&gt;C&lt;/sub&gt;( R )&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;投影&lt;/strong&gt; （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系&lt;code&gt;R&lt;/code&gt;中的部分列。表达式 π&lt;!-- raw HTML omitted --&gt;A1,A2,&amp;hellip;,An&lt;!-- raw HTML omitted --&gt; ( R ) 的值是这样一个关系，它只包含关系&lt;code&gt;R&lt;/code&gt;属性&lt;code&gt;A1,A2,...An&lt;/code&gt;所代表的列。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;投影&lt;/strong&gt; （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系&lt;code&gt;R&lt;/code&gt;中的部分列。表达式 π&lt;sub&gt;A1,A2,&amp;hellip;,An&lt;/sub&gt; ( R ) 的值是这样一个关系，它只包含关系&lt;code&gt;R&lt;/code&gt;属性&lt;code&gt;A1,A2,...An&lt;/code&gt;所代表的列。&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;θ连接&lt;/strong&gt;，关系R和关系S满足条件C的&lt;strong&gt;θ连接&lt;/strong&gt;可以用这样的符号来表示： R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;θ连接&lt;/strong&gt;，关系R和关系S满足条件C的&lt;strong&gt;θ连接&lt;/strong&gt;可以用这样的符号来表示： R ⋈&lt;sub&gt;C&lt;/sub&gt; S&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;θ连接&lt;/strong&gt;的结果这样构造：&lt;/p&gt;
@@ -15786,7 +16064,7 @@ Enjoy it!&lt;/p&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;R ⋈ &lt;!-- raw HTML omitted --&gt; A&amp;lt;D  AND  R.B ≠ S.B&lt;!-- raw HTML omitted --&gt; S 的结果是：&lt;/p&gt;
+&lt;p&gt;R ⋈ &lt;sub&gt; A&amp;lt;D  AND  R.B ≠ S.B&lt;/sub&gt; S 的结果是：&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -15811,7 +16089,7 @@ Enjoy it!&lt;/p&gt;
 &lt;/table&gt;
 &lt;p&gt;有两类常用的连接运算：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;等值连接&lt;/strong&gt;（equijoin）：比较运算符为 &lt;code&gt;=&lt;/code&gt; 的连接运算称为等值连接。例如： R ⋈ &lt;!-- raw HTML omitted --&gt;R.A = S.B &lt;!-- raw HTML omitted --&gt; S 是从关系R与S的笛卡尔积中选取A、B属性值相等的那些元组。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;等值连接&lt;/strong&gt;（equijoin）：比较运算符为 &lt;code&gt;=&lt;/code&gt; 的连接运算称为等值连接。例如： R ⋈ &lt;sub&gt;R.A = S.B &lt;/sub&gt; S 是从关系R与S的笛卡尔积中选取A、B属性值相等的那些元组。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;自然连接&lt;/strong&gt;（Natural join）：自然连接是一种特殊的等值连接，两个关系中进行比较的分量必须是相同的属性组，并在结果中把重复的属性列去掉。关系R和S的自然连接表示为  &lt;code&gt;R ⋈ S&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;关系R&lt;/p&gt;
@@ -15895,8 +16173,8 @@ Enjoy it!&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;消除重复操作符&lt;/strong&gt;（duplicated-elimination operator）用 &lt;code&gt;δ(R)&lt;/code&gt; 来返回一个没有重复元组的关系&lt;code&gt;R&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;聚集操作符&lt;/strong&gt; （aggregation operator）用来汇总或者聚集关系某一列中出现的值，有 &lt;code&gt;SUM&lt;/code&gt;，&lt;code&gt;AVG&lt;/code&gt;，&lt;code&gt;MIN&lt;/code&gt;，&lt;code&gt;MAX&lt;/code&gt;，&lt;code&gt;COUNT&lt;/code&gt; 等&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;分组操作&lt;/strong&gt;（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 &lt;code&gt;γ&lt;/code&gt; 是组合了&lt;strong&gt;分组&lt;/strong&gt;和&lt;strong&gt;聚合操作&lt;/strong&gt;的一个算子。例如表达式： γ &lt;!-- raw HTML omitted --&gt;gender, COUNT(emp_no)-&amp;gt;count&lt;!-- raw HTML omitted --&gt;(employees) 代表把性别（&lt;code&gt;gender&lt;/code&gt;）作为分组属性，然后对每一个分组进行&lt;code&gt;COUNT(emp_no)&lt;/code&gt;的操作。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;排序算子&lt;/strong&gt;（sorting operator）如果关系&lt;code&gt;R&lt;/code&gt;的模式是 &lt;code&gt;R(A,B,C)&lt;/code&gt;，那么 τ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) 就把&lt;code&gt;R&lt;/code&gt;中的元组按照属性&lt;code&gt;C&lt;/code&gt;的值排序。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分组操作&lt;/strong&gt;（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 &lt;code&gt;γ&lt;/code&gt; 是组合了&lt;strong&gt;分组&lt;/strong&gt;和&lt;strong&gt;聚合操作&lt;/strong&gt;的一个算子。例如表达式： γ &lt;sub&gt;gender, COUNT(emp_no)-&amp;gt;count&lt;/sub&gt;(employees) 代表把性别（&lt;code&gt;gender&lt;/code&gt;）作为分组属性，然后对每一个分组进行&lt;code&gt;COUNT(emp_no)&lt;/code&gt;的操作。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;排序算子&lt;/strong&gt;（sorting operator）如果关系&lt;code&gt;R&lt;/code&gt;的模式是 &lt;code&gt;R(A,B,C)&lt;/code&gt;，那么 τ&lt;sub&gt;C&lt;/sub&gt;( R ) 就把&lt;code&gt;R&lt;/code&gt;中的元组按照属性&lt;code&gt;C&lt;/code&gt;的值排序。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id=&#34;关系代数小结&#34;&gt;关系代数小结&lt;/h3&gt;
 &lt;p&gt;上面的知识有些枯燥，但非常容易理解，因为我们经常使用关系数据库，已经接受了这些概念。掌握了一些关系代数的知识，在阅读&lt;code&gt;TiDB&lt;/code&gt;源码时，当看到&lt;code&gt;selection&lt;/code&gt;、&lt;code&gt;projection&lt;/code&gt; 这些术语就能一下想到它们对应的关系代数运算符。&lt;/p&gt;
@@ -16038,8 +16316,8 @@ Enjoy it!&lt;/p&gt;
 &lt;p&gt;现在将上一步生成的语法树转换成&lt;strong&gt;关系代数表达式树&lt;/strong&gt;，也就是&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。对于示例SQL的抽象语法树转换过程如下：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;&amp;lt;FromList&amp;gt;&lt;/code&gt; 中涉及的关系&lt;code&gt;employees&lt;/code&gt;和&lt;code&gt;salaries&lt;/code&gt;做笛卡尔积运算&lt;/li&gt;
-&lt;li&gt;选择（selection）运算 σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;，其中&lt;code&gt;C&lt;/code&gt;被替换成&lt;code&gt;&amp;lt;Condition&amp;gt;&lt;/code&gt;表达式，即&lt;code&gt;employees.emp_no = salaries.emp_no AND salary &amp;gt; 7000&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;投影（projection） π&lt;!-- raw HTML omitted --&gt;L&lt;!-- raw HTML omitted --&gt;，其中&lt;code&gt;L&lt;/code&gt;是&lt;code&gt;&amp;lt;SelList&amp;gt;&lt;/code&gt;中的属性列表，对于这个查询只有一个属性&lt;code&gt;name&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;选择（selection）运算 σ&lt;sub&gt;C&lt;/sub&gt;，其中&lt;code&gt;C&lt;/code&gt;被替换成&lt;code&gt;&amp;lt;Condition&amp;gt;&lt;/code&gt;表达式，即&lt;code&gt;employees.emp_no = salaries.emp_no AND salary &amp;gt; 7000&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;投影（projection） π&lt;sub&gt;L&lt;/sub&gt;，其中&lt;code&gt;L&lt;/code&gt;是&lt;code&gt;&amp;lt;SelList&amp;gt;&lt;/code&gt;中的属性列表，对于这个查询只有一个属性&lt;code&gt;name&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;我们得到下面的关系代数表达式树：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011707826.png&#34;
@@ -16065,29 +16343,29 @@ Enjoy it!&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;涉及选择的定律&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C1 AND C2&lt;!-- raw HTML omitted --&gt; = σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;(σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;( R ))&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C1 OR C2&lt;!-- raw HTML omitted --&gt; = (σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;( R ) ∪ (σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;( R ) )&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;(σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;( R )) = σ&lt;!-- raw HTML omitted --&gt;C2&lt;!-- raw HTML omitted --&gt;(σ&lt;!-- raw HTML omitted --&gt;C1&lt;!-- raw HTML omitted --&gt;( R ))&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C1 AND C2&lt;/sub&gt; = σ&lt;sub&gt;C1&lt;/sub&gt;(σ&lt;sub&gt;C2&lt;/sub&gt;( R ))&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C1 OR C2&lt;/sub&gt; = (σ&lt;sub&gt;C1&lt;/sub&gt;( R ) ∪ (σ&lt;sub&gt;C2&lt;/sub&gt;( R ) )&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C1&lt;/sub&gt;(σ&lt;sub&gt;C2&lt;/sub&gt;( R )) = σ&lt;sub&gt;C2&lt;/sub&gt;(σ&lt;sub&gt;C1&lt;/sub&gt;( R ))&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;下推选择&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;在表达式中下推选择是查询优化器最强有力的工具。&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S ) = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) × S&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ⋈ S) = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) ⋈ S&lt;/p&gt;
-&lt;p&gt;σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ⋈&lt;!-- raw HTML omitted --&gt;D&lt;!-- raw HTML omitted --&gt; S) = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R ) ⋈&lt;!-- raw HTML omitted --&gt;D&lt;!-- raw HTML omitted --&gt; S&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C&lt;/sub&gt;( R × S ) = σ&lt;sub&gt;C&lt;/sub&gt;( R ) × S&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C&lt;/sub&gt;( R ⋈ S) = σ&lt;sub&gt;C&lt;/sub&gt;( R ) ⋈ S&lt;/p&gt;
+&lt;p&gt;σ&lt;sub&gt;C&lt;/sub&gt;( R ⋈&lt;sub&gt;D&lt;/sub&gt; S) = σ&lt;sub&gt;C&lt;/sub&gt;( R ) ⋈&lt;sub&gt;D&lt;/sub&gt; S&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;涉及连接和笛卡尔积的定律&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S)&lt;/p&gt;
+&lt;p&gt;R ⋈&lt;sub&gt;C&lt;/sub&gt; S = σ&lt;sub&gt;C&lt;/sub&gt;( R × S)&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;涉及消除重复的定律&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;δ(R×S) = δ( R ) × δ(S)&lt;/p&gt;
-&lt;p&gt;δ(R⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;S) = δ( R ) ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; δ(S)&lt;/p&gt;
+&lt;p&gt;δ(R⋈&lt;sub&gt;C&lt;/sub&gt;S) = δ( R ) ⋈&lt;sub&gt;C&lt;/sub&gt; δ(S)&lt;/p&gt;
 &lt;p&gt;另外还有涉及投影的定律、涉及分组和聚集的定律。这部分有些理论化，可以参考这篇&lt;a class=&#34;link&#34; href=&#34;https://pingcap.com/blog-cn/tidb-source-code-reading-7/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《TiDB 源码阅读系列文章（七）基于规则的优化》&lt;/a&gt;看看 &lt;code&gt;TiDB&lt;/code&gt; 具体是怎么做的。&lt;/p&gt;
-&lt;p&gt;对于本例使用到的定律比较简单。先将选择的两部分分解为 σ&lt;!-- raw HTML omitted --&gt;employees.emp_no = salaries.emp_no&lt;!-- raw HTML omitted --&gt;
-和 σ&lt;!-- raw HTML omitted --&gt;salary &amp;gt; 7000&lt;!-- raw HTML omitted --&gt;，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt; S = σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R × S)&lt;/p&gt;
+&lt;p&gt;对于本例使用到的定律比较简单。先将选择的两部分分解为 σ&lt;sub&gt;employees.emp_no = salaries.emp_no&lt;/sub&gt;
+和 σ&lt;sub&gt;salary &amp;gt; 7000&lt;/sub&gt;，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈&lt;sub&gt;C&lt;/sub&gt; S = σ&lt;sub&gt;C&lt;/sub&gt;( R × S)&lt;/p&gt;
 &lt;p&gt;从右向左使用，把&lt;strong&gt;笛卡尔积&lt;/strong&gt;转换成&lt;strong&gt;连接&lt;/strong&gt;。使用了两个定律后，得到优化后的逻辑查询计划如下图：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011708287.png&#34;
 	
@@ -16131,7 +16409,7 @@ Enjoy it!&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;σ&lt;/code&gt;选择结点一般有两种选择：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;可以简单的用物理过滤运算符&lt;code&gt;Filter( C )&lt;/code&gt;替代 σ&lt;!-- raw HTML omitted --&gt;C&lt;!-- raw HTML omitted --&gt;( R )&lt;/li&gt;
+&lt;li&gt;可以简单的用物理过滤运算符&lt;code&gt;Filter( C )&lt;/code&gt;替代 σ&lt;sub&gt;C&lt;/sub&gt;( R )&lt;/li&gt;
 &lt;li&gt;如果&lt;code&gt;C&lt;/code&gt;是一个带有比较运算符的条件，例如 &lt;code&gt;A = 100&lt;/code&gt;，并且属性&lt;code&gt;A&lt;/code&gt;上有索引，可以把比较运算合并到&lt;strong&gt;扫描运算符&lt;/strong&gt;：&lt;code&gt;IndexScan(R, A = 100)&lt;/code&gt;。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;对于本例，&lt;code&gt;salary&lt;/code&gt; 一般都不会建立索引，因此可以把&lt;code&gt;σ( salary &amp;gt; 7000 )&lt;/code&gt; 替换为 &lt;code&gt;Filter( salary &amp;gt; 7000 )&lt;/code&gt;&lt;/p&gt;
@@ -19566,12 +19844,12 @@ echo &amp;quot;80&amp;quot; &amp;gt; /proc/irq/106/smp_affinity
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;net.ipv4.tcp_rmem = &amp;lt;MIN&amp;gt; &amp;lt;DEFAULT&amp;gt; &amp;lt;MAX&amp;gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;最初&lt;code&gt;recv buffer&lt;/code&gt;被设置为&lt;!-- raw HTML omitted --&gt;，同时这个缺省值会覆盖&lt;code&gt;net.core.rmem_default&lt;/code&gt;的设置。随后&lt;code&gt;recv buffer&lt;/code&gt;根据实际情况在最大值和最小值之间动态调节。在缓冲的动态调优机制开启的情况下，我们将&lt;code&gt;net.ipv4.tcp_rmem&lt;/code&gt;的最大值设置为&lt;code&gt;BDP&lt;/code&gt;。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;最初&lt;code&gt;recv buffer&lt;/code&gt;被设置为&lt;DEFAULT&gt;，同时这个缺省值会覆盖&lt;code&gt;net.core.rmem_default&lt;/code&gt;的设置。随后&lt;code&gt;recv buffer&lt;/code&gt;根据实际情况在最大值和最小值之间动态调节。在缓冲的动态调优机制开启的情况下，我们将&lt;code&gt;net.ipv4.tcp_rmem&lt;/code&gt;的最大值设置为&lt;code&gt;BDP&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;当&lt;code&gt;net.ipv4.tcp_moderate_rcvbuf&lt;/code&gt;被设置为0，或者设置了socket选项&lt;code&gt;SO_RCVBUF&lt;/code&gt;，缓冲的动态调节机制被关闭。&lt;code&gt;recv buffer&lt;/code&gt;的缺省值由&lt;code&gt;net.core.rmem_default&lt;/code&gt;设置，但如果设置了&lt;code&gt;net.ipv4.tcp_rmem&lt;/code&gt;，缺省值则被&lt;code&gt;&amp;lt;DEFAULT&amp;gt;&lt;/code&gt;覆盖。可以通过系统调用&lt;code&gt;setsockopt()&lt;/code&gt;设置&lt;code&gt;recv buffer&lt;/code&gt;的最大值为&lt;code&gt;net.core.rmem_max&lt;/code&gt;。在缓冲动态调节机制关闭的情况下，建议把缓冲的缺省值设置为&lt;code&gt;BDP&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;注意这里还有一个细节，缓冲除了保存接收的数据本身，还需要一部分空间保存socket数据结构等额外信息。因此上面讨论的&lt;code&gt;recv buffer&lt;/code&gt;最佳值仅仅等于&lt;code&gt;BDP&lt;/code&gt;是不够的，还需要考虑保存socket等额外信息的开销。Linux根据参数&lt;code&gt;net.ipv4.tcp_adv_win_scale&lt;/code&gt;计算额外开销的大小：&lt;/p&gt;
-&lt;p&gt;Buffer / 2&lt;!-- raw HTML omitted --&gt;tcp_adv_win_scale&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;p&gt;Buffer / 2&lt;sup&gt;tcp_adv_win_scale&lt;/sup&gt;&lt;/p&gt;
 &lt;p&gt;如果&lt;code&gt;net.ipv4.tcp_adv_win_scale&lt;/code&gt;的值为1，则二分之一的缓冲空间用来做额外开销，如果为2的话，则四分之一缓冲空间用来做额外开销。因此&lt;code&gt;recv buffer&lt;/code&gt;的最佳值应该设置为：&lt;/p&gt;
-&lt;p&gt;BDP / (1 – 1 / 2&lt;!-- raw HTML omitted --&gt;tcp_adv_win_scale&lt;!-- raw HTML omitted --&gt;)&lt;/p&gt;
+&lt;p&gt;BDP / (1 – 1 / 2&lt;sup&gt;tcp_adv_win_scale&lt;/sup&gt;)&lt;/p&gt;
 &lt;h3 id=&#34;三数据包的发送&#34;&gt;三、数据包的发送&lt;/h3&gt;
 &lt;p&gt;发送数据包经过的路径：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011117967.png&#34;
@@ -19602,7 +19880,7 @@ echo &amp;quot;80&amp;quot; &amp;gt; /proc/irq/106/smp_affinity
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;net.core.wmem_max
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;发送端缓冲的自动调节机制很早就已经实现，并且是无条件开启，没有参数去设置。如果指定了&lt;code&gt;tcp_wmem&lt;/code&gt;，则&lt;code&gt;net.core.wmem_default&lt;/code&gt;被&lt;code&gt;tcp_wmem&lt;/code&gt;的&lt;!-- raw HTML omitted --&gt;覆盖。&lt;code&gt;send Buffer&lt;/code&gt;在&lt;code&gt;tcp_wmem&lt;/code&gt;的最小值和最大值之间自动调节。如果调用&lt;code&gt;setsockopt()&lt;/code&gt;设置了socket选项&lt;code&gt;SO_SNDBUF&lt;/code&gt;，将关闭发送端缓冲的自动调节机制，&lt;code&gt;tcp_wmem&lt;/code&gt;将被忽略，&lt;code&gt;SO_SNDBUF&lt;/code&gt;的最大值由&lt;code&gt;net.core.wmem_max&lt;/code&gt;限制。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;发送端缓冲的自动调节机制很早就已经实现，并且是无条件开启，没有参数去设置。如果指定了&lt;code&gt;tcp_wmem&lt;/code&gt;，则&lt;code&gt;net.core.wmem_default&lt;/code&gt;被&lt;code&gt;tcp_wmem&lt;/code&gt;的&lt;DEFAULT&gt;覆盖。&lt;code&gt;send Buffer&lt;/code&gt;在&lt;code&gt;tcp_wmem&lt;/code&gt;的最小值和最大值之间自动调节。如果调用&lt;code&gt;setsockopt()&lt;/code&gt;设置了socket选项&lt;code&gt;SO_SNDBUF&lt;/code&gt;，将关闭发送端缓冲的自动调节机制，&lt;code&gt;tcp_wmem&lt;/code&gt;将被忽略，&lt;code&gt;SO_SNDBUF&lt;/code&gt;的最大值由&lt;code&gt;net.core.wmem_max&lt;/code&gt;限制。&lt;/p&gt;
 &lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;&lt;strong&gt;QDisc&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;

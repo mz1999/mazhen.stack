@@ -682,8 +682,31 @@ if (!doNotTrack) {
 <p>可以通过查看 <code>/proc/meminfo</code> 文件获知 <strong>Page Cache</strong> 相关的各种指标。</p>
 <p><code>/proc</code> 是伪文件系统（Pseudo filesystems ）。Linux 通过伪文件系统，让系统和内核信息在用户空间可用。使用 <code>free</code>、<code>vmstat</code>等命令查看到的内存信息，数据实际上都来自 <code>/proc/meminfo</code>。</p>
 <p>我们看一个示例：</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+<pre>
+$ cat /proc/meminfo 
+MemTotal:        8052564 kB
+MemFree:          129804 kB
+MemAvailable:    4956164 kB
+<b>Buffers:          175932 kB</b>
+<b>Cached:          4896824 kB</b>
+SwapCached:           40 kB
+Active:          2748728 kB  <- Active(anon) + Active(file)
+Inactive:        4676540 kB  <- Inactive(anon) +Inactive(file)  
+<b>Active(anon):       3432 kB</b>
+<b>Inactive(anon):  2513172 kB</b>
+<b>Active(file):    2745296 kB</b>
+<b>Inactive(file):  2163368 kB</b>
+Unevictable:       65496 kB
+Mlocked:               0 kB
+SwapTotal:       2097148 kB
+SwapFree:        2095868 kB
+Dirty:                12 kB
+Writeback:             0 kB
+<b>AnonPages:       2411440 kB</b>
+Mapped:           761076 kB
+<b>Shmem:            170868 kB</b>
+...
+</pre>
 <p>关于 <code>/proc/meminfo</code> 每一项的详细解释，可以查看 [Linux 内核文档 - The /proc Filesystem](<a class="link" href="https://www.kernel.org/doc/html/latest/filesystems/proc.html#meminfo"  target="_blank" rel="noopener"
     >The /proc Filesystem — The Linux Kernel documentation</a>)。我们重点看一下 <strong>Page Cache</strong> 相关的字段。</p>
 <p>当前系统 Page Cache 等于 Buffers + Cached 之和 ：</p>
