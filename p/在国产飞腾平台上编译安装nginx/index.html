@@ -487,40 +487,40 @@ if (!doNotTrack) {
 </span><span class="lnt">34
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-v" data-lang="v"><span class="line"><span class="cl"><span class="err">$</span> <span class="p">.</span><span class="o">/</span><span class="nv">configure</span> <span class="o">--</span><span class="nv">help</span> <span class="o">|</span> <span class="nv">more</span>
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ./configure --help | more
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="o">--</span><span class="nv">help</span>                             <span class="nv">print</span> <span class="nv">this</span> <span class="nv">message</span>
+</span></span><span class="line"><span class="cl">--help                             print this message
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">prefix</span><span class="o">=</span><span class="nc">PATH</span>                      <span class="nv">set</span> <span class="nv">installation</span> <span class="nv">prefix</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">sbin</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                   <span class="nv">set</span> <span class="nv">nginx</span> <span class="nv">binary</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">modules</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                <span class="nv">set</span> <span class="nv">modules</span> <span class="nv">path</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">conf</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                   <span class="nv">set</span> <span class="nv">nginx</span><span class="p">.</span><span class="nv">conf</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="kt">error</span><span class="o">-</span><span class="nv">log</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>              <span class="nv">set</span> <span class="kt">error</span> <span class="nv">log</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">pid</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                    <span class="nv">set</span> <span class="nv">nginx</span><span class="p">.</span><span class="nv">pid</span> <span class="nv">pathname</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="k">lock</span><span class="o">-</span><span class="nv">path</span><span class="o">=</span><span class="nc">PATH</span>                   <span class="nv">set</span> <span class="nv">nginx</span><span class="p">.</span><span class="k">lock</span> <span class="nv">pathname</span>
+</span></span><span class="line"><span class="cl">  --prefix=PATH                      set installation prefix
+</span></span><span class="line"><span class="cl">  --sbin-path=PATH                   set nginx binary pathname
+</span></span><span class="line"><span class="cl">  --modules-path=PATH                set modules path
+</span></span><span class="line"><span class="cl">  --conf-path=PATH                   set nginx.conf pathname
+</span></span><span class="line"><span class="cl">  --error-log-path=PATH              set error log pathname
+</span></span><span class="line"><span class="cl">  --pid-path=PATH                    set nginx.pid pathname
+</span></span><span class="line"><span class="cl">  --lock-path=PATH                   set nginx.lock pathname
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">user</span><span class="o">=</span><span class="nc">USER</span>                        <span class="nv">set</span> <span class="nv">non</span><span class="o">-</span><span class="nv">privileged</span> <span class="nv">user</span> <span class="k">for</span>
-</span></span><span class="line"><span class="cl">                                     <span class="nv">worker</span> <span class="nv">processes</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">group</span><span class="o">=</span><span class="nc">GROUP</span>                      <span class="nv">set</span> <span class="nv">non</span><span class="o">-</span><span class="nv">privileged</span> <span class="nv">group</span> <span class="k">for</span>
-</span></span><span class="line"><span class="cl">                                     <span class="nv">worker</span> <span class="nv">processes</span>
+</span></span><span class="line"><span class="cl">  --user=USER                        set non-privileged user for
+</span></span><span class="line"><span class="cl">                                     worker processes
+</span></span><span class="line"><span class="cl">  --group=GROUP                      set non-privileged group for
+</span></span><span class="line"><span class="cl">                                     worker processes
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">build</span><span class="o">=</span><span class="nc">NAME</span>                       <span class="nv">set</span> <span class="nv">build</span> <span class="nv">name</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">builddir</span><span class="o">=</span><span class="nc">DIR</span>                     <span class="nv">set</span> <span class="nv">build</span> <span class="nv">directory</span>
+</span></span><span class="line"><span class="cl">  --build=NAME                       set build name
+</span></span><span class="line"><span class="cl">  --builddir=DIR                     set build directory
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">select_module</span>               <span class="nv">enable</span> <span class="k">select</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">without</span><span class="o">-</span><span class="nv">select_module</span>            <span class="nv">disable</span> <span class="k">select</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">poll_module</span>                 <span class="nv">enable</span> <span class="nv">poll</span> <span class="kn">module</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">without</span><span class="o">-</span><span class="nv">poll_module</span>              <span class="nv">disable</span> <span class="nv">poll</span> <span class="kn">module</span>
+</span></span><span class="line"><span class="cl">  --with-select_module               enable select module
+</span></span><span class="line"><span class="cl">  --without-select_module            disable select module
+</span></span><span class="line"><span class="cl">  --with-poll_module                 enable poll module
+</span></span><span class="line"><span class="cl">  --without-poll_module              disable poll module
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">......</span>
+</span></span><span class="line"><span class="cl">  ......
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">libatomic</span>                   <span class="nv">force</span> <span class="nv">libatomic_ops</span> <span class="nv">library</span> <span class="nv">usage</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">libatomic</span><span class="o">=</span><span class="nc">DIR</span>               <span class="nv">set</span> <span class="nv">path</span> <span class="nv">to</span> <span class="nv">libatomic_ops</span> <span class="nv">library</span> <span class="nv">sources</span>
+</span></span><span class="line"><span class="cl">  --with-libatomic                   force libatomic_ops library usage
+</span></span><span class="line"><span class="cl">  --with-libatomic=DIR               set path to libatomic_ops library sources
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">openssl</span><span class="o">=</span><span class="nc">DIR</span>                 <span class="nv">set</span> <span class="nv">path</span> <span class="nv">to</span> <span class="nc">OpenSSL</span> <span class="nv">library</span> <span class="nv">sources</span>
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">openssl</span><span class="o">-</span><span class="nv">opt</span><span class="o">=</span><span class="nc">OPTIONS</span>         <span class="nv">set</span> <span class="nv">additional</span> <span class="nv">build</span> <span class="nv">options</span> <span class="k">for</span> <span class="nc">OpenSSL</span>
+</span></span><span class="line"><span class="cl">  --with-openssl=DIR                 set path to OpenSSL library sources
+</span></span><span class="line"><span class="cl">  --with-openssl-opt=OPTIONS         set additional build options for OpenSSL
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">debug</span>                       <span class="nv">enable</span> <span class="nv">debug</span> <span class="nv">logging</span>
+</span></span><span class="line"><span class="cl">  --with-debug                       enable debug logging
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>--with</code>开头的模块缺省不包括在编译结果中，如果想使用需要在编译配置时显示的指定。<code>--without</code>开头的模块则相反，如果不想包含在编译结果中需要显示设定。</p>

@@ -6,20 +6,36 @@
         <description>Recent content in Tags on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Fri, 21 Jul 2023 16:48:55 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>glassfish</title>
-        <link>https://mazhen.tech/tags/glassfish/</link>
-        <pubDate>Fri, 21 Jul 2023 16:48:55 +0800</pubDate>
+        <lastBuildDate>Wed, 27 Sep 2023 18:30:59 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>consensus</title>
+        <link>https://mazhen.tech/tags/consensus/</link>
+        <pubDate>Wed, 27 Sep 2023 18:30:59 +0800</pubDate>
         
-        <guid>https://mazhen.tech/tags/glassfish/</guid>
+        <guid>https://mazhen.tech/tags/consensus/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>db</title>
+        <link>https://mazhen.tech/tags/db/</link>
+        <pubDate>Wed, 27 Sep 2023 18:30:59 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/db/</guid>
         <description></description>
         </item>
         <item>
         <title>java</title>
         <link>https://mazhen.tech/tags/java/</link>
-        <pubDate>Fri, 21 Jul 2023 16:48:55 +0800</pubDate>
+        <pubDate>Wed, 27 Sep 2023 18:30:59 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/java/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>glassfish</title>
+        <link>https://mazhen.tech/tags/glassfish/</link>
+        <pubDate>Fri, 21 Jul 2023 16:48:55 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/glassfish/</guid>
         <description></description>
         </item>
         <item>
@@ -36,14 +52,6 @@
         <pubDate>Tue, 11 Jul 2023 17:26:22 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/macos/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>db</title>
-        <link>https://mazhen.tech/tags/db/</link>
-        <pubDate>Thu, 20 Apr 2023 18:35:13 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/db/</guid>
         <description></description>
         </item>
         <item>
@@ -92,14 +100,6 @@
         <pubDate>Mon, 22 Aug 2022 16:24:52 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/docker/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>consensus</title>
-        <link>https://mazhen.tech/tags/consensus/</link>
-        <pubDate>Fri, 15 May 2020 11:30:26 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/consensus/</guid>
         <description></description>
         </item>
         <item>

@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,20 +28,23 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/glassfish/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/consensus/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
   </url><url>
-    <loc>https://mazhen.tech/p/glassfish-startup-process/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/db/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/jakarta-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -54,6 +57,12 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/glassfish/</loc>
+    <lastmod>2023-07-21T16:48:55+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/glassfish-startup-process/</loc>
     <lastmod>2023-07-21T16:48:55+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</loc>
@@ -67,9 +76,6 @@
   </url><url>
     <loc>https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/</loc>
     <lastmod>2023-07-11T17:26:22+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/db/</loc>
-    <lastmod>2023-04-20T18:35:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/</loc>
     <lastmod>2023-04-20T18:35:13+08:00</lastmod>
@@ -162,9 +168,6 @@
     <lastmod>2021-05-21T11:37:22+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/atomikos%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E4%BD%BF%E7%94%A8/</loc>
-    <lastmod>2020-05-15T11:30:26+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/consensus/</loc>
     <lastmod>2020-05-15T11:30:26+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/</loc>

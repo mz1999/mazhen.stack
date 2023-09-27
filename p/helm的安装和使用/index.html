@@ -635,12 +635,12 @@ if (!doNotTrack) {
 </span><span class="lnt">6
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">export NODE_PORT=$(kubectl get --namespace default -o jsonpath=&#34;{.spec.ports[0].nodePort}&#34; services my-web-tomcat)
-</span></span><span class="line"><span class="cl">export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath=&#34;{.items[0].status.addresses[0].address}&#34;)
-</span></span><span class="line"><span class="cl">echo http://$NODE_IP:$NODE_PORT
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="k">export</span> <span class="n">NODE_PORT</span><span class="o">=$</span><span class="p">(</span><span class="n">kubectl</span> <span class="n">get</span> <span class="o">--</span><span class="n">namespace</span> <span class="n">default</span> <span class="o">-</span><span class="n">o</span> <span class="n">jsonpath</span><span class="o">=</span><span class="s2">&#34;{.spec.ports[0].nodePort}&#34;</span> <span class="n">services</span> <span class="n">my</span><span class="o">-</span><span class="n">web</span><span class="o">-</span><span class="n">tomcat</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">export</span> <span class="n">NODE_IP</span><span class="o">=$</span><span class="p">(</span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">--</span><span class="n">namespace</span> <span class="n">default</span> <span class="o">-</span><span class="n">o</span> <span class="n">jsonpath</span><span class="o">=</span><span class="s2">&#34;{.items[0].status.addresses[0].address}&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">echo</span> <span class="n">http</span><span class="p">:</span><span class="o">//$</span><span class="n">NODE_IP</span><span class="p">:</span><span class="o">$</span><span class="n">NODE_PORT</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 访问sample应用
-</span></span><span class="line"><span class="cl">curl http://$NODE_IP:$NODE_PORT/sample/
+</span></span><span class="line"><span class="cl"><span class="c1"># 访问sample应用</span>
+</span></span><span class="line"><span class="cl"><span class="n">curl</span> <span class="n">http</span><span class="p">:</span><span class="o">//$</span><span class="n">NODE_IP</span><span class="p">:</span><span class="o">$</span><span class="n">NODE_PORT</span><span class="o">/</span><span class="n">sample</span><span class="o">/</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
@@ -750,12 +750,12 @@ if (!doNotTrack) {
             
                 
 <article class="">
-    <a href="/p/glassfish-startup-process/">
+    <a href="/p/jakarta-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">GlassFish Startup Process</h2>
+            <h2 class="article-title">Jakarta EE应用服务器的事务处理</h2>
         </div>
     </a>
 </article>

@@ -498,13 +498,13 @@ if (!doNotTrack) {
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Bean(name = &#34;/services/order&#34;)
-</span></span><span class="line"><span class="cl">TransactionalHttpInvokerServiceExporter orderService(OrderServiceImpl orderService) {
-</span></span><span class="line"><span class="cl">    TransactionalHttpInvokerServiceExporter exporter = new TransactionalHttpInvokerServiceExporter();
-</span></span><span class="line"><span class="cl">    exporter.setService(orderService);
-</span></span><span class="line"><span class="cl">    exporter.setServiceInterface(OrderService.class);
-</span></span><span class="line"><span class="cl">    return exporter;
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="nf">Bean</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&#34;/services/order&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">TransactionalHttpInvokerServiceExporter</span> <span class="nf">orderService</span><span class="p">(</span><span class="n">OrderServiceImpl</span> <span class="n">orderService</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TransactionalHttpInvokerServiceExporter</span> <span class="n">exporter</span> <span class="o">=</span> <span class="n">new</span> <span class="nf">TransactionalHttpInvokerServiceExporter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exporter</span><span class="o">.</span><span class="nf">setService</span><span class="p">(</span><span class="n">orderService</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exporter</span><span class="o">.</span><span class="nf">setServiceInterface</span><span class="p">(</span><span class="n">OrderService</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">exporter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>OrderService</code>的调用者<strong>business-service</strong>使用<code>HttpInvokerProxyFactoryBean</code><a class="link" href="https://github.com/mz1999/atomkos-sample/blob/690d6c0026a8f0874de63828023f26ef9210d0dd/business-service/src/main/java/com/apusic/samples/config/ServiceConfig.java#L14"  target="_blank" rel="noopener"
@@ -527,20 +527,20 @@ if (!doNotTrack) {
 </span><span class="lnt">14
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Bean
-</span></span><span class="line"><span class="cl">public HttpInvokerProxyFactoryBean orderService() {
-</span></span><span class="line"><span class="cl">    HttpInvokerProxyFactoryBean orderService = new HttpInvokerProxyFactoryBean();
-</span></span><span class="line"><span class="cl">    orderService.setHttpInvokerRequestExecutor(httpInvokerRequestExecutor());
-</span></span><span class="line"><span class="cl">    orderService.setServiceUrl(&#34;http://localhost:8082/services/order&#34;);
-</span></span><span class="line"><span class="cl">    orderService.setServiceInterface(OrderService.class);
-</span></span><span class="line"><span class="cl">    return orderService;
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="n">Bean</span>
+</span></span><span class="line"><span class="cl"><span class="n">public</span> <span class="n">HttpInvokerProxyFactoryBean</span> <span class="nf">orderService</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HttpInvokerProxyFactoryBean</span> <span class="n">orderService</span> <span class="o">=</span> <span class="n">new</span> <span class="nf">HttpInvokerProxyFactoryBean</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">orderService</span><span class="o">.</span><span class="nf">setHttpInvokerRequestExecutor</span><span class="p">(</span><span class="nf">httpInvokerRequestExecutor</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">orderService</span><span class="o">.</span><span class="nf">setServiceUrl</span><span class="p">(</span><span class="s2">&#34;http://localhost:8082/services/order&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">orderService</span><span class="o">.</span><span class="nf">setServiceInterface</span><span class="p">(</span><span class="n">OrderService</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">orderService</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">@Bean
-</span></span><span class="line"><span class="cl">public TransactionalHttpInvokerRequestExecutor httpInvokerRequestExecutor() {
-</span></span><span class="line"><span class="cl">    TransactionalHttpInvokerRequestExecutor httpInvokerRequestExecutor = new TransactionalHttpInvokerRequestExecutor();
-</span></span><span class="line"><span class="cl">    return httpInvokerRequestExecutor;
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">Bean</span>
+</span></span><span class="line"><span class="cl"><span class="n">public</span> <span class="n">TransactionalHttpInvokerRequestExecutor</span> <span class="nf">httpInvokerRequestExecutor</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TransactionalHttpInvokerRequestExecutor</span> <span class="n">httpInvokerRequestExecutor</span> <span class="o">=</span> <span class="n">new</span> <span class="nf">TransactionalHttpInvokerRequestExecutor</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">httpInvokerRequestExecutor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>business-service</strong>负责发起全局事务，它使用<code>Spring</code>标准的<code>@Transactional</code>标记方法<a class="link" href="https://github.com/mz1999/atomkos-sample/blob/690d6c0026a8f0874de63828023f26ef9210d0dd/business-service/src/main/java/com/apusic/samples/service/BusinessService.java#L19"  target="_blank" rel="noopener"
@@ -554,11 +554,11 @@ if (!doNotTrack) {
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Transactional
-</span></span><span class="line"><span class="cl">public void createOrder(String userId, String commodityCode, Integer count) {
-</span></span><span class="line"><span class="cl">    orderService.create(userId, commodityCode, count);
-</span></span><span class="line"><span class="cl">    storageService.deduct(commodityCode, count);
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="n">Transactional</span>
+</span></span><span class="line"><span class="cl"><span class="n">public</span> <span class="kt">void</span> <span class="nf">createOrder</span><span class="p">(</span><span class="nc">String</span> <span class="n">userId</span><span class="p">,</span> <span class="nc">String</span> <span class="n">commodityCode</span><span class="p">,</span> <span class="n">Integer</span> <span class="n">count</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">orderService</span><span class="o">.</span><span class="nf">create</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span> <span class="n">commodityCode</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">storageService</span><span class="o">.</span><span class="nf">deduct</span><span class="p">(</span><span class="n">commodityCode</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>Atomikos</code>提供了<code>TransactionalHttpInvokerRequestExecutor</code>和<code>TransactionalHttpInvokerServiceExporter</code>拦截请求和响应，利用<code>HTTP header</code>传递事务上下文。</p>
@@ -585,13 +585,13 @@ if (!doNotTrack) {
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Override
-</span></span><span class="line"><span class="cl">protected void prepareConnection(HttpURLConnection con, int contentLength)
-</span></span><span class="line"><span class="cl">		throws IOException {
-</span></span><span class="line"><span class="cl">	String propagation = template.onOutgoingRequest();
-</span></span><span class="line"><span class="cl">	con.setRequestProperty(HeaderNames.PROPAGATION_HEADER_NAME, propagation);
-</span></span><span class="line"><span class="cl">	super.prepareConnection(con, contentLength);
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="n">Override</span>
+</span></span><span class="line"><span class="cl"><span class="n">protected</span> <span class="kt">void</span> <span class="nf">prepareConnection</span><span class="p">(</span><span class="n">HttpURLConnection</span> <span class="n">con</span><span class="p">,</span> <span class="kt">int</span> <span class="n">contentLength</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nc">String</span> <span class="n">propagation</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="nf">onOutgoingRequest</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">	<span class="n">con</span><span class="o">.</span><span class="nf">setRequestProperty</span><span class="p">(</span><span class="n">HeaderNames</span><span class="o">.</span><span class="n">PROPAGATION_HEADER_NAME</span><span class="p">,</span> <span class="n">propagation</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">super</span><span class="o">.</span><span class="nf">prepareConnection</span><span class="p">(</span><span class="n">con</span><span class="p">,</span> <span class="n">contentLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>OrderService</code>会使用<a class="link" href="https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerServiceExporter.java#L33"  target="_blank" rel="noopener"
@@ -611,17 +611,17 @@ if (!doNotTrack) {
 </span><span class="lnt">11
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Override
-</span></span><span class="line"><span class="cl">protected InputStream decorateInputStream(HttpServletRequest request, InputStream is) throws IOException {
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="n">Override</span>
+</span></span><span class="line"><span class="cl"><span class="n">protected</span> <span class="n">InputStream</span> <span class="nf">decorateInputStream</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">InputStream</span> <span class="ow">is</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">	
-</span></span><span class="line"><span class="cl">	try {
-</span></span><span class="line"><span class="cl">		String propagation = request.getHeader(HeaderNames.PROPAGATION_HEADER_NAME);
-</span></span><span class="line"><span class="cl">		template.onIncomingRequest(propagation);
-</span></span><span class="line"><span class="cl">	} catch (IllegalArgumentException e) {
-</span></span><span class="line"><span class="cl">		...
-</span></span><span class="line"><span class="cl">	}
-</span></span><span class="line"><span class="cl">	return super.decorateInputStream(request, is);
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">	<span class="n">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nc">String</span> <span class="n">propagation</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="nf">getHeader</span><span class="p">(</span><span class="n">HeaderNames</span><span class="o">.</span><span class="n">PROPAGATION_HEADER_NAME</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="n">template</span><span class="o">.</span><span class="nf">onIncomingRequest</span><span class="p">(</span><span class="n">propagation</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="n">catch</span> <span class="p">(</span><span class="n">IllegalArgumentException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="o">...</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="k">super</span><span class="o">.</span><span class="nf">decorateInputStream</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="ow">is</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>OrderService</code>处理完成<a class="link" href="https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerServiceExporter.java#L48"  target="_blank" rel="noopener"
@@ -642,18 +642,18 @@ if (!doNotTrack) {
 </span><span class="lnt">12
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Override
-</span></span><span class="line"><span class="cl">	protected OutputStream decorateOutputStream(HttpServletRequest request, HttpServletResponse response,
-</span></span><span class="line"><span class="cl">			OutputStream os) throws IOException {
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="n">Override</span>
+</span></span><span class="line"><span class="cl">	<span class="n">protected</span> <span class="n">OutputStream</span> <span class="nf">decorateOutputStream</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="n">OutputStream</span> <span class="n">os</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">		...
+</span></span><span class="line"><span class="cl">		<span class="o">...</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">		response.addHeader(HeaderNames.EXTENT_HEADER_NAME, extent);
+</span></span><span class="line"><span class="cl">		<span class="n">response</span><span class="o">.</span><span class="nf">addHeader</span><span class="p">(</span><span class="n">HeaderNames</span><span class="o">.</span><span class="n">EXTENT_HEADER_NAME</span><span class="p">,</span> <span class="n">extent</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        ...
+</span></span><span class="line"><span class="cl">        <span class="o">...</span>
 </span></span><span class="line"><span class="cl">		
-</span></span><span class="line"><span class="cl">		return super.decorateOutputStream(request, response, os);
-</span></span><span class="line"><span class="cl">	}
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="k">super</span><span class="o">.</span><span class="nf">decorateOutputStream</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">os</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>business-service</strong>接收到响应，利用<a class="link" href="https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-remoting/src/main/java/com/atomikos/remoting/spring/httpinvoker/TransactionalHttpInvokerRequestExecutor.java#L39"  target="_blank" rel="noopener"
@@ -669,13 +669,13 @@ if (!doNotTrack) {
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Override
-</span></span><span class="line"><span class="cl">protected void validateResponse(HttpInvokerClientConfiguration config,
-</span></span><span class="line"><span class="cl">		HttpURLConnection con) throws IOException {
-</span></span><span class="line"><span class="cl">	super.validateResponse(config, con);
-</span></span><span class="line"><span class="cl">	String extent = con.getHeaderField(HeaderNames.EXTENT_HEADER_NAME);
-</span></span><span class="line"><span class="cl">	template.onIncomingResponse(extent);
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="err">@</span><span class="n">Override</span>
+</span></span><span class="line"><span class="cl"><span class="n">protected</span> <span class="kt">void</span> <span class="nf">validateResponse</span><span class="p">(</span><span class="n">HttpInvokerClientConfiguration</span> <span class="n">config</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">HttpURLConnection</span> <span class="n">con</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">super</span><span class="o">.</span><span class="nf">validateResponse</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">con</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nc">String</span> <span class="n">extent</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="nf">getHeaderField</span><span class="p">(</span><span class="n">HeaderNames</span><span class="o">.</span><span class="n">EXTENT_HEADER_NAME</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="n">template</span><span class="o">.</span><span class="nf">onIncomingResponse</span><span class="p">(</span><span class="n">extent</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="两阶段提交过程">两阶段提交过程</h2>
@@ -799,6 +799,19 @@ if (!doNotTrack) {
             
                 
 <article class="">
+    <a href="/p/jakarta-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Jakarta EE应用服务器的事务处理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/">
         
         
@@ -844,19 +857,6 @@ if (!doNotTrack) {
 
         <div class="article-details">
             <h2 class="article-title">Consensus and Distributed Transactions</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/glassfish-startup-process/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">GlassFish Startup Process</h2>
         </div>
     </a>
 </article>

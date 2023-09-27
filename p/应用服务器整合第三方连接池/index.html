@@ -553,16 +553,16 @@ if (!doNotTrack) {
 </span><span class="lnt">10
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"> <span class="mf">1.</span> <span class="n">UserTransaction</span> <span class="n">ut</span> <span class="o">=</span> <span class="n">getUserTransaction</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mf">2.</span> <span class="n">DataSource</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">getDataSource</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mf">3.</span>  
-</span></span><span class="line"><span class="cl"> <span class="mf">4.</span> <span class="n">ut</span><span class="o">.</span><span class="na">begin</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mf">5.</span> 
-</span></span><span class="line"><span class="cl"> <span class="mf">6.</span> <span class="n">Connection</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mf">7.</span>  <span class="c1">// do some SQL 
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="mf">8.</span> <span class="n">c1</span><span class="o">.</span><span class="na">close</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mf">9.</span> 
-</span></span><span class="line"><span class="cl"><span class="mf">10.</span> <span class="n">ut</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span> 
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"> <span class="mi">1</span><span class="o">.</span> <span class="n">UserTransaction</span> <span class="n">ut</span> <span class="o">=</span> <span class="n">getUserTransaction</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">2</span><span class="o">.</span> <span class="n">DataSource</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">getDataSource</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">3</span><span class="o">.</span>  
+</span></span><span class="line"><span class="cl"> <span class="mi">4</span><span class="o">.</span> <span class="n">ut</span><span class="o">.</span><span class="na">begin</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">5</span><span class="o">.</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">6</span><span class="o">.</span> <span class="n">Connection</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">7</span><span class="o">.</span>  <span class="c1">// do some SQL 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="mi">8</span><span class="o">.</span> <span class="n">c1</span><span class="o">.</span><span class="na">close</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">9</span><span class="o">.</span> 
+</span></span><span class="line"><span class="cl"><span class="mi">10</span><span class="o">.</span> <span class="n">ut</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span> 
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>在第8行，连接将释放回连接池，另外一个线程就可以通过 <code>getConnection()</code> 获得刚释放的连接。但此时 c1 上的事务还没有提交，如果被其他线程获取，就有可能加入另一个事务，这就是为什么连接必须能够一次支持多个事务。</p>
@@ -651,6 +651,19 @@ if (!doNotTrack) {
             
                 
 <article class="">
+    <a href="/p/jakarta-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Jakarta EE应用服务器的事务处理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/">
         
         
@@ -696,19 +709,6 @@ if (!doNotTrack) {
 
         <div class="article-details">
             <h2 class="article-title">GlassFish Startup Process</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Glassfish 启动流程</h2>
         </div>
     </a>
 </article>
