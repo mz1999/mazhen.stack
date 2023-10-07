@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,23 +28,20 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/consensus/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/cs/</loc>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
   </url><url>
-    <loc>https://mazhen.tech/tags/db/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <loc>https://mazhen.tech/p/incomplete-list-of-computer-science-learning-resources-for-college-students/</loc>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
   </url><url>
-    <loc>https://mazhen.tech/p/jakarta-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/linux/</loc>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -57,6 +54,18 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2023-10-07T10:45:48+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/consensus/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/db/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/jakarta-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/</loc>
+    <lastmod>2023-09-27T18:30:59+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/java/</loc>
     <lastmod>2023-09-27T18:30:59+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/glassfish/</loc>
@@ -82,9 +91,6 @@
   </url><url>
     <loc>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%B4%E5%90%88%E7%AC%AC%E4%B8%89%E6%96%B9%E8%BF%9E%E6%8E%A5%E6%B1%A0/</loc>
     <lastmod>2023-03-10T22:35:11+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/linux/</loc>
-    <lastmod>2022-11-23T15:06:21+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/nginx/</loc>
     <lastmod>2022-11-23T15:06:21+08:00</lastmod>
