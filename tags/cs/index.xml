@@ -12,7 +12,10 @@
         <pubDate>Wed, 11 Oct 2023 16:20:21 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/latency-numbers-every-programmer-should-know/</guid>
-        <description>&lt;p&gt;对于&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Von_Neumann_architecture&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <description>&lt;img src=&#34;https://cdn.mazhen.tech/images/202310111653873.jpeg&#34; alt=&#34;title&#34; style=&#34;zoom:50%;&#34; /&gt;
+&lt;p&gt;&lt;em&gt;题图使用 &lt;a class=&#34;link&#34; href=&#34;https://bing.com/create&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Microsoft Bing 图像创建&lt;/a&gt;器生成。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;对于&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Von_Neumann_architecture&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;冯·诺伊曼体系结构&lt;/a&gt;的计算机，CPU 要数据才能正常工作。如果没有可处理的数据，那么CPU的运算速度再快也没有用，它只能等待。&lt;/p&gt;
 &lt;p&gt;在计算机和芯片发展的历史中，CPU 速度不断提高，但主内存的访问速度改进相对较慢，导致 CPU经常处于等待数据的状态，无法充分发挥其处理能力。为了解决这个问题，出现了 CPU 缓存。&lt;/p&gt;
 &lt;p&gt;寄存器和 CPU 缓存共同构成 CPU 内部的高速缓冲存储体系。&lt;/p&gt;
