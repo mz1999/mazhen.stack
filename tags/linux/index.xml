@@ -80,6 +80,8 @@
     &gt;Learning Modern Linux&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://makelinux.github.io/kernel/map/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;交互式的 Linux 内核地图&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.linuxfromscratch.org/lfs/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Linux From Scratch&lt;/a&gt; step-by-step instructions for building your own customized Linux system entirely from source.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;网络&#34;&gt;网络&lt;/h2&gt;
 &lt;ul&gt;
