@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在'>
+<title>从源码构建 perf</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='从源码构建 perf'>
+<meta property='og:description' content='perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在'>
+<meta property='og:url' content='https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2023-10-26T09:30:20&#43;08:00'/><meta property='article:modified_time' content='2023-10-26T09:30:20&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="从源码构建 perf">
+<meta name="twitter:description" content="perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#安装预编译二进制包">安装预编译二进制包</a></li>
+    <li><a href="#安装-debug-symbol">安装 Debug Symbol</a></li>
+    <li><a href="#kernel-tracepoints">Kernel Tracepoints</a></li>
+    <li><a href="#从源码构建-perf">从源码构建 perf</a>
+      <ol>
+        <li><a href="#源码下载">源码下载</a></li>
+        <li><a href="#安装依赖">安装依赖</a></li>
+        <li><a href="#构建">构建</a></li>
+        <li><a href="#测试验证">测试验证</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">从源码构建 perf</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2023-10-26</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
+    >perf</a> 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。</p>
+<p>perf_events 也被称为 Performance Counters for Linux  (PCL) ，是在 <a class="link" href="https://lwn.net/Articles/339361/"  target="_blank" rel="noopener"
+    >2009 年合并到 Linux内核主线源代码中</a>，成为内核一个新的子系统。perf_events 最初支持 <a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter?useskin=vector"  target="_blank" rel="noopener"
+    >performance monitoring counters</a>  (PMC) ，后来逐步扩展支持基于多种事件源，包括：tracepoints、kprobes、uprobes 和 USDT。</p>
+<p><img src="https://cdn.mazhen.tech/images/202310261046436.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="perf_event"
+	
+	
+></p>
+<h2 id="安装预编译二进制包">安装预编译二进制包</h2>
+<p>perf 包含在 linux-tools-common 中，首先安装该软件包：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install linux-tools-common  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行  <code>perf</code> 命令，可能会提示你安装另一个相关的软件包：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ perf
+</span></span><span class="line"><span class="cl">WARNING: perf not found <span class="k">for</span> kernel 6.2.0-35
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  You may need to install the following packages <span class="k">for</span> this specific kernel:
+</span></span><span class="line"><span class="cl">    linux-tools-6.2.0-35-generic
+</span></span><span class="line"><span class="cl">    linux-cloud-tools-6.2.0-35-generic
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  You may also want to install one of the following packages to keep up to date:
+</span></span><span class="line"><span class="cl">    linux-tools-generic
+</span></span><span class="line"><span class="cl">    linux-cloud-tools-generic
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>按照提示安装和内核版本相关的 package：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install linux-tools-6.2.0-35-generic
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="安装-debug-symbol">安装 Debug Symbol</h2>
+<p>perf 像其他调试工具一样，需要调试符号表信息（Debug symbols）。这些符号信息用于将内存地址转换为函数和变量名称。如果没有符号信息，你将看到代表被分析内存地址的十六进制数字。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">13.19%     0.00%  sshd             libc.so.6                    [.] __libc_start_call_main
+</span></span><span class="line"><span class="cl">            |
+</span></span><span class="line"><span class="cl">            ---__libc_start_call_main
+</span></span><span class="line"><span class="cl">               |          
+</span></span><span class="line"><span class="cl">                --12.91%--0x5641182e4b66
+</span></span><span class="line"><span class="cl">                          0x5641182fecf7
+</span></span><span class="line"><span class="cl">                          |          
+</span></span><span class="line"><span class="cl">                          |--9.50%--0x56411835c752
+</span></span><span class="line"><span class="cl">                          |          |          
+</span></span><span class="line"><span class="cl">                          |           --9.10%--0x5641183330dd
+</span></span><span class="line"><span class="cl">                          |                     |          
+</span></span><span class="line"><span class="cl">                          |                      --8.80%--0x5641182ee730
+</span></span><span class="line"><span class="cl">                          |                                |          
+</span></span><span class="line"><span class="cl">                          |                                |--4.64%--0x564118303c43
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过 package 方式安装的软件，一般都会提供以 <strong>-dbgsym</strong> 或 <strong>-dbg</strong> 结尾的调试符号信息 package。在 Ubuntu 上，首先需要将<code>-dbgsym</code> 仓库添加到更新源中，执行下面的代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;deb http://ddebs.ubuntu.com </span><span class="k">$(</span>lsb_release -cs<span class="k">)</span><span class="s2"> main restricted universe multiverse
+</span></span></span><span class="line"><span class="cl"><span class="s2">deb http://ddebs.ubuntu.com </span><span class="k">$(</span>lsb_release -cs<span class="k">)</span><span class="s2">-updates main restricted universe multiverse
+</span></span></span><span class="line"><span class="cl"><span class="s2">deb http://ddebs.ubuntu.com </span><span class="k">$(</span>lsb_release -cs<span class="k">)</span><span class="s2">-proposed main restricted universe multiverse&#34;</span> <span class="p">|</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>sudo tee -a /etc/apt/sources.list.d/ddebs.list
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后从 Ubuntu 服务器导入调试符号 package 签名密钥：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install ubuntu-dbgsym-keyring
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后更新软件源，安装 glibc 和 openssh-server 的调试符号信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt update
+</span></span><span class="line"><span class="cl">$ sudo apt install libc6-dbg
+</span></span><span class="line"><span class="cl">$ sudo apt install openssh-server-dbgsym
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>安装了调试符号信息后，再使用 perf report 就会将十六进制数字转换为对应的方法名：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">    11.68%     0.00%  sshd             libc.so.6                 [.] __libc_start_call_main
+</span></span><span class="line"><span class="cl">            |
+</span></span><span class="line"><span class="cl">            ---__libc_start_call_main
+</span></span><span class="line"><span class="cl">               main
+</span></span><span class="line"><span class="cl">               |          
+</span></span><span class="line"><span class="cl">                --11.46%--do_authenticated
+</span></span><span class="line"><span class="cl">                          do_authenticated2 (inlined)
+</span></span><span class="line"><span class="cl">                          server_loop2.constprop.0
+</span></span><span class="line"><span class="cl">                          |          
+</span></span><span class="line"><span class="cl">                          |--8.30%--process_buffered_input_packets (inlined)
+</span></span><span class="line"><span class="cl">                          |          ssh_dispatch_run_fatal
+</span></span><span class="line"><span class="cl">                          |          ssh_dispatch_run (inlined)
+</span></span><span class="line"><span class="cl">                          |          |          
+</span></span><span class="line"><span class="cl">                          |           --7.86%--server_input_channel_req (inlined)
+</span></span><span class="line"><span class="cl">                          |                     |          
+</span></span><span class="line"><span class="cl">                          |                      --7.78%--session_input_channel_req (inlined)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们还可以安装内核镜像和一些内置命令行工具的调试符号信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install coreutils-dbgsym
+</span></span><span class="line"><span class="cl">$ sudo apt install linux-image-<span class="sb">`</span>uname -r<span class="sb">`</span>-dbgsym
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="kernel-tracepoints">Kernel Tracepoints</h2>
+<p>Kernel <strong>tracepoint</strong> 是在内核源码中关键位置的埋点，允许开发人员监视内核中的各种事件和操作，例如系统调用、TCP事件、文件系统I/O、磁盘I/O等，以了解内核的行为，进行性能分析和故障诊断。</p>
+<p>使用 perf 可以对 tracepoints 进行统计、追踪和采样。例如可以使用下面的命令对上下文切换进行 1 秒钟的跟踪：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf record -e sched:sched_switch -a -g sleep <span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在执行这个命令的时候可能遇到下面的错误：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">event syntax error: &#39;sched:sched_switch&#39;
+</span></span><span class="line"><span class="cl">                     \___ unsupported tracepoint
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">libtraceevent is necessary for tracepoint support
+</span></span><span class="line"><span class="cl">Run &#39;perf list&#39; for a list of valid events
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>错误信息说明不支持 <code>sched:sched_switch</code> 这个 tracepoint。我们运行 perf list 查看可用的 tracepoint：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf list <span class="s1">&#39;sched:*&#39;</span>
+</span></span><span class="line"><span class="cl">List of pre-defined events <span class="o">(</span>to be used in -e or -M<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">  sched:sched_stat_wait                              <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_stick_numa                             <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_swap_numa                              <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_switch                                 <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_wait_task                              <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>输出中明明包含了 <code>sched:sched_switch</code>，为什么 perf 不支持呢？</p>
+<p>使用 <code>perf version --build-options</code> 查看 perf 的 build 选项：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ perf version --build-options
+</span></span><span class="line"><span class="cl">perf version 6.2.16
+</span></span><span class="line"><span class="cl">                 dwarf: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_DWARF_SUPPORT</span>
+</span></span><span class="line"><span class="cl">    dwarf_getlocations: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_DWARF_GETLOCATIONS_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                 glibc: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_GLIBC_SUPPORT</span>
+</span></span><span class="line"><span class="cl">         syscall_table: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_SYSCALL_TABLE_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                libbfd: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_LIBBFD_SUPPORT</span>
+</span></span><span class="line"><span class="cl">            debuginfod: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_DEBUGINFOD_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                libelf: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBELF_SUPPORT</span>
+</span></span><span class="line"><span class="cl">               libnuma: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBNUMA_SUPPORT</span>
+</span></span><span class="line"><span class="cl">numa_num_possible_cpus: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBNUMA_SUPPORT</span>
+</span></span><span class="line"><span class="cl">               libperl: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_LIBPERL_SUPPORT</span>
+</span></span><span class="line"><span class="cl">             libpython: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_LIBPYTHON_SUPPORT</span>
+</span></span><span class="line"><span class="cl">              libslang: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_SLANG_SUPPORT</span>
+</span></span><span class="line"><span class="cl">             libcrypto: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBCRYPTO_SUPPORT</span>
+</span></span><span class="line"><span class="cl">             libunwind: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBUNWIND_SUPPORT</span>
+</span></span><span class="line"><span class="cl">    libdw-dwarf-unwind: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_DWARF_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                  zlib: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_ZLIB_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                  lzma: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LZMA_SUPPORT</span>
+</span></span><span class="line"><span class="cl">             get_cpuid: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_AUXTRACE_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                   bpf: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBBPF_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                   aio: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_AIO_SUPPORT</span>
+</span></span><span class="line"><span class="cl">                  zstd: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_ZSTD_SUPPORT</span>
+</span></span><span class="line"><span class="cl">               libpfm4: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_LIBPFM</span>
+</span></span><span class="line"><span class="cl">         libtraceevent: <span class="o">[</span> OFF <span class="o">]</span>  <span class="c1"># HAVE_LIBTRACEEVENT</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><a class="link" href="https://www.man7.org/linux/man-pages/man3/libtraceevent.3.html"  target="_blank" rel="noopener"
+    >libtraceevent</a> 提供了访问内核 tracepoint 事件的 API。注意到最后一行，说明 perf 在 build 时没有打开 <code>libtraceevent</code>的支持。因此我们安装的预编译二进制包不能进行 tracepoint 追踪。我们需要自己从源码构建 perf。</p>
+<h2 id="从源码构建-perf">从源码构建 perf</h2>
+<h3 id="源码下载">源码下载</h3>
+<p>首先下载 perf 的源代码。perf 的源码位于 Linux 内核源码中的 <code>tools/perf</code> 目录下。perf 是一个复杂的用户空间应用程序，而它却位于Linux 内核源代码树中，可能是唯一一个被包含在 Linux 源代码中的复杂用户软件。</p>
+<p>为了下载和内核匹配的源码，先确定内核版本：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ uname -r
+</span></span><span class="line"><span class="cl">6.2.0-35-generic
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后去 <a class="link" href="https://www.kernel.org/pub/"  target="_blank" rel="noopener"
+    >https://www.kernel.org/pub/</a> 浏览并下载正确版本的源码。</p>
+<h3 id="安装依赖">安装依赖</h3>
+<p>安装构建依赖：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt-get install build-essential flex bison python3 python3-dev
+</span></span><span class="line"><span class="cl">$ sudo apt-get install libelf-dev libnewt-dev libdw-dev libaudit-dev libiberty-dev libunwind-dev libcap-dev libzstd-dev libnuma-dev libssl-dev python3-dev python3-setuptools binutils-dev gcc-multilib liblzma-dev
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们需要支持 tracepoint，所以还要安装 <strong>libtraceevent</strong> package：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install libtraceevent-dev
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="构建">构建</h3>
+<p>解压下载的 Linux 源码，进入源码目录，运行下面的命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ <span class="nv">PYTHON</span><span class="o">=</span>python3 make -C tools/perf install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>成功构建后 perf 被安装到了 <code>$HOME/bin</code> 目录。</p>
+<h3 id="测试验证">测试验证</h3>
+<p>卸载先前安装的预编译版本：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt remove linux-tools-common 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>将 <code>$HOME/bin</code> 加入到环境变量 <code>$PATH</code>，确保我们构建的 perf 命令能被找到。注意一般我们都需要 <code>sudo</code> 执行 perf 命令，所以还要编辑 <code>/etc/sudoers</code>（必须使用 visudo）文件，在 <code>Defaults	secure_path=&quot;...&quot;</code> 中加入 perf 命令的路径。</p>
+<p>验证 perf 的构建选项：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf version --build-options
+</span></span><span class="line"><span class="cl">perf version 6.2.0
+</span></span><span class="line"><span class="cl">         ...
+</span></span><span class="line"><span class="cl">         libtraceevent: <span class="o">[</span> on  <span class="o">]</span>  <span class="c1"># HAVE_LIBTRACEEVENT</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这次 libtraceevent 打开了，支持 tracepoint 的追踪。执行下面的命令追踪系统的上下文切换：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf record -e sched:sched_switch -a --call-graph dwarf  sleep <span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看报告：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf report
+</span></span><span class="line"><span class="cl"><span class="c1"># To display the perf.data header info, please use --header/--header-only options.</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Total Lost Samples: 0</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Samples: 499  of event &#39;sched:sched_switch&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Event count (approx.): 499</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Children      Self  Command          Shared Object               Symbol                               </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ........  ........  ...............  ..........................  .....................................</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl">    48.70%    48.70%  swapper          <span class="o">[</span>kernel.vmlinux<span class="o">]</span>            <span class="o">[</span>k<span class="o">]</span> __schedule
+</span></span><span class="line"><span class="cl">            <span class="p">|</span>
+</span></span><span class="line"><span class="cl">            ---secondary_startup_64_no_verify
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>          
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>--39.28%--start_secondary
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>          cpu_startup_entry
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>          do_idle
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>          schedule_idle
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>          __schedule
+</span></span><span class="line"><span class="cl">               <span class="p">|</span>          __schedule
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>另外一个例子，按类型统计整个系统的系统调用，持续 5 秒钟：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf stat -e <span class="s1">&#39;syscalls:sys_enter_*&#39;</span> -a sleep <span class="m">5</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> Performance counter stats <span class="k">for</span> <span class="s1">&#39;system wide&#39;</span>:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">               ...         
+</span></span><span class="line"><span class="cl">                <span class="m">25</span>      syscalls:sys_enter_timerfd_settime                                      
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_timerfd_gettime                                      
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_signalfd4                                          
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_signalfd                                           
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_epoll_create1                                      
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_epoll_create                                       
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_epoll_ctl                                          
+</span></span><span class="line"><span class="cl">                <span class="m">37</span>      syscalls:sys_enter_epoll_wait                                         
+</span></span><span class="line"><span class="cl">                <span class="m">80</span>      syscalls:sys_enter_epoll_pwait                                        
+</span></span><span class="line"><span class="cl">                 <span class="m">0</span>      syscalls:sys_enter_epoll_pwait2                                       
+</span></span><span class="line"><span class="cl">                                         
+</span></span><span class="line"><span class="cl">                ...                                   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       5.004101037 seconds <span class="nb">time</span> elapsed
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，我们自己 build 的 perf 可以对 tracepoint 进行追踪和统计。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-%E4%BF%A1%E5%8F%B7signal/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux 信号(Signal)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入理解 Page Cache</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2023 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

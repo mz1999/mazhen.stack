@@ -6,20 +6,28 @@
         <description>Recent content in Tags on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Wed, 11 Oct 2023 16:20:21 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>cs</title>
-        <link>https://mazhen.tech/tags/cs/</link>
-        <pubDate>Wed, 11 Oct 2023 16:20:21 +0800</pubDate>
+        <lastBuildDate>Thu, 26 Oct 2023 09:30:20 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>kernel</title>
+        <link>https://mazhen.tech/tags/kernel/</link>
+        <pubDate>Thu, 26 Oct 2023 09:30:20 +0800</pubDate>
         
-        <guid>https://mazhen.tech/tags/cs/</guid>
+        <guid>https://mazhen.tech/tags/kernel/</guid>
         <description></description>
         </item>
         <item>
         <title>linux</title>
         <link>https://mazhen.tech/tags/linux/</link>
-        <pubDate>Sat, 07 Oct 2023 10:45:48 +0800</pubDate>
+        <pubDate>Thu, 26 Oct 2023 09:30:20 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/linux/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>cs</title>
+        <link>https://mazhen.tech/tags/cs/</link>
+        <pubDate>Wed, 11 Oct 2023 16:20:21 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/cs/</guid>
         <description></description>
         </item>
         <item>
@@ -84,14 +92,6 @@
         <pubDate>Wed, 12 Oct 2022 09:14:10 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/rust/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>kernel</title>
-        <link>https://mazhen.tech/tags/kernel/</link>
-        <pubDate>Fri, 30 Sep 2022 10:23:23 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/kernel/</guid>
         <description></description>
         </item>
         <item>
