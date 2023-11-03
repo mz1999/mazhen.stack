@@ -553,17 +553,17 @@ if (!doNotTrack) {
 </span><span class="lnt">10
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"> <span class="mi">1</span><span class="o">.</span> <span class="n">UserTransaction</span> <span class="n">ut</span> <span class="o">=</span> <span class="n">getUserTransaction</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mi">2</span><span class="o">.</span> <span class="n">DataSource</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">getDataSource</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mi">3</span><span class="o">.</span>  
-</span></span><span class="line"><span class="cl"> <span class="mi">4</span><span class="o">.</span> <span class="n">ut</span><span class="o">.</span><span class="na">begin</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mi">5</span><span class="o">.</span> 
-</span></span><span class="line"><span class="cl"> <span class="mi">6</span><span class="o">.</span> <span class="n">Connection</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mi">7</span><span class="o">.</span>  <span class="c1">// do some SQL 
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="mi">8</span><span class="o">.</span> <span class="n">c1</span><span class="o">.</span><span class="na">close</span><span class="o">();</span> 
-</span></span><span class="line"><span class="cl"> <span class="mi">9</span><span class="o">.</span> 
-</span></span><span class="line"><span class="cl"><span class="mi">10</span><span class="o">.</span> <span class="n">ut</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span> 
-</span></span></code></pre></td></tr></table>
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w"> </span><span class="n">1</span><span class="p">.</span><span class="w"> </span><span class="n">UserTransaction</span><span class="w"> </span><span class="n">ut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getUserTransaction</span><span class="p">();</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">2</span><span class="p">.</span><span class="w"> </span><span class="n">DataSource</span><span class="w"> </span><span class="n">ds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getDataSource</span><span class="p">();</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">3</span><span class="p">.</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">4</span><span class="p">.</span><span class="w"> </span><span class="n">ut</span><span class="p">.</span><span class="na">begin</span><span class="p">();</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">5</span><span class="p">.</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">6</span><span class="p">.</span><span class="w"> </span><span class="n">Connection</span><span class="w"> </span><span class="n">c1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ds</span><span class="p">.</span><span class="na">getConnection</span><span class="p">();</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">7</span><span class="p">.</span><span class="w">  </span><span class="c1">// do some SQL </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">8</span><span class="p">.</span><span class="w"> </span><span class="n">c1</span><span class="p">.</span><span class="na">close</span><span class="p">();</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">9</span><span class="p">.</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">10</span><span class="p">.</span><span class="w"> </span><span class="n">ut</span><span class="p">.</span><span class="na">commit</span><span class="p">();</span><span class="w"> 
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>在第8行，连接将释放回连接池，另外一个线程就可以通过 <code>getConnection()</code> 获得刚释放的连接。但此时 c1 上的事务还没有提交，如果被其他线程获取，就有可能加入另一个事务，这就是为什么连接必须能够一次支持多个事务。</p>
 <p>大多数数据库都不支持事务多路复用，那么一种变通的做法是<strong>让事务独占连接</strong>，在 JTA 事务完成之前，连接不要释放连接回池中。</p>

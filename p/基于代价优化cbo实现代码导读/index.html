@@ -441,20 +441,20 @@ if (!doNotTrack) {
 </span><span class="lnt">14
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">func physicalOptimize(logic LogicalPlan) (PhysicalPlan, error) {
-</span></span><span class="line"><span class="cl"> logic.preparePossibleProperties()
-</span></span><span class="line"><span class="cl"> _, err := logic.deriveStats()
-</span></span><span class="line"><span class="cl"> if err != nil {
-</span></span><span class="line"><span class="cl">  return nil, errors.Trace(err)
-</span></span><span class="line"><span class="cl"> }
-</span></span><span class="line"><span class="cl"> t, err := logic.findBestTask(&amp;requiredProp{taskTp: rootTaskType, expectedCnt: math.MaxFloat64})
-</span></span><span class="line"><span class="cl"> if err != nil {
-</span></span><span class="line"><span class="cl">  return nil, errors.Trace(err)
-</span></span><span class="line"><span class="cl"> }
-</span></span><span class="line"><span class="cl"> p := t.plan()
-</span></span><span class="line"><span class="cl"> p.ResolveIndices()
-</span></span><span class="line"><span class="cl"> return p, nil
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="k">func</span> <span class="n">physicalOptimize</span><span class="p">(</span><span class="n">logic</span> <span class="n">LogicalPlan</span><span class="p">)</span> <span class="p">(</span><span class="n">PhysicalPlan</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">logic</span><span class="o">.</span><span class="n">preparePossibleProperties</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"> <span class="n">_</span><span class="p">,</span> <span class="n">err</span> <span class="p">:</span><span class="o">=</span> <span class="n">logic</span><span class="o">.</span><span class="n">deriveStats</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">nil</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">Trace</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="n">t</span><span class="p">,</span> <span class="n">err</span> <span class="p">:</span><span class="o">=</span> <span class="n">logic</span><span class="o">.</span><span class="n">findBestTask</span><span class="p">(</span><span class="o">&amp;</span><span class="n">requiredProp</span><span class="p">{</span><span class="n">taskTp</span><span class="p">:</span> <span class="n">rootTaskType</span><span class="p">,</span> <span class="n">expectedCnt</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">MaxFloat64</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">nil</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">Trace</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="n">p</span> <span class="p">:</span><span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"> <span class="n">p</span><span class="o">.</span><span class="n">ResolveIndices</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>三行关键的代码：</p>

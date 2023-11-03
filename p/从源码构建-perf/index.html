@@ -598,22 +598,22 @@ if (!doNotTrack) {
 </span><span class="lnt">16
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">    11.68%     0.00%  sshd             libc.so.6                 [.] __libc_start_call_main
-</span></span><span class="line"><span class="cl">            |
-</span></span><span class="line"><span class="cl">            ---__libc_start_call_main
-</span></span><span class="line"><span class="cl">               main
-</span></span><span class="line"><span class="cl">               |          
-</span></span><span class="line"><span class="cl">                --11.46%--do_authenticated
-</span></span><span class="line"><span class="cl">                          do_authenticated2 (inlined)
-</span></span><span class="line"><span class="cl">                          server_loop2.constprop.0
-</span></span><span class="line"><span class="cl">                          |          
-</span></span><span class="line"><span class="cl">                          |--8.30%--process_buffered_input_packets (inlined)
-</span></span><span class="line"><span class="cl">                          |          ssh_dispatch_run_fatal
-</span></span><span class="line"><span class="cl">                          |          ssh_dispatch_run (inlined)
-</span></span><span class="line"><span class="cl">                          |          |          
-</span></span><span class="line"><span class="cl">                          |           --7.86%--server_input_channel_req (inlined)
-</span></span><span class="line"><span class="cl">                          |                     |          
-</span></span><span class="line"><span class="cl">                          |                      --7.78%--session_input_channel_req (inlined)
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl">    <span class="mf">11.68</span><span class="o">%</span>     <span class="mf">0.00</span><span class="o">%</span>  <span class="n">sshd</span>             <span class="n">libc</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">6</span>                 <span class="p">[</span><span class="o">.</span><span class="p">]</span> <span class="n">__libc_start_call_main</span>
+</span></span><span class="line"><span class="cl">            <span class="o">|</span>
+</span></span><span class="line"><span class="cl">            <span class="o">---</span><span class="n">__libc_start_call_main</span>
+</span></span><span class="line"><span class="cl">               <span class="n">main</span>
+</span></span><span class="line"><span class="cl">               <span class="o">|</span>          
+</span></span><span class="line"><span class="cl">                <span class="o">--</span><span class="mf">11.46</span><span class="o">%--</span><span class="n">do_authenticated</span>
+</span></span><span class="line"><span class="cl">                          <span class="n">do_authenticated2</span> <span class="p">(</span><span class="n">inlined</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                          <span class="n">server_loop2</span><span class="o">.</span><span class="n">constprop</span><span class="o">.</span><span class="mi">0</span>
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>          
+</span></span><span class="line"><span class="cl">                          <span class="o">|--</span><span class="mf">8.30</span><span class="o">%--</span><span class="n">process_buffered_input_packets</span> <span class="p">(</span><span class="n">inlined</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>          <span class="n">ssh_dispatch_run_fatal</span>
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>          <span class="n">ssh_dispatch_run</span> <span class="p">(</span><span class="n">inlined</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>          <span class="o">|</span>          
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>           <span class="o">--</span><span class="mf">7.86</span><span class="o">%--</span><span class="n">server_input_channel_req</span> <span class="p">(</span><span class="n">inlined</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>                     <span class="o">|</span>          
+</span></span><span class="line"><span class="cl">                          <span class="o">|</span>                      <span class="o">--</span><span class="mf">7.78</span><span class="o">%--</span><span class="n">session_input_channel_req</span> <span class="p">(</span><span class="n">inlined</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>我们还可以安装内核镜像和一些内置命令行工具的调试符号信息：</p>

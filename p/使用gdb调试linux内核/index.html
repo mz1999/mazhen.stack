@@ -977,25 +977,25 @@ if (!doNotTrack) {
 </span><span class="lnt">19
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">submenu &#39;Advanced options for Ubuntu&#39; $menuentry_id_option &#39;gnulinux-advanced-5506d28f-c9e7-46d4-a12e-42555d491eec&#39; {
-</span></span><span class="line"><span class="cl">        menuentry &#39;Ubuntu, with Linux 5.4.106&#39; --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option &#39;gnulinux-5.4.106-advanced-5506d28f-c9e7-46d4-a12e-42555d491eec&#39; {
-</span></span><span class="line"><span class="cl">                recordfail
-</span></span><span class="line"><span class="cl">                load_video
-</span></span><span class="line"><span class="cl">                gfxmode $linux_gfx_mode
-</span></span><span class="line"><span class="cl">                insmod gzio
-</span></span><span class="line"><span class="cl">                if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
-</span></span><span class="line"><span class="cl">                insmod part_gpt
-</span></span><span class="line"><span class="cl">                insmod ext2
-</span></span><span class="line"><span class="cl">                if [ x$feature_platform_search_hint = xy ]; then
-</span></span><span class="line"><span class="cl">                  search --no-floppy --fs-uuid --set=root  5506d28f-c9e7-46d4-a12e-42555d491eec
-</span></span><span class="line"><span class="cl">                else
-</span></span><span class="line"><span class="cl">                  search --no-floppy --fs-uuid --set=root 5506d28f-c9e7-46d4-a12e-42555d491eec
-</span></span><span class="line"><span class="cl">                fi
-</span></span><span class="line"><span class="cl">                echo    &#39;Loading Linux 5.4.106 ...&#39;
-</span></span><span class="line"><span class="cl">                linux   /boot/vmlinuz-5.4.106 root=UUID=5506d28f-c9e7-46d4-a12e-42555d491eec ro maybe-ubiquity
-</span></span><span class="line"><span class="cl">                echo    &#39;Loading initial ramdisk ...&#39;
-</span></span><span class="line"><span class="cl">                initrd  /boot/initrd.img-5.4.106
-</span></span><span class="line"><span class="cl">        }
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">submenu</span> <span class="s1">&#39;Advanced options for Ubuntu&#39;</span> <span class="o">$</span><span class="n">menuentry_id_option</span> <span class="s1">&#39;gnulinux-advanced-5506d28f-c9e7-46d4-a12e-42555d491eec&#39;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">menuentry</span> <span class="s1">&#39;Ubuntu, with Linux 5.4.106&#39;</span> <span class="o">--</span><span class="k">class</span> <span class="n">ubuntu</span> <span class="o">--</span><span class="k">class</span> <span class="n">gnu</span><span class="o">-</span><span class="n">linux</span> <span class="o">--</span><span class="k">class</span> <span class="n">gnu</span> <span class="o">--</span><span class="k">class</span> <span class="n">os</span> <span class="o">$</span><span class="n">menuentry_id_option</span> <span class="s1">&#39;gnulinux-5.4.106-advanced-5506d28f-c9e7-46d4-a12e-42555d491eec&#39;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">recordfail</span>
+</span></span><span class="line"><span class="cl">                <span class="n">load_video</span>
+</span></span><span class="line"><span class="cl">                <span class="n">gfxmode</span> <span class="o">$</span><span class="n">linux_gfx_mode</span>
+</span></span><span class="line"><span class="cl">                <span class="n">insmod</span> <span class="n">gzio</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">[</span> <span class="n">x</span><span class="o">$</span><span class="n">grub_platform</span> <span class="o">=</span> <span class="n">xxen</span> <span class="p">];</span> <span class="n">then</span> <span class="n">insmod</span> <span class="n">xzio</span><span class="p">;</span> <span class="n">insmod</span> <span class="n">lzopio</span><span class="p">;</span> <span class="n">fi</span>
+</span></span><span class="line"><span class="cl">                <span class="n">insmod</span> <span class="n">part_gpt</span>
+</span></span><span class="line"><span class="cl">                <span class="n">insmod</span> <span class="n">ext2</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">[</span> <span class="n">x</span><span class="o">$</span><span class="n">feature_platform_search_hint</span> <span class="o">=</span> <span class="n">xy</span> <span class="p">];</span> <span class="n">then</span>
+</span></span><span class="line"><span class="cl">                  <span class="n">search</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">floppy</span> <span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">uuid</span> <span class="o">--</span><span class="n">set</span><span class="o">=</span><span class="n">root</span>  <span class="mi">5506</span><span class="n">d28f</span><span class="o">-</span><span class="n">c9e7</span><span class="o">-</span><span class="mi">46</span><span class="n">d4</span><span class="o">-</span><span class="n">a12e</span><span class="o">-</span><span class="mi">42555</span><span class="n">d491eec</span>
+</span></span><span class="line"><span class="cl">                <span class="k">else</span>
+</span></span><span class="line"><span class="cl">                  <span class="n">search</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">floppy</span> <span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">uuid</span> <span class="o">--</span><span class="n">set</span><span class="o">=</span><span class="n">root</span> <span class="mi">5506</span><span class="n">d28f</span><span class="o">-</span><span class="n">c9e7</span><span class="o">-</span><span class="mi">46</span><span class="n">d4</span><span class="o">-</span><span class="n">a12e</span><span class="o">-</span><span class="mi">42555</span><span class="n">d491eec</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fi</span>
+</span></span><span class="line"><span class="cl">                <span class="n">echo</span>    <span class="s1">&#39;Loading Linux 5.4.106 ...&#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">linux</span>   <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.4</span><span class="o">.</span><span class="mi">106</span> <span class="n">root</span><span class="o">=</span><span class="n">UUID</span><span class="o">=</span><span class="mi">5506</span><span class="n">d28f</span><span class="o">-</span><span class="n">c9e7</span><span class="o">-</span><span class="mi">46</span><span class="n">d4</span><span class="o">-</span><span class="n">a12e</span><span class="o">-</span><span class="mi">42555</span><span class="n">d491eec</span> <span class="n">ro</span> <span class="n">maybe</span><span class="o">-</span><span class="n">ubiquity</span>
+</span></span><span class="line"><span class="cl">                <span class="n">echo</span>    <span class="s1">&#39;Loading initial ramdisk ...&#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">initrd</span>  <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">5.4</span><span class="o">.</span><span class="mi">106</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>vmlinuz-5.4.106</code>就是我们新编译的内核。</p>
@@ -1039,7 +1039,7 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">add-auto-load-safe-path /path/to/linux-build
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">add</span><span class="o">-</span><span class="n">auto</span><span class="o">-</span><span class="nb">load</span><span class="o">-</span><span class="n">safe</span><span class="o">-</span><span class="n">path</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">linux</span><span class="o">-</span><span class="n">build</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>/path/to/linux-build</code>就是上面从虚拟机拷贝过来的Linux源码目录。</p>
@@ -1134,13 +1134,13 @@ if (!doNotTrack) {
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(gdb) n
-</span></span><span class="line"><span class="cl">2376		if (!(clone_flags &amp; CLONE_UNTRACED)) {
-</span></span><span class="line"><span class="cl">(gdb) n
-</span></span><span class="line"><span class="cl">2377			if (clone_flags &amp; CLONE_VFORK)
-</span></span><span class="line"><span class="cl">(gdb) n
-</span></span><span class="line"><span class="cl">2379			else if (args-&gt;exit_signal != SIGCHLD)
-</span></span><span class="line"><span class="cl">(gdb) 
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="p">(</span><span class="n">gdb</span><span class="p">)</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2376</span>		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">clone_flags</span> <span class="o">&amp;</span> <span class="n">CLONE_UNTRACED</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">gdb</span><span class="p">)</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2377</span>			<span class="k">if</span> <span class="p">(</span><span class="n">clone_flags</span> <span class="o">&amp;</span> <span class="n">CLONE_VFORK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">gdb</span><span class="p">)</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2379</span>			<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">exit_signal</span> <span class="o">!=</span> <span class="n">SIGCHLD</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">gdb</span><span class="p">)</span> 
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>l</code>显示多行源码：</p>
@@ -1159,17 +1159,17 @@ if (!doNotTrack) {
 </span><span class="lnt">11
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(gdb) l
-</span></span><span class="line"><span class="cl">2374		 * for the type of forking is enabled.
-</span></span><span class="line"><span class="cl">2375		 */
-</span></span><span class="line"><span class="cl">2376		if (!(clone_flags &amp; CLONE_UNTRACED)) {
-</span></span><span class="line"><span class="cl">2377			if (clone_flags &amp; CLONE_VFORK)
-</span></span><span class="line"><span class="cl">2378				trace = PTRACE_EVENT_VFORK;
-</span></span><span class="line"><span class="cl">2379			else if (args-&gt;exit_signal != SIGCHLD)
-</span></span><span class="line"><span class="cl">2380				trace = PTRACE_EVENT_CLONE;
-</span></span><span class="line"><span class="cl">2381			else
-</span></span><span class="line"><span class="cl">2382				trace = PTRACE_EVENT_FORK;
-</span></span><span class="line"><span class="cl">2383	
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="p">(</span><span class="n">gdb</span><span class="p">)</span> <span class="n">l</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2374</span>		 <span class="o">*</span> <span class="k">for</span> <span class="n">the</span> <span class="n">type</span> <span class="n">of</span> <span class="n">forking</span> <span class="n">is</span> <span class="n">enabled</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2375</span>		 <span class="o">*/</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2376</span>		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">clone_flags</span> <span class="o">&amp;</span> <span class="n">CLONE_UNTRACED</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2377</span>			<span class="k">if</span> <span class="p">(</span><span class="n">clone_flags</span> <span class="o">&amp;</span> <span class="n">CLONE_VFORK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2378</span>				<span class="n">trace</span> <span class="o">=</span> <span class="n">PTRACE_EVENT_VFORK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2379</span>			<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">exit_signal</span> <span class="o">!=</span> <span class="n">SIGCHLD</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2380</span>				<span class="n">trace</span> <span class="o">=</span> <span class="n">PTRACE_EVENT_CLONE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2381</span>			<span class="k">else</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2382</span>				<span class="n">trace</span> <span class="o">=</span> <span class="n">PTRACE_EVENT_FORK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2383</span>	
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>bt</code>查看函数调用信息：</p>

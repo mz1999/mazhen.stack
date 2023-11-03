@@ -816,35 +816,35 @@ if (!doNotTrack) {
 </span><span class="lnt">29
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">// Scanner implements the yyLexer interface.
-</span></span><span class="line"><span class="cl">type Scanner struct {
-</span></span><span class="line"><span class="cl"> r   reader
-</span></span><span class="line"><span class="cl"> buf bytes.Buffer
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Scanner</span> <span class="n">implements</span> <span class="n">the</span> <span class="n">yyLexer</span> <span class="n">interface</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">type</span> <span class="n">Scanner</span> <span class="n">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">r</span>   <span class="n">reader</span>
+</span></span><span class="line"><span class="cl"> <span class="n">buf</span> <span class="n">bytes</span><span class="o">.</span><span class="n">Buffer</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> errs         []error
-</span></span><span class="line"><span class="cl"> stmtStartPos int
+</span></span><span class="line"><span class="cl"> <span class="n">errs</span>         <span class="p">[]</span><span class="n">error</span>
+</span></span><span class="line"><span class="cl"> <span class="n">stmtStartPos</span> <span class="ne">int</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> // For scanning such kind of comment: /*! MySQL-specific code */ or /*+ optimizer hint */
-</span></span><span class="line"><span class="cl"> specialComment specialCommentScanner
+</span></span><span class="line"><span class="cl"> <span class="o">//</span> <span class="n">For</span> <span class="n">scanning</span> <span class="n">such</span> <span class="n">kind</span> <span class="n">of</span> <span class="n">comment</span><span class="p">:</span> <span class="o">/*!</span> <span class="n">MySQL</span><span class="o">-</span><span class="n">specific</span> <span class="n">code</span> <span class="o">*/</span> <span class="ow">or</span> <span class="o">/*+</span> <span class="n">optimizer</span> <span class="n">hint</span> <span class="o">*/</span>
+</span></span><span class="line"><span class="cl"> <span class="n">specialComment</span> <span class="n">specialCommentScanner</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> sqlMode mysql.SQLMode
-</span></span><span class="line"><span class="cl">}
-</span></span><span class="line"><span class="cl">// Lex returns a token and store the token value in v.
-</span></span><span class="line"><span class="cl">// Scanner satisfies yyLexer interface.
-</span></span><span class="line"><span class="cl">// 0 and invalid are special token id this function would return:
-</span></span><span class="line"><span class="cl">// return 0 tells parser that scanner meets EOF,
-</span></span><span class="line"><span class="cl">// return invalid tells parser that scanner meets illegal character.
-</span></span><span class="line"><span class="cl">func (s *Scanner) Lex(v *yySymType) int {
-</span></span><span class="line"><span class="cl"> tok, pos, lit := s.scan()
-</span></span><span class="line"><span class="cl"> v.offset = pos.Offset
-</span></span><span class="line"><span class="cl"> v.ident = lit
-</span></span><span class="line"><span class="cl"> ...
-</span></span><span class="line"><span class="cl">}
-</span></span><span class="line"><span class="cl">// Errors returns the errors during a scan.
-</span></span><span class="line"><span class="cl">func (s *Scanner) Errors() []error {
-</span></span><span class="line"><span class="cl"> return s.errs
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl"> <span class="n">sqlMode</span> <span class="n">mysql</span><span class="o">.</span><span class="n">SQLMode</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Lex</span> <span class="n">returns</span> <span class="n">a</span> <span class="n">token</span> <span class="ow">and</span> <span class="n">store</span> <span class="n">the</span> <span class="n">token</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Scanner</span> <span class="n">satisfies</span> <span class="n">yyLexer</span> <span class="n">interface</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">invalid</span> <span class="n">are</span> <span class="n">special</span> <span class="n">token</span> <span class="n">id</span> <span class="n">this</span> <span class="n">function</span> <span class="n">would</span> <span class="k">return</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="k">return</span> <span class="mi">0</span> <span class="n">tells</span> <span class="n">parser</span> <span class="n">that</span> <span class="n">scanner</span> <span class="n">meets</span> <span class="n">EOF</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="k">return</span> <span class="n">invalid</span> <span class="n">tells</span> <span class="n">parser</span> <span class="n">that</span> <span class="n">scanner</span> <span class="n">meets</span> <span class="n">illegal</span> <span class="n">character</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">Scanner</span><span class="p">)</span> <span class="n">Lex</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span><span class="n">yySymType</span><span class="p">)</span> <span class="ne">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">tok</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">lit</span> <span class="p">:</span><span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"> <span class="n">v</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">Offset</span>
+</span></span><span class="line"><span class="cl"> <span class="n">v</span><span class="o">.</span><span class="n">ident</span> <span class="o">=</span> <span class="n">lit</span>
+</span></span><span class="line"><span class="cl"> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Errors</span> <span class="n">returns</span> <span class="n">the</span> <span class="n">errors</span> <span class="n">during</span> <span class="n">a</span> <span class="n">scan</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">Scanner</span><span class="p">)</span> <span class="n">Errors</span><span class="p">()</span> <span class="p">[]</span><span class="n">error</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">errs</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>另外<code>lexer</code> 使用了<code>字典树</code>技术进行 <code>token</code> 识别，具体的实现代码在<a class="link" href="https://github.com/pingcap/tidb/blob/master/parser/misc.go"  target="_blank" rel="noopener"
@@ -1027,67 +1027,67 @@ if (!doNotTrack) {
 </span><span class="lnt">61
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/* 这部分的token是 ident类型 */
-</span></span><span class="line"><span class="cl">%token &lt;ident&gt;
-</span></span><span class="line"><span class="cl">    ...
-</span></span><span class="line"><span class="cl"> add   &#34;ADD&#34;
-</span></span><span class="line"><span class="cl"> all    &#34;ALL&#34;
-</span></span><span class="line"><span class="cl"> alter   &#34;ALTER&#34;
-</span></span><span class="line"><span class="cl"> analyze   &#34;ANALYZE&#34;
-</span></span><span class="line"><span class="cl"> and   &#34;AND&#34;
-</span></span><span class="line"><span class="cl"> as   &#34;AS&#34;
-</span></span><span class="line"><span class="cl"> asc   &#34;ASC&#34;
-</span></span><span class="line"><span class="cl"> between   &#34;BETWEEN&#34;
-</span></span><span class="line"><span class="cl"> bigIntType  &#34;BIGINT&#34;
-</span></span><span class="line"><span class="cl">    ...
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">/*</span> <span class="err">这部分的</span><span class="n">token是</span> <span class="n">ident类型</span> <span class="o">*/</span>
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">ident</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
+</span></span><span class="line"><span class="cl"> <span class="n">add</span>   <span class="s2">&#34;ADD&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">all</span>    <span class="s2">&#34;ALL&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">alter</span>   <span class="s2">&#34;ALTER&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">analyze</span>   <span class="s2">&#34;ANALYZE&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="ow">and</span>   <span class="s2">&#34;AND&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">as</span>   <span class="s2">&#34;AS&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">asc</span>   <span class="s2">&#34;ASC&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">between</span>   <span class="s2">&#34;BETWEEN&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">bigIntType</span>  <span class="s2">&#34;BIGINT&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">/* 这部分的token是 item 类型 */   
-</span></span><span class="line"><span class="cl">%token &lt;item&gt;
-</span></span><span class="line"><span class="cl">    /*yy:token &#34;1.%d&#34;   */ floatLit        &#34;floating-point literal&#34;
-</span></span><span class="line"><span class="cl"> /*yy:token &#34;1.%d&#34;   */ decLit          &#34;decimal literal&#34;
-</span></span><span class="line"><span class="cl"> /*yy:token &#34;%d&#34;     */ intLit          &#34;integer literal&#34;
-</span></span><span class="line"><span class="cl"> /*yy:token &#34;%x&#34;     */ hexLit          &#34;hexadecimal literal&#34;
-</span></span><span class="line"><span class="cl"> /*yy:token &#34;%b&#34;     */ bitLit          &#34;bit literal&#34;
+</span></span><span class="line"><span class="cl"><span class="o">/*</span> <span class="err">这部分的</span><span class="n">token是</span> <span class="n">item</span> <span class="err">类型</span> <span class="o">*/</span>   
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">/*</span><span class="n">yy</span><span class="p">:</span><span class="n">token</span> <span class="s2">&#34;1.</span><span class="si">%d</span><span class="s2">&#34;</span>   <span class="o">*/</span> <span class="n">floatLit</span>        <span class="s2">&#34;floating-point literal&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="o">/*</span><span class="n">yy</span><span class="p">:</span><span class="n">token</span> <span class="s2">&#34;1.</span><span class="si">%d</span><span class="s2">&#34;</span>   <span class="o">*/</span> <span class="n">decLit</span>          <span class="s2">&#34;decimal literal&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="o">/*</span><span class="n">yy</span><span class="p">:</span><span class="n">token</span> <span class="s2">&#34;</span><span class="si">%d</span><span class="s2">&#34;</span>     <span class="o">*/</span> <span class="n">intLit</span>          <span class="s2">&#34;integer literal&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="o">/*</span><span class="n">yy</span><span class="p">:</span><span class="n">token</span> <span class="s2">&#34;</span><span class="si">%x</span><span class="s2">&#34;</span>     <span class="o">*/</span> <span class="n">hexLit</span>          <span class="s2">&#34;hexadecimal literal&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="o">/*</span><span class="n">yy</span><span class="p">:</span><span class="n">token</span> <span class="s2">&#34;%b&#34;</span>     <span class="o">*/</span> <span class="n">bitLit</span>          <span class="s2">&#34;bit literal&#34;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> andnot  &#34;&amp;^&#34;
-</span></span><span class="line"><span class="cl"> assignmentEq &#34;:=&#34;
-</span></span><span class="line"><span class="cl"> eq  &#34;=&#34;
-</span></span><span class="line"><span class="cl"> ge  &#34;&gt;=&#34;
-</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl"> <span class="n">andnot</span>  <span class="s2">&#34;&amp;^&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">assignmentEq</span> <span class="s2">&#34;:=&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">eq</span>  <span class="s2">&#34;=&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">ge</span>  <span class="s2">&#34;&gt;=&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">/* 非终结符按照类型分别定义 */
-</span></span><span class="line"><span class="cl">%type &lt;expr&gt;
-</span></span><span class="line"><span class="cl">    Expression   &#34;expression&#34;
-</span></span><span class="line"><span class="cl"> BoolPri    &#34;boolean primary expression&#34;
-</span></span><span class="line"><span class="cl"> ExprOrDefault   &#34;expression or default&#34;
-</span></span><span class="line"><span class="cl"> PredicateExpr   &#34;Predicate expression factor&#34;
-</span></span><span class="line"><span class="cl"> SetExpr    &#34;Set variable statement value&#39;s expression&#34;
-</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl"><span class="o">/*</span> <span class="err">非终结符按照类型分别定义</span> <span class="o">*/</span>
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">type</span> <span class="o">&lt;</span><span class="n">expr</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Expression</span>   <span class="s2">&#34;expression&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">BoolPri</span>    <span class="s2">&#34;boolean primary expression&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">ExprOrDefault</span>   <span class="s2">&#34;expression or default&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PredicateExpr</span>   <span class="s2">&#34;Predicate expression factor&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">SetExpr</span>    <span class="s2">&#34;Set variable statement value&#39;s expression&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">%type &lt;statement&gt;
-</span></span><span class="line"><span class="cl"> AdminStmt   &#34;Check table statement or show ddl statement&#34;
-</span></span><span class="line"><span class="cl"> AlterTableStmt   &#34;Alter table statement&#34;
-</span></span><span class="line"><span class="cl"> AlterUserStmt   &#34;Alter user statement&#34;
-</span></span><span class="line"><span class="cl"> AnalyzeTableStmt  &#34;Analyze table statement&#34;
-</span></span><span class="line"><span class="cl"> BeginTransactionStmt  &#34;BEGIN TRANSACTION statement&#34;
-</span></span><span class="line"><span class="cl"> BinlogStmt   &#34;Binlog base64 statement&#34;
-</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">type</span> <span class="o">&lt;</span><span class="n">statement</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AdminStmt</span>   <span class="s2">&#34;Check table statement or show ddl statement&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AlterTableStmt</span>   <span class="s2">&#34;Alter table statement&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AlterUserStmt</span>   <span class="s2">&#34;Alter user statement&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AnalyzeTableStmt</span>  <span class="s2">&#34;Analyze table statement&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">BeginTransactionStmt</span>  <span class="s2">&#34;BEGIN TRANSACTION statement&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">BinlogStmt</span>   <span class="s2">&#34;Binlog base64 statement&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
 </span></span><span class="line"><span class="cl"> 
-</span></span><span class="line"><span class="cl">%type   &lt;item&gt;
-</span></span><span class="line"><span class="cl"> AlterTableOptionListOpt  &#34;alter table option list opt&#34;
-</span></span><span class="line"><span class="cl"> AlterTableSpec   &#34;Alter table specification&#34;
-</span></span><span class="line"><span class="cl"> AlterTableSpecList  &#34;Alter table specification list&#34;
-</span></span><span class="line"><span class="cl"> AnyOrAll   &#34;Any or All for subquery&#34;
-</span></span><span class="line"><span class="cl"> Assignment   &#34;assignment&#34;
-</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">type</span>   <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AlterTableOptionListOpt</span>  <span class="s2">&#34;alter table option list opt&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AlterTableSpec</span>   <span class="s2">&#34;Alter table specification&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AlterTableSpecList</span>  <span class="s2">&#34;Alter table specification list&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">AnyOrAll</span>   <span class="s2">&#34;Any or All for subquery&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">Assignment</span>   <span class="s2">&#34;assignment&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">%type &lt;ident&gt;
-</span></span><span class="line"><span class="cl"> KeyOrIndex  &#34;{KEY|INDEX}&#34;
-</span></span><span class="line"><span class="cl"> ColumnKeywordOpt &#34;Column keyword or empty&#34;
-</span></span><span class="line"><span class="cl"> PrimaryOpt  &#34;Optional primary keyword&#34;
-</span></span><span class="line"><span class="cl"> NowSym   &#34;CURRENT_TIMESTAMP/LOCALTIME/LOCALTIMESTAMP&#34;
-</span></span><span class="line"><span class="cl"> NowSymFunc  &#34;CURRENT_TIMESTAMP/LOCALTIME/LOCALTIMESTAMP/NOW&#34;
-</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">type</span> <span class="o">&lt;</span><span class="n">ident</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">KeyOrIndex</span>  <span class="s2">&#34;{KEY|INDEX}&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">ColumnKeywordOpt</span> <span class="s2">&#34;Column keyword or empty&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PrimaryOpt</span>  <span class="s2">&#34;Optional primary keyword&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">NowSym</span>   <span class="s2">&#34;CURRENT_TIMESTAMP/LOCALTIME/LOCALTIMESTAMP&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="n">NowSymFunc</span>  <span class="s2">&#34;CURRENT_TIMESTAMP/LOCALTIME/LOCALTIMESTAMP/NOW&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>第一部分的最后是对优先级和结合性的定义：</p>
@@ -1154,29 +1154,29 @@ if (!doNotTrack) {
 </span><span class="lnt">23
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SELECT
-</span></span><span class="line"><span class="cl">    [ALL | DISTINCT | DISTINCTROW ]
-</span></span><span class="line"><span class="cl">      [HIGH_PRIORITY]
-</span></span><span class="line"><span class="cl">      [STRAIGHT_JOIN]
-</span></span><span class="line"><span class="cl">      [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
-</span></span><span class="line"><span class="cl">      [SQL_CACHE | SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
-</span></span><span class="line"><span class="cl">    select_expr [, select_expr ...]
-</span></span><span class="line"><span class="cl">    [FROM table_references
-</span></span><span class="line"><span class="cl">      [PARTITION partition_list]
-</span></span><span class="line"><span class="cl">    [WHERE where_condition]
-</span></span><span class="line"><span class="cl">    [GROUP BY {col_name | expr | position}
-</span></span><span class="line"><span class="cl">      [ASC | DESC], ... [WITH ROLLUP]]
-</span></span><span class="line"><span class="cl">    [HAVING where_condition]
-</span></span><span class="line"><span class="cl">    [ORDER BY {col_name | expr | position}
-</span></span><span class="line"><span class="cl">      [ASC | DESC], ...]
-</span></span><span class="line"><span class="cl">    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
-</span></span><span class="line"><span class="cl">    [PROCEDURE procedure_name(argument_list)]
-</span></span><span class="line"><span class="cl">    [INTO OUTFILE &#39;file_name&#39;
-</span></span><span class="line"><span class="cl">        [CHARACTER SET charset_name]
-</span></span><span class="line"><span class="cl">        export_options
-</span></span><span class="line"><span class="cl">      | INTO DUMPFILE &#39;file_name&#39;
-</span></span><span class="line"><span class="cl">      | INTO var_name [, var_name]]
-</span></span><span class="line"><span class="cl">    [FOR UPDATE | LOCK IN SHARE MODE]]
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">SELECT</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">ALL</span> <span class="o">|</span> <span class="n">DISTINCT</span> <span class="o">|</span> <span class="n">DISTINCTROW</span> <span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">HIGH_PRIORITY</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">STRAIGHT_JOIN</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">SQL_SMALL_RESULT</span><span class="p">]</span> <span class="p">[</span><span class="n">SQL_BIG_RESULT</span><span class="p">]</span> <span class="p">[</span><span class="n">SQL_BUFFER_RESULT</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">SQL_CACHE</span> <span class="o">|</span> <span class="n">SQL_NO_CACHE</span><span class="p">]</span> <span class="p">[</span><span class="n">SQL_CALC_FOUND_ROWS</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">select_expr</span> <span class="p">[,</span> <span class="n">select_expr</span> <span class="o">...</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">FROM</span> <span class="n">table_references</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">PARTITION</span> <span class="n">partition_list</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">WHERE</span> <span class="n">where_condition</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">GROUP</span> <span class="n">BY</span> <span class="p">{</span><span class="n">col_name</span> <span class="o">|</span> <span class="n">expr</span> <span class="o">|</span> <span class="n">position</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">ASC</span> <span class="o">|</span> <span class="n">DESC</span><span class="p">],</span> <span class="o">...</span> <span class="p">[</span><span class="n">WITH</span> <span class="n">ROLLUP</span><span class="p">]]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">HAVING</span> <span class="n">where_condition</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">ORDER</span> <span class="n">BY</span> <span class="p">{</span><span class="n">col_name</span> <span class="o">|</span> <span class="n">expr</span> <span class="o">|</span> <span class="n">position</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[</span><span class="n">ASC</span> <span class="o">|</span> <span class="n">DESC</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">LIMIT</span> <span class="p">{[</span><span class="n">offset</span><span class="p">,]</span> <span class="n">row_count</span> <span class="o">|</span> <span class="n">row_count</span> <span class="n">OFFSET</span> <span class="n">offset</span><span class="p">}]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">PROCEDURE</span> <span class="n">procedure_name</span><span class="p">(</span><span class="n">argument_list</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">INTO</span> <span class="n">OUTFILE</span> <span class="s1">&#39;file_name&#39;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="n">CHARACTER</span> <span class="n">SET</span> <span class="n">charset_name</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">export_options</span>
+</span></span><span class="line"><span class="cl">      <span class="o">|</span> <span class="n">INTO</span> <span class="n">DUMPFILE</span> <span class="s1">&#39;file_name&#39;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">|</span> <span class="n">INTO</span> <span class="n">var_name</span> <span class="p">[,</span> <span class="n">var_name</span><span class="p">]]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="n">FOR</span> <span class="n">UPDATE</span> <span class="o">|</span> <span class="n">LOCK</span> <span class="n">IN</span> <span class="n">SHARE</span> <span class="n">MODE</span><span class="p">]]</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>我们可以在 <code>parser.y</code> 中找到 <code>SELECT</code> 语句的产生式：</p>
@@ -1289,10 +1289,10 @@ if (!doNotTrack) {
 </span><span class="lnt">4
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// Parse parses a query string to raw ast.StmtNode.
-</span></span><span class="line"><span class="cl">func (parser *Parser) Parse(sql, charset, collation string) ([]ast.StmtNode, error) {
-</span></span><span class="line"><span class="cl">    ...
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Parse</span> <span class="n">parses</span> <span class="n">a</span> <span class="n">query</span> <span class="n">string</span> <span class="n">to</span> <span class="n">raw</span> <span class="n">ast</span><span class="o">.</span><span class="n">StmtNode</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="k">func</span> <span class="p">(</span><span class="n">parser</span> <span class="o">*</span><span class="n">Parser</span><span class="p">)</span> <span class="n">Parse</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">charset</span><span class="p">,</span> <span class="n">collation</span> <span class="n">string</span><span class="p">)</span> <span class="p">([]</span><span class="n">ast</span><span class="o">.</span><span class="n">StmtNode</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>最后，我写了一个简单的例子，使用TiDB的 <code>SQL Parser</code> 进行SQL语法解析，构建出 <code>AST</code>，然后利用 <code>visitor</code> 遍历 <code>AST</code> ：</p>

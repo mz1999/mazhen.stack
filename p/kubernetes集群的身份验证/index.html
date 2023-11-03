@@ -649,13 +649,13 @@ if (!doNotTrack) {
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># tree /var/lib/kubelet/pki
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="c1"># tree /var/lib/kubelet/pki</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">/var/lib/kubelet/pki
-</span></span><span class="line"><span class="cl">├── kubelet-client-2019-04-28-10-48-13.pem
-</span></span><span class="line"><span class="cl">├── kubelet-client-current.pem -&gt; /var/lib/kubelet/pki/kubelet-client-2019-04-28-10-48-13.pem
-</span></span><span class="line"><span class="cl">├── kubelet.crt   kubelet服务端证书
-</span></span><span class="line"><span class="cl">└── kubelet.key   kubelet服务端私钥
+</span></span><span class="line"><span class="cl"><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">kubelet</span><span class="o">/</span><span class="n">pki</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">kubelet</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="mi">2019</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">28</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">48</span><span class="o">-</span><span class="mf">13.</span><span class="n">pem</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">kubelet</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">current</span><span class="o">.</span><span class="n">pem</span> <span class="o">-&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">kubelet</span><span class="o">/</span><span class="n">pki</span><span class="o">/</span><span class="n">kubelet</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="mi">2019</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">28</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">48</span><span class="o">-</span><span class="mf">13.</span><span class="n">pem</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">crt</span>   <span class="n">kubelet服务端证书</span>
+</span></span><span class="line"><span class="cl"><span class="err">└──</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">key</span>   <span class="n">kubelet服务端私钥</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>另外，<code>API server</code>有很多认证相关的<a class="link" href="https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/#options"  target="_blank" rel="noopener"
@@ -1113,24 +1113,24 @@ if (!doNotTrack) {
 </span><span class="lnt">18
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &#34; &#34; -f 7
-</span></span><span class="line"><span class="cl">eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im5naW54LWV4YW1wbGUtdG9rZW4tcjJjdjYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibmdpbngtZXhhbXBsZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjBmZWRlOWM1LTc2YjUtMTFlOS05MWNhLTAwNTA1NmFjMWMxYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0Om5naW54LWV4YW1wbGUifQ.VOjVQBr5PKg1WyZYtIW0Fos5fxFN4cYE3Mz9p1eWbQP6rQRQGDEiGX-LBuM6ECI9cpSL-F4nYQAL9vmIlA4vbAgS4OFgC4nwu8SzLu2FVeE7RDpguvsdAsj-4T_LxEGX1RPljGTpvlt8HRjTnp9K8W4dy7PyJQEB5XvCf-IVNAs3zESgmuJ7wJwO7mXQe5WdeqhI5vXjcZiXP97oH0VRYT1vTKVP-GooC5YfaNhU7rHoJ0gmR10xNqZjwKGsHKkq5maC5BOrXFLlHRqVRwm9-hRn-ZLgAoCwujCIpLvPaFUR8HaatzX4GQ_HWev2soJnk1qcav0smxfjC-fu540vZA
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">kubectl</span> <span class="n">describe</span> <span class="n">secrets</span> <span class="n">nginx</span><span class="o">-</span><span class="n">example</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">r2cv6</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">token</span><span class="p">:</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34; &#34;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">7</span>
+</span></span><span class="line"><span class="cl"><span class="n">eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9</span><span class="o">.</span><span class="n">eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im5naW54LWV4YW1wbGUtdG9rZW4tcjJjdjYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibmdpbngtZXhhbXBsZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjBmZWRlOWM1LTc2YjUtMTFlOS05MWNhLTAwNTA1NmFjMWMxYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0Om5naW54LWV4YW1wbGUifQ</span><span class="o">.</span><span class="n">VOjVQBr5PKg1WyZYtIW0Fos5fxFN4cYE3Mz9p1eWbQP6rQRQGDEiGX</span><span class="o">-</span><span class="n">LBuM6ECI9cpSL</span><span class="o">-</span><span class="n">F4nYQAL9vmIlA4vbAgS4OFgC4nwu8SzLu2FVeE7RDpguvsdAsj</span><span class="o">-</span><span class="mi">4</span><span class="n">T_LxEGX1RPljGTpvlt8HRjTnp9K8W4dy7PyJQEB5XvCf</span><span class="o">-</span><span class="n">IVNAs3zESgmuJ7wJwO7mXQe5WdeqhI5vXjcZiXP97oH0VRYT1vTKVP</span><span class="o">-</span><span class="n">GooC5YfaNhU7rHoJ0gmR10xNqZjwKGsHKkq5maC5BOrXFLlHRqVRwm9</span><span class="o">-</span><span class="n">hRn</span><span class="o">-</span><span class="n">ZLgAoCwujCIpLvPaFUR8HaatzX4GQ_HWev2soJnk1qcav0smxfjC</span><span class="o">-</span><span class="n">fu540vZA</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &#34; &#34; -f 7 | cut -d &#34;.&#34; -f 1 | base64 -d | python -mjson.tool
-</span></span><span class="line"><span class="cl">{
-</span></span><span class="line"><span class="cl">    &#34;alg&#34;: &#34;RS256&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kid&#34;: &#34;&#34;
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl"><span class="o">$</span> <span class="n">kubectl</span> <span class="n">describe</span> <span class="n">secrets</span> <span class="n">nginx</span><span class="o">-</span><span class="n">example</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">r2cv6</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">token</span><span class="p">:</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34; &#34;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">7</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34;.&#34;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">base64</span> <span class="o">-</span><span class="n">d</span> <span class="o">|</span> <span class="n">python</span> <span class="o">-</span><span class="n">mjson</span><span class="o">.</span><span class="k">tool</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;alg&#34;</span><span class="p">:</span> <span class="s2">&#34;RS256&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kid&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">$ kubectl describe secrets nginx-example-token-r2cv6 | grep token: | cut -d &#34; &#34; -f 7 | cut -d &#34;.&#34; -f 2 | base64 -d | python -mjson.tool
-</span></span><span class="line"><span class="cl">{
-</span></span><span class="line"><span class="cl">    &#34;iss&#34;: &#34;kubernetes/serviceaccount&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/namespace&#34;: &#34;default&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/secret.name&#34;: &#34;nginx-example-token-r2cv6&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.name&#34;: &#34;nginx-example&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.uid&#34;: &#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&#34;,
-</span></span><span class="line"><span class="cl">    &#34;sub&#34;: &#34;system:serviceaccount:default:nginx-example&#34;
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl"><span class="o">$</span> <span class="n">kubectl</span> <span class="n">describe</span> <span class="n">secrets</span> <span class="n">nginx</span><span class="o">-</span><span class="n">example</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">r2cv6</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">token</span><span class="p">:</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34; &#34;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">7</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34;.&#34;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">base64</span> <span class="o">-</span><span class="n">d</span> <span class="o">|</span> <span class="n">python</span> <span class="o">-</span><span class="n">mjson</span><span class="o">.</span><span class="k">tool</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;iss&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes/serviceaccount&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/namespace&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/secret.name&#34;</span><span class="p">:</span> <span class="s2">&#34;nginx-example-token-r2cv6&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/service-account.name&#34;</span><span class="p">:</span> <span class="s2">&#34;nginx-example&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/service-account.uid&#34;</span><span class="p">:</span> <span class="s2">&#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;sub&#34;</span><span class="p">:</span> <span class="s2">&#34;system:serviceaccount:default:nginx-example&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>Header</code>中的<code>alg</code>指明了签名用到的加密算法，<code>Payload</code> 中包含了用户的身份信息，可以知道这个<code>service account</code>属于的<code>namespace</code>为<code>default</code>，名称为<code>nginx-example</code>。</p>
@@ -1143,10 +1143,10 @@ if (!doNotTrack) {
 </span><span class="lnt">4
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PKCSSHA256(
-</span></span><span class="line"><span class="cl">  base64UrlEncode(header) + &#34;.&#34; +
-</span></span><span class="line"><span class="cl">  base64UrlEncode(payload),
-</span></span><span class="line"><span class="cl">  secret)
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">PKCSSHA256</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">base64UrlEncode</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&#34;.&#34;</span> <span class="o">+</span>
+</span></span><span class="line"><span class="cl">  <span class="n">base64UrlEncode</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="n">secret</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>controller-manager</code>用<code>sa.key</code>签名，<code>API Server</code>用公钥<code>sa.pub</code>验签，进行身份验证。</p>
@@ -1195,10 +1195,10 @@ if (!doNotTrack) {
 </span><span class="lnt">4
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl exec firstpod -- ls  /var/run/secrets/kubernetes.io/serviceaccount
-</span></span><span class="line"><span class="cl">ca.crt
-</span></span><span class="line"><span class="cl">namespace
-</span></span><span class="line"><span class="cl">token
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">kubectl</span> <span class="n">exec</span> <span class="n">firstpod</span> <span class="o">--</span> <span class="n">ls</span>  <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">secrets</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">serviceaccount</span>
+</span></span><span class="line"><span class="cl"><span class="n">ca</span><span class="o">.</span><span class="n">crt</span>
+</span></span><span class="line"><span class="cl"><span class="n">namespace</span>
+</span></span><span class="line"><span class="cl"><span class="n">token</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>查看<code>Pod</code>内文件<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>的内容：</p>
@@ -1215,15 +1215,15 @@ if (!doNotTrack) {
 </span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ kubectl exec firstpod -- cat  /var/run/secrets/kubernetes.io/serviceaccount/token | cut -d &#34;.&#34; -f 2 | base64 -d | python -mjson.tool
-</span></span><span class="line"><span class="cl">{
-</span></span><span class="line"><span class="cl">    &#34;iss&#34;: &#34;kubernetes/serviceaccount&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/namespace&#34;: &#34;default&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/secret.name&#34;: &#34;nginx-example-token-r2cv6&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.name&#34;: &#34;nginx-example&#34;,
-</span></span><span class="line"><span class="cl">    &#34;kubernetes.io/serviceaccount/service-account.uid&#34;: &#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&#34;,
-</span></span><span class="line"><span class="cl">    &#34;sub&#34;: &#34;system:serviceaccount:default:nginx-example&#34;
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">kubectl</span> <span class="n">exec</span> <span class="n">firstpod</span> <span class="o">--</span> <span class="n">cat</span>  <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">secrets</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">serviceaccount</span><span class="o">/</span><span class="n">token</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34;.&#34;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">base64</span> <span class="o">-</span><span class="n">d</span> <span class="o">|</span> <span class="n">python</span> <span class="o">-</span><span class="n">mjson</span><span class="o">.</span><span class="k">tool</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;iss&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes/serviceaccount&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/namespace&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/secret.name&#34;</span><span class="p">:</span> <span class="s2">&#34;nginx-example-token-r2cv6&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/service-account.name&#34;</span><span class="p">:</span> <span class="s2">&#34;nginx-example&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;kubernetes.io/serviceaccount/service-account.uid&#34;</span><span class="p">:</span> <span class="s2">&#34;0fede9c5-76b5-11e9-91ca-005056ac1c1c&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;sub&#34;</span><span class="p">:</span> <span class="s2">&#34;system:serviceaccount:default:nginx-example&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到，映射进<code>Pod</code>中的<code>token</code>，正是我们在配置中通过<code>serviceAccountName</code>指定的<code>nginx-example</code>。<code>Pod</code>中的进程可以通过访问文件<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>拿到<code>token</code>。</p>

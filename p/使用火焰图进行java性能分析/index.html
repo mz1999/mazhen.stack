@@ -658,7 +658,7 @@ if (!doNotTrack) {
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt install linux-tools-$(uname -r) linux-tools-generic
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="o">-$</span><span class="p">(</span><span class="n">uname</span> <span class="o">-</span><span class="n">r</span><span class="p">)</span> <span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="o">-</span><span class="n">generic</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>perf</code>的功能强大，支持硬件计数器统计，定时采样，静态和动态tracing等。本文只介绍几个常用的使用场景，如果想全面的了解<code>perf</code>的使用，可以参考<a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
@@ -947,25 +947,25 @@ if (!doNotTrack) {
 </span><span class="lnt">19
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-&gt; % sudo /usr/share/bcc/tools/biolatency
-</span></span><span class="line"><span class="cl">Tracing block device I/O... Hit Ctrl-C to end.
-</span></span><span class="line"><span class="cl">^C
-</span></span><span class="line"><span class="cl">     usecs               : count     distribution
-</span></span><span class="line"><span class="cl">         0 -&gt; 1          : 0        |                                        |
-</span></span><span class="line"><span class="cl">         2 -&gt; 3          : 0        |                                        |
-</span></span><span class="line"><span class="cl">         4 -&gt; 7          : 0        |                                        |
-</span></span><span class="line"><span class="cl">         8 -&gt; 15         : 0        |                                        |
-</span></span><span class="line"><span class="cl">        16 -&gt; 31         : 2        |***                                     |
-</span></span><span class="line"><span class="cl">        32 -&gt; 63         : 0        |                                        |
-</span></span><span class="line"><span class="cl">        64 -&gt; 127        : 3        |*****                                   |
-</span></span><span class="line"><span class="cl">       128 -&gt; 255        : 7        |***********                             |
-</span></span><span class="line"><span class="cl">       256 -&gt; 511        : 6        |**********                              |
-</span></span><span class="line"><span class="cl">       512 -&gt; 1023       : 11       |******************                      |
-</span></span><span class="line"><span class="cl">      1024 -&gt; 2047       : 16       |**************************              |
-</span></span><span class="line"><span class="cl">      2048 -&gt; 4095       : 24       |****************************************|
-</span></span><span class="line"><span class="cl">      4096 -&gt; 8191       : 1        |*                                       |
-</span></span><span class="line"><span class="cl">      8192 -&gt; 16383      : 6        |**********                              |
-</span></span><span class="line"><span class="cl">     16384 -&gt; 32767      : 3        |*****                                   |
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">-&gt;</span> <span class="o">%</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">bcc</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">biolatency</span>
+</span></span><span class="line"><span class="cl"><span class="n">Tracing</span> <span class="n">block</span> <span class="n">device</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span><span class="o">...</span> <span class="n">Hit</span> <span class="n">Ctrl</span><span class="o">-</span><span class="n">C</span> <span class="n">to</span> <span class="n">end</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">^</span><span class="n">C</span>
+</span></span><span class="line"><span class="cl">     <span class="n">usecs</span>               <span class="p">:</span> <span class="n">count</span>     <span class="n">distribution</span>
+</span></span><span class="line"><span class="cl">         <span class="mi">0</span> <span class="o">-&gt;</span> <span class="mi">1</span>          <span class="p">:</span> <span class="mi">0</span>        <span class="o">|</span>                                        <span class="o">|</span>
+</span></span><span class="line"><span class="cl">         <span class="mi">2</span> <span class="o">-&gt;</span> <span class="mi">3</span>          <span class="p">:</span> <span class="mi">0</span>        <span class="o">|</span>                                        <span class="o">|</span>
+</span></span><span class="line"><span class="cl">         <span class="mi">4</span> <span class="o">-&gt;</span> <span class="mi">7</span>          <span class="p">:</span> <span class="mi">0</span>        <span class="o">|</span>                                        <span class="o">|</span>
+</span></span><span class="line"><span class="cl">         <span class="mi">8</span> <span class="o">-&gt;</span> <span class="mi">15</span>         <span class="p">:</span> <span class="mi">0</span>        <span class="o">|</span>                                        <span class="o">|</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">16</span> <span class="o">-&gt;</span> <span class="mi">31</span>         <span class="p">:</span> <span class="mi">2</span>        <span class="o">|***</span>                                     <span class="o">|</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">32</span> <span class="o">-&gt;</span> <span class="mi">63</span>         <span class="p">:</span> <span class="mi">0</span>        <span class="o">|</span>                                        <span class="o">|</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">64</span> <span class="o">-&gt;</span> <span class="mi">127</span>        <span class="p">:</span> <span class="mi">3</span>        <span class="o">|*****</span>                                   <span class="o">|</span>
+</span></span><span class="line"><span class="cl">       <span class="mi">128</span> <span class="o">-&gt;</span> <span class="mi">255</span>        <span class="p">:</span> <span class="mi">7</span>        <span class="o">|***********</span>                             <span class="o">|</span>
+</span></span><span class="line"><span class="cl">       <span class="mi">256</span> <span class="o">-&gt;</span> <span class="mi">511</span>        <span class="p">:</span> <span class="mi">6</span>        <span class="o">|**********</span>                              <span class="o">|</span>
+</span></span><span class="line"><span class="cl">       <span class="mi">512</span> <span class="o">-&gt;</span> <span class="mi">1023</span>       <span class="p">:</span> <span class="mi">11</span>       <span class="o">|******************</span>                      <span class="o">|</span>
+</span></span><span class="line"><span class="cl">      <span class="mi">1024</span> <span class="o">-&gt;</span> <span class="mi">2047</span>       <span class="p">:</span> <span class="mi">16</span>       <span class="o">|**************************</span>              <span class="o">|</span>
+</span></span><span class="line"><span class="cl">      <span class="mi">2048</span> <span class="o">-&gt;</span> <span class="mi">4095</span>       <span class="p">:</span> <span class="mi">24</span>       <span class="o">|****************************************|</span>
+</span></span><span class="line"><span class="cl">      <span class="mi">4096</span> <span class="o">-&gt;</span> <span class="mi">8191</span>       <span class="p">:</span> <span class="mi">1</span>        <span class="o">|*</span>                                       <span class="o">|</span>
+</span></span><span class="line"><span class="cl">      <span class="mi">8192</span> <span class="o">-&gt;</span> <span class="mi">16383</span>      <span class="p">:</span> <span class="mi">6</span>        <span class="o">|**********</span>                              <span class="o">|</span>
+</span></span><span class="line"><span class="cl">     <span class="mi">16384</span> <span class="o">-&gt;</span> <span class="mi">32767</span>      <span class="p">:</span> <span class="mi">3</span>        <span class="o">|*****</span>                                   <span class="o">|</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>biolatency</code>展示的直方图比<code>iostat</code>的平均值能更好的理解磁盘<code>I/O</code>性能。</p>
@@ -1088,21 +1088,21 @@ if (!doNotTrack) {
 </span><span class="lnt">15
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-&gt; % sudo bpftrace /usr/local/share/bpftrace/tools/biolatency.bt
-</span></span><span class="line"><span class="cl">Attaching 4 probes...
-</span></span><span class="line"><span class="cl">Tracing block device I/O... Hit Ctrl-C to end.
-</span></span><span class="line"><span class="cl">^C
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">-&gt;</span> <span class="o">%</span> <span class="n">sudo</span> <span class="n">bpftrace</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">bpftrace</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">biolatency</span><span class="o">.</span><span class="n">bt</span>
+</span></span><span class="line"><span class="cl"><span class="n">Attaching</span> <span class="mi">4</span> <span class="n">probes</span><span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">Tracing</span> <span class="n">block</span> <span class="n">device</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span><span class="o">...</span> <span class="n">Hit</span> <span class="n">Ctrl</span><span class="o">-</span><span class="n">C</span> <span class="n">to</span> <span class="n">end</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">^</span><span class="n">C</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">@usecs: 
-</span></span><span class="line"><span class="cl">[128, 256)             6 |@@@@@@@@@@                                          |
-</span></span><span class="line"><span class="cl">[256, 512)             4 |@@@@@@                                              |
-</span></span><span class="line"><span class="cl">[512, 1K)              8 |@@@@@@@@@@@@@                                       |
-</span></span><span class="line"><span class="cl">[1K, 2K)              20 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                  |
-</span></span><span class="line"><span class="cl">[2K, 4K)              30 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
-</span></span><span class="line"><span class="cl">[4K, 8K)               1 |@                                                   |
-</span></span><span class="line"><span class="cl">[8K, 16K)              3 |@@@@@                                               |
-</span></span><span class="line"><span class="cl">[16K, 32K)             0 |                                                    |
-</span></span><span class="line"><span class="cl">[32K, 64K)             2 |@@@                                                 |
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">usecs</span><span class="p">:</span> 
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>             <span class="mi">6</span> <span class="o">|</span><span class="err">@@@@@@@@@@</span>                                          <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>             <span class="mi">4</span> <span class="o">|</span><span class="err">@@@@@@</span>                                              <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">1</span><span class="n">K</span><span class="p">)</span>              <span class="mi">8</span> <span class="o">|</span><span class="err">@@@@@@@@@@@@@</span>                                       <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">1</span><span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="n">K</span><span class="p">)</span>              <span class="mi">20</span> <span class="o">|</span><span class="err">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span>                  <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">2</span><span class="n">K</span><span class="p">,</span> <span class="mi">4</span><span class="n">K</span><span class="p">)</span>              <span class="mi">30</span> <span class="o">|</span><span class="err">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">4</span><span class="n">K</span><span class="p">,</span> <span class="mi">8</span><span class="n">K</span><span class="p">)</span>               <span class="mi">1</span> <span class="o">|</span><span class="err">@</span>                                                   <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">8</span><span class="n">K</span><span class="p">,</span> <span class="mi">16</span><span class="n">K</span><span class="p">)</span>              <span class="mi">3</span> <span class="o">|</span><span class="err">@@@@@</span>                                               <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">16</span><span class="n">K</span><span class="p">,</span> <span class="mi">32</span><span class="n">K</span><span class="p">)</span>             <span class="mi">0</span> <span class="o">|</span>                                                    <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="mi">32</span><span class="n">K</span><span class="p">,</span> <span class="mi">64</span><span class="n">K</span><span class="p">)</span>             <span class="mi">2</span> <span class="o">|</span><span class="err">@@@</span>                                                 <span class="o">|</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>关于<code>bpftrace</code>脚本编写不在本文的讨论范围，感兴趣的可以参考<a class="link" href="https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md"  target="_blank" rel="noopener"
@@ -1234,10 +1234,10 @@ if (!doNotTrack) {
 </span><span class="lnt">4
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/jvm-profiling-tools/perf-map-agent.git
-</span></span><span class="line"><span class="cl">cd perf-map-agent
-</span></span><span class="line"><span class="cl">cmake .
-</span></span><span class="line"><span class="cl">make
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jvm</span><span class="o">-</span><span class="n">profiling</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">perf</span><span class="o">-</span><span class="n">map</span><span class="o">-</span><span class="n">agent</span><span class="o">.</span><span class="n">git</span>
+</span></span><span class="line"><span class="cl"><span class="n">cd</span> <span class="n">perf</span><span class="o">-</span><span class="n">map</span><span class="o">-</span><span class="n">agent</span>
+</span></span><span class="line"><span class="cl"><span class="n">cmake</span> <span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">make</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h4 id="配合perf使用">配合<code>perf</code>使用</h4>
@@ -1306,8 +1306,8 @@ if (!doNotTrack) {
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-8-oracle}
-</span></span><span class="line"><span class="cl">AGENT_HOME=${AGENT_HOME:-/usr/lib/jvm/perf-map-agent} # from https://github.com/jvm-profiling-tools/perf-map-agent
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">JAVA_HOME</span><span class="o">=$</span><span class="p">{</span><span class="n">JAVA_HOME</span><span class="p">:</span><span class="o">-/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">java</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">oracle</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">AGENT_HOME</span><span class="o">=$</span><span class="p">{</span><span class="n">AGENT_HOME</span><span class="p">:</span><span class="o">-/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">perf</span><span class="o">-</span><span class="n">map</span><span class="o">-</span><span class="n">agent</span><span class="p">}</span> <span class="c1"># from https://github.com/jvm-profiling-tools/perf-map-agent</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>运行<code>jmaps</code>，可以看到它会为当前所有的Java进程生成符号表：</p>
@@ -1338,11 +1338,11 @@ if (!doNotTrack) {
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Profiling
-</span></span><span class="line"><span class="cl">sudo ./jmaps ; sudo /usr/share/bcc/tools/profile -dF 99 -afp [PID] 10 &gt; out.profile01.txt
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="c1"># Profiling</span>
+</span></span><span class="line"><span class="cl"><span class="n">sudo</span> <span class="o">./</span><span class="n">jmaps</span> <span class="p">;</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">bcc</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">profile</span> <span class="o">-</span><span class="n">dF</span> <span class="mi">99</span> <span class="o">-</span><span class="n">afp</span> <span class="p">[</span><span class="n">PID</span><span class="p">]</span> <span class="mi">10</span> <span class="o">&gt;</span> <span class="n">out</span><span class="o">.</span><span class="n">profile01</span><span class="o">.</span><span class="n">txt</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 生成火焰图
-</span></span><span class="line"><span class="cl">./flamegraph.pl --color=java --hash &lt;out.profile01.txt &gt; flamegraph.svg
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成火焰图</span>
+</span></span><span class="line"><span class="cl"><span class="o">./</span><span class="n">flamegraph</span><span class="o">.</span><span class="n">pl</span> <span class="o">--</span><span class="n">color</span><span class="o">=</span><span class="n">java</span> <span class="o">--</span><span class="nb">hash</span> <span class="o">&lt;</span><span class="n">out</span><span class="o">.</span><span class="n">profile01</span><span class="o">.</span><span class="n">txt</span> <span class="o">&gt;</span> <span class="n">flamegraph</span><span class="o">.</span><span class="n">svg</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
@@ -1357,11 +1357,11 @@ if (!doNotTrack) {
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Profiling
-</span></span><span class="line"><span class="cl">sudo ./jmaps ; sudo /usr/share/bcc/tools/offcputime -fp [PID] 10 &gt; out.offcpu01.txt
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="c1"># Profiling</span>
+</span></span><span class="line"><span class="cl"><span class="n">sudo</span> <span class="o">./</span><span class="n">jmaps</span> <span class="p">;</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">bcc</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">offcputime</span> <span class="o">-</span><span class="n">fp</span> <span class="p">[</span><span class="n">PID</span><span class="p">]</span> <span class="mi">10</span> <span class="o">&gt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">txt</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 生成火焰图
-</span></span><span class="line"><span class="cl">./flamegraph.pl --color=java --bgcolor=blue --hash --countname=us --width=1024 --title=&#34;Off-CPU Time Flame Graph&#34; &lt; out.offcpu01.txt &gt; out.offcpu01.svg
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成火焰图</span>
+</span></span><span class="line"><span class="cl"><span class="o">./</span><span class="n">flamegraph</span><span class="o">.</span><span class="n">pl</span> <span class="o">--</span><span class="n">color</span><span class="o">=</span><span class="n">java</span> <span class="o">--</span><span class="n">bgcolor</span><span class="o">=</span><span class="n">blue</span> <span class="o">--</span><span class="nb">hash</span> <span class="o">--</span><span class="n">countname</span><span class="o">=</span><span class="n">us</span> <span class="o">--</span><span class="n">width</span><span class="o">=</span><span class="mi">1024</span> <span class="o">--</span><span class="n">title</span><span class="o">=</span><span class="s2">&#34;Off-CPU Time Flame Graph&#34;</span> <span class="o">&lt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">txt</span> <span class="o">&gt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">svg</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
@@ -1408,11 +1408,11 @@ if (!doNotTrack) {
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Profiling
-</span></span><span class="line"><span class="cl">sudo ./jmaps ; sudo /usr/share/bcc/tools/offcputime -K --state 2 -f 30 &gt; out.offcpu01.txt
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="c1"># Profiling</span>
+</span></span><span class="line"><span class="cl"><span class="n">sudo</span> <span class="o">./</span><span class="n">jmaps</span> <span class="p">;</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">bcc</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">offcputime</span> <span class="o">-</span><span class="n">K</span> <span class="o">--</span><span class="n">state</span> <span class="mi">2</span> <span class="o">-</span><span class="n">f</span> <span class="mi">30</span> <span class="o">&gt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">txt</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 生成火焰图
-</span></span><span class="line"><span class="cl">./flamegraph.pl --color=io --countname=ms &lt; out.offcpu01.txt &gt; out.offcpu01.svg
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成火焰图</span>
+</span></span><span class="line"><span class="cl"><span class="o">./</span><span class="n">flamegraph</span><span class="o">.</span><span class="n">pl</span> <span class="o">--</span><span class="n">color</span><span class="o">=</span><span class="n">io</span> <span class="o">--</span><span class="n">countname</span><span class="o">=</span><span class="n">ms</span> <span class="o">&lt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">txt</span> <span class="o">&gt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">svg</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="async-profiler">async-profiler</h3>
@@ -1438,20 +1438,20 @@ if (!doNotTrack) {
 </span><span class="lnt">14
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">typedef struct {
-</span></span><span class="line"><span class="cl">  jint lineno;         // BCI in the source file
-</span></span><span class="line"><span class="cl">  jmethodID method_id; // method executed in this frame
-</span></span><span class="line"><span class="cl">} ASGCT_CallFrame;
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">typedef</span> <span class="n">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">jint</span> <span class="n">lineno</span><span class="p">;</span>         <span class="o">//</span> <span class="n">BCI</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">source</span> <span class="n">file</span>
+</span></span><span class="line"><span class="cl">  <span class="n">jmethodID</span> <span class="n">method_id</span><span class="p">;</span> <span class="o">//</span> <span class="n">method</span> <span class="n">executed</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">frame</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">ASGCT_CallFrame</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">typedef struct {
-</span></span><span class="line"><span class="cl">  JNIEnv *env_id   //Env where trace was recorded
-</span></span><span class="line"><span class="cl">  jint num_frames; // number of frames in this trace
-</span></span><span class="line"><span class="cl">  ASGCT_CallFrame *frames;
-</span></span><span class="line"><span class="cl">} ASGCT_CallTrace; 
+</span></span><span class="line"><span class="cl"><span class="n">typedef</span> <span class="n">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">JNIEnv</span> <span class="o">*</span><span class="n">env_id</span>   <span class="o">//</span><span class="n">Env</span> <span class="n">where</span> <span class="n">trace</span> <span class="n">was</span> <span class="n">recorded</span>
+</span></span><span class="line"><span class="cl">  <span class="n">jint</span> <span class="n">num_frames</span><span class="p">;</span> <span class="o">//</span> <span class="n">number</span> <span class="n">of</span> <span class="n">frames</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">trace</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ASGCT_CallFrame</span> <span class="o">*</span><span class="n">frames</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">ASGCT_CallTrace</span><span class="p">;</span> 
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">void AsyncGetCallTrace(ASGCT_CallTrace *trace, // pre-allocated trace to fill
-</span></span><span class="line"><span class="cl">                       jint depth,             // max number of frames to walk up the stack
-</span></span><span class="line"><span class="cl">                       void* ucontext)         // signal context
+</span></span><span class="line"><span class="cl"><span class="n">void</span> <span class="n">AsyncGetCallTrace</span><span class="p">(</span><span class="n">ASGCT_CallTrace</span> <span class="o">*</span><span class="n">trace</span><span class="p">,</span> <span class="o">//</span> <span class="n">pre</span><span class="o">-</span><span class="n">allocated</span> <span class="n">trace</span> <span class="n">to</span> <span class="n">fill</span>
+</span></span><span class="line"><span class="cl">                       <span class="n">jint</span> <span class="n">depth</span><span class="p">,</span>             <span class="o">//</span> <span class="nb">max</span> <span class="n">number</span> <span class="n">of</span> <span class="n">frames</span> <span class="n">to</span> <span class="n">walk</span> <span class="n">up</span> <span class="n">the</span> <span class="n">stack</span>
+</span></span><span class="line"><span class="cl">                       <span class="n">void</span><span class="o">*</span> <span class="n">ucontext</span><span class="p">)</span>         <span class="o">//</span> <span class="k">signal</span> <span class="n">context</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看出，该函数直接通过<code>ucontext</code>就能获取到完整的Java调用栈。</p>

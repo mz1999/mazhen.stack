@@ -511,31 +511,31 @@ if (!doNotTrack) {
 </span><span class="lnt">25
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">func foo(s []string) {
-</span></span><span class="line"><span class="cl"> fmt.Println(&#34;======= func foo =======&#34;)
-</span></span><span class="line"><span class="cl"> s = append(s, &#34;f&#34;)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;&amp;s: %p \n&#34;, &amp;s)
-</span></span><span class="line"><span class="cl"> fmt.Println(&#34;========================\n&#34;)
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="k">func</span> <span class="n">foo</span><span class="p">(</span><span class="n">s</span> <span class="p">[]</span><span class="n">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&#34;======= func foo =======&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">s</span> <span class="o">=</span> <span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&#34;f&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;%#v </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;%#v </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">SliceHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;&amp;s: %p </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&#34;========================</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">func main() {
+</span></span><span class="line"><span class="cl"><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   ......
+</span></span><span class="line"><span class="cl">   <span class="o">......</span>
 </span></span><span class="line"><span class="cl">   
-</span></span><span class="line"><span class="cl"> s = append(s, &#34;e&#34;)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;&amp;s: %p \n&#34;, &amp;s)
-</span></span><span class="line"><span class="cl"> fmt.Println()
+</span></span><span class="line"><span class="cl"> <span class="n">s</span> <span class="o">=</span> <span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&#34;e&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;%#v </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;%#v </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">SliceHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;&amp;s: %p </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> foo(s)
+</span></span><span class="line"><span class="cl"> <span class="n">foo</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, s)
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;%#v \n&#34;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;s)))
-</span></span><span class="line"><span class="cl"> fmt.Printf(&#34;&amp;s: %p \n&#34;, &amp;s)
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;%#v </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;%#v </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">SliceHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&#34;&amp;s: %p </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>运行结果为：</p>
@@ -595,29 +595,29 @@ if (!doNotTrack) {
 </span><span class="lnt">23
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// String converts slice to string without copy.
-</span></span><span class="line"><span class="cl">// Use at your own risk.
-</span></span><span class="line"><span class="cl">func String(b []byte) (s string) {
-</span></span><span class="line"><span class="cl"> if len(b) == 0 {
-</span></span><span class="line"><span class="cl">  return &#34;&#34;
-</span></span><span class="line"><span class="cl"> }
-</span></span><span class="line"><span class="cl"> pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&amp;b))
-</span></span><span class="line"><span class="cl"> pstring := (*reflect.StringHeader)(unsafe.Pointer(&amp;s))
-</span></span><span class="line"><span class="cl"> pstring.Data = pbytes.Data
-</span></span><span class="line"><span class="cl"> pstring.Len = pbytes.Len
-</span></span><span class="line"><span class="cl"> return
-</span></span><span class="line"><span class="cl">}
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">//</span> <span class="ne">String</span> <span class="n">converts</span> <span class="n">slice</span> <span class="n">to</span> <span class="n">string</span> <span class="n">without</span> <span class="n">copy</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Use</span> <span class="n">at</span> <span class="n">your</span> <span class="n">own</span> <span class="n">risk</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="k">func</span> <span class="ne">String</span><span class="p">(</span><span class="n">b</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="p">(</span><span class="n">s</span> <span class="n">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="n">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pbytes</span> <span class="p">:</span><span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">SliceHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">b</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pstring</span> <span class="p">:</span><span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">StringHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pstring</span><span class="o">.</span><span class="n">Data</span> <span class="o">=</span> <span class="n">pbytes</span><span class="o">.</span><span class="n">Data</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pstring</span><span class="o">.</span><span class="n">Len</span> <span class="o">=</span> <span class="n">pbytes</span><span class="o">.</span><span class="n">Len</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">// Slice converts string to slice without copy.
-</span></span><span class="line"><span class="cl">// Use at your own risk.
-</span></span><span class="line"><span class="cl">func Slice(s string) (b []byte) {
-</span></span><span class="line"><span class="cl"> pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&amp;b))
-</span></span><span class="line"><span class="cl"> pstring := (*reflect.StringHeader)(unsafe.Pointer(&amp;s))
-</span></span><span class="line"><span class="cl"> pbytes.Data = pstring.Data
-</span></span><span class="line"><span class="cl"> pbytes.Len = pstring.Len
-</span></span><span class="line"><span class="cl"> pbytes.Cap = pstring.Len
-</span></span><span class="line"><span class="cl"> return
-</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Slice</span> <span class="n">converts</span> <span class="n">string</span> <span class="n">to</span> <span class="n">slice</span> <span class="n">without</span> <span class="n">copy</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Use</span> <span class="n">at</span> <span class="n">your</span> <span class="n">own</span> <span class="n">risk</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="k">func</span> <span class="n">Slice</span><span class="p">(</span><span class="n">s</span> <span class="n">string</span><span class="p">)</span> <span class="p">(</span><span class="n">b</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pbytes</span> <span class="p">:</span><span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">SliceHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">b</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pstring</span> <span class="p">:</span><span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">reflect</span><span class="o">.</span><span class="n">StringHeader</span><span class="p">)(</span><span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pbytes</span><span class="o">.</span><span class="n">Data</span> <span class="o">=</span> <span class="n">pstring</span><span class="o">.</span><span class="n">Data</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pbytes</span><span class="o">.</span><span class="n">Len</span> <span class="o">=</span> <span class="n">pstring</span><span class="o">.</span><span class="n">Len</span>
+</span></span><span class="line"><span class="cl"> <span class="n">pbytes</span><span class="o">.</span><span class="n">Cap</span> <span class="o">=</span> <span class="n">pstring</span><span class="o">.</span><span class="n">Len</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>上面两个函数实现了<code>[]byte</code>和<code>string</code>的互相转换，不需要底层数组的copy。</p>
