@@ -12,7 +12,17 @@
         <pubDate>Mon, 06 Nov 2023 11:18:06 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</guid>
-        <description>&lt;h2 id=&#34;perf-是什么&#34;&gt;perf 是什么&lt;/h2&gt;
+        <description>&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202311211430792.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;title&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;perf-是什么&#34;&gt;perf 是什么&lt;/h2&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf&lt;/a&gt; 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：&lt;/p&gt;
 &lt;ul&gt;
