@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子'>
+<title>深入探索 perf CPU Profiling 实现原理</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/'>
+
+<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='深入探索 perf CPU Profiling 实现原理'>
+<meta property='og:description' content='perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子'>
+<meta property='og:url' content='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2023-11-06T11:18:06&#43;08:00'/><meta property='article:modified_time' content='2023-11-06T11:18:06&#43;08:00'/>
+<meta name="twitter:site" content="@mazhen">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="深入探索 perf CPU Profiling 实现原理">
+<meta name="twitter:description" content="perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
+}
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/sword_holder/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/sword_holder'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/mazhen'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://mazhen.tech/" selected>中文</option>
+                        
+                            <option value="https://mazhen.tech/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#perf-是什么">perf 是什么</a></li>
+    <li><a href="#perf-事件源">perf 事件源</a></li>
+    <li><a href="#hardware-event">Hardware Event</a></li>
+    <li><a href="#cpu-profiling">CPU Profiling</a>
+      <ol>
+        <li><a href="#cycles-事件">cycles 事件</a></li>
+        <li><a href="#设置采样频率">设置采样频率</a></li>
+      </ol>
+    </li>
+    <li><a href="#背景知识">背景知识</a>
+      <ol>
+        <li><a href="#cpu-执行指令">CPU 执行指令</a></li>
+        <li><a href="#还原函数调用栈">还原函数调用栈</a></li>
+        <li><a href="#用户态和内核态">用户态和内核态</a></li>
+        <li><a href="#系统调用">系统调用</a></li>
+        <li><a href="#用户栈和内核栈">用户栈和内核栈</a></li>
+        <li><a href="#进程虚拟地址空间">进程虚拟地址空间</a></li>
+        <li><a href="#还原完整调用栈">还原完整调用栈</a></li>
+        <li><a href="#中断处理">中断处理</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">深入探索 perf CPU Profiling 实现原理</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2023-11-06</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 26 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="perf-是什么">perf 是什么</h2>
+<p><a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
+    >perf</a> 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：</p>
+<ul>
+<li><strong>perf</strong> 命令，用户空间的应用程序</li>
+<li><strong>perf_events</strong> ，Linux 内核中的一个子系统</li>
+</ul>
+<p>内核子系统 <code>perf_events</code> 提供了性能计数器（<a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter"  target="_blank" rel="noopener"
+    >hardware performance counters</a>）和性能事件的支持，它以事件驱动型的方式工作，通过收集特定事件（如 CPU 时钟周期，缓存未命中等）来跟踪和分析系统性能。<code>perf_events</code>是在 <a class="link" href="https://lwn.net/Articles/339361/"  target="_blank" rel="noopener"
+    >2009 年合并到 Linux 内核源代码中</a>，成为内核一个新的子系统。</p>
+<p><code>perf</code> 命令是一个用户空间工具，具备 profiling、tracing 和脚本编写等多种功能，是内核子系统 perf_events 的前端工具。通过<code>perf</code> 命令可以设置和操作内核子系统 <code>perf_events</code>，完成系统性能数据的收集和分析。</p>
+<p>虽然 <code>perf</code> 命令是一个用户空间的应用程序，但它却位于 Linux 内核源代码树中，在 <a class="link" href="https://github.com/torvalds/linux/tree/master/tools/perf"  target="_blank" rel="noopener"
+    >tools/perf</a> 目录下，它可能是唯一一个被包含在 Linux 内核源码中的复杂用户软件。</p>
+<p>perf 和 perf_events 最初支持硬件计数器（performance monitoring counters，<strong>PMC</strong>），后来逐步扩展到支持多种事件源，包括：<a class="link" href="https://docs.kernel.org/trace/events.html"  target="_blank" rel="noopener"
+    >tracepoints</a>、kernel 软件事件、<a class="link" href="https://www.kernel.org/doc/html/latest/trace/kprobes.html"  target="_blank" rel="noopener"
+    >kprobes</a>、<a class="link" href="https://docs.kernel.org/trace/uprobetracer.html?highlight=uprobe"  target="_blank" rel="noopener"
+    >uprobes</a> 和 USDT（User-level statically-defined tracing）。</p>
+<p>下图显示了 perf 命令和 perf_events 的关系，以及 perf_events 支持的事件源。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311071635405.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="perf events"
+	
+	
+></p>
+<h2 id="perf-事件源">perf 事件源</h2>
+<p>perf 支持来自硬件和软件方面的各种事件。硬件事件来自芯片组中的硬件性能计数器（<a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter"  target="_blank" rel="noopener"
+    >hardware performance counters</a>），而软件事件则由<a class="link" href="https://docs.kernel.org/trace/events.html"  target="_blank" rel="noopener"
+    >tracepoints</a>、<a class="link" href="https://www.kernel.org/doc/html/latest/trace/kprobes.html"  target="_blank" rel="noopener"
+    >kprobe</a> 和 <a class="link" href="https://docs.kernel.org/trace/uprobetracer.html?highlight=uprobe"  target="_blank" rel="noopener"
+    >uprobe</a> 等调试设施提供。</p>
+<p>可以使用 perf 的子命令 <strong>list</strong> 列出当前可用的所有事件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf list
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">List of pre-defined events <span class="o">(</span>to be used in -e or -M<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  branch-instructions OR branches                    <span class="o">[</span>Hardware event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  branch-misses                                      <span class="o">[</span>Hardware event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  bus-cycles                                         <span class="o">[</span>Hardware event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  cache-misses                                       <span class="o">[</span>Hardware event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  cache-references                                   <span class="o">[</span>Hardware event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  cpu-cycles OR cycles                               <span class="o">[</span>Hardware event<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>...<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  cgroup-switches                                    <span class="o">[</span>Software event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  context-switches OR cs                             <span class="o">[</span>Software event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  cpu-clock                                          <span class="o">[</span>Software event<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>...<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  L1-dcache-load-misses                              <span class="o">[</span>Hardware cache event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  L1-dcache-loads                                    <span class="o">[</span>Hardware cache event<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>...<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  branch-instructions OR cpu/branch-instructions/    <span class="o">[</span>Kernel PMU event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  branch-misses OR cpu/branch-misses/                <span class="o">[</span>Kernel PMU event<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>...<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_process_exec                           <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_process_exit                           <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  sched:sched_process_fork                           <span class="o">[</span>Tracepoint event<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>...<span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>事件类型如下：</p>
+<ul>
+<li><strong>Hardware Event</strong>：CPU 性能计数器（performance monitoring counters）</li>
+<li><strong>Software event</strong>：内核计数器事件</li>
+<li><strong>Hardware cache event</strong>：CPU Cache 事件</li>
+<li><strong>Kernel PMU event</strong>：Performance Monitoring Unit (PMU) 事件</li>
+<li><strong>Tracepoint event</strong>：包含了静态和动态代码追踪事件
+<ul>
+<li><strong>Kernel tracepoints</strong>：在 kernel 中关键位置的静态追踪代码</li>
+<li><strong>kprobes</strong>：在内核中的任意位置动态地被插入追踪代码</li>
+<li><strong>uprobes</strong>：与kprobes类似，但用于用户空间。动态地在应用程序和库中的任意位置插入追踪代码</li>
+<li><strong>USDT</strong>：是 tracepoints 在用户空间的对应技术，是应用程序和库在它们的代码中提前加入的静态追踪代码</li>
+</ul>
+</li>
+</ul>
+<p>perf 的 “Tracepoint event” 事件源很容易引起混淆，因为除了内核的 tracepoints，基于 kprobe、uprobe 和 USDT 的跟踪事件也被标记为了“Tracepoint event”。默认情况下它们不会出现在 perf list 的输出中， 必须先初始化才会作为 &ldquo;Tracepoint event&rdquo; 中的事件。</p>
+<p>内核 tracepoints 是由 <a class="link" href="https://elixir.bootlin.com/linux/latest/source/include/trace/trace_events.h#L39"  target="_blank" rel="noopener"
+    >TRACE_EVENT</a> 宏定义。TRACE_EVENT 自动生成静态追踪代码，定义并格式化其参数，并将跟踪事件放入 tracefs （/sys/kernel/debug/tracing）和 <a class="link" href="https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html"  target="_blank" rel="noopener"
+    >perf_event_open</a> 接口。</p>
+<p>与其他性能分析工具相比，perf 特别适合 CPU 分析，它能对运行在 CPU 上代码调用栈（stack traces）进行采样，以确定程序在 CPU 上的运行情况，识别和优化代码中的热点。这种 CPU Profiling 能力是基于硬件计数器 (performance monitoring counters，PMC) 实现的，而 PMC 被内核子系统 <code>perf_events</code>  包装成了 <strong>Hardware Event</strong>，下面重点介绍。</p>
+<h2 id="hardware-event">Hardware Event</h2>
+<p>CPU 和其他硬件设备通常提供用于观测性能数据的 PMC。简单来说，<strong>PMC</strong> 就是 CPU 上的<strong>可编程寄存器</strong>，可通过编程对特定硬件事件进行计数。通过 PMC 可以监控和计算 CPU 内部各种事件，比如 CPU 指令的执行效率、CPU caches 的命中率、分支预测的成功率等 micro-architectural 级的性能信息。利用这些数据分析性能，可以实现各种性能优化。</p>
+<p>perf 命令通过 <a class="link" href="https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html"  target="_blank" rel="noopener"
+    >perf_event_open(2)</a> 系统调用访问 PMC，配置想要捕获的硬件事件。PMC 可以在两种模式下使用：</p>
+<ul>
+<li>Counting（计数模式），只计算和报告硬件事件的总数，开销几乎为零。</li>
+<li>Sampling（采样模式），当发生一定数量的事件后，会触发一个中断，以便捕获系统的状态信息。可用于采集代码路径。</li>
+</ul>
+<p>glibc 没有提供对系统调用 perf_event_open 的包装，perf 在 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.2/source/tools/perf/perf-sys.h"  target="_blank" rel="noopener"
+    >tools/perf/perf-sys.h</a> 定义了自己的包装函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kr">inline</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="nf">sys_perf_event_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">perf_event_attr</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">pid_t</span> <span class="n">pid</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">int</span> <span class="n">group_fd</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="nf">syscall</span><span class="p">(</span><span class="n">__NR_perf_event_open</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">cpu</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">         <span class="n">group_fd</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第一个参数 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.2/source/include/uapi/linux/perf_event.h#L385"  target="_blank" rel="noopener"
+    >perf_event_attr</a> 结构体定义了想要监控的事件的类型和行为。例如想要统计 CPU 的总指令数，可以这样初始化 <code>perf_event_attr</code> 结构体：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">perf_event_attr</span>  <span class="n">pe</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pe</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pe</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="n">pe</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">PERF_TYPE_HARDWARE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">pe</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pe</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">pe</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">PERF_COUNT_HW_INSTRUCTIONS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">pe</span><span class="p">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">pe</span><span class="p">.</span><span class="n">exclude_kernel</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">pe</span><span class="p">.</span><span class="n">exclude_hv</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>perf 在 <a class="link" href="https://elixir.bootlin.com/linux/v6.2.16/source/include/uapi/linux/perf_event.h"  target="_blank" rel="noopener"
+    >perf_event.h</a> 中定义了适用于各类处理器的通用事件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">enum</span> <span class="n">perf_hw_id</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PERF_COUNT_HW_CPU_CYCLES</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PERF_COUNT_HW_INSTRUCTIONS</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PERF_COUNT_HW_CACHE_REFERENCES</span>  <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">enum</span> <span class="n">perf_hw_cache_id</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PERF_COUNT_HW_CACHE_L1D</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PERF_COUNT_HW_CACHE_L1I</span>   <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"> <span class="n">PERF_COUNT_HW_CACHE_LL</span>   <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">...</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>针对每种 CPU，需要将事件枚举类型映射为特定 CPU 的原始硬件事件描述符。例如对于 Intel x86 架构的 CPU，<strong>PERF_COUNT_HW_INSTRUCTIONS</strong> 事件映射为 <code>0x00c0</code>，在 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.2/source/arch/x86/events/intel/core.c#L31"  target="_blank" rel="noopener"
+    >arch/x86/events/intel/core.c</a> 中定义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="n">u64</span> <span class="n">intel_perfmon_event_map</span><span class="p">[</span><span class="n">PERF_COUNT_HW_MAX</span><span class="p">]</span> <span class="n">__read_mostly</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="p">[</span><span class="n">PERF_COUNT_HW_CPU_CYCLES</span><span class="p">]</span>  <span class="o">=</span> <span class="mh">0x003c</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"> <span class="p">[</span><span class="n">PERF_COUNT_HW_INSTRUCTIONS</span><span class="p">]</span>  <span class="o">=</span> <span class="mh">0x00c0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"> <span class="p">[</span><span class="n">PERF_COUNT_HW_CACHE_REFERENCES</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4f2e</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这些原始硬件事件描述符在相应的处理器软件开发人员手册中进行了说明。内核开发人员根据 CPU 厂商提供的软件开发人员手册，完成 PMC 事件和特定 CPU 代码的映射。</p>
+<p>例如 Intel x86 架构的 CPU可以参考 <a class="link" href="https://www.intel.com/content/www/us/en/content-details/782158/intel-64-and-ia-32-architectures-software-developer-s-manual-combined-volumes-1-2a-2b-2c-2d-3a-3b-3c-3d-and-4.html"  target="_blank" rel="noopener"
+    >Intel® 64 and IA-32 Architectures Software Developer’s Manual</a> 的第三卷第 20 章 “PERFORMANCE MONITORING”。Intel 还提供了一个网站 <a class="link" href="https://perfmon-events.intel.com/"  target="_blank" rel="noopener"
+    >perfmon-events.intel.com</a>，可以查询 CPU 的所有 PMC 事件。</p>
+<p>我们在使用 perf 时，可以直接指定特定 CPU 的原始事件代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo perf stat -e r00c0 -e instructions -a sleep <span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于 Intel CPU，<code>instructions</code> 事件的原始事件代码为 <code>r00c0</code>，两者可以等价使用。</p>
+<p>对于大部分通用事件，我们不需要记住这些原始事件代码，perf 都提供了可读的映射。但在某些情况下，例如最新 CPU 增加的事件还没有在 perf 中添加映射，或者某种 CPU 的特定事件不会通过可读的名称暴露出来，这时就只能通过指定原始硬件事件代码来监控事件。</p>
+<p>简单了解了 PMC 后，我们来看如何基于 PMC 事件进行 CPU Profiling。</p>
+<h2 id="cpu-profiling">CPU Profiling</h2>
+<p>perf 是事件驱动的方式工作，通过 <strong>-e</strong> 参数指定想要收集的特定事件，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo perf stat -e LLC-loads,LLC-load-misses,LLC-stores,LLC-prefetches ls
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们在对整个系统的 CPU 进行30 秒的采样时，使用的命令如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo perf record -F <span class="m">99</span> -a -g -- sleep <span class="m">30</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里并未明确指定事件（没有 -e 参数），perf 将默认使用以下预定义事件中第一个可用的：</p>
+<ol>
+<li>cycles:ppp</li>
+<li>cycles:pp</li>
+<li>cycles:p</li>
+<li>cycles</li>
+<li>cpu-clock</li>
+</ol>
+<p>前四个事件都是 PMC 提供的 CPU <strong>cycles</strong> 事件，区别在于精确度不同，从最精确（<code>ppp</code>）到无精确设置（没有 <code>p</code>），最精确的事件优先被选择。<strong>cpu-clock</strong> 是基于软件的 CPU 频率采样，在没有硬件 <strong>cycles</strong> 事件可用时，会选择使用 <strong>cpu-clock</strong> 软件事件。</p>
+<p>那么什么是CPU <strong>cycles</strong> 事件，为什么对 <strong>cycles</strong> 事件进行采样可以分析 CPU 的性能？</p>
+<h3 id="cycles-事件">cycles 事件</h3>
+<p>首先介绍一个关于 CPU 性能的重要概念，<strong>Clock Rate</strong>（时钟频率）。Clock（时钟）是驱动 CPU 的数字信号，CPU 以特定的时钟频率执行，例如 4 GHz的 CPU 每秒可执行40亿个 cycles（周期）。</p>
+<p>CPU <strong>cycles （周期）<strong>是 CPU 执行指令的时间单位，而</strong>时钟频率</strong>表示 CPU 每秒执行的 CPU 周期数。每个 CPU 指令执行可能需要一个或多个 CPU 周期。 通常情况下，更高的时钟频率意味着更快的CPU，因为它允许 CPU 在单位时间内执行更多的指令。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311091031747.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="CPU cycles"
+	
+	
+></p>
+<p>每经过一个 CPU 周期都会触发一个 <strong>cycles</strong> 事件。可以认为，<strong>cycles</strong> 事件是均匀的分布在程序的执行期间。这样，以固定频率去采样的 <strong>cycles</strong> 事件，也是均匀的分布在程序的执行期间。我们在采样 <strong>cycles</strong> 事件时，记录 CPU 正在干什么，持续一段时间收集到多个采样后，我们就能基于这些信息分析程序的行为，多次出现的同样动作，可以认为是程序的热点，成为下一步分析重点关注的方面。</p>
+<p>因为 <strong>cycles</strong> 事件的均匀分布，通过以固定频率采样 <strong>cycles</strong> 事件获得的信息，我们就能进行 CPU 性能分析。那么如何指定采样频率呢？</p>
+<h3 id="设置采样频率">设置采样频率</h3>
+<p>在使用 perf record 记录 PMC 事件时，会使用一个默认的采样频率，不是每个事件都会被记录。例如记录 cycles 事件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ perf record -vve cycles -a sleep <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Using CPUID GenuineIntel-6-45-1
+</span></span><span class="line"><span class="cl"><span class="nv">DEBUGINFOD_URLS</span><span class="o">=</span>
+</span></span><span class="line"><span class="cl">nr_cblocks: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">affinity: SYS
+</span></span><span class="line"><span class="cl">mmap flush: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">comp level: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">------------------------------------------------------------
+</span></span><span class="line"><span class="cl">perf_event_attr:
+</span></span><span class="line"><span class="cl">  size                             <span class="m">128</span>
+</span></span><span class="line"><span class="cl">  <span class="o">{</span> sample_period, sample_freq <span class="o">}</span>   <span class="m">4000</span>
+</span></span><span class="line"><span class="cl">  sample_type                      IP<span class="p">|</span>TID<span class="p">|</span>TIME<span class="p">|</span>ID<span class="p">|</span>CPU<span class="p">|</span>PERIOD
+</span></span><span class="line"><span class="cl">  read_format                      ID<span class="p">|</span>LOST
+</span></span><span class="line"><span class="cl">  disabled                         <span class="m">1</span>
+</span></span><span class="line"><span class="cl">  inherit                          <span class="m">1</span>
+</span></span><span class="line"><span class="cl">  freq                             <span class="m">1</span>
+</span></span><span class="line"><span class="cl">  sample_id_all                    <span class="m">1</span>
+</span></span><span class="line"><span class="cl">  exclude_guest                    <span class="m">1</span>
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="o">[</span> perf record: Captured and wrote 0.422 MB perf.data <span class="o">(</span><span class="m">297</span> samples<span class="o">)</span> <span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>加了 <strong>-vv</strong> 选项可以输出更详细的信息。从输出中可以看出，即使我们没有明确设置采样频率，采样频率已经启用（<code>freq 1</code>），并且采样频率为 4000 （<code>{ sample_period, sample_freq }   4000</code>），即每 CPU 每秒采集约 4000个事件。cycles 事件每秒中有几十亿次，默认采样频率的设置很合理，否则记录事件的开销过高。</p>
+<p>可以使用 <strong>-F</strong> 选项明确设置事件采样频率，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">perf record -F <span class="m">99</span> -e cycles -a sleep <span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>-F 99</strong> 设置采样频率为 99 Hertz，即每秒进行 99 次采样。<a class="link" href="https://www.brendangregg.com/index.html"  target="_blank" rel="noopener"
+    >Brendan Gregg</a> 在大量的例子中都使用了 99 Hertz 这个采样频率，至于为什么这样设置，他在文章 <a class="link" href="https://www.brendangregg.com/perf.html"  target="_blank" rel="noopener"
+    >perf Examples</a> 中给出了解释，大意是：选择 99 Hertz 而不是100 Hertz，是为了避免意外地与一些周期性活动同步，这会产生偏差的结果。也就是说，如果程序中有周期性的定时任务，例如每秒钟执行的任务，以 100 Hertz 频率进行采样，那么每次周期性任务运行时都会被采样，这样产生的结果“放大”了周期性任务的影响，偏离了程序正常的行为模式。</p>
+<p><code>perf record</code> 命令还可以使用 <strong>-c</strong> 选项来设置采样事件的周期，这个周期代表了采样事件之间的间隔。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo perf record -c <span class="m">1000</span> -e cycles -a sleep <span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个示例中，<strong>-c</strong> 选项设置采样周期为 1000，即每隔 1000 次事件进行一次采样。</p>
+<p>现在我们知道了如何以固定的频率对 cycles 事件进行采样，那么如何获知在采样时，CPU 正在干什么呢？</p>
+<h2 id="背景知识">背景知识</h2>
+<p>要知道  cycles 事件发生时 CPU 正在干什么，我们需要了解一些硬件知识，以及内核与硬件是如何配合工作的。先看看 CPU 是如何执行指令的。</p>
+<h3 id="cpu-执行指令">CPU 执行指令</h3>
+<p>CPU 内部有多种不同功能的寄存器，涉及到指令执行的，有三个重要的寄存器：</p>
+<ul>
+<li>PC 寄存器（<strong>PC</strong>，Program Counter），存放下一条指令的内存地址</li>
+<li>指令寄存器（<strong>IR</strong>，Instruction Register），存放当前正在执行的指令</li>
+<li>状态寄存器（<strong>SR</strong>，Status Register），用于存储 CPU 当前的状态，如条件标志位、中断禁止位、处理器模式标志等</li>
+</ul>
+<p>CPU 还有其他用于存储数据和内存地址的寄存器，根据存放内容命名，如整数寄存器、浮点数寄存器、向量寄存器和地址寄存器等。有些寄存器既可以存放数据，又可以存放地址，被称为通用寄存器（<strong>GR</strong>，General register）。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311091736945.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="cpu registers"
+	
+	
+></p>
+<p>程序执行时，CPU 根据 <strong>PC</strong> 寄存器中的地址从内存中读取指令到 <strong>IR</strong> 寄存器中执行，并根据指令长度自增，加载下一条指令。</p>
+<p>只要我们在采样时获取CPU 的 <strong>PC</strong> 寄存器和 <strong>IR</strong> 寄存器的内容，就能推断出 CPU 当时正在干什么。</p>
+<p>在 x86-64 架构中，Program Counter 的功能是由  <strong>RIP (Instruction Pointer Register)</strong> 寄存器实现的。</p>
+<p>在编译程序时，可以让编译器生成一个映射，将源代码行与生成的机器指令关联起来，这个映射通常存储在 <a class="link" href="https://dwarfstd.org/"  target="_blank" rel="noopener"
+    >DWARF 格式（Debugging With Attributed Record Formats）</a>的调试信息中。同时编译时会生成<strong>符号表（Symbol Table）</strong>，其中包含了程序中各种符号（如函数名、变量名）及其地址的映射。perf 借助调试信息和符号表（symbol table），可以将采样时寄存器中的指令地址转换为对应的函数名、源代码行号等信息。</p>
+<p>知道了 CPU 当时的“动作”还不够，我们还需要知道 CPU 是怎么做这个“动作”的，也就是代码的执行路径。下面介绍函数调用栈的相关概念。</p>
+<h3 id="还原函数调用栈">还原函数调用栈</h3>
+<p>函数是软件中的一个关键抽象概念，它让开发者将具有特定功能的代码打包，然后这个功能可以在程序的多个位置被调用。</p>
+<p>假设函数 P 调用函数 Q，然后 Q 执行并返回结果给 P，这个过程涉及到以下机制：</p>
+<ul>
+<li><strong>传递控制</strong>：在进入函数 Q 时，<strong>PC</strong> 寄存器设置为 Q 的起始地址；在从 Q 返回时，<strong>PC</strong> 寄存器设置为 P 中调用 Q 后的下一条指令处。</li>
+<li><strong>传递数据</strong>：P 能够向 Q 提供一个或多个参数，Q 也能够将一个值返回给 P。</li>
+<li><strong>分配和释放内存</strong>：Q 需要在开始时为局部变量分配空间，然后在返回前释放该存储空间。</li>
+</ul>
+<p><img src="https://cdn.mazhen.tech/images/202311141521021.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="stack & code"
+	
+	
+></p>
+<p>x86-64 平台上的程序使用<strong>堆栈（Stack）<strong>来实现函数调用。<strong>堆栈（Stack）<strong>的特性是</strong>后进先出（LIFO）</strong>，函数调用正是利用了这一特性。调用某个函数就是在堆栈上为这个函数分配所需的内存空间，这部分空间被称为</strong>栈帧（stack frame）</strong>，从函数返回，就是将这个函数的**栈帧（stack frame）<strong>从堆栈中弹出，释放空间。多个</strong>栈帧（stack frame）**组成 <a class="link" href="https://en.wikipedia.org/wiki/Call_stack"  target="_blank" rel="noopener"
+    >Call stack</a>，体现出了函数的调用关系。</p>
+<p>注意：编译后的程序存储在<strong>代码段</strong>，是静态的；而 <a class="link" href="https://en.wikipedia.org/wiki/Call_stack"  target="_blank" rel="noopener"
+    >Call stack</a> 是动态的，反应了程序运行时的状态。</p>
+<p>下面以示例程序为例，x86-64 平台上如何利用**堆栈（Stack）**实现函数调用的。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311141524326.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="stack"
+	
+	
+></p>
+<p><code>main</code>函数有三个局部变量<code>a</code>、<code>b</code>和 <code>res</code> 存储在自己的 <strong>stack frame</strong> 中。当 <code>main</code> 调用 <code>Calc</code> 函数时，会先将参数 <code>i</code>和<code>j</code> 压入 Stack，然后将 <strong>PC</strong> 寄存器中的值也压入 Stack。我们知道，<strong>PC</strong> 寄存器存放的是下一条指令的地址，这时 <strong>PC</strong> 寄存器中的值是函数调用指令（call）后紧跟着的那条指令的地址。把 <strong>PC</strong> 寄存器压入 Stack，相当于保留了函数调用结束后要执行的指令地址，这样<code>Calc</code>完成后程序知道从哪里继续执行。</p>
+<p><strong>rbp</strong> 是栈基址寄存器（register base pointer ），又叫栈帧指针（<strong>Frame Pointer</strong>），存放了当前 <strong>stack frame</strong> 的起始地址。<strong>rsp</strong> 是栈顶寄存器（register stack pointer），称为栈指针（<strong>Stack Pointer</strong>），随着入栈出栈动作而移动，始终指向栈顶元素。<strong>x86-64</strong> 的堆栈是<strong>从高地址向低地址</strong>增长的。</p>
+<p>在为 <code>calc</code>  新建 <strong>stack frame</strong> 时，会先将 <strong>rbp</strong> 寄存器压入 Stack。当前 <strong>rbp</strong> 寄存器中存放的是 <code>main</code>  <strong>stack frame</strong> 的起始地址，将  <strong>rbp</strong> 寄存器压入 Stack，也就是将 <code>main</code>  <strong>stack frame</strong> 的起始地址压入了 Stack。</p>
+<p>随后把 <strong>rsp</strong> 的值复制到 <strong>rbp</strong>，因为 <strong>rsp</strong> 始终会指向栈顶，把 <strong>rsp</strong> 的值复制到 <strong>rbp</strong> 就是让  <strong>rbp</strong> 寄存器指向当前位置，即 <code>calc</code> <strong>stack frame</strong> 的起始位置。</p>
+<p>注意 <code>Calc</code> 的参数和返回地址包含在 <code>main</code> 的 <strong>stack frame</strong> 中，因为它们保存了与 <code>main</code> 相关的状态。<code>Calc</code> 函数局部变量<code>sum</code>和<code>result</code> 被分配在自己的 <strong>stack frame</strong> 上。</p>
+<p>在 <code>Calc</code> 调用 <code>Sum</code> 时，重复上面的动作：参数和返回地址入栈，保存并更新 <strong>rbp</strong> 寄存器，为 <code>Sum</code> 的局部变量分配地址。</p>
+<p>在函数 <code>Sum</code> 执行完成之后，会将之前保存的  <strong>rbp</strong> 出栈，恢复到 <strong>rbp</strong> 中，也就是让 <strong>rbp</strong> 指向 <code>Calc</code>  <strong>stack frame</strong> 的起始地址，将 <code>Sum</code>的  <strong>stack frame</strong> 弹出了 Stack，释放了 <code>Sum</code> 占用的空间。然后将返回地址出栈，更新到 <strong>PC</strong> 寄存器中。返回地址是函数调用指令（call）后的下一条指令，即 <code>Calc</code> 调用完 <code>Sum</code> 后紧跟着的下一条指令，把这个指令的地址恢复到 <strong>PC</strong> 寄存器中，实际上是将控制权返回给了 <code>Calc</code> ，让 <code>Calc</code> 剩余部分接着执行。</p>
+<p><code>Calc</code> 执行完也会做同样的出栈动作，释放 <strong>stack frame</strong> ，将控制权返回给 <code>main</code>。</p>
+<p>这样，函数调用利用了**堆栈（Stack）**传递参数，存储返回信息，保存寄存器中的值，以及存储函数的局部变量，来实现函数调用。</p>
+<p>每个函数的活动记录对应一个<strong>栈帧（stack frame）</strong>，多个<strong>栈帧（stack frame）<strong>叠加在一起构成</strong>调用栈</strong>（ <a class="link" href="https://en.wikipedia.org/wiki/Call_stack"  target="_blank" rel="noopener"
+    >Call stack</a>）。<strong>Frame Pointer</strong>（通常是 <strong>rbp</strong> 寄存器）指向当前激活的函数的<strong>栈帧（stack frame）<strong>的起始处，这个起始处保存了调用它的函数的</strong>栈帧（stack frame）<strong>的起始地址。通过这种链接，我们就能以 <strong>Frame Pointer</strong> 为起点，追溯整个调用链，即从当前函数开始，逐级访问到每个调用者的</strong>栈帧（stack frame）</strong>，从而重构出程序执行的路径。</p>
+<p>需要注意的是，出于空间和时间效率的考虑，程序都会优先使用通用寄存器来传递参数，只有在寄存器不够用的时候才会将多出的参数压入栈中。</p>
+<p>perf 正是利用 <strong>Frame Pointer</strong>，还原采样时的代码执行路径。</p>
+<p>在开启编译器优化的情况下，程序会将 <strong>rbp</strong> 寄存器作为通用寄存器重新使用，这时就不能再使用 <strong>Frame Pointer</strong> 还原函数调用栈。perf 还可以使用其他方法进行 stack walking：</p>
+<ul>
+<li><strong>&ndash;call-graph dwarf</strong> ：使用调试信息</li>
+<li><strong>&ndash;call-graph lbr</strong>： 使用 Intel 的 last branch record (LBR)</li>
+<li><strong>&ndash;call-graph fp</strong>：使用 <strong>Frame Pointer</strong> ，缺省方法</li>
+</ul>
+<p>本文就不详细讨论其他两种还原调用栈的方法，感兴趣的可以参考<a class="link" href="https://www.brendangregg.com/bpf-performance-tools-book.html"  target="_blank" rel="noopener"
+    >《BPF Performance Tools》</a>。</p>
+<p>在 Linux 上，进程的执行分为了用户态和内核态，要知道完整的代码执行路径，就需要分别还原用户栈和内核栈。什么是用户态和内核态呢？</p>
+<h3 id="用户态和内核态">用户态和内核态</h3>
+<p>操作系统需要能够限制对关键系统资源的访问，提供对资源不同级别的访问权限，这样可以保护系统免受错误和恶意行为的侵害。这种访问权限由 CPU 在硬件级别上实现，例如 x86 架构定义了特权级别，也称为保护环（<strong>protection rings</strong>），从 <strong>Ring 0</strong> 到 <strong>Ring 3</strong> ，每个级别定义了可使用的指令集和可访问的资源，<strong>Ring 0</strong> 具有最高的特权级别。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311151103732.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="protection rings"
+	
+	
+></p>
+<ul>
+<li><strong>Ring 0</strong>: 最高特权级别，用于操作系统的内核，可以直接访问所有的硬件和系统资源。</li>
+<li><strong>Ring 1 和 Ring 2</strong>: 这些中间层次的环通常用于特定的系统任务，如设备驱动程序，但在现代操作系统中，这些任务通常也在 Ring 0 执行。</li>
+<li><strong>Ring 3</strong>: 最低特权级别，用于普通的应用程序，这些应用程序不能直接执行影响系统稳定性或安全性的操作。</li>
+</ul>
+<p>Linux 主要使用了 <strong>Ring 0</strong> 和 <strong>Ring 3</strong>，将能够访问关键资源的内核放在 Ring0，称为内核态（<strong>Kernel Mode</strong>），普通的应用程序将放在 Ring3，称为用户态（<strong>User Mode</strong>）。</p>
+<h3 id="系统调用">系统调用</h3>
+<p>如果用户态代码需要访问核心资源，它必须通过<strong>系统调用（system call ）</strong>。系统调用是进入内核的入口点，内核通过系统调用向程序提供一系列服务，如文件读写、进程创建、输入输出操作等。应用程序通过系统调用请求内核代为执行这些服务。</p>
+<p>调用系统调用看起来很像调用 C 函数。但实际上，在系统调用的执行过程中，会进行多个步骤。以 x86 平台的实现为例，包括以下几个关键环节：</p>
+<p><img src="https://cdn.mazhen.tech/images/202311211416813.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="system call"
+	
+	
+></p>
+<ol>
+<li>应用程序通过调用 C 库中的包装函数来发起系统调用。</li>
+<li>包装函数负责将所有系统调用参数传递给内核。这些参数通常通过栈传递给包装函数，然后被复制到特定的 CPU 寄存器中。</li>
+<li>为了让内核识别不同的系统调用，包装函数会把系统调用的编号复制到一个特定的 CPU 寄存器（%eax）中。</li>
+<li>包装函数执行 <strong>trap</strong> 机器指令（ x86 架构 <code>sysenter</code> 指令），使 CPU 从用户模式切换到内核模式。</li>
+<li>内核响应中断，把当前的寄存器值保存到内核栈数据结构 <strong>struct pt_regs</strong> 中，根据编号在一个表格中找到相应的系统调用服务程序，并执行它，然后返回结果。</li>
+<li>完成操作后，内核将寄存器值恢复到原始状态，并将控制权返回给用户空间的应用程序，同时返回系统调用的结果。</li>
+</ol>
+<h3 id="用户栈和内核栈">用户栈和内核栈</h3>
+<p>可以看出在执行系统调用时，进程具有两个栈：<strong>用户栈（User Stack）<strong>和</strong>内核栈（Kernel Stack）</strong>。</p>
+<ul>
+<li><strong>用户栈（User Stack）</strong> 保留了进入系统调用前的状态，用户栈在系统调用期间不会改变</li>
+<li><strong>内核栈（Kernel Stack）</strong> 是在系统调用期间使用，用于存储在内核态下执行的状态信息，包括寄存器的值和系统调用的参数。此外处理中断和异常时，也会使用内核栈。</li>
+</ul>
+<p>用户栈和内核栈在什么什么位置？我们需要先了解虚拟地址空间的概念。</p>
+<h3 id="进程虚拟地址空间">进程虚拟地址空间</h3>
+<p>在现代操作系统上，用户程序都不能直接操作物理内存。操作系统会给进程分配虚拟内存空间，所有进程看到的这个地址都是一样的，里面的内存都是从 0 开始编号。</p>
+<p>程序里指令操作的都是虚拟地址。内核会维护一个虚拟内存到物理内存的映射表，将不同进程的虚拟地址和不同的物理地址映射起来。当程序要访问虚拟地址时，会通过映射表进行转换，找到对应的物理内存地址。不同进程相同的虚拟地址，会映射到不同的物理地址，不会发生冲突。这样每个进程的地址空间都是独立的，相互隔离互不影响。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311151758027.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Virtual Memory Address"
+	
+	
+></p>
+<p>我们来看一下进程的虚拟地址空间布局。</p>
+<p>一个进程的虚拟地址空间分为两个部分，一部分是用户态地址空间，一部分是内核态地址空间。</p>
+<p>用户空间是应用程序执行的场所，每个进程都有自己独立的用户空间，其布局包含代码、全局变量、堆、栈和内存映射区域等多种部分。</p>
+<p>内核空间是内核代码运行的内存区域，它并非专属于某个单独的进程，所有进程通过系统调用进入到内核之后，看到的虚拟地址空间都是一样的。</p>
+<p>用户空间与内核空间的这种分离，确保了用户应用程序不能直接干扰内核，保证了系统的安全稳定性。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311161738057.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="process virtual addrsss space"
+	
+	
+></p>
+<p>Linux 的可执行文件是 <a class="link" href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format"  target="_blank" rel="noopener"
+    >ELF（Executable and Linkable Format）</a>格式，执行时从硬盘加载到内存，ELF 文件中的代码段和数据段被直接映射到进程虚拟地址空间用户态的数据段和代码段。</p>
+<p>用户空间的**堆（heap）**是动态内存分配的区域，可以使用系统调用 <a class="link" href="https://www.man7.org/linux/man-pages/man2/brk.2.html"  target="_blank" rel="noopener"
+    >sbrk</a> 、<a class="link" href="https://www.man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 和 glibc 提供的 <a class="link" href="https://elixir.bootlin.com/glibc/glibc-2.38/source/malloc/malloc.c"  target="_blank" rel="noopener"
+    >malloc</a> 函数进行堆内存的申请。内核会维护一个变量 <strong>brk</strong> 指向堆的顶部，<strong>sbrk</strong> 通过改变 <strong>brk</strong> 来维护堆的大小。<strong>malloc</strong> 内部也使用了系统调用 <strong>sbrk</strong> 或 <strong>mmap</strong>，但 glibc 会维护一个内存池，并不是每次使用 <strong>malloc</strong> 申请内存时都直接进行系统调用。</p>
+<p>内存映射区域为共享库及文件映射提供空间。可以使用系统调用 <a class="link" href="https://www.man7.org/linux/man-pages/man2/mmap.2.html"  target="_blank" rel="noopener"
+    >mmap</a> 将创建文件映射提升 IO 效率。</p>
+<p>用户空间的<strong>堆栈（Stack）</strong> 是用户态函数执行的活跃记录，<code>%rsp</code>指向当前堆栈顶部。</p>
+<p>内核空间也有代码段和数据段，映射内核的代码段和数据段。</p>
+<p>当进程执行系统调用时，会从用户空间切换到内核空间，进程的当前状态，包括栈指针（<strong>rsp</strong> 寄存器）、程序计数器（<strong>rip</strong>，也就是 <strong>PC</strong> 寄存器）等，会被保存在内核数据结构 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/include/asm/ptrace.h#L59"  target="_blank" rel="noopener"
+    >struct pt_regs</a> 内，以便在系统调用完成后能够准确地恢复，继续执行因系统调用而暂停的用户空间操作。</p>
+<p>执行内核代码会使用<strong>内核栈（Kernel-Stack）</strong>。</p>
+<p>现在有了进程虚拟地址空间的全景图，我们再回头看看还原函数调用栈的问题。</p>
+<h3 id="还原完整调用栈">还原完整调用栈</h3>
+<p>在 Linux 系统中，我们可以说在任何给定的时刻，CPU 处于下面三种状态之一：</p>
+<ol>
+<li>在用户空间，执行某个进程里的用户级代码</li>
+<li>在内核空间，以进程的身份运行，为特定的进程服务，也就是执行系统调用</li>
+<li>在内核空间，处于处理中断的状态，此时不与任何进程相关联，运行在内核线程中，专注于处理中断事件</li>
+</ol>
+<p>对于第一、第三种情况， perf 在采样事件触发时，只要通过 <strong>Frame Pointer</strong>（ <strong>rsp</strong> 寄存器）就可以还原用户栈或内核栈，并且已经是完整的调用栈。</p>
+<p>对于第二种情况，进程正好陷入内核执行系统调用，那么通过 <strong>Frame Pointer</strong>（ <strong>rsp</strong> 寄存器）可以还原内核代码的执行路径。然后再通过内核数据结构 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/include/asm/ptrace.h#L59"  target="_blank" rel="noopener"
+    >struct pt_regs</a> 内保存的寄存器状态，还原进入内核前用户空间的代码执行路径。这样我们就能获得采样事件触发时，包含了用户态和内核态的完整代码执行路径。</p>
+<p>通过 <strong>PC</strong> 寄存器、 <strong>rsp</strong> 寄存器，以及内核数据结构<strong>pt_regs</strong>，我们能知道 CPU 瞬时的“动作”，以及它是怎么做这个动作的（代码执行路径），那么还剩最后一个问题，我们怎么知道采样发生时刻 CPU 寄存器的内容呢？</p>
+<h3 id="中断处理">中断处理</h3>
+<p>内核是被动工作模式，它“躺”在内核空间不会主动工作，要么通过系统调用让它为用户进程服务，要么由时钟中断和各种外部设备中断事件驱动执行。</p>
+<p>中断是 Linux 的核心功能之一，它允许 CPU 响应外部或内部事件，如源自硬件设备的键盘、鼠标、网卡，或来自软件的异常。当这些事件，也就是中断事件发生时，CPU 会暂停当前的工作，转入内核的<strong>中断处理程序（Interrupt Handler）</strong>。当处理完成后，会从中断处理程序返回到原来被中断的代码处继续执行。</p>
+<p>中断可以分为**同步（Synchronous）<strong>中断和</strong>异步（Asynchronous）**中断两类：</p>
+<ul>
+<li><strong>同步中断</strong>：由CPU当前执行的指令序列引起的。</li>
+<li><strong>异步中断</strong>：由外部事件（定时中断和 I/O 设备）引起，与CPU当前执行的指令序列无关。</li>
+</ul>
+<p>在 x86 平台上，同步中断被称为<strong>异常（Exception）</strong>，而异步中断被称为<strong>中断（Interrupt）</strong>。注意“中断”这个词根据上下文，可以仅指异步中断，也可以指包含了异常的两类中断的总称。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311201051594.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="interrupts"
+	
+	
+></p>
+<p>在 x86 架构中，每个中断或异常都通过一个 0 到 255 范围内的数字来识别，这个数字是一个 8 位的无符号数，被称为“<strong>向量（<em>vector</em>）</strong>”。其中，异常和不可屏蔽中断的向量值是固定不变的（0～31），而可屏蔽中断的向量可以通过<strong>可编程中断控制器</strong>（<em>Programmable Interrupt Controller</em>，<strong>PIC</strong>）进行调整。</p>
+<p>每个 I/O 设备通常有一个单独的输出线路，用来发送中断请求（<strong>I</strong>nterrupt <strong>R</strong>e<strong>Q</strong>uest, <strong>IRQ</strong>）。所有 <strong>IRQ</strong> 线路都连接到 <strong>PIC</strong>，然后 <strong>PIC</strong> 又连接到 CPU 的 <strong>INTR</strong> 引脚。当某个 I/O 设备发生了需要 CPU 注意的事件，例如用户敲击键盘，数据到达网卡，该设备在相应的 IRQ 线路上发送信号，<strong>PIC</strong> 将这个 <strong>IRQ</strong> 信号转换成一个<strong>中断向量</strong>，然后在 CPU 的 <strong>INTR</strong> 引脚上发起一个中断请求，等待 CPU 处理。</p>
+<p>不可屏蔽中断通过 <strong>NMI</strong> 引脚接入 CPU。</p>
+<p><img src="https://cdn.mazhen.tech/images/202311201445225.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="PIC"
+	
+	
+></p>
+<p>我们可以在 <strong>/proc/interrupts</strong> 查看到系统硬件设备 <strong>IRQ</strong> 线路及对应 CPU 的统计信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ cat /proc/interrupts 
+</span></span><span class="line"><span class="cl">           CPU0       CPU1       CPU2       CPU3       
+</span></span><span class="line"><span class="cl">  8:          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>  IR-IO-APIC   8-edge      rtc0
+</span></span><span class="line"><span class="cl">  9:          <span class="m">0</span>          <span class="m">4</span>          <span class="m">0</span>          <span class="m">0</span>  IR-IO-APIC   9-fasteoi   acpi
+</span></span><span class="line"><span class="cl"> 18:          <span class="m">0</span>          <span class="m">2</span>          <span class="m">0</span>          <span class="m">0</span>  IR-IO-APIC  18-fasteoi   i801_smbus
+</span></span><span class="line"><span class="cl"> 23:         <span class="m">35</span>          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>  IR-IO-APIC  23-fasteoi   ehci_hcd:usb1
+</span></span><span class="line"><span class="cl"> 40:          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>  DMAR-MSI   0-edge      dmar0
+</span></span><span class="line"><span class="cl"> 41:          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>  DMAR-MSI   1-edge      dmar1
+</span></span><span class="line"><span class="cl"> 42:          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>          <span class="m">0</span>  IR-PCI-MSI-0000:00:1c.0   0-edge      PCIe PME
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">NMI:         <span class="m">67</span>        <span class="m">124</span>         <span class="m">61</span>         <span class="m">60</span>   Non-maskable interrupts
+</span></span><span class="line"><span class="cl">LOC:    <span class="m">7386692</span>    <span class="m">9261862</span>    <span class="m">8162396</span>    <span class="m">7051922</span>   Local timer interrupts
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">PMI:         <span class="m">67</span>        <span class="m">124</span>         <span class="m">61</span>         <span class="m">60</span>   Performance monitoring interrupts
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意第一列输出的是 <strong>IRQ</strong> 线路编号，需要通过 <strong>PIC</strong> 转换为 CPU 使用的<strong>中断向量</strong>，对于 Intel CPU，IRQn 转换为的中断向量是 <strong>n+32</strong>，因为 0～31 是固定给了异常使用。</p>
+<p>×86 系列的 CPU 能处理 20 种不同类型的异常，内核必须为每一种异常都提供一个专门的异常处理程序。我们可以在 <a class="link" href="https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"  target="_blank" rel="noopener"
+    >Intel&rsquo;s Software Development Manual: System Programming Guide</a> 中找到对这些异常的完整描述。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Vector</th>
+<th>Mnemonic</th>
+<th>Description</th>
+<th>Type</th>
+<th>Error Code</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>#DE</td>
+<td>Divide Error</td>
+<td>Fault</td>
+<td>No</td>
+<td>DIV and IDIV instructions.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>#DB</td>
+<td>Debug Exception</td>
+<td>Fault/ Trap</td>
+<td>No</td>
+<td>Instruction, data, and I/O breakpoints; single-step; and others.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>-</td>
+<td>NMI Interrupt</td>
+<td>Interrupt</td>
+<td>No</td>
+<td>Nonmaskable external interrupt.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>#BP</td>
+<td>Breakpoint</td>
+<td>Trap</td>
+<td>No</td>
+<td>INT3 instruction.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>#OF</td>
+<td>Overflow</td>
+<td>Trap</td>
+<td>No</td>
+<td>INTO instruction.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>#BR</td>
+<td>BOUND Range  Exceeded</td>
+<td>Fault</td>
+<td>No</td>
+<td>BOUND instruction.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>#UD</td>
+<td>Invalid Opcode (Undefined Opcode)</td>
+<td>Fault</td>
+<td>No</td>
+<td>UD instruction or reserved opcode.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>#NM</td>
+<td>Device Not Available (No Math  Coprocessor)</td>
+<td>Fault</td>
+<td>No</td>
+<td>Floating-point or WAIT/FWAIT instruction.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>#DF</td>
+<td>Double Fault</td>
+<td>Abort</td>
+<td>Yes (zero)</td>
+<td>Any instruction that can generate an  exception, an NMI, or an INTR.</td>
+</tr>
+<tr>
+<td>9</td>
+<td></td>
+<td>Coprocessor Segment Overrun (reserved)</td>
+<td>Fault</td>
+<td>No</td>
+<td>Floating-point instruction.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>#TS</td>
+<td>Invalid TSS</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Task switch or TSS access.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>#NP</td>
+<td>Segment Not Present</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Loading segment registers or accessing  system segments.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>#SS</td>
+<td>Stack-Segment Fault</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Stack operations and SS register loads.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>#GP</td>
+<td>General Protection</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Any memory reference and other protection checks.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>#PF</td>
+<td>Page Fault</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Any memory reference.</td>
+</tr>
+<tr>
+<td>15</td>
+<td>—</td>
+<td>(Intel reserved. Do  not use.)</td>
+<td></td>
+<td>No</td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>#MF</td>
+<td>x87 FPU Floating-Point Error (Math Fault)</td>
+<td>Fault</td>
+<td>No</td>
+<td>x87 FPU  floating-point or WAIT/FWAIT instruction.</td>
+</tr>
+<tr>
+<td>17</td>
+<td>#AC</td>
+<td>Alignment Check</td>
+<td>Fault</td>
+<td>Yes (Zero)</td>
+<td>Any data reference in memory.</td>
+</tr>
+<tr>
+<td>18</td>
+<td>#MC</td>
+<td>Machine Check</td>
+<td>Abort</td>
+<td>No</td>
+<td>Error codes (if any) and source are model  dependent.</td>
+</tr>
+<tr>
+<td>19</td>
+<td>#XM</td>
+<td>SIMD Floating-Point Exception</td>
+<td>Fault</td>
+<td>No</td>
+<td>SSE/SSE2/SSE3 floating-point instructions</td>
+</tr>
+<tr>
+<td>20</td>
+<td>#VE</td>
+<td>Virtualization Exception</td>
+<td>Fault</td>
+<td>No</td>
+<td>EPT violations</td>
+</tr>
+<tr>
+<td>21</td>
+<td>#CP</td>
+<td>Control Protection Exception</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>RET, IRET, RSTORSSP, and SETSSBSY  instructions can generate this exception. When CET indirect branch tracking  is enabled, this exception can be generated due to a missing ENDBRANCH  instruction at target of an indirect call or jump.</td>
+</tr>
+<tr>
+<td>22-31</td>
+<td>-</td>
+<td>Intel reserved. Do not use.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>下图描述了中断处理的大致流程：</p>
+<p><img src="https://cdn.mazhen.tech/images/202311201727048.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Interrupt Handler"
+	
+	
+></p>
+<p>异常是由 CPU 执行的指令产生，中断是由外部设备的紧急事件产生。</p>
+<p>CPU 在收到中断请求后，根据中断号在<strong>中断向量表</strong>中找到相应的**中断处理程序（Interrupt Handler）**入口，从而做出相应的处理。<strong>中断向量表</strong>将每个中断或异常与对应的中断处理程序关联了起来。</p>
+<p>从上图可以看出，中断向量表的 0～31固定为异常处理，32～127 和 129～238 项用来处理外部 I/O 设备的请求。 <strong>PIC</strong> 会将 <strong>IRQ</strong> 编号转换为<strong>中断向量</strong>。</p>
+<p>当系统收到中断请求时，如果不在内核态，先会从用户态切换到内核态，并在内核栈中保存当前的状态信息（主要是寄存器信息）。</p>
+<p>接着使用中断向量号，在中断向量表中查找对应的处理代码的入口地址。然后系统跳转到这个地址，执行相应的中断处理程序。</p>
+<p>处理完成后，系统通过中断返回机制恢复被中断任务的现场（内核态或用户态），并继续执行原来的代码。</p>
+<p>中断处理的一个关键步骤是，<strong>保留中断发生时的现场信息</strong>，perf 的 CPU 采样功能正是利用了这一点。</p>
+<p>我们使用 <code>perf record</code> 进行 CPU 分析时，会通过 <strong>-F</strong> 指定采样频率。当达到预设的阈值（如一定数量的指令执行或特定时间间隔），硬件性能计数器会触发一个 <strong>PMI</strong> （Performance monitoring interrupts）中断。</p>
+<p><strong>PMI</strong> 是个什么类型的中断呢？一般 <strong>PMI</strong> 是由本地 <strong>APIC</strong>（ <em>Advanced</em> PIC）产生，而 APIC 接入 CPU 的 <strong>INTR</strong> 引脚，你可能觉得它是一个可屏蔽中断。但根据<a class="link" href="https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"  target="_blank" rel="noopener"
+    >Intel&rsquo;s Software Development Manual: System Programming Guide</a> ，<strong>非屏蔽中断 (NMI)</strong> 可通过两种方式生成：</p>
+<ul>
+<li>外部硬件激活 CPU 的 <strong>NMI</strong> 引脚</li>
+<li>CPU 通过系统总线或 APIC 串行总线接收一条包含 <strong>NMI</strong> 传递模式的消息</li>
+</ul>
+<p>也就是说，APIC 可以生成 <strong>NMI</strong> 模式的中断消息，以调用 NMI 中断处理程序。</p>
+<p>由于 <strong>NMI</strong> 无法被忽略，它们常被一些系统用作硬件监控工具。如果出现某些特定情况，比如在预定的时间内没有触发中断，NMI 处理程序就会产生警告并提供关于该问题的调试信息。这种机制有助于发现并预防系统死锁。</p>
+<p>硬件性能计数器触发的 <strong>PMI</strong> 中断被设置为了 <strong>NMI</strong>类型。我们以 x86 平台为例，当 <strong>PMI</strong> 中断发生时，处理入口位置在 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/entry/entry_64.S"  target="_blank" rel="noopener"
+    >arch/x86/entry/entry_64.S</a>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">SYM_CODE_START</span><span class="p">(</span><span class="no">asm_exc_nmi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="na">...</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">pushq</span>	<span class="mi">5</span><span class="p">*</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rdx</span><span class="p">)</span>	<span class="cm">/* pt_regs-&gt;ss */</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">pushq</span>	<span class="mi">4</span><span class="p">*</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rdx</span><span class="p">)</span>	<span class="cm">/* pt_regs-&gt;rsp */</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">pushq</span>	<span class="mi">3</span><span class="p">*</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rdx</span><span class="p">)</span>	<span class="cm">/* pt_regs-&gt;flags */</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">pushq</span>	<span class="mi">2</span><span class="p">*</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rdx</span><span class="p">)</span>	<span class="cm">/* pt_regs-&gt;cs */</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">pushq</span>	<span class="mi">1</span><span class="p">*</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rdx</span><span class="p">)</span>	<span class="cm">/* pt_regs-&gt;rip */</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">UNWIND_HINT_IRET_REGS</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">pushq</span>   <span class="no">$-1</span>		<span class="cm">/* pt_regs-&gt;orig_ax */</span>
+</span></span><span class="line"><span class="cl">	<span class="na">...</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">movq</span>	<span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rdi</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">movq</span>	<span class="no">$-1</span><span class="p">,</span> <span class="nv">%rsi</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">call</span>	<span class="no">exc_nmi</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/entry/entry_64.S"  target="_blank" rel="noopener"
+    >arch/x86/entry/entry_64.S</a>是用汇编语言编写，负责系统调用、中断异常处理、任务切换和信号处理，专门针对 x86_64 架构进行了优化。</p>
+<p><code>asm_exc_nmi</code> 函数是处理 <strong>NMI</strong> 的入口，从截取代码片段的注释可以看出， <code>asm_exc_nmi</code> 会使用 <code>pushq</code> 指令将当前的寄存器状态保存到内核栈上，这些包括程序计数器（<strong>rip</strong>，也就是 PC 寄存器）、代码段（<strong>cs</strong>）、标志（<strong>flags</strong>）、堆栈指针（<strong>rsp</strong>）和堆栈段（<strong>ss</strong>）。这一步非常关键，保留中断发生时的现场信息。最后使用**<code>call exc_nmi</code>** 指令调用 <code>exc_nmi</code> 函数。<code>exc_nmi</code> 会根据类型，调用预先注册的 NMI 处理函数。</p>
+<p>如果是 <strong>PMI</strong> 类型的中断，最终调用的处理函数是 <strong>perf_event_nmi_handler</strong> ，定义在 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/events/core.c#L1729"  target="_blank" rel="noopener"
+    >arch/x86/events/core.c</a>中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="nf">perf_event_nmi_handler</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">cmd</span><span class="p">,</span> <span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">regs</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">u64</span> <span class="n">start_clock</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">u64</span> <span class="n">finish_clock</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="cm">/*
+</span></span></span><span class="line"><span class="cl"><span class="cm">	 * All PMUs/events that share this PMI handler should make sure to
+</span></span></span><span class="line"><span class="cl"><span class="cm">	 * increment active_events for their events.
+</span></span></span><span class="line"><span class="cl"><span class="cm">	 */</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">atomic_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_events</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">NMI_DONE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">start_clock</span> <span class="o">=</span> <span class="nf">sched_clock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ret</span> <span class="o">=</span> <span class="nf">static_call</span><span class="p">(</span><span class="n">x86_pmu_handle_irq</span><span class="p">)(</span><span class="n">regs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="n">finish_clock</span> <span class="o">=</span> <span class="nf">sched_clock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">perf_sample_event_took</span><span class="p">(</span><span class="n">finish_clock</span> <span class="o">-</span> <span class="n">start_clock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，第二个参数 <strong>pt_regs</strong> 在前面介绍系统调用时已经出现过，是内核用来保存寄存器状态的结构体。这样在<strong>perf_event_nmi_handler</strong>中，我们就可以使用 <strong>pt_regs</strong> 中保存的寄存器状态，还原出 <strong>PMI</strong> 中断发生时，CPU 当时的动作，以及包含了用户态和内核态的完整代码执行路径。</p>
+<p>至此，我们了解了 perf 在进行 CPU Profiling 时涉及的全部技术机制。</p>
+<h2 id="总结">总结</h2>
+<p>现在再回顾我们使用 perf 进行 CPU Profiling 时的命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf record -F <span class="m">99</span> -a -g -- sleep <span class="m">30</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>perf 是事件驱动的方式工作，这个命令没有指定 <strong>-e</strong> 参数，会收集什么事件呢？perf 会默认收集 <strong>cycles</strong> 相关事件，从最精确的 <strong>cycles:ppp</strong> 到无精确设置的 <strong>cycles</strong>，优先选择可用且精度高的事件。如果没有硬件 <strong>cycles</strong> 事件可用，退而选择 <strong>cpu-clock</strong> 软件事件。</p>
+<p>为什么采样 <strong>cycles</strong> 事件就能分析程序的 CPU 性能？因为每个 CPU 周期都会触发一个 <strong>cycles</strong> 事件，<strong>cycles</strong> 事件均匀的分布在程序的执行期间，以固定频率采样的 <strong>cycles</strong> 事件同样均匀分布，如果我们在采样 <strong>cycles</strong> 事件时，记录 CPU 正在干什么，持续一段时间收集到多个采样后，就能基于这些信息分析程序的行为，多次出现的同样动作，就可以认为是程序的热点。</p>
+<p>如果指定采样频率？<strong>-F 99</strong> 设置采样频率为 99 Hertz，即每秒进行 99 次采样。也可以使用 **-c 1000 ** 设置采样周期，即每隔 1000 次事件进行一次采样。</p>
+<p>如果知道采样时 CPU 正在做什么？通过CPU 的 <strong>PC（Program Counter）寄存器</strong>（x86-64 平台上对应的是 <strong>rip</strong> 寄存器）、指令寄存器等状态信息，能推断出 CPU 的瞬时动作。</p>
+<p>知道了 CPU 采样时的“动作”还不够，还需要知道 CPU 是怎么做这个“动作”的，也就是代码的执行路径。系统利用了<strong>堆栈（Stack）<strong>的</strong>后进先出（LIFO）<strong>实现了函数调用，每个函数在堆栈上分配的空间称为</strong>栈帧（stack frame）</strong>，多个<strong>栈帧（stack frame）<strong>组成 <a class="link" href="https://en.wikipedia.org/wiki/Call_stack"  target="_blank" rel="noopener"
+    >Call stack</a>，体现出了函数的调用关系。通过栈帧指针</strong>Frame Pointer</strong>（<strong>rbp</strong> 寄存器），可以追溯整个调用链，逐级访问到每个调用者的<strong>栈帧（stack frame）</strong>，重构出程序执行的路径。这就是 <strong>-g</strong> 参数的作用：使用 <strong>Frame Pointer</strong> 还原调用栈。</p>
+<p>操作系统为了安全会限制用户进程对关键资源的访问，将系统分为了用户态和内核态，用户态的代码必须通过**系统调用（system call ）**访问核心资源。所以在执行系统调用时，进程具有两个栈：<strong>用户栈（User Stack）<strong>和</strong>内核栈（Kernel Stack）</strong>。为了还原包含了用户栈和内核栈在内完整的调用栈，我们探索了进程虚拟地址空间的布局，以及系统调用的实现：原来在系统调用时，会将进程用户态的执行状态（<strong>rsp</strong>、<strong>rip</strong>等寄存器）保存在内核数据结构 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/include/asm/ptrace.h#L59"  target="_blank" rel="noopener"
+    >struct pt_regs</a> 内，这样就能通过 <strong>Frame Pointer</strong> 和 <strong>pt_regs</strong> 分别还原内核栈和用户栈。</p>
+<p>怎么获取采样发生时刻 CPU 寄存器的内容呢？在特定的时间间隔到达时，也就是该采样的时刻，APIC 会触发 <strong>PMI</strong> 中断，CPU 在将控制权转给中断处理程序之前，将当前的寄存器状态保存到<strong>pt_regs</strong>，然后作为参数传递给 <strong>perf_event_nmi_handler</strong>。这样 perf 就拿到了采样发生时刻，CPU 寄存器的内容。</p>
+<p>最后，我们可以看一下 <code>perf record</code> 收集了什么样的数据。使用 <code>perf script</code> 命令可以打印收集在 <code>perf.data</code> 中的每个样本：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf script
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">sshd <span class="m">50588</span> 430947.269426:      <span class="m">16854</span> cycles: 
+</span></span><span class="line"><span class="cl">        ffffffff824b84f6 native_write_msr+0x6 <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff82413dc5 intel_pmu_enable_all+0x15 <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff82407abb x86_pmu_enable+0x1ab <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff8273d05a perf_ctx_enable+0x3a <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff8274646a __perf_event_task_sched_in+0x15a <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff82534bf9 finish_task_switch.isra.0+0x179 <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff834a57bf __schedule+0x2bf <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff834a5b68 schedule+0x68 <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff834ac3cb schedule_hrtimeout_range_clock+0x11b <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff834ac403 schedule_hrtimeout_range+0x13 <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff8289de3a do_poll.constprop.0+0x22a <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff8289e136 do_sys_poll+0x166 <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff8289e7cc __x64_sys_ppoll+0xbc <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff834931ac do_syscall_64+0x5c <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        ffffffff836000eb entry_SYSCALL_64+0xab <span class="o">(</span>/usr/lib/debug/boot/vmlinux-6.2.0-36-generic<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                  118e5f __ppoll+0x4f <span class="o">(</span>inlined<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   89a97 server_loop2.constprop.0+0x547 <span class="o">(</span>/usr/sbin/sshd<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   89a97 wait_until_can_do_something+0x547 <span class="o">(</span>inlined<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   89a97 server_loop2.constprop.0+0x547 <span class="o">(</span>/usr/sbin/sshd<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   2bcf7 do_authenticated2+0x1e7 <span class="o">(</span>inlined<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   2bcf7 do_authenticated+0x1e7 <span class="o">(</span>/usr/sbin/sshd<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   11b66 main+0x3616 <span class="o">(</span>/usr/sbin/sshd<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   29d8f __libc_start_call_main+0x7f <span class="o">(</span>/usr/lib/x86_64-linux-gnu/libc.so.6<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   29e3f __libc_start_main_impl+0x7f <span class="o">(</span>inlined<span class="o">)</span>
+</span></span><span class="line"><span class="cl">                   <span class="m">12844</span> _start+0x24 <span class="o">(</span>/usr/sbin/sshd<span class="o">)</span>
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>任意截取了其中一段输出，可以看到包含了用户态和内核态完整的调用栈。基于多个这样的代码执行路径，我们还能生成<a class="link" href="https://brendangregg.com/flamegraphs.html"  target="_blank" rel="noopener"
+    >火焰图</a>进一步进行分析。</p>
+<p>为了了解 <code>perf record</code> 的实现原理，我们在 Linux 内核进行了一段深入而刺激的旅程，感谢各位参与探险！</p>
+<p>我的博客即将同步至腾讯云开发者社区，邀请大家一同入驻：https://cloud.tencent.com/developer/support-plan?invite_code=1k39tbi20c30f</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">linux</a>
+        
+            <a href="/tags/kernel/">kernel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 perf</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-gnu/linux%E4%BB%A5%E5%8F%8Aalpine-linux/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux, GNU/Linux以及Alpine Linux</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入浅出容器技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gcc-%E4%B8%BA%E9%BE%99%E8%8A%AF-cpu%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GCC 为龙芯 CPU的预定义宏</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-%E4%BF%A1%E5%8F%B7signal/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux 信号(Signal)</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2023 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
