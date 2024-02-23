@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>nginx on mazhen.tech</title>
+        <title>Nginx on mazhen.tech</title>
         <link>https://mazhen.tech/tags/nginx/</link>
-        <description>Recent content in nginx on mazhen.tech</description>
+        <description>Recent content in Nginx on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <lastBuildDate>Wed, 23 Nov 2022 15:06:21 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/nginx/index.xml" rel="self" type="application/rss+xml" /><item>

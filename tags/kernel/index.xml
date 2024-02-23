@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>kernel on mazhen.tech</title>
+        <title>Kernel on mazhen.tech</title>
         <link>https://mazhen.tech/tags/kernel/</link>
-        <description>Recent content in kernel on mazhen.tech</description>
+        <description>Recent content in Kernel on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <lastBuildDate>Mon, 06 Nov 2023 11:18:06 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/kernel/index.xml" rel="self" type="application/rss+xml" /><item>
@@ -1627,7 +1627,7 @@
     var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
 
     
-    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech\/&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
 
     
     var pdfDoc = null,

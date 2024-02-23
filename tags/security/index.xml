@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>security on mazhen.tech</title>
+        <title>Security on mazhen.tech</title>
         <link>https://mazhen.tech/tags/security/</link>
-        <description>Recent content in security on mazhen.tech</description>
+        <description>Recent content in Security on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <lastBuildDate>Sun, 19 May 2019 09:46:53 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/security/index.xml" rel="self" type="application/rss+xml" /><item>

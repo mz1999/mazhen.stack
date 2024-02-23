@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>db on mazhen.tech</title>
+        <title>Db on mazhen.tech</title>
         <link>https://mazhen.tech/tags/db/</link>
-        <description>Recent content in db on mazhen.tech</description>
+        <description>Recent content in Db on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <lastBuildDate>Wed, 27 Sep 2023 18:30:59 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/db/index.xml" rel="self" type="application/rss+xml" /><item>
@@ -1116,7 +1116,7 @@
     var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
 
     
-    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech\/&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
 
     
     var pdfDoc = null,
@@ -2148,7 +2148,7 @@
     var pdfjsLib = window[&#39;pdfjs-dist/build/pdf&#39;];
 
     
-    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = &#34;https:\/\/mazhen.tech\/&#34; + &#39;/js/pdf-js/build/pdf.worker.js&#39;;
 
     
     var pdfDoc = null,
