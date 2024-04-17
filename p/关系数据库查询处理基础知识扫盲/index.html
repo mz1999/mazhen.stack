@@ -16,16 +16,25 @@
 <meta name="twitter:description" content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是">
     <link rel="shortcut icon" href="/favicon.png" />
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
-}
-</script>
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
 
     </head>
     <body class="

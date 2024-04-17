@@ -16,16 +16,25 @@
 <meta name="twitter:description" content="Go的错误处理机制很简洁，使用errors.New(text)创建 error，方法的调用者一般按照如下模式处理： 1 2 3 if err != nil { return err } 这样做">
     <link rel="shortcut icon" href="/favicon.png" />
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-LBEVB8TRX2', { 'anonymize_ip': false });
-}
-</script>
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
 
     </head>
     <body class="
