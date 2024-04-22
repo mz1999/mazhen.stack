@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='安装helm客户端 在macOS上安装很简单： 1 brew install kubernetes-helm 其他平台请参考Installing Helm 配置RBAC 定义rbac-config.yaml文件'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 安装helm客户端 在macOS上安装很简单： 1 brew install kubernetes-helm 其他平台请参考Installing Helm # 配置RBAC 定义rbac-config.yaml">
 <title>Helm的安装和使用</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/helm%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Helm的安装和使用'>
-<meta property='og:description' content='安装helm客户端 在macOS上安装很简单： 1 brew install kubernetes-helm 其他平台请参考Installing Helm 配置RBAC 定义rbac-config.yaml文件'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Helm的安装和使用">
+<meta property='og:description' content="# 安装helm客户端 在macOS上安装很简单： 1 brew install kubernetes-helm 其他平台请参考Installing Helm # 配置RBAC 定义rbac-config.yaml">
 <meta property='og:url' content='https://mazhen.tech/p/helm%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='kubernetes' /><meta property='article:published_time' content='2019-06-11T09:36:01&#43;08:00'/><meta property='article:modified_time' content='2019-06-11T09:36:01&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Helm的安装和使用">
-<meta name="twitter:description" content="安装helm客户端 在macOS上安装很简单： 1 brew install kubernetes-helm 其他平台请参考Installing Helm 配置RBAC 定义rbac-config.yaml文件">
+<meta name="twitter:description" content="# 安装helm客户端 在macOS上安装很简单： 1 brew install kubernetes-helm 其他平台请参考Installing Helm # 配置RBAC 定义rbac-config.yaml">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -446,8 +449,10 @@
     <section class="article-content">
     
     
-    <h2 id="安装helm客户端">安装helm客户端</h2>
-<p>在<code>macOS</code>上安装很简单：</p>
+    <h2 id="安装helm客户端">
+    <a href="#%e5%ae%89%e8%a3%85helm%e5%ae%a2%e6%88%b7%e7%ab%af" class="header-anchor">#</a>
+    安装helm客户端
+</h2><p>在<code>macOS</code>上安装很简单：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -458,8 +463,10 @@
 </div>
 </div><p>其他平台请参考<a class="link" href="https://helm.sh/docs/using_helm/#installing-helm"  target="_blank" rel="noopener"
     >Installing Helm</a></p>
-<h2 id="配置rbac">配置RBAC</h2>
-<p>定义<code>rbac-config.yaml</code>文件，创建<code>tiller</code>账号，并和<code>cluster-admin</code>绑定：</p>
+<h2 id="配置rbac">
+    <a href="#%e9%85%8d%e7%bd%aerbac" class="header-anchor">#</a>
+    配置RBAC
+</h2><p>定义<code>rbac-config.yaml</code>文件，创建<code>tiller</code>账号，并和<code>cluster-admin</code>绑定：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -515,11 +522,15 @@
 </span></span><span class="line"><span class="cl">clusterrolebinding &#34;tiller&#34; created
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="安装tiller镜像">安装Tiller镜像</h2>
-<p>在强国环境内，需要参考<a class="link" href="https://github.com/maguowei/kubernetes-for-china"  target="_blank" rel="noopener"
+</div><h2 id="安装tiller镜像">
+    <a href="#%e5%ae%89%e8%a3%85tiller%e9%95%9c%e5%83%8f" class="header-anchor">#</a>
+    安装Tiller镜像
+</h2><p>在强国环境内，需要参考<a class="link" href="https://github.com/maguowei/kubernetes-for-china"  target="_blank" rel="noopener"
     >kubernetes-for-china</a>，将<code>helm</code>服务端部分<code>Tiller</code>的镜像下载到集群节点上。</p>
-<h2 id="初始化helm">初始化helm</h2>
-<p>执行初始化命令，注意指定上一步创建的<code>ServiceAccount</code>：</p>
+<h2 id="初始化helm">
+    <a href="#%e5%88%9d%e5%a7%8b%e5%8c%96helm" class="header-anchor">#</a>
+    初始化helm
+</h2><p>执行初始化命令，注意指定上一步创建的<code>ServiceAccount</code>：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -545,8 +556,10 @@
 </span></span><span class="line"><span class="cl">tiller-deploy-7fbf5fc745-lxzxl         1/1     Running   0          179m
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="quickstart">Quickstart</h2>
-<ul>
+</div><h2 id="quickstart">
+    <a href="#quickstart" class="header-anchor">#</a>
+    Quickstart
+</h2><ul>
 <li>增加<code>Chart Repository</code>（可选）</li>
 </ul>
 <p>查看helm的<code>Chart Repository</code>：</p>
@@ -833,8 +846,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核">
 <title>深入探索 perf CPU Profiling 实现原理</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='深入探索 perf CPU Profiling 实现原理'>
-<meta property='og:description' content='perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="深入探索 perf CPU Profiling 实现原理">
+<meta property='og:description' content="# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核">
 <meta property='og:url' content='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2023-11-06T11:18:06&#43;08:00'/><meta property='article:modified_time' content='2023-11-06T11:18:06&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="深入探索 perf CPU Profiling 实现原理">
-<meta name="twitter:description" content="perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子">
+<meta name="twitter:description" content="# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -473,8 +476,10 @@
 	
 	
 ></p>
-<h2 id="perf-是什么">perf 是什么</h2>
-<p><a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
+<h2 id="perf-是什么">
+    <a href="#perf-%e6%98%af%e4%bb%80%e4%b9%88" class="header-anchor">#</a>
+    perf 是什么
+</h2><p><a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
     >perf</a> 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：</p>
 <ul>
 <li><strong>perf</strong> 命令，用户空间的应用程序</li>
@@ -501,8 +506,10 @@
 	
 	
 ></p>
-<h2 id="perf-事件源">perf 事件源</h2>
-<p>perf 支持来自硬件和软件方面的各种事件。硬件事件来自芯片组中的硬件性能计数器（<a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter"  target="_blank" rel="noopener"
+<h2 id="perf-事件源">
+    <a href="#perf-%e4%ba%8b%e4%bb%b6%e6%ba%90" class="header-anchor">#</a>
+    perf 事件源
+</h2><p>perf 支持来自硬件和软件方面的各种事件。硬件事件来自芯片组中的硬件性能计数器（<a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter"  target="_blank" rel="noopener"
     >hardware performance counters</a>），而软件事件则由<a class="link" href="https://docs.kernel.org/trace/events.html"  target="_blank" rel="noopener"
     >tracepoints</a>、<a class="link" href="https://www.kernel.org/doc/html/latest/trace/kprobes.html"  target="_blank" rel="noopener"
     >kprobe</a> 和 <a class="link" href="https://docs.kernel.org/trace/uprobetracer.html?highlight=uprobe"  target="_blank" rel="noopener"
@@ -584,8 +591,10 @@
     >TRACE_EVENT</a> 宏定义。TRACE_EVENT 自动生成静态追踪代码，定义并格式化其参数，并将跟踪事件放入 tracefs （/sys/kernel/debug/tracing）和 <a class="link" href="https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html"  target="_blank" rel="noopener"
     >perf_event_open</a> 接口。</p>
 <p>与其他性能分析工具相比，perf 特别适合 CPU 分析，它能对运行在 CPU 上代码调用栈（stack traces）进行采样，以确定程序在 CPU 上的运行情况，识别和优化代码中的热点。这种 CPU Profiling 能力是基于硬件计数器 (performance monitoring counters，PMC) 实现的，而 PMC 被内核子系统 <code>perf_events</code>  包装成了 <strong>Hardware Event</strong>，下面重点介绍。</p>
-<h2 id="hardware-event">Hardware Event</h2>
-<p>CPU 和其他硬件设备通常提供用于观测性能数据的 PMC。简单来说，<strong>PMC</strong> 就是 CPU 上的<strong>可编程寄存器</strong>，可通过编程对特定硬件事件进行计数。通过 PMC 可以监控和计算 CPU 内部各种事件，比如 CPU 指令的执行效率、CPU caches 的命中率、分支预测的成功率等 micro-architectural 级的性能信息。利用这些数据分析性能，可以实现各种性能优化。</p>
+<h2 id="hardware-event">
+    <a href="#hardware-event" class="header-anchor">#</a>
+    Hardware Event
+</h2><p>CPU 和其他硬件设备通常提供用于观测性能数据的 PMC。简单来说，<strong>PMC</strong> 就是 CPU 上的<strong>可编程寄存器</strong>，可通过编程对特定硬件事件进行计数。通过 PMC 可以监控和计算 CPU 内部各种事件，比如 CPU 指令的执行效率、CPU caches 的命中率、分支预测的成功率等 micro-architectural 级的性能信息。利用这些数据分析性能，可以实现各种性能优化。</p>
 <p>perf 命令通过 <a class="link" href="https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html"  target="_blank" rel="noopener"
     >perf_event_open(2)</a> 系统调用访问 PMC，配置想要捕获的硬件事件。PMC 可以在两种模式下使用：</p>
 <ul>
@@ -714,8 +723,10 @@
 </div><p>对于 Intel CPU，<code>instructions</code> 事件的原始事件代码为 <code>r00c0</code>，两者可以等价使用。</p>
 <p>对于大部分通用事件，我们不需要记住这些原始事件代码，perf 都提供了可读的映射。但在某些情况下，例如最新 CPU 增加的事件还没有在 perf 中添加映射，或者某种 CPU 的特定事件不会通过可读的名称暴露出来，这时就只能通过指定原始硬件事件代码来监控事件。</p>
 <p>简单了解了 PMC 后，我们来看如何基于 PMC 事件进行 CPU Profiling。</p>
-<h2 id="cpu-profiling">CPU Profiling</h2>
-<p>perf 是事件驱动的方式工作，通过 <strong>-e</strong> 参数指定想要收集的特定事件，例如：</p>
+<h2 id="cpu-profiling">
+    <a href="#cpu-profiling" class="header-anchor">#</a>
+    CPU Profiling
+</h2><p>perf 是事件驱动的方式工作，通过 <strong>-e</strong> 参数指定想要收集的特定事件，例如：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -743,8 +754,10 @@
 </ol>
 <p>前四个事件都是 PMC 提供的 CPU <strong>cycles</strong> 事件，区别在于精确度不同，从最精确（<code>ppp</code>）到无精确设置（没有 <code>p</code>），最精确的事件优先被选择。<strong>cpu-clock</strong> 是基于软件的 CPU 频率采样，在没有硬件 <strong>cycles</strong> 事件可用时，会选择使用 <strong>cpu-clock</strong> 软件事件。</p>
 <p>那么什么是CPU <strong>cycles</strong> 事件，为什么对 <strong>cycles</strong> 事件进行采样可以分析 CPU 的性能？</p>
-<h3 id="cycles-事件">cycles 事件</h3>
-<p>首先介绍一个关于 CPU 性能的重要概念，<strong>Clock Rate</strong>（时钟频率）。Clock（时钟）是驱动 CPU 的数字信号，CPU 以特定的时钟频率执行，例如 4 GHz的 CPU 每秒可执行40亿个 cycles（周期）。</p>
+<h3 id="cycles-事件">
+    <a href="#cycles-%e4%ba%8b%e4%bb%b6" class="header-anchor">#</a>
+    cycles 事件
+</h3><p>首先介绍一个关于 CPU 性能的重要概念，<strong>Clock Rate</strong>（时钟频率）。Clock（时钟）是驱动 CPU 的数字信号，CPU 以特定的时钟频率执行，例如 4 GHz的 CPU 每秒可执行40亿个 cycles（周期）。</p>
 <p>CPU <strong>cycles （周期）<strong>是 CPU 执行指令的时间单位，而</strong>时钟频率</strong>表示 CPU 每秒执行的 CPU 周期数。每个 CPU 指令执行可能需要一个或多个 CPU 周期。 通常情况下，更高的时钟频率意味着更快的CPU，因为它允许 CPU 在单位时间内执行更多的指令。</p>
 <p><img src="https://cdn.mazhen.tech/images/202311091031747.jpg"
 	
@@ -758,8 +771,10 @@
 ></p>
 <p>每经过一个 CPU 周期都会触发一个 <strong>cycles</strong> 事件。可以认为，<strong>cycles</strong> 事件是均匀的分布在程序的执行期间。这样，以固定频率去采样的 <strong>cycles</strong> 事件，也是均匀的分布在程序的执行期间。我们在采样 <strong>cycles</strong> 事件时，记录 CPU 正在干什么，持续一段时间收集到多个采样后，我们就能基于这些信息分析程序的行为，多次出现的同样动作，可以认为是程序的热点，成为下一步分析重点关注的方面。</p>
 <p>因为 <strong>cycles</strong> 事件的均匀分布，通过以固定频率采样 <strong>cycles</strong> 事件获得的信息，我们就能进行 CPU 性能分析。那么如何指定采样频率呢？</p>
-<h3 id="设置采样频率">设置采样频率</h3>
-<p>在使用 perf record 记录 PMC 事件时，会使用一个默认的采样频率，不是每个事件都会被记录。例如记录 cycles 事件：</p>
+<h3 id="设置采样频率">
+    <a href="#%e8%ae%be%e7%bd%ae%e9%87%87%e6%a0%b7%e9%a2%91%e7%8e%87" class="header-anchor">#</a>
+    设置采样频率
+</h3><p>在使用 perf record 记录 PMC 事件时，会使用一个默认的采样频率，不是每个事件都会被记录。例如记录 cycles 事件：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -830,10 +845,14 @@
 </div>
 </div><p>在这个示例中，<strong>-c</strong> 选项设置采样周期为 1000，即每隔 1000 次事件进行一次采样。</p>
 <p>现在我们知道了如何以固定的频率对 cycles 事件进行采样，那么如何获知在采样时，CPU 正在干什么呢？</p>
-<h2 id="背景知识">背景知识</h2>
-<p>要知道  cycles 事件发生时 CPU 正在干什么，我们需要了解一些硬件知识，以及内核与硬件是如何配合工作的。先看看 CPU 是如何执行指令的。</p>
-<h3 id="cpu-执行指令">CPU 执行指令</h3>
-<p>CPU 内部有多种不同功能的寄存器，涉及到指令执行的，有三个重要的寄存器：</p>
+<h2 id="背景知识">
+    <a href="#%e8%83%8c%e6%99%af%e7%9f%a5%e8%af%86" class="header-anchor">#</a>
+    背景知识
+</h2><p>要知道  cycles 事件发生时 CPU 正在干什么，我们需要了解一些硬件知识，以及内核与硬件是如何配合工作的。先看看 CPU 是如何执行指令的。</p>
+<h3 id="cpu-执行指令">
+    <a href="#cpu-%e6%89%a7%e8%a1%8c%e6%8c%87%e4%bb%a4" class="header-anchor">#</a>
+    CPU 执行指令
+</h3><p>CPU 内部有多种不同功能的寄存器，涉及到指令执行的，有三个重要的寄存器：</p>
 <ul>
 <li>PC 寄存器（<strong>PC</strong>，Program Counter），存放下一条指令的内存地址</li>
 <li>指令寄存器（<strong>IR</strong>，Instruction Register），存放当前正在执行的指令</li>
@@ -856,8 +875,10 @@
 <p>在编译程序时，可以让编译器生成一个映射，将源代码行与生成的机器指令关联起来，这个映射通常存储在 <a class="link" href="https://dwarfstd.org/"  target="_blank" rel="noopener"
     >DWARF 格式（Debugging With Attributed Record Formats）</a>的调试信息中。同时编译时会生成<strong>符号表（Symbol Table）</strong>，其中包含了程序中各种符号（如函数名、变量名）及其地址的映射。perf 借助调试信息和符号表（symbol table），可以将采样时寄存器中的指令地址转换为对应的函数名、源代码行号等信息。</p>
 <p>知道了 CPU 当时的“动作”还不够，我们还需要知道 CPU 是怎么做这个“动作”的，也就是代码的执行路径。下面介绍函数调用栈的相关概念。</p>
-<h3 id="还原函数调用栈">还原函数调用栈</h3>
-<p>函数是软件中的一个关键抽象概念，它让开发者将具有特定功能的代码打包，然后这个功能可以在程序的多个位置被调用。</p>
+<h3 id="还原函数调用栈">
+    <a href="#%e8%bf%98%e5%8e%9f%e5%87%bd%e6%95%b0%e8%b0%83%e7%94%a8%e6%a0%88" class="header-anchor">#</a>
+    还原函数调用栈
+</h3><p>函数是软件中的一个关键抽象概念，它让开发者将具有特定功能的代码打包，然后这个功能可以在程序的多个位置被调用。</p>
 <p>假设函数 P 调用函数 Q，然后 Q 执行并返回结果给 P，这个过程涉及到以下机制：</p>
 <ul>
 <li><strong>传递控制</strong>：在进入函数 Q 时，<strong>PC</strong> 寄存器设置为 Q 的起始地址；在从 Q 返回时，<strong>PC</strong> 寄存器设置为 P 中调用 Q 后的下一条指令处。</li>
@@ -911,8 +932,10 @@
 <p>本文就不详细讨论其他两种还原调用栈的方法，感兴趣的可以参考<a class="link" href="https://www.brendangregg.com/bpf-performance-tools-book.html"  target="_blank" rel="noopener"
     >《BPF Performance Tools》</a>。</p>
 <p>在 Linux 上，进程的执行分为了用户态和内核态，要知道完整的代码执行路径，就需要分别还原用户栈和内核栈。什么是用户态和内核态呢？</p>
-<h3 id="用户态和内核态">用户态和内核态</h3>
-<p>操作系统需要能够限制对关键系统资源的访问，提供对资源不同级别的访问权限，这样可以保护系统免受错误和恶意行为的侵害。这种访问权限由 CPU 在硬件级别上实现，例如 x86 架构定义了特权级别，也称为保护环（<strong>protection rings</strong>），从 <strong>Ring 0</strong> 到 <strong>Ring 3</strong> ，每个级别定义了可使用的指令集和可访问的资源，<strong>Ring 0</strong> 具有最高的特权级别。</p>
+<h3 id="用户态和内核态">
+    <a href="#%e7%94%a8%e6%88%b7%e6%80%81%e5%92%8c%e5%86%85%e6%a0%b8%e6%80%81" class="header-anchor">#</a>
+    用户态和内核态
+</h3><p>操作系统需要能够限制对关键系统资源的访问，提供对资源不同级别的访问权限，这样可以保护系统免受错误和恶意行为的侵害。这种访问权限由 CPU 在硬件级别上实现，例如 x86 架构定义了特权级别，也称为保护环（<strong>protection rings</strong>），从 <strong>Ring 0</strong> 到 <strong>Ring 3</strong> ，每个级别定义了可使用的指令集和可访问的资源，<strong>Ring 0</strong> 具有最高的特权级别。</p>
 <p><img src="https://cdn.mazhen.tech/images/202311151103732.png"
 	
 	
@@ -929,8 +952,10 @@
 <li><strong>Ring 3</strong>: 最低特权级别，用于普通的应用程序，这些应用程序不能直接执行影响系统稳定性或安全性的操作。</li>
 </ul>
 <p>Linux 主要使用了 <strong>Ring 0</strong> 和 <strong>Ring 3</strong>，将能够访问关键资源的内核放在 Ring0，称为内核态（<strong>Kernel Mode</strong>），普通的应用程序将放在 Ring3，称为用户态（<strong>User Mode</strong>）。</p>
-<h3 id="系统调用">系统调用</h3>
-<p>如果用户态代码需要访问核心资源，它必须通过<strong>系统调用（system call ）</strong>。系统调用是进入内核的入口点，内核通过系统调用向程序提供一系列服务，如文件读写、进程创建、输入输出操作等。应用程序通过系统调用请求内核代为执行这些服务。</p>
+<h3 id="系统调用">
+    <a href="#%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8" class="header-anchor">#</a>
+    系统调用
+</h3><p>如果用户态代码需要访问核心资源，它必须通过<strong>系统调用（system call ）</strong>。系统调用是进入内核的入口点，内核通过系统调用向程序提供一系列服务，如文件读写、进程创建、输入输出操作等。应用程序通过系统调用请求内核代为执行这些服务。</p>
 <p>调用系统调用看起来很像调用 C 函数。但实际上，在系统调用的执行过程中，会进行多个步骤。以 x86 平台的实现为例，包括以下几个关键环节：</p>
 <p><img src="https://cdn.mazhen.tech/images/202311211416813.png"
 	
@@ -950,15 +975,19 @@
 <li>内核响应中断，把当前的寄存器值保存到内核栈数据结构 <strong>struct pt_regs</strong> 中，根据编号在一个表格中找到相应的系统调用服务程序，并执行它，然后返回结果。</li>
 <li>完成操作后，内核将寄存器值恢复到原始状态，并将控制权返回给用户空间的应用程序，同时返回系统调用的结果。</li>
 </ol>
-<h3 id="用户栈和内核栈">用户栈和内核栈</h3>
-<p>可以看出在执行系统调用时，进程具有两个栈：<strong>用户栈（User Stack）<strong>和</strong>内核栈（Kernel Stack）</strong>。</p>
+<h3 id="用户栈和内核栈">
+    <a href="#%e7%94%a8%e6%88%b7%e6%a0%88%e5%92%8c%e5%86%85%e6%a0%b8%e6%a0%88" class="header-anchor">#</a>
+    用户栈和内核栈
+</h3><p>可以看出在执行系统调用时，进程具有两个栈：<strong>用户栈（User Stack）<strong>和</strong>内核栈（Kernel Stack）</strong>。</p>
 <ul>
 <li><strong>用户栈（User Stack）</strong> 保留了进入系统调用前的状态，用户栈在系统调用期间不会改变</li>
 <li><strong>内核栈（Kernel Stack）</strong> 是在系统调用期间使用，用于存储在内核态下执行的状态信息，包括寄存器的值和系统调用的参数。此外处理中断和异常时，也会使用内核栈。</li>
 </ul>
 <p>用户栈和内核栈在什么什么位置？我们需要先了解虚拟地址空间的概念。</p>
-<h3 id="进程虚拟地址空间">进程虚拟地址空间</h3>
-<p>在现代操作系统上，用户程序都不能直接操作物理内存。操作系统会给进程分配虚拟内存空间，所有进程看到的这个地址都是一样的，里面的内存都是从 0 开始编号。</p>
+<h3 id="进程虚拟地址空间">
+    <a href="#%e8%bf%9b%e7%a8%8b%e8%99%9a%e6%8b%9f%e5%9c%b0%e5%9d%80%e7%a9%ba%e9%97%b4" class="header-anchor">#</a>
+    进程虚拟地址空间
+</h3><p>在现代操作系统上，用户程序都不能直接操作物理内存。操作系统会给进程分配虚拟内存空间，所有进程看到的这个地址都是一样的，里面的内存都是从 0 开始编号。</p>
 <p>程序里指令操作的都是虚拟地址。内核会维护一个虚拟内存到物理内存的映射表，将不同进程的虚拟地址和不同的物理地址映射起来。当程序要访问虚拟地址时，会通过映射表进行转换，找到对应的物理内存地址。不同进程相同的虚拟地址，会映射到不同的物理地址，不会发生冲突。这样每个进程的地址空间都是独立的，相互隔离互不影响。</p>
 <p><img src="https://cdn.mazhen.tech/images/202311151758027.png"
 	
@@ -999,8 +1028,10 @@
     >struct pt_regs</a> 内，以便在系统调用完成后能够准确地恢复，继续执行因系统调用而暂停的用户空间操作。</p>
 <p>执行内核代码会使用<strong>内核栈（Kernel-Stack）</strong>。</p>
 <p>现在有了进程虚拟地址空间的全景图，我们再回头看看还原函数调用栈的问题。</p>
-<h3 id="还原完整调用栈">还原完整调用栈</h3>
-<p>在 Linux 系统中，我们可以说在任何给定的时刻，CPU 处于下面三种状态之一：</p>
+<h3 id="还原完整调用栈">
+    <a href="#%e8%bf%98%e5%8e%9f%e5%ae%8c%e6%95%b4%e8%b0%83%e7%94%a8%e6%a0%88" class="header-anchor">#</a>
+    还原完整调用栈
+</h3><p>在 Linux 系统中，我们可以说在任何给定的时刻，CPU 处于下面三种状态之一：</p>
 <ol>
 <li>在用户空间，执行某个进程里的用户级代码</li>
 <li>在内核空间，以进程的身份运行，为特定的进程服务，也就是执行系统调用</li>
@@ -1010,8 +1041,10 @@
 <p>对于第二种情况，进程正好陷入内核执行系统调用，那么通过 <strong>Frame Pointer</strong>（ <strong>rsp</strong> 寄存器）可以还原内核代码的执行路径。然后再通过内核数据结构 <a class="link" href="https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/include/asm/ptrace.h#L59"  target="_blank" rel="noopener"
     >struct pt_regs</a> 内保存的寄存器状态，还原进入内核前用户空间的代码执行路径。这样我们就能获得采样事件触发时，包含了用户态和内核态的完整代码执行路径。</p>
 <p>通过 <strong>PC</strong> 寄存器、 <strong>rsp</strong> 寄存器，以及内核数据结构<strong>pt_regs</strong>，我们能知道 CPU 瞬时的“动作”，以及它是怎么做这个动作的（代码执行路径），那么还剩最后一个问题，我们怎么知道采样发生时刻 CPU 寄存器的内容呢？</p>
-<h3 id="中断处理">中断处理</h3>
-<p>内核是被动工作模式，它“躺”在内核空间不会主动工作，要么通过系统调用让它为用户进程服务，要么由时钟中断和各种外部设备中断事件驱动执行。</p>
+<h3 id="中断处理">
+    <a href="#%e4%b8%ad%e6%96%ad%e5%a4%84%e7%90%86" class="header-anchor">#</a>
+    中断处理
+</h3><p>内核是被动工作模式，它“躺”在内核空间不会主动工作，要么通过系统调用让它为用户进程服务，要么由时钟中断和各种外部设备中断事件驱动执行。</p>
 <p>中断是 Linux 的核心功能之一，它允许 CPU 响应外部或内部事件，如源自硬件设备的键盘、鼠标、网卡，或来自软件的异常。当这些事件，也就是中断事件发生时，CPU 会暂停当前的工作，转入内核的<strong>中断处理程序（Interrupt Handler）</strong>。当处理完成后，会从中断处理程序返回到原来被中断的代码处继续执行。</p>
 <p>中断可以分为**同步（Synchronous）<strong>中断和</strong>异步（Asynchronous）**中断两类：</p>
 <ul>
@@ -1398,8 +1431,10 @@
 </div>
 </div><p>可以看到，第二个参数 <strong>pt_regs</strong> 在前面介绍系统调用时已经出现过，是内核用来保存寄存器状态的结构体。这样在<strong>perf_event_nmi_handler</strong>中，我们就可以使用 <strong>pt_regs</strong> 中保存的寄存器状态，还原出 <strong>PMI</strong> 中断发生时，CPU 当时的动作，以及包含了用户态和内核态的完整代码执行路径。</p>
 <p>至此，我们了解了 perf 在进行 CPU Profiling 时涉及的全部技术机制。</p>
-<h2 id="总结">总结</h2>
-<p>现在再回顾我们使用 perf 进行 CPU Profiling 时的命令：</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>现在再回顾我们使用 perf 进行 CPU Profiling 时的命令：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1656,8 +1691,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

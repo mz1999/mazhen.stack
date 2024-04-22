@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='配置文件语法 Nginx的配置文件是一个文本文件，由指令和指令块构成。 指令 指令以分号 ; 结尾，指令和参数间以空格分割。 指令块作为容器，将相关的指'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 配置文件语法 Nginx的配置文件是一个文本文件，由指令和指令块构成。 # 指令 指令以分号 ; 结尾，指令和参数间以空格分割。 指令块作为容器，将相关">
 <title>Nginx静态资源服务的配置</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/nginx%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E7%9A%84%E9%85%8D%E7%BD%AE/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Nginx静态资源服务的配置'>
-<meta property='og:description' content='配置文件语法 Nginx的配置文件是一个文本文件，由指令和指令块构成。 指令 指令以分号 ; 结尾，指令和参数间以空格分割。 指令块作为容器，将相关的指'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Nginx静态资源服务的配置">
+<meta property='og:description' content="# 配置文件语法 Nginx的配置文件是一个文本文件，由指令和指令块构成。 # 指令 指令以分号 ; 结尾，指令和参数间以空格分割。 指令块作为容器，将相关">
 <meta property='og:url' content='https://mazhen.tech/p/nginx%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E7%9A%84%E9%85%8D%E7%BD%AE/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='nginx' /><meta property='article:published_time' content='2022-11-15T14:40:19&#43;08:00'/><meta property='article:modified_time' content='2022-11-15T14:40:19&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Nginx静态资源服务的配置">
-<meta name="twitter:description" content="配置文件语法 Nginx的配置文件是一个文本文件，由指令和指令块构成。 指令 指令以分号 ; 结尾，指令和参数间以空格分割。 指令块作为容器，将相关的指">
+<meta name="twitter:description" content="# 配置文件语法 Nginx的配置文件是一个文本文件，由指令和指令块构成。 # 指令 指令以分号 ; 结尾，指令和参数间以空格分割。 指令块作为容器，将相关">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -452,10 +455,14 @@
     <section class="article-content">
     
     
-    <h2 id="配置文件语法">配置文件语法</h2>
-<p>Nginx的配置文件是一个文本文件，由指令和指令块构成。</p>
-<h3 id="指令">指令</h3>
-<p><strong>指令</strong>以分号 <code>;</code> 结尾，指令和参数间以空格分割。</p>
+    <h2 id="配置文件语法">
+    <a href="#%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6%e8%af%ad%e6%b3%95" class="header-anchor">#</a>
+    配置文件语法
+</h2><p>Nginx的配置文件是一个文本文件，由指令和指令块构成。</p>
+<h3 id="指令">
+    <a href="#%e6%8c%87%e4%bb%a4" class="header-anchor">#</a>
+    指令
+</h3><p><strong>指令</strong>以分号 <code>;</code> 结尾，指令和参数间以空格分割。</p>
 <p><strong>指令块</strong>作为容器，将相关的指令组合在一起，用大括号 <code>{}</code> 将它们包围起来。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -491,8 +498,10 @@
 </div>
 </div><p>上面配置中的http、server、location等都是指令块。指令块配置项之后是否如参数（例如 location /），取决于解析这个块配置项的模块。</p>
 <p>指令块配置项是可以嵌套的。内层块会继承父级块包含的指令的设置。有些指令可以出现在多层指令块内，你可以通过在内层指令块包含该指令，来覆盖从父级继承的设置。</p>
-<h3 id="context">Context</h3>
-<p>一些 top-level 指令被称为 <strong>context</strong>，将适用于不同流量类型的指令组合在一起。</p>
+<h3 id="context">
+    <a href="#context" class="header-anchor">#</a>
+    Context
+</h3><p>一些 top-level 指令被称为 <strong>context</strong>，将适用于不同流量类型的指令组合在一起。</p>
 <ul>
 <li><strong>events</strong> – 通用的连接处理</li>
 <li><strong>http</strong> – HTTP流量</li>
@@ -503,8 +512,10 @@
 <p>在每个流量处理 context 中，可以包括一个或多个 <strong>server</strong> 块，用来定义控制请求处理的虚拟服务器。</p>
 <p>对于HTTP流量，每个 server 指令块是对特定域名或IP地址访问的控制。通过一个活多个 <strong>location</strong> 定义如何处理特定的URI。</p>
 <p>对于 Mail 和 TCP/UDP 流量，server 指令块是对特定 TCP 端口流量的控制。</p>
-<h2 id="静态资源服务">静态资源服务</h2>
-<p>将个人网站的静态资源 clone 到 nginx 根目录：</p>
+<h2 id="静态资源服务">
+    <a href="#%e9%9d%99%e6%80%81%e8%b5%84%e6%ba%90%e6%9c%8d%e5%8a%a1" class="header-anchor">#</a>
+    静态资源服务
+</h2><p>将个人网站的静态资源 clone 到 nginx 根目录：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -592,8 +603,10 @@
 </div>
 </div><p>如果一个请求的 URI 是 <code>/i/top.gif</code>，Nginx 将会返回服务器上的 <code>/data/w3/images/top.gif</code>文件。alias 会把 <code>location</code> 后面配置的 <code>uri</code> 替换为 <code>alias</code> 定义的目录。</p>
 <p>最后要注意，使用 <code>alias</code> 时，目录名后面一定要加 <code>/</code>。</p>
-<h2 id="开启gzip">开启gzip</h2>
-<p>Nginx 的 <code>ngx_http_gzip_module</code> 模块是一个过滤器，它使用 &ldquo;gzip &ldquo;方法压缩响应。可以在 http context 下配置 gzip：</p>
+<h2 id="开启gzip">
+    <a href="#%e5%bc%80%e5%90%afgzip" class="header-anchor">#</a>
+    开启gzip
+</h2><p>Nginx 的 <code>ngx_http_gzip_module</code> 模块是一个过滤器，它使用 &ldquo;gzip &ldquo;方法压缩响应。可以在 http context 下配置 gzip：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -629,8 +642,10 @@
 </ul>
 <p>更多的配置项，可以参考<a class="link" href="https://nginx.org/en/docs/http/ngx_http_gzip_module.html"  target="_blank" rel="noopener"
     >官方文档</a>。</p>
-<h2 id="autoindex">autoindex</h2>
-<p>Nginx 的 <code>ngx_http_autoindex_module</code> 模块处理以斜线字符 <code>/</code> 结尾的请求，并产生一个目录列表。通常情况下，当 <code>ngx_http_index_module</code> 模块找不到index文件时，请求会被传递给 <code>ngx_http_autoindex_module</code> 模块。</p>
+<h2 id="autoindex">
+    <a href="#autoindex" class="header-anchor">#</a>
+    autoindex
+</h2><p>Nginx 的 <code>ngx_http_autoindex_module</code> 模块处理以斜线字符 <code>/</code> 结尾的请求，并产生一个目录列表。通常情况下，当 <code>ngx_http_index_module</code> 模块找不到index文件时，请求会被传递给 <code>ngx_http_autoindex_module</code> 模块。</p>
 <p>autoindex 的配置很简单：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -647,8 +662,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>注意，只有 index 模块找不到index文件时，请求才会被 autoindex 模块处理。我们可以把 <code>mazhen</code> 目录下的 index 文件删掉，或者为 index 指令配置一个不存在的文件。</p>
-<h2 id="limit_rate">limit_rate</h2>
-<p>由于带宽的限制，我们有时候需要限制某些资源向客户端传输响应的速率，例如可以对大文件限速，避免传输大文件占用过多带宽，从而影响其他更重要的小文件（css，js）的传输。我们可以使用 <code>set</code> 指令配合内置变量 <code>$limit_rate</code> 实现这个功能：</p>
+<h2 id="limit_rate">
+    <a href="#limit_rate" class="header-anchor">#</a>
+    limit_rate
+</h2><p>由于带宽的限制，我们有时候需要限制某些资源向客户端传输响应的速率，例如可以对大文件限速，避免传输大文件占用过多带宽，从而影响其他更重要的小文件（css，js）的传输。我们可以使用 <code>set</code> 指令配合内置变量 <code>$limit_rate</code> 实现这个功能：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -694,8 +711,10 @@
 ></p>
 <p>这里有 http module 所有内置变量的说明，包括我们刚才使用 <a class="link" href="https://nginx.org/en/docs/http/ngx_http_core_module.html#var_limit_rate"  target="_blank" rel="noopener"
     >$limit_rate</a>。</p>
-<h2 id="access-log">access log</h2>
-<p>Nginx 的 access log 功能由 <a class="link" href="https://nginx.org/en/docs/http/ngx_http_log_module.html"  target="_blank" rel="noopener"
+<h2 id="access-log">
+    <a href="#access-log" class="header-anchor">#</a>
+    access log
+</h2><p>Nginx 的 access log 功能由 <a class="link" href="https://nginx.org/en/docs/http/ngx_http_log_module.html"  target="_blank" rel="noopener"
     >ngx_http_log_module</a> 模块提供。ngx_http_log_module 提供了两个指令：</p>
 <ul>
 <li><strong>log_format</strong> 指定日志格式</li>
@@ -900,8 +919,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

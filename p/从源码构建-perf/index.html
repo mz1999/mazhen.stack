@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在">
 <title>从源码构建 perf</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='从源码构建 perf'>
-<meta property='og:description' content='perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="从源码构建 perf">
+<meta property='og:description' content="perf 是 Linux 官方的性能分析工具，它具备 profiling、tracing 和脚本编写等多种功能，是内核 perf_events 子系统的前端工具。 perf_events 也被称为 Performance Counters for Linux (PCL) ，是在">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2023-10-26T09:30:20&#43;08:00'/><meta property='article:modified_time' content='2023-10-26T09:30:20&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -467,8 +470,10 @@
 	
 	
 ></p>
-<h2 id="安装预编译二进制包">安装预编译二进制包</h2>
-<p>perf 包含在 linux-tools-common 中，首先安装该软件包：</p>
+<h2 id="安装预编译二进制包">
+    <a href="#%e5%ae%89%e8%a3%85%e9%a2%84%e7%bc%96%e8%af%91%e4%ba%8c%e8%bf%9b%e5%88%b6%e5%8c%85" class="header-anchor">#</a>
+    安装预编译二进制包
+</h2><p>perf 包含在 linux-tools-common 中，首先安装该软件包：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -513,8 +518,10 @@
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install linux-tools-6.2.0-35-generic
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="安装-debug-symbol">安装 Debug Symbol</h2>
-<p>perf 像其他调试工具一样，需要调试符号表信息（Debug symbols）。这些符号信息用于将内存地址转换为函数和变量名称。如果没有符号信息，你将看到代表被分析内存地址的十六进制数字。</p>
+</div><h2 id="安装-debug-symbol">
+    <a href="#%e5%ae%89%e8%a3%85-debug-symbol" class="header-anchor">#</a>
+    安装 Debug Symbol
+</h2><p>perf 像其他调试工具一样，需要调试符号表信息（Debug symbols）。这些符号信息用于将内存地址转换为函数和变量名称。如果没有符号信息，你将看到代表被分析内存地址的十六进制数字。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -636,8 +643,10 @@
 </span></span><span class="line"><span class="cl">$ sudo apt install linux-image-<span class="sb">`</span>uname -r<span class="sb">`</span>-dbgsym
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="kernel-tracepoints">Kernel Tracepoints</h2>
-<p>Kernel <strong>tracepoint</strong> 是在内核源码中关键位置的埋点，允许开发人员监视内核中的各种事件和操作，例如系统调用、TCP事件、文件系统I/O、磁盘I/O等，以了解内核的行为，进行性能分析和故障诊断。</p>
+</div><h2 id="kernel-tracepoints">
+    <a href="#kernel-tracepoints" class="header-anchor">#</a>
+    Kernel Tracepoints
+</h2><p>Kernel <strong>tracepoint</strong> 是在内核源码中关键位置的埋点，允许开发人员监视内核中的各种事件和操作，例如系统调用、TCP事件、文件系统I/O、磁盘I/O等，以了解内核的行为，进行性能分析和故障诊断。</p>
 <p>使用 perf 可以对 tracepoints 进行统计、追踪和采样。例如可以使用下面的命令对上下文切换进行 1 秒钟的跟踪：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -749,9 +758,13 @@
 </div>
 </div><p><a class="link" href="https://www.man7.org/linux/man-pages/man3/libtraceevent.3.html"  target="_blank" rel="noopener"
     >libtraceevent</a> 提供了访问内核 tracepoint 事件的 API。注意到最后一行，说明 perf 在 build 时没有打开 <code>libtraceevent</code>的支持。因此我们安装的预编译二进制包不能进行 tracepoint 追踪。我们需要自己从源码构建 perf。</p>
-<h2 id="从源码构建-perf">从源码构建 perf</h2>
-<h3 id="源码下载">源码下载</h3>
-<p>首先下载 perf 的源代码。perf 的源码位于 Linux 内核源码中的 <code>tools/perf</code> 目录下。perf 是一个复杂的用户空间应用程序，而它却位于Linux 内核源代码树中，可能是唯一一个被包含在 Linux 源代码中的复杂用户软件。</p>
+<h2 id="从源码构建-perf">
+    <a href="#%e4%bb%8e%e6%ba%90%e7%a0%81%e6%9e%84%e5%bb%ba-perf" class="header-anchor">#</a>
+    从源码构建 perf
+</h2><h3 id="源码下载">
+    <a href="#%e6%ba%90%e7%a0%81%e4%b8%8b%e8%bd%bd" class="header-anchor">#</a>
+    源码下载
+</h3><p>首先下载 perf 的源代码。perf 的源码位于 Linux 内核源码中的 <code>tools/perf</code> 目录下。perf 是一个复杂的用户空间应用程序，而它却位于Linux 内核源代码树中，可能是唯一一个被包含在 Linux 源代码中的复杂用户软件。</p>
 <p>为了下载和内核匹配的源码，先确定内核版本：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -765,8 +778,10 @@
 </div>
 </div><p>然后去 <a class="link" href="https://www.kernel.org/pub/"  target="_blank" rel="noopener"
     >https://www.kernel.org/pub/</a> 浏览并下载正确版本的源码。</p>
-<h3 id="安装依赖">安装依赖</h3>
-<p>安装构建依赖：</p>
+<h3 id="安装依赖">
+    <a href="#%e5%ae%89%e8%a3%85%e4%be%9d%e8%b5%96" class="header-anchor">#</a>
+    安装依赖
+</h3><p>安装构建依赖：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -786,8 +801,10 @@
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install libtraceevent-dev
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="构建">构建</h3>
-<p>解压下载的 Linux 源码，进入源码目录，运行下面的命令：</p>
+</div><h3 id="构建">
+    <a href="#%e6%9e%84%e5%bb%ba" class="header-anchor">#</a>
+    构建
+</h3><p>解压下载的 Linux 源码，进入源码目录，运行下面的命令：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -797,8 +814,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>成功构建后 perf 被安装到了 <code>$HOME/bin</code> 目录。</p>
-<h3 id="测试验证">测试验证</h3>
-<p>卸载先前安装的预编译版本：</p>
+<h3 id="测试验证">
+    <a href="#%e6%b5%8b%e8%af%95%e9%aa%8c%e8%af%81" class="header-anchor">#</a>
+    测试验证
+</h3><p>卸载先前安装的预编译版本：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1101,8 +1120,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

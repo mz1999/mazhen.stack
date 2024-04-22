@@ -100,8 +100,10 @@
         <description>&lt;img src=&#34;https://cdn.mazhen.tech/images/202310071804322.jpeg&#34; alt=&#34;cs resource&#34; style=&#34;zoom:50%;&#34; /&gt;
 &lt;p&gt;&lt;em&gt;题图使用 &lt;a class=&#34;link&#34; href=&#34;https://bing.com/create&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Microsoft Bing 图像创建&lt;/a&gt;器生成。&lt;/em&gt;&lt;/p&gt;
-&lt;h2 id=&#34;计算机原理体系结构&#34;&gt;计算机原理/体系结构&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;计算机原理体系结构&#34;&gt;
+    &lt;a href=&#34;#%e8%ae%a1%e7%ae%97%e6%9c%ba%e5%8e%9f%e7%90%86%e4%bd%93%e7%b3%bb%e7%bb%93%e6%9e%84&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    计算机原理/体系结构
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/column/intro/100026001&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;深入浅出计算机组成原理&lt;/a&gt;&lt;/p&gt;
@@ -139,8 +141,10 @@
     &gt;嵌入式C语言自我修养&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;linux&#34;&gt;Linux&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;linux&#34;&gt;
+    &lt;a href=&#34;#linux&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Linux
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/course/intro/100029601&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Linux 实战技能 100 讲&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.oreilly.com/library/view/efficient-linux-at/9781098113391/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -172,8 +176,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.linuxfromscratch.org/lfs/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Linux From Scratch&lt;/a&gt; step-by-step instructions for building your own customized Linux system entirely from source.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;网络&#34;&gt;网络&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;网络&#34;&gt;
+    &lt;a href=&#34;#%e7%bd%91%e7%bb%9c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    网络
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/35013753/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;趣谈网络协议&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/course/intro/100026801&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -185,8 +191,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/26941639/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;网络是怎样连接的&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;编程&#34;&gt;编程&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;编程&#34;&gt;
+    &lt;a href=&#34;#%e7%bc%96%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    编程
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/35218533/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;C专家编程&lt;/a&gt; Expert C Programming: Deep C Secrets&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://pythontutor.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -197,8 +205,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/25900403/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;UNIX环境高级编程&lt;/a&gt; Advanced Programming in the UNIX Environment&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;编译原理&#34;&gt;编译原理&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;编译原理&#34;&gt;
+    &lt;a href=&#34;#%e7%bc%96%e8%af%91%e5%8e%9f%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    编译原理
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/26365491/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;程序是怎样跑起来的&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/3652388/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -208,8 +218,10 @@
     &gt;part2&lt;/a&gt; &lt;a class=&#34;link&#34; href=&#34;https://blog.cloudflare.com/how-to-execute-an-object-file-part-3/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;part3&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;数据结构和算法&#34;&gt;数据结构和算法&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;数据结构和算法&#34;&gt;
+    &lt;a href=&#34;#%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84%e5%92%8c%e7%ae%97%e6%b3%95&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    数据结构和算法
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/column/intro/100017301&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;数据结构与算法之美&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/course/intro/100019701&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -222,8 +234,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://visualgo.net/zh&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;通过动画可视化数据结构和算法&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;综合&#34;&gt;综合&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;综合&#34;&gt;
+    &lt;a href=&#34;#%e7%bb%bc%e5%90%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    综合
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://csdiy.wiki/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;计算机自学指南&lt;/a&gt; (&lt;a class=&#34;link&#34; href=&#34;https://github.com/PKUFlyingPig/cs-self-learning&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;GitHub仓库&lt;/a&gt;)&lt;/li&gt;
@@ -236,8 +250,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.freecodecamp.org/news/online-coding-classes-for-beginners-2022-guide/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Online Coding Classes – For Beginners&lt;/a&gt;  3000 小时的免费课程，涵盖了编程涉及到的方方面面&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;在线课程&#34;&gt;在线课程&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;在线课程&#34;&gt;
+    &lt;a href=&#34;#%e5%9c%a8%e7%ba%bf%e8%af%be%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    在线课程
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.educative.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;educative&lt;/a&gt; 为开发者提供交互式在线课程，重点关注技术领域的知识与技能&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.edx.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -245,8 +261,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://exercism.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;exercism&lt;/a&gt; 专注于通过有趣且具有挑战性的练习问题、支持建设性同行评审机制来促进积极参与和技能提升，从而培养对各种现代计算范式的熟练掌握。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;技术面试&#34;&gt;技术面试&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;技术面试&#34;&gt;
+    &lt;a href=&#34;#%e6%8a%80%e6%9c%af%e9%9d%a2%e8%af%95&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    技术面试
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://leetcode.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Leetcode&lt;/a&gt; 一个广受欢迎的在线编程题库&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.amazon.com/Cracking-Coding-Interview-Programming-Questions/dp/0984782850&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -262,15 +280,19 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.meetapro.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Meetapro&lt;/a&gt; 一个可以找到专业人士进行模拟面试的网站&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;交互式教程&#34;&gt;交互式教程&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;交互式教程&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%a4%e4%ba%92%e5%bc%8f%e6%95%99%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    交互式教程
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://antonz.org/grep-by-example/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Grep by example&lt;/a&gt; 如何使用命令行工具 grep 进行文本搜索的交互式指南&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://learngitbranching.js.org/?locale=zh_CN&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Learn Git Branching&lt;/a&gt; 一个交互式的在线教程，帮助用户学习并练习 Git 的基本使用方法&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;大语言模型&#34;&gt;大语言模型&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;大语言模型&#34;&gt;
+    &lt;a href=&#34;#%e5%a4%a7%e8%af%ad%e8%a8%80%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    大语言模型
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://learnprompting.org/zh-Hans/docs/intro&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Learn Prompting&lt;/a&gt; 一个开源的、多元化社区构建的课程，旨在提供完整、公正的提示工程知识。&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.promptingguide.ai/zh&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -282,8 +304,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://datawhalechina.github.io/llm-universe/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;动手学大模型应用开发&lt;/a&gt; 面向小白开发者的大模型应用开发教程，基于阿里云服务器，结合个人知识库助手项目，通过一个课程完成大模型开发的重点入门。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;ios开发&#34;&gt;iOS开发&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;ios开发&#34;&gt;
+    &lt;a href=&#34;#ios%e5%bc%80%e5%8f%91&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    iOS开发
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.udemy.com/course/ios-13-app-development-bootcamp/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;iOS &amp;amp; Swift - The Complete iOS App Development Bootcamp&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.hackingwithswift.com/100/swiftui&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -299,8 +323,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://developer.apple.com/tutorials/swiftui&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;SwiftUI Tutorials&lt;/a&gt; 苹果官方教程&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;计算机科学史&#34;&gt;计算机科学史&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;计算机科学史&#34;&gt;
+    &lt;a href=&#34;#%e8%ae%a1%e7%ae%97%e6%9c%ba%e7%a7%91%e5%ad%a6%e5%8f%b2&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    计算机科学史
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/25752043/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;信息简史&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='我们通常会使用 load average 了解服务器的健康状况，检查服务器的负载是否正常。但 load average 有几个缺点： load average 的计算包含了 TASK_RUNNING 和 TASK_UNINTERRUPTIBLE 两种状态的进程。TASK_RUNN'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="我们通常会使用 load average 了解服务器的健康状况，检查服务器的负载是否正常。但 load average 有几个缺点： load average 的计算包含了 TASK_RUNNING 和 TASK_UNINTERRUPTIBLE 两种状态的进程。TASK_RUNN">
 <title>使用PSI（Pressure Stall Information）监控服务器资源</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8psipressure-stall-information%E7%9B%91%E6%8E%A7%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B5%84%E6%BA%90/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='使用PSI（Pressure Stall Information）监控服务器资源'>
-<meta property='og:description' content='我们通常会使用 load average 了解服务器的健康状况，检查服务器的负载是否正常。但 load average 有几个缺点： load average 的计算包含了 TASK_RUNNING 和 TASK_UNINTERRUPTIBLE 两种状态的进程。TASK_RUNN'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="使用PSI（Pressure Stall Information）监控服务器资源">
+<meta property='og:description' content="我们通常会使用 load average 了解服务器的健康状况，检查服务器的负载是否正常。但 load average 有几个缺点： load average 的计算包含了 TASK_RUNNING 和 TASK_UNINTERRUPTIBLE 两种状态的进程。TASK_RUNN">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8psipressure-stall-information%E7%9B%91%E6%8E%A7%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B5%84%E6%BA%90/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2021-08-01T11:51:05&#43;08:00'/><meta property='article:modified_time' content='2021-08-01T11:51:05&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -456,12 +459,16 @@
 <p>于是，Facebook的工程师 Johannes Weiner 发明了一个新的指标 <a class="link" href="https://www.kernel.org/doc/html/latest/accounting/psi.html"  target="_blank" rel="noopener"
     >PSI(Pressure Stall Information)</a>，并向内核提交了这个<a class="link" href="https://lwn.net/Articles/763629/"  target="_blank" rel="noopener"
     >patch</a>。</p>
-<h2 id="psi-概览">PSI 概览</h2>
-<p>当 CPU、内存或 IO 设备争夺激烈的时候，系统会出现负载的延迟峰值、吞吐量下降，并可能触发内核的 <code>OOM Killer</code>。<strong>PSI(Pressure Stall Information)</strong> 字面意思就是由于资源（CPU、内存和 IO）压力造成的任务执行停顿。<strong>PSI</strong> 量化了由于硬件资源紧张造成的任务执行中断，统计了系统中任务等待硬件资源的时间。我们可以用 <strong>PSI</strong> 作为指标，来衡量硬件资源的压力情况。停顿的时间越长，说明资源面临的压力越大。</p>
+<h2 id="psi-概览">
+    <a href="#psi-%e6%a6%82%e8%a7%88" class="header-anchor">#</a>
+    PSI 概览
+</h2><p>当 CPU、内存或 IO 设备争夺激烈的时候，系统会出现负载的延迟峰值、吞吐量下降，并可能触发内核的 <code>OOM Killer</code>。<strong>PSI(Pressure Stall Information)</strong> 字面意思就是由于资源（CPU、内存和 IO）压力造成的任务执行停顿。<strong>PSI</strong> 量化了由于硬件资源紧张造成的任务执行中断，统计了系统中任务等待硬件资源的时间。我们可以用 <strong>PSI</strong> 作为指标，来衡量硬件资源的压力情况。停顿的时间越长，说明资源面临的压力越大。</p>
 <p>如果持续监控 <code>PSI</code> 指标并绘制变化曲线图，可以发现吞吐量下降与资源短缺的关系，让用户在资源变得紧张前，采取更主动的措施，例如将任务迁移到其他服务器，杀死低优先级的任务等。</p>
 <p><code>PSI</code> 已经包含在 4.20及以上版本的 Linux 内核中。</p>
-<h2 id="psi-接口文件">PSI 接口文件</h2>
-<p>CPU、内存和 IO 的压力信息导出到了 <code>/proc/pressure/</code> 目录下对应的文件，你可以使用 <code>cat</code> 命令查询资源的压力统计信息：</p>
+<h2 id="psi-接口文件">
+    <a href="#psi-%e6%8e%a5%e5%8f%a3%e6%96%87%e4%bb%b6" class="header-anchor">#</a>
+    PSI 接口文件
+</h2><p>CPU、内存和 IO 的压力信息导出到了 <code>/proc/pressure/</code> 目录下对应的文件，你可以使用 <code>cat</code> 命令查询资源的压力统计信息：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -492,8 +499,10 @@
 <p><strong>avg</strong> 给出了任务由于硬件资源不可用而被停顿的时间百分比。<strong>avg10</strong>、<strong>avg60</strong>和<strong>avg300</strong>分别是最近10秒、60秒和300秒的停顿时间百分比。</p>
 <p>例如上面 <code>/proc/pressure/cpu</code> 的输出，<strong>avg10=0.03</strong> 意思是任务因为CPU资源的不可用，在最近的10秒内，有0.03%的时间停顿等待 CPU。如果 avg 大于 40 ，也就是有 40% 时间在等待硬件资源，就说明这种资源的压力已经比较大了。</p>
 <p><strong>total</strong> 是任务停顿的总时间，以微秒（microseconds）为单位。通过 total 可以检测出停顿持续太短而无法影响平均值的情况。</p>
-<h2 id="some-和-full-的定义">some 和 full 的定义</h2>
-<p><strong>some</strong> 指标说明一个或多个任务由于等待资源而被停顿的时间百分比。在下图的例子中，在最近的60秒内，任务A的运行没有停顿，而由于内存紧张，任务B在运行过程中花了30秒等待内存，则 some 的值为50%。</p>
+<h2 id="some-和-full-的定义">
+    <a href="#some-%e5%92%8c-full-%e7%9a%84%e5%ae%9a%e4%b9%89" class="header-anchor">#</a>
+    some 和 full 的定义
+</h2><p><strong>some</strong> 指标说明一个或多个任务由于等待资源而被停顿的时间百分比。在下图的例子中，在最近的60秒内，任务A的运行没有停顿，而由于内存紧张，任务B在运行过程中花了30秒等待内存，则 some 的值为50%。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241153234.png"
 	
 	
@@ -529,8 +538,10 @@
 	
 ></p>
 <p>理解了 <strong>some</strong> 和 <strong>full</strong> 的含义，就明白了 CPU 为什么没有 <strong>full</strong> 指标，因为不可能所有的任务都同时饿死在 CPU 上，CPU 总是在执行一个任务。</p>
-<h2 id="psi-阈值监控">PSI 阈值监控</h2>
-<p>用户可以向 PSI 注册触发器，在资源压力超过自定义的阈值时获得通知。一个触发器定义了特定时间窗口内最大累积停顿时间，例如，在任何 500ms 的窗口内，累计 100ms 的停顿时间会产生一个通知事件。</p>
+<h2 id="psi-阈值监控">
+    <a href="#psi-%e9%98%88%e5%80%bc%e7%9b%91%e6%8e%a7" class="header-anchor">#</a>
+    PSI 阈值监控
+</h2><p>用户可以向 PSI 注册触发器，在资源压力超过自定义的阈值时获得通知。一个触发器定义了特定时间窗口内最大累积停顿时间，例如，在任何 500ms 的窗口内，累计 100ms 的停顿时间会产生一个通知事件。</p>
 <p>如何向 PSI 注册触发器呢？打开 <code>/proc/pressure/</code> 目录下资源对应的 PSI 接口文件，写入想要的阈值和时间窗口，然后在打开的文件描述符上使用 <code>select()</code>、<code>poll()</code> 或 <code>epoll()</code> 方法等待通知事件。写入 PSI 接口文件的数据格式为：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -687,8 +698,10 @@
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="psi-应用案例">PSI 应用案例</h2>
-<p>Facebook 是因为一些实际的需求开发了 PSI。其中一个案例是为了避免内核 OOM(Out-Of-Memory) killer 的触发。</p>
+</div><h2 id="psi-应用案例">
+    <a href="#psi-%e5%ba%94%e7%94%a8%e6%a1%88%e4%be%8b" class="header-anchor">#</a>
+    PSI 应用案例
+</h2><p>Facebook 是因为一些实际的需求开发了 PSI。其中一个案例是为了避免内核 OOM(Out-Of-Memory) killer 的触发。</p>
 <p>应用在申请内存的时候，如果没有足够的 free 内存，可以通过回收 <strong>Page Cache</strong> 释放内存，如果这时 free 内存还是不够，就会触发内核的 OOM Killer，挑选一个进程 kill 掉释放内存。这个过程是同步的，申请分配内存的进程一直被阻塞等待，而且内核选择 kill 掉哪个进程释放内存，用户不可控。因此，Facebook 开发了用户空间的 OOM Killer 工具 <a class="link" href="https://github.com/facebookincubator/oomd"  target="_blank" rel="noopener"
     >oomd</a>。</p>
 <p><a class="link" href="https://github.com/facebookincubator/oomd"  target="_blank" rel="noopener"
@@ -865,8 +878,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

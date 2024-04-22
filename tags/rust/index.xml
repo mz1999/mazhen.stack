@@ -23,8 +23,10 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;call&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;-&amp;gt; &lt;span class=&#34;nb&#34;&gt;Result&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Error&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;service-trait-的定义&#34;&gt;Service trait 的定义&lt;/h2&gt;
-&lt;p&gt;我们希望 Service 是异步编程风格，也就是 call 为 async 方法：&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;service-trait-的定义&#34;&gt;
+    &lt;a href=&#34;#service-trait-%e7%9a%84%e5%ae%9a%e4%b9%89&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Service trait 的定义
+&lt;/h2&gt;&lt;p&gt;我们希望 Service 是异步编程风格，也就是 call 为 async 方法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -92,8 +94,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;实现自己的-future-类型&#34;&gt;实现自己的 Future 类型&lt;/h2&gt;
-&lt;p&gt;我们在实现 Service 时，仍然需要为&lt;code&gt;type Future&lt;/code&gt; 设置具体的类型。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;实现自己的-future-类型&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%9e%e7%8e%b0%e8%87%aa%e5%b7%b1%e7%9a%84-future-%e7%b1%bb%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    实现自己的 Future 类型
+&lt;/h2&gt;&lt;p&gt;我们在实现 Service 时，仍然需要为&lt;code&gt;type Future&lt;/code&gt; 设置具体的类型。&lt;/p&gt;
 &lt;p&gt;既然没法让 call 直接返回 &lt;code&gt;impl Future&lt;/code&gt;，一种方法是定义自己的 &lt;code&gt;Future&lt;/code&gt; 类型，例如：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -213,8 +217,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;使用-async-blocks&#34;&gt;使用 async blocks&lt;/h2&gt;
-&lt;p&gt;手工实现 Future 会比较麻烦，我们一般都是用 &lt;code&gt;async fn&lt;/code&gt;/&lt;code&gt;async blocks&lt;/code&gt;语法糖生成 Future，那么这时 &lt;code&gt;Service::call&lt;/code&gt; 返回什么类型呢？&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;使用-async-blocks&#34;&gt;
+    &lt;a href=&#34;#%e4%bd%bf%e7%94%a8-async-blocks&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    使用 async blocks
+&lt;/h2&gt;&lt;p&gt;手工实现 Future 会比较麻烦，我们一般都是用 &lt;code&gt;async fn&lt;/code&gt;/&lt;code&gt;async blocks&lt;/code&gt;语法糖生成 Future，那么这时 &lt;code&gt;Service::call&lt;/code&gt; 返回什么类型呢？&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -292,10 +298,14 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;编译错误提示的没有实现 &lt;code&gt;Unpin&lt;/code&gt; trait 是什么意思？那要先从 Pin 说起。&lt;/p&gt;
-&lt;h2 id=&#34;一句话解释pin&#34;&gt;一句话解释Pin&lt;/h2&gt;
-&lt;p&gt;Pin 本质上解决的问题是保证 &lt;code&gt;Pin&amp;lt;P&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; 中的 T 不会被 move，除非 T 满足 T: Unpin。&lt;/p&gt;
-&lt;h2 id=&#34;什么是move&#34;&gt;什么是move&lt;/h2&gt;
-&lt;p&gt;所有权转移的这个过程就是 move，例如：&lt;/p&gt;
+&lt;h2 id=&#34;一句话解释pin&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%80%e5%8f%a5%e8%af%9d%e8%a7%a3%e9%87%8apin&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    一句话解释Pin
+&lt;/h2&gt;&lt;p&gt;Pin 本质上解决的问题是保证 &lt;code&gt;Pin&amp;lt;P&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; 中的 T 不会被 move，除非 T 满足 T: Unpin。&lt;/p&gt;
+&lt;h2 id=&#34;什么是move&#34;&gt;
+    &lt;a href=&#34;#%e4%bb%80%e4%b9%88%e6%98%afmove&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    什么是move
+&lt;/h2&gt;&lt;p&gt;所有权转移的这个过程就是 move，例如：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -308,8 +318,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;s2 浅copy s1 的内容，同时 String 的所有权转移给了 s2。&lt;/p&gt;
 &lt;p&gt;通过&lt;code&gt;std::mem::swap()&lt;/code&gt;方法交换了两个可变借用 &lt;strong&gt;&amp;amp;mut&lt;/strong&gt; 的内容，也发生了move。&lt;/p&gt;
-&lt;h2 id=&#34;为什么要pin&#34;&gt;为什么要Pin&lt;/h2&gt;
-&lt;p&gt;自引用结构体，move了以后会出问题。&lt;/p&gt;
+&lt;h2 id=&#34;为什么要pin&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a6%81pin&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    为什么要Pin
+&lt;/h2&gt;&lt;p&gt;自引用结构体，move了以后会出问题。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201529136.webp&#34;
 	
 	
@@ -321,15 +333,19 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;所以需要 Pin，不能move。&lt;/p&gt;
-&lt;h2 id=&#34;怎么-pin-住的&#34;&gt;怎么 Pin 住的&lt;/h2&gt;
-&lt;p&gt;保证 T 不会被move，需要避免两种情况：&lt;/p&gt;
+&lt;h2 id=&#34;怎么-pin-住的&#34;&gt;
+    &lt;a href=&#34;#%e6%80%8e%e4%b9%88-pin-%e4%bd%8f%e7%9a%84&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    怎么 Pin 住的
+&lt;/h2&gt;&lt;p&gt;保证 T 不会被move，需要避免两种情况：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;不能暴露 T ，否则赋值、方法调用等都会move&lt;/li&gt;
 &lt;li&gt;不能暴露 &amp;amp;mut T，开发者可以调用 &lt;code&gt;std::mem::swap()&lt;/code&gt; 或 &lt;code&gt;std::mem::replace()&lt;/code&gt; 这类方法来 move 掉 T&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;Pin&amp;lt;P&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt;没有暴露T，而且没法让你获得 &lt;code&gt;&amp;amp;mut T&lt;/code&gt;，所以就 Pin 住了T。但注意有个前提条件：T 没有实现 &lt;strong&gt;Unpin&lt;/strong&gt;&lt;/p&gt;
-&lt;h2 id=&#34;谁没有实现-unpin&#34;&gt;谁没有实现 Unpin&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Unpin&lt;/code&gt; 是一个auto trait，编译器默认会给所有类型实现 &lt;code&gt;Unpin&lt;/code&gt;。唯独有几个例外，他们实现的是 &lt;code&gt;!Unpin&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;谁没有实现-unpin&#34;&gt;
+    &lt;a href=&#34;#%e8%b0%81%e6%b2%a1%e6%9c%89%e5%ae%9e%e7%8e%b0-unpin&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    谁没有实现 Unpin
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Unpin&lt;/code&gt; 是一个auto trait，编译器默认会给所有类型实现 &lt;code&gt;Unpin&lt;/code&gt;。唯独有几个例外，他们实现的是 &lt;code&gt;!Unpin&lt;/code&gt;。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;PhantomPinned&lt;/li&gt;
 &lt;/ul&gt;
@@ -389,19 +405,25 @@
 &lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;编译器为 &lt;code&gt;async fn&lt;/code&gt; 生成的匿名结构体实现的是 &lt;code&gt;!Unpin&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;async-fn&#34;&gt;async fn&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;async fn&lt;/code&gt; 是语法糖，在编译时，编译器使用&lt;a class=&#34;link&#34; href=&#34;https://doc.rust-lang.org/std/ops/trait.Generator.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;async-fn&#34;&gt;
+    &lt;a href=&#34;#async-fn&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async fn
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;async fn&lt;/code&gt; 是语法糖，在编译时，编译器使用&lt;a class=&#34;link&#34; href=&#34;https://doc.rust-lang.org/std/ops/trait.Generator.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Generator&lt;/a&gt;为 &lt;code&gt;async fn&lt;/code&gt; 生成匿名结构体，这个结构体实现了 &lt;code&gt;Future&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;这个匿名结构体是自引用的。原因是，如果 &lt;code&gt;async fn&lt;/code&gt; 内有多个 &lt;code&gt;await&lt;/code&gt;，执行到 &lt;code&gt;await&lt;/code&gt; 可能因为资源没准备好而让出 CPU 暂停执行，随后该 &lt;code&gt;Future&lt;/code&gt; 可能被调度到其他线程接着执行。所以这个匿名结构体需要保存跨 &lt;code&gt;await&lt;/code&gt; 的数据，形成了自引用结构。&lt;/p&gt;
 &lt;p&gt;由于为 &lt;code&gt;async fn&lt;/code&gt; 生成的结构体是自引用的，所以这个结构体实现了 &lt;code&gt;!Unpin&lt;/code&gt;，表示它不能被 move。&lt;/p&gt;
 &lt;p&gt;这也是为什么不能给&lt;code&gt;Future::poll&lt;/code&gt; 直接传 &lt;code&gt;&amp;amp;mut Self&lt;/code&gt; 的原因：生成的匿名结构体不能被move，而拿到 &lt;code&gt;&amp;amp;mut Self&lt;/code&gt;就可以使用 swap 或 replace之类的方法进行move，这样不安全，所以必须使用 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;future-都是-unpin-的吗&#34;&gt;Future 都是 !Unpin 的吗&lt;/h2&gt;
-&lt;p&gt;不一定。&lt;/p&gt;
+&lt;h2 id=&#34;future-都是-unpin-的吗&#34;&gt;
+    &lt;a href=&#34;#future-%e9%83%bd%e6%98%af-unpin-%e7%9a%84%e5%90%97&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Future 都是 !Unpin 的吗
+&lt;/h2&gt;&lt;p&gt;不一定。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;async fn&lt;/code&gt; 语法糖生成的实现了 Future 的匿名结构，内部包含自引用，它会明确实现 &lt;code&gt;!Unpin&lt;/code&gt;，不能 move。&lt;/p&gt;
 &lt;p&gt;但如果你自己实现的 Future，内部没有自引用，它就不是 &lt;code&gt;!Unpin&lt;/code&gt;，当然可以 move。&lt;/p&gt;
 &lt;p&gt;也就是说，&lt;code&gt;Future&lt;/code&gt; 和 &lt;code&gt;!Unpin&lt;/code&gt; 是两个 trait，虽然它们经常联系在一起，但并不是实现了 &lt;code&gt;Future&lt;/code&gt; 的类型都必须同时实现 &lt;code&gt;!Unpin&lt;/code&gt;，没有包含自引用的 &lt;code&gt;Future&lt;/code&gt;当然可以安全的 move 了。&lt;/p&gt;
-&lt;h2 id=&#34;实现了-unpin-的-future&#34;&gt;实现了 Unpin 的 Future&lt;/h2&gt;
-&lt;p&gt;如果是可以 move 的 Future，也就是实现了 Unpin 的 Future，在调用 &lt;code&gt;Future::poll&lt;/code&gt; 的时候，要求传入 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，会不会有什么问题呢？&lt;/p&gt;
+&lt;h2 id=&#34;实现了-unpin-的-future&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%9e%e7%8e%b0%e4%ba%86-unpin-%e7%9a%84-future&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    实现了 Unpin 的 Future
+&lt;/h2&gt;&lt;p&gt;如果是可以 move 的 Future，也就是实现了 Unpin 的 Future，在调用 &lt;code&gt;Future::poll&lt;/code&gt; 的时候，要求传入 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，会不会有什么问题呢？&lt;/p&gt;
 &lt;p&gt;首先，如果 &lt;code&gt;T：Unpin&lt;/code&gt;，那么 &lt;code&gt;Pin&amp;lt;&amp;amp;mut T&amp;gt;&lt;/code&gt; 就完全等同于 &lt;code&gt;&amp;amp;mut T&lt;/code&gt;。换句话说，&lt;code&gt;Unpin&lt;/code&gt; 意味着这个类型可以被移动，即使是在 Pin 住的情况下，所以 Pin 对这样的类型没有影响。因为 Pin 是智能指针，它实现了 &lt;code&gt;Deref/DerefMut&lt;/code&gt;，只要满足 &lt;code&gt;T: Unpin&lt;/code&gt;，你就能拿到&lt;code&gt;&amp;amp;mut T&lt;/code&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -448,8 +470,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;所以，如果你的 &lt;code&gt;Future&lt;/code&gt; 是 &lt;code&gt;Unpin&lt;/code&gt;，那么即使&lt;code&gt;Future::poll&lt;/code&gt; 要求传入的是 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，对你也没有任何影响。&lt;/p&gt;
-&lt;h2 id=&#34;boxdyn-futrue-的问题&#34;&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt; 的问题&lt;/h2&gt;
-&lt;p&gt;回到上面的问题，我们想让 &lt;code&gt;Service::call&lt;/code&gt; 返回 &lt;code&gt;trait object&lt;/code&gt;，也就是 &lt;code&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt;&lt;/code&gt;，会编译不过，为什么呢？&lt;/p&gt;
+&lt;h2 id=&#34;boxdyn-futrue-的问题&#34;&gt;
+    &lt;a href=&#34;#boxdyn-futrue-%e7%9a%84%e9%97%ae%e9%a2%98&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt; 的问题
+&lt;/h2&gt;&lt;p&gt;回到上面的问题，我们想让 &lt;code&gt;Service::call&lt;/code&gt; 返回 &lt;code&gt;trait object&lt;/code&gt;，也就是 &lt;code&gt;Box&amp;lt;dyn Futrue&amp;lt;&amp;gt;&amp;gt;&lt;/code&gt;，会编译不过，为什么呢？&lt;/p&gt;
 &lt;p&gt;因为标准库为 Box 实现了 Future，但要求 Box 包装的 Future 必须同时实现了 Unpin ：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -466,8 +490,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;前面已经讲过，async 解语法糖生成的 Future 没有实现 Unpin，所以&lt;code&gt;Box::new(async{...})&lt;/code&gt; 不满足类型约束，它没有实现 Future，不能在它上面await。&lt;/p&gt;
-&lt;h2 id=&#34;pin-实现了-future&#34;&gt;Pin 实现了 Future&lt;/h2&gt;
-&lt;p&gt;前面讲过，在 Future 上 poll 的时候，不能直接传入&lt;code&gt;&amp;amp;mut Self&lt;/code&gt;，而需要传入 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，需要这样调用 &lt;code&gt;Future::poll(Pin::new(&amp;amp;mut future), ctx)&lt;/code&gt;。如果 Pin 实现了 Future ，我们就可以直接这样 poll 了： &lt;code&gt;Pin::new(&amp;amp;mut future).poll(ctx)&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;pin-实现了-future&#34;&gt;
+    &lt;a href=&#34;#pin-%e5%ae%9e%e7%8e%b0%e4%ba%86-future&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Pin 实现了 Future
+&lt;/h2&gt;&lt;p&gt;前面讲过，在 Future 上 poll 的时候，不能直接传入&lt;code&gt;&amp;amp;mut Self&lt;/code&gt;，而需要传入 &lt;code&gt;Pin&amp;lt;&amp;amp;mut Self&amp;gt;&lt;/code&gt;，需要这样调用 &lt;code&gt;Future::poll(Pin::new(&amp;amp;mut future), ctx)&lt;/code&gt;。如果 Pin 实现了 Future ，我们就可以直接这样 poll 了： &lt;code&gt;Pin::new(&amp;amp;mut future).poll(ctx)&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;标准库也确实为 Pin 实现了 Future：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -523,8 +549,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;这回终于可以了。事实上，在异步场景下，我们经常会看到使用 &lt;code&gt;Box::pin&lt;/code&gt; 去包装 &lt;code&gt;async block&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;pinboxdyn-future&#34;&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 除了实现了Future，也实现了 Unpin。&lt;/p&gt;
+&lt;h2 id=&#34;pinboxdyn-future&#34;&gt;
+    &lt;a href=&#34;#pinboxdyn-future&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 除了实现了Future，也实现了 Unpin。&lt;/p&gt;
 &lt;p&gt;因为 Pin 实现了 Unpin，只要 P 是 Unpin 的：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -568,8 +596,10 @@
         <description>&lt;p&gt;Rust 通过 &lt;a class=&#34;link&#34; href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RFC conservative impl trait&lt;/a&gt; 增加了新的语法 &lt;code&gt;impl Trait&lt;/code&gt;，它被用在函数返回值的位置上，表示返回的类型将实现这个 Trait。随后的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1951-expand-impl-trait.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RFC expanding impl Trait&lt;/a&gt; 更进一步，允许 &lt;code&gt;impl Trait&lt;/code&gt; 用在函数参数的位置，表示由调用者决定参数的具体类型，其实就等价于函数的泛型参数。&lt;/p&gt;
-&lt;h2 id=&#34;impl-trait-作为函数参数&#34;&gt;impl Trait 作为函数参数&lt;/h2&gt;
-&lt;p&gt;根据  &lt;a class=&#34;link&#34; href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1951-expand-impl-trait.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;impl-trait-作为函数参数&#34;&gt;
+    &lt;a href=&#34;#impl-trait-%e4%bd%9c%e4%b8%ba%e5%87%bd%e6%95%b0%e5%8f%82%e6%95%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    impl Trait 作为函数参数
+&lt;/h2&gt;&lt;p&gt;根据  &lt;a class=&#34;link&#34; href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1951-expand-impl-trait.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RFC on expanding impl Trait&lt;/a&gt;， &lt;code&gt;impl Trait&lt;/code&gt; 可以用在函数参数中，作用是作为函数的匿名泛型参数。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Expand &lt;code&gt;impl Trait&lt;/code&gt; to allow use in arguments, where it behaves like an anonymous generic parameter.&lt;/p&gt;
@@ -605,8 +635,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;除了这个差别，可以认为&lt;code&gt;impl Trait&lt;/code&gt; 作为函数参数，和使用泛型参数是等价的。&lt;/p&gt;
-&lt;h2 id=&#34;impl-trait-作为函数返回值&#34;&gt;impl Trait 作为函数返回值&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;impl Trait&lt;/code&gt; 作为函数的返回值，表示返回的类型将实现这个 Trait。&lt;/p&gt;
+&lt;h2 id=&#34;impl-trait-作为函数返回值&#34;&gt;
+    &lt;a href=&#34;#impl-trait-%e4%bd%9c%e4%b8%ba%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e5%80%bc&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    impl Trait 作为函数返回值
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;impl Trait&lt;/code&gt; 作为函数的返回值，表示返回的类型将实现这个 Trait。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -698,8 +730,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                     &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;found&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;`&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Map&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;::&lt;span class=&#34;n&#34;&gt;ops&lt;/span&gt;::&lt;span class=&#34;n&#34;&gt;Range&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;u32&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;closure&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;src&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;rs&lt;/span&gt;:&lt;span class=&#34;mi&#34;&gt;6&lt;/span&gt;:&lt;span class=&#34;mi&#34;&gt;16&lt;/span&gt;: &lt;span class=&#34;mi&#34;&gt;6&lt;/span&gt;:&lt;span class=&#34;mi&#34;&gt;27&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;`&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;universals-vs-existentials&#34;&gt;Universals vs. Existentials&lt;/h2&gt;
-&lt;p&gt;在  &lt;a class=&#34;link&#34; href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1951-expand-impl-trait.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h2 id=&#34;universals-vs-existentials&#34;&gt;
+    &lt;a href=&#34;#universals-vs-existentials&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Universals vs. Existentials
+&lt;/h2&gt;&lt;p&gt;在  &lt;a class=&#34;link&#34; href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1951-expand-impl-trait.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RFC on expanding impl Trait&lt;/a&gt; 中使用了两个术语，Universal 和 Existential：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;ul&gt;
@@ -717,8 +751,10 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;也就是说，&lt;code&gt;impl Trait&lt;/code&gt; 用在返回位置不是泛型，编译时不需要单态化，抽象类型可以简单地替换为调用代码中的具体类型。&lt;/p&gt;
-&lt;h2 id=&#34;在-trait-中使用-impl-trait&#34;&gt;在 Trait 中使用 impl Trait&lt;/h2&gt;
-&lt;p&gt;Rust 目前还不支持在 Trait 里使用 &lt;code&gt;impl Trait&lt;/code&gt; 做返回值：&lt;/p&gt;
+&lt;h2 id=&#34;在-trait-中使用-impl-trait&#34;&gt;
+    &lt;a href=&#34;#%e5%9c%a8-trait-%e4%b8%ad%e4%bd%bf%e7%94%a8-impl-trait&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    在 Trait 中使用 impl Trait
+&lt;/h2&gt;&lt;p&gt;Rust 目前还不支持在 Trait 里使用 &lt;code&gt;impl Trait&lt;/code&gt; 做返回值：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -808,8 +844,10 @@
         <pubDate>Sat, 24 Sep 2022 16:48:29 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/rust-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/</guid>
-        <description>&lt;h2 id=&#34;future-trait&#34;&gt;Future trait&lt;/h2&gt;
-&lt;p&gt;Rust 异步编程最核心的是 &lt;a class=&#34;link&#34; href=&#34;https://doc.rust-lang.org/std/future/trait.Future.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <description>&lt;h2 id=&#34;future-trait&#34;&gt;
+    &lt;a href=&#34;#future-trait&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Future trait
+&lt;/h2&gt;&lt;p&gt;Rust 异步编程最核心的是 &lt;a class=&#34;link&#34; href=&#34;https://doc.rust-lang.org/std/future/trait.Future.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Future&lt;/a&gt; trait：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -834,8 +872,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;code&gt;Future&lt;/code&gt; 代表一个异步计算，它会产生一个值。通过调用 &lt;code&gt;poll&lt;/code&gt; 方法来推进 &lt;code&gt;Future&lt;/code&gt; 的运行，如果 &lt;code&gt;Future&lt;/code&gt; 完成了，它将返回 &lt;code&gt;Poll::Ready(result)&lt;/code&gt;，我们拿到运算结果。如果 &lt;code&gt;Future&lt;/code&gt; 还不能完成，可能是因为需要等待其他资源，它返回 &lt;code&gt;Poll::Pending&lt;/code&gt;。等条件具备，如资源已经准备好，这个 &lt;code&gt;Future&lt;/code&gt; 将被唤醒，再次进入 &lt;code&gt;poll&lt;/code&gt;，直到计算完成获得结果。&lt;/p&gt;
-&lt;h2 id=&#34;asyncawait&#34;&gt;async/.await&lt;/h2&gt;
-&lt;p&gt;如果产生一个 &lt;code&gt;Future&lt;/code&gt; 呢，使用 &lt;code&gt;async&lt;/code&gt; 是产生 &lt;code&gt;Future&lt;/code&gt; 最方便的方法。使用 &lt;code&gt;async&lt;/code&gt; 有两种方式：&lt;code&gt;async fn&lt;/code&gt; 和 &lt;code&gt;async blocks&lt;/code&gt;。每种方法都返回一个实现了&lt;code&gt;Future&lt;/code&gt; trait 的匿名结构：&lt;/p&gt;
+&lt;h2 id=&#34;asyncawait&#34;&gt;
+    &lt;a href=&#34;#asyncawait&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async/.await
+&lt;/h2&gt;&lt;p&gt;如果产生一个 &lt;code&gt;Future&lt;/code&gt; 呢，使用 &lt;code&gt;async&lt;/code&gt; 是产生 &lt;code&gt;Future&lt;/code&gt; 最方便的方法。使用 &lt;code&gt;async&lt;/code&gt; 有两种方式：&lt;code&gt;async fn&lt;/code&gt; 和 &lt;code&gt;async blocks&lt;/code&gt;。每种方法都返回一个实现了&lt;code&gt;Future&lt;/code&gt; trait 的匿名结构：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -983,8 +1023,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;pin&#34;&gt;Pin&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Future&lt;/code&gt; 被每个 &lt;code&gt;await&lt;/code&gt; 分成多段，执行到 &lt;code&gt;await&lt;/code&gt; 可能因为资源没准备好而让出 CPU 暂停执行，随后该 &lt;code&gt;future&lt;/code&gt; 可能被调度到其他线程接着执行。所以 &lt;code&gt;future&lt;/code&gt; 结构中需要保存跨await的数据，形成了自引用结构。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;pin&#34;&gt;
+    &lt;a href=&#34;#pin&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Pin
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Future&lt;/code&gt; 被每个 &lt;code&gt;await&lt;/code&gt; 分成多段，执行到 &lt;code&gt;await&lt;/code&gt; 可能因为资源没准备好而让出 CPU 暂停执行，随后该 &lt;code&gt;future&lt;/code&gt; 可能被调度到其他线程接着执行。所以 &lt;code&gt;future&lt;/code&gt; 结构中需要保存跨await的数据，形成了自引用结构。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201453379.jpg&#34;
 	
 	
@@ -1019,8 +1061,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;总之 &lt;code&gt;Pin&amp;lt;&amp;amp;mut T&amp;gt;&lt;/code&gt; 不是数据的 owner，也没法获得 &lt;code&gt;&amp;amp;mut T&lt;/code&gt;，所以就不能移动 T。&lt;/p&gt;
 &lt;p&gt;注意，&lt;code&gt;Pin&lt;/code&gt; 拿住的是一个可以解引用成 T 的指针类型 P，而不是直接拿原本的类型 T。Pin 本身是可 move 的，T 被 pin 住，不能 move。&lt;/p&gt;
-&lt;h2 id=&#34;async-runtime的内部实现&#34;&gt;async runtime的内部实现&lt;/h2&gt;
-&lt;p&gt;要运行异步函数，必须将最外层的 &lt;code&gt;Future&lt;/code&gt; 提交给 executor。 executor 负责调用Future::poll，推动异步计算的前进。&lt;/p&gt;
+&lt;h2 id=&#34;async-runtime的内部实现&#34;&gt;
+    &lt;a href=&#34;#async-runtime%e7%9a%84%e5%86%85%e9%83%a8%e5%ae%9e%e7%8e%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async runtime的内部实现
+&lt;/h2&gt;&lt;p&gt;要运行异步函数，必须将最外层的 &lt;code&gt;Future&lt;/code&gt; 提交给 executor。 executor 负责调用Future::poll，推动异步计算的前进。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209201433572.png&#34;
 	
 	
@@ -1111,8 +1155,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;stream-trait&#34;&gt;Stream trait&lt;/h2&gt;
-&lt;p&gt;对于 &lt;code&gt;Iterator&lt;/code&gt;，可以不断调用其 &lt;code&gt;next()&lt;/code&gt; 方法，获得新的值，直到 &lt;code&gt;Iterator&lt;/code&gt; 返回 &lt;code&gt;None&lt;/code&gt;。&lt;code&gt;Iterator&lt;/code&gt; 是阻塞式返回数据的，每次调用 &lt;code&gt;next()&lt;/code&gt;，必然独占 CPU 直到得到一个结果，而异步的 &lt;code&gt;Stream&lt;/code&gt; 是非阻塞的，在等待的过程中会空出 CPU 做其他事情。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;stream-trait&#34;&gt;
+    &lt;a href=&#34;#stream-trait&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Stream trait
+&lt;/h2&gt;&lt;p&gt;对于 &lt;code&gt;Iterator&lt;/code&gt;，可以不断调用其 &lt;code&gt;next()&lt;/code&gt; 方法，获得新的值，直到 &lt;code&gt;Iterator&lt;/code&gt; 返回 &lt;code&gt;None&lt;/code&gt;。&lt;code&gt;Iterator&lt;/code&gt; 是阻塞式返回数据的，每次调用 &lt;code&gt;next()&lt;/code&gt;，必然独占 CPU 直到得到一个结果，而异步的 &lt;code&gt;Stream&lt;/code&gt; 是非阻塞的，在等待的过程中会空出 CPU 做其他事情。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Stream::poll_next()&lt;/code&gt; 方法和 &lt;code&gt;Future::poll()&lt;/code&gt; 类似, 除了它可以被重复调用，以便从 &lt;code&gt;Stream&lt;/code&gt; 中接收多个值。然而，&lt;code&gt;poll_next()&lt;/code&gt; 调用起来不方便，我们需要自己处理 Poll 状态。也就是说，&lt;code&gt;await&lt;/code&gt; 语法糖只能应用在 Future 上，没法使用 &lt;code&gt;stream.await&lt;/code&gt; 。所以，我们要想办法用 &lt;code&gt;Future&lt;/code&gt; 包装 &lt;code&gt;Stream&lt;/code&gt;，在 &lt;code&gt;Future::poll()&lt;/code&gt; 中调用 &lt;code&gt;Stream::poll_next()&lt;/code&gt;，这样就可以使用 await。 &lt;a class=&#34;link&#34; href=&#34;https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;StreamExt&lt;/a&gt; 提供了 &lt;code&gt;next()&lt;/code&gt; 方法，返回一个实现了 &lt;code&gt;Future trait&lt;/code&gt; 的 &lt;code&gt;Next&lt;/code&gt; 结构，这样，我们就可以直接通过 &lt;code&gt;stream.next().await&lt;/code&gt; 来获取下一个值了。看一下 &lt;code&gt;next()&lt;/code&gt; 方法以及 &lt;code&gt;Next&lt;/code&gt; 结构的实现。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -1221,8 +1267,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;code&gt;Stream&lt;/code&gt; 可以是 unpin 的，&lt;code&gt;Future&lt;/code&gt; 也可以是 unpin 的，如果他们内部包含了其他 &lt;code&gt;!Unpin&lt;/code&gt; 的 &lt;code&gt;Stream&lt;/code&gt; 或 &lt;code&gt;Future&lt;/code&gt;，只需要把他们用 pin 包装，外面的 &lt;code&gt;Stream&lt;/code&gt; 和 &lt;code&gt;Future&lt;/code&gt; 就可以是 unpin 的。&lt;/p&gt;
 &lt;p&gt;一般我们使用的 &lt;code&gt;Stream&lt;/code&gt; 都是 unpin 的，如果不是，就用 pin 把它变成 unpin 的。为啥我们用的都是 unpin 的？因为能 move 的 Stream 更加灵活，可以作为参数和返回值。&lt;/p&gt;
-&lt;h2 id=&#34;asyncread-和-asyncwrite&#34;&gt;AsyncRead 和 AsyncWrite&lt;/h2&gt;
-&lt;p&gt;所有同步的 Read / Write / Seek trait，前面加一个 Async，就构成了对应的异步 IO 接口。&lt;/p&gt;
+&lt;h2 id=&#34;asyncread-和-asyncwrite&#34;&gt;
+    &lt;a href=&#34;#asyncread-%e5%92%8c-asyncwrite&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    AsyncRead 和 AsyncWrite
+&lt;/h2&gt;&lt;p&gt;所有同步的 Read / Write / Seek trait，前面加一个 Async，就构成了对应的异步 IO 接口。&lt;/p&gt;
 &lt;p&gt;AsyncRead / AsyncWrite 的方法会返回一个实现了 &lt;code&gt;Future&lt;/code&gt; 的 &lt;code&gt;struct&lt;/code&gt;，这样我们才能使用 await ，将 future 提交到 async runtime，触发 future 的执行。例如 &lt;code&gt;AsyncReadExt::read_to_end()&lt;/code&gt;方法，返回 &lt;code&gt;ReadToEnd&lt;/code&gt; 结构，而 &lt;code&gt;ReadToEnd&lt;/code&gt; 实现了 Future：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;

@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要特'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要">
 <title>HTTP/2 简介</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/http/2-%E7%AE%80%E4%BB%8B/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='HTTP/2 简介'>
-<meta property='og:description' content='Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要特'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="HTTP/2 简介">
+<meta property='og:description' content="# Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要">
 <meta property='og:url' content='https://mazhen.tech/p/http/2-%E7%AE%80%E4%BB%8B/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='http' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2019-10-07T09:59:29&#43;08:00'/><meta property='article:modified_time' content='2019-10-07T09:59:29&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="HTTP/2 简介">
-<meta name="twitter:description" content="Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要特">
+<meta name="twitter:description" content="# Outline 回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机 HTTP简史 HTTP/1.1的主要特性和问题 HTTP/2 的核心概念、主要">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -513,8 +516,10 @@
     <section class="article-content">
     
     
-    <h3 id="outline">Outline</h3>
-<p>回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机</p>
+    <h3 id="outline">
+    <a href="#outline" class="header-anchor">#</a>
+    Outline
+</h3><p>回顾HTTP的发展简史，理解HTTP在设计上的关键转变，以及每次转变的动机</p>
 <ul>
 <li>HTTP简史</li>
 <li>HTTP/1.1的主要特性和问题</li>
@@ -523,8 +528,10 @@
 <li>HTTP/2 的问题及展望</li>
 </ul>
 <hr>
-<h3 id="http简史">HTTP简史</h3>
-<ul>
+<h3 id="http简史">
+    <a href="#http%e7%ae%80%e5%8f%b2" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li><code>HTTP</code>(HyperText Transfer Protocol，超文本传输协议)是互联网上最普遍采用的一种应用协议</li>
 <li>由欧洲核子研究委员会<code>CERN</code>的英国工程师<a class="link" href="https://en.wikipedia.org/wiki/Tim_Berners-Lee"  target="_blank" rel="noopener"
     >Tim Berners-Lee</a>在1991年发明</li>
@@ -532,8 +539,10 @@
     >Tim Berners-Lee</a>也是WWW的发明者</li>
 </ul>
 <hr>
-<h3 id="http简史-1">HTTP简史</h3>
-<ul>
+<h3 id="http简史-1">
+    <a href="#http%e7%ae%80%e5%8f%b2-1" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li><code>HTTP/0.9</code>：只有一行的协议
 <ul>
 <li>请求只有一行，包括<code>GET</code>方法和要请求的文档的路径</li>
@@ -544,8 +553,10 @@
 <li><code>HTTP/0.9</code>的设计目标传递超文本文档</li>
 </ul>
 <hr>
-<h3 id="http简史-2">HTTP简史</h3>
-<ul>
+<h3 id="http简史-2">
+    <a href="#http%e7%ae%80%e5%8f%b2-2" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li><code>HTTP/0.9</code>演示</li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -577,8 +588,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="http简史-3">HTTP简史</h3>
-<ul>
+<h3 id="http简史-3">
+    <a href="#http%e7%ae%80%e5%8f%b2-3" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li>1996年<code>HTTP</code>工作组发布了<code>RFC 1945</code>，这就是<code>HTTP/1.0</code></li>
 <li>提供请求和响应的各种元数据</li>
 <li>不局限于超文本的传输，响应可以是任何类型：<code>HTML</code>文件、图片、音频等</li>
@@ -586,8 +599,10 @@
 <li>从<strong>超文本</strong>到<strong>超媒体</strong>传输</li>
 </ul>
 <hr>
-<h3 id="http简史-4">HTTP简史</h3>
-<ul>
+<h3 id="http简史-4">
+    <a href="#http%e7%ae%80%e5%8f%b2-4" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li><code>HTTP/1.0</code>演示</li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -627,8 +642,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="http简史-5">HTTP简史</h3>
-<ul>
+<h3 id="http简史-5">
+    <a href="#http%e7%ae%80%e5%8f%b2-5" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li>1997年1月定义<code>HTTP/1.1</code>标准的<code>RFC 2068</code>发布</li>
 <li>1999年6月<code>RFC 2616</code>发布，取代了<code>RFC 2068</code></li>
 <li>性能优化
@@ -645,8 +662,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http简史-6">HTTP简史</h3>
-<ul>
+<h3 id="http简史-6">
+    <a href="#http%e7%ae%80%e5%8f%b2-6" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li><code>HTTP/1.1</code>演示</li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -778,8 +797,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="http简史-7">HTTP简史</h3>
-<ul>
+<h3 id="http简史-7">
+    <a href="#http%e7%ae%80%e5%8f%b2-7" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li>Google在2009年发布了实验性协议<code>SPDY</code>，主要目标是解决<code>HTTP/1.1</code>的性能限制</li>
 <li>Google工程师在09年11月分享了实验结果 <a class="link" href="https://blog.chromium.org/2009/11/2x-faster-web.html"  target="_blank" rel="noopener"
     >A 2x Faster Web</a></li>
@@ -792,8 +813,10 @@
 <li><code>HTTP-WG</code>(HTTP Working Group)开始在<code>SPDY</code>的基础上制定官方标准</li>
 </ul>
 <hr>
-<h3 id="http简史-8">HTTP简史</h3>
-<ul>
+<h3 id="http简史-8">
+    <a href="#http%e7%ae%80%e5%8f%b2-8" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li>2015年正式发布<code>HTTP/2</code>
 <ul>
 <li>主要目标：改进传输性能，降低延迟，提高吞吐量</li>
@@ -804,16 +827,20 @@
     >W3Techs的报告</a>，截止2019年11月，全球已经有 <strong>42.1%</strong> 的网站开启了<code>HTTP/2</code></li>
 </ul>
 <hr>
-<h3 id="http简史-9">HTTP简史</h3>
-<ul>
+<h3 id="http简史-9">
+    <a href="#http%e7%ae%80%e5%8f%b2-9" class="header-anchor">#</a>
+    HTTP简史
+</h3><ul>
 <li>Google在2012年设计开发了<a class="link" href="https://en.wikipedia.org/wiki/QUIC"  target="_blank" rel="noopener"
     >QUIC协议</a>，让<code>HTTP</code>不再基于<code>TCP</code></li>
 <li>2018年底，<code>HTTP/3</code>标准发布</li>
 <li><code>HTTP/3</code>协议业务逻辑变化不大，可以简单理解为 <code>HTTP/2</code> + <code>QUIC</code></li>
 </ul>
 <hr>
-<h3 id="http11-持久连接">HTTP/1.1 持久连接</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221002459.png"
+<h3 id="http11-持久连接">
+    <a href="#http11-%e6%8c%81%e4%b9%85%e8%bf%9e%e6%8e%a5" class="header-anchor">#</a>
+    HTTP/1.1 持久连接
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221002459.png"
 	
 	
 	
@@ -824,8 +851,10 @@
 	
 ></p>
 <hr>
-<h3 id="http11-持久连接-1">HTTP/1.1 持久连接</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221002365.png"
+<h3 id="http11-持久连接-1">
+    <a href="#http11-%e6%8c%81%e4%b9%85%e8%bf%9e%e6%8e%a5-1" class="header-anchor">#</a>
+    HTTP/1.1 持久连接
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221002365.png"
 	
 	
 	
@@ -836,8 +865,10 @@
 	
 ></p>
 <hr>
-<h3 id="http11-持久连接-2">HTTP/1.1 持久连接</h3>
-<ul>
+<h3 id="http11-持久连接-2">
+    <a href="#http11-%e6%8c%81%e4%b9%85%e8%bf%9e%e6%8e%a5-2" class="header-anchor">#</a>
+    HTTP/1.1 持久连接
+</h3><ul>
 <li>非持久<code>HTTP</code>连接的固定时间成本
 <ul>
 <li>至少两次网络往返： 握手、请求和响应</li>
@@ -847,8 +878,10 @@
 <li>持久连接避免<code>TCP</code>连接时的三次握手，消除<code>TCP</code>的慢启动</li>
 </ul>
 <hr>
-<h3 id="http11-管道">HTTP/1.1 管道</h3>
-<ul>
+<h3 id="http11-管道">
+    <a href="#http11-%e7%ae%a1%e9%81%93" class="header-anchor">#</a>
+    HTTP/1.1 管道
+</h3><ul>
 <li>多次请求必须满足<strong>先进先出</strong>(FIFO)的顺序</li>
 </ul>
 <p><img src="https://cdn.mazhen.tech/images/202209221004912.png"
@@ -862,8 +895,10 @@
 	
 ></p>
 <hr>
-<h3 id="http11-管道-1">HTTP/1.1 管道</h3>
-<ul>
+<h3 id="http11-管道-1">
+    <a href="#http11-%e7%ae%a1%e9%81%93-1" class="header-anchor">#</a>
+    HTTP/1.1 管道
+</h3><ul>
 <li>尽早发送请求，不被每次响应阻塞</li>
 </ul>
 <p><img src="https://cdn.mazhen.tech/images/202209221005557.png"
@@ -877,8 +912,10 @@
 	
 ></p>
 <hr>
-<h3 id="http11-管道-2">HTTP/1.1 管道</h3>
-<ul>
+<h3 id="http11-管道-2">
+    <a href="#http11-%e7%ae%a1%e9%81%93-2" class="header-anchor">#</a>
+    HTTP/1.1 管道
+</h3><ul>
 <li><code>HTTP/1.1</code>的局限性
 <ul>
 <li>只能严格串行地返回响应，不允许一个连接上的多个响应交错到达</li>
@@ -894,8 +931,10 @@
 <li>管道的应用非常有限</li>
 </ul>
 <hr>
-<h3 id="http11-的协议开销"><code>HTTP/1.1</code> 的协议开销</h3>
-<ul>
+<h3 id="http11-的协议开销">
+    <a href="#http11-%e7%9a%84%e5%8d%8f%e8%ae%ae%e5%bc%80%e9%94%80" class="header-anchor">#</a>
+    <code>HTTP/1.1</code> 的协议开销
+</h3><ul>
 <li>每个<code>HTTP</code>请求都会携带500~800字节的<code>header</code></li>
 <li>如果使用了<code>cookie</code>，每个<code>HTTP</code>请求会增加几千字节的协议开销</li>
 <li><code>HTTP header</code>以纯文本形式发送，不会进行任何压缩</li>
@@ -906,8 +945,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http11性能优化建议"><code>HTTP/1.1</code>性能优化建议</h3>
-<ul>
+<h3 id="http11性能优化建议">
+    <a href="#http11%e6%80%a7%e8%83%bd%e4%bc%98%e5%8c%96%e5%bb%ba%e8%ae%ae" class="header-anchor">#</a>
+    <code>HTTP/1.1</code>性能优化建议
+</h3><ul>
 <li>由于<code>HTTP/1.1</code>不支持多路复用
 <ul>
 <li>浏览器支持每个主机打开多个连接（例如Chrome是6个）</li>
@@ -927,8 +968,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http11性能优化建议-1"><code>HTTP/1.1</code>性能优化建议</h3>
-<ul>
+<h3 id="http11性能优化建议-1">
+    <a href="#http11%e6%80%a7%e8%83%bd%e4%bc%98%e5%8c%96%e5%bb%ba%e8%ae%ae-1" class="header-anchor">#</a>
+    <code>HTTP/1.1</code>性能优化建议
+</h3><ul>
 <li>使用多域名分区
 <img src="https://cdn.mazhen.tech/images/202209221005735.png"
 	
@@ -942,8 +985,10 @@
 ></li>
 </ul>
 <hr>
-<h3 id="http11性能优化建议-2"><code>HTTP/1.1</code>性能优化建议</h3>
-<ul>
+<h3 id="http11性能优化建议-2">
+    <a href="#http11%e6%80%a7%e8%83%bd%e4%bc%98%e5%8c%96%e5%bb%ba%e8%ae%ae-2" class="header-anchor">#</a>
+    <code>HTTP/1.1</code>性能优化建议
+</h3><ul>
 <li>减少请求次数
 <ul>
 <li>把多个<code>JavaScript</code>或<code>CSS</code>组合为一个文件</li>
@@ -954,8 +999,10 @@
 </ul>
 <p><em>增加应用的复杂度，导致缓存、更新等问题，只是权宜之计</em></p>
 <hr>
-<h3 id="http2-的目标"><code>HTTP/2</code> 的目标</h3>
-<ul>
+<h3 id="http2-的目标">
+    <a href="#http2-%e7%9a%84%e7%9b%ae%e6%a0%87" class="header-anchor">#</a>
+    <code>HTTP/2</code> 的目标
+</h3><ul>
 <li>性能优化
 <ul>
 <li>支持请求与响应的多路复用</li>
@@ -971,8 +1018,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http2-二进制分帧层"><code>HTTP/2</code> 二进制分帧层</h3>
-<ul>
+<h3 id="http2-二进制分帧层">
+    <a href="#http2-%e4%ba%8c%e8%bf%9b%e5%88%b6%e5%88%86%e5%b8%a7%e5%b1%82" class="header-anchor">#</a>
+    <code>HTTP/2</code> 二进制分帧层
+</h3><ul>
 <li>引入新的二进制分帧数据层</li>
 <li>将传输的信息分割为消息和帧，并采用二进制格式的编码</li>
 </ul>
@@ -987,8 +1036,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2-的核心概念"><code>HTTP/2</code> 的核心概念</h3>
-<ul>
+<h3 id="http2-的核心概念">
+    <a href="#http2-%e7%9a%84%e6%a0%b8%e5%bf%83%e6%a6%82%e5%bf%b5" class="header-anchor">#</a>
+    <code>HTTP/2</code> 的核心概念
+</h3><ul>
 <li>流(Stream)
 <ul>
 <li>已建立的连接上的双向字节流</li>
@@ -1008,8 +1059,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http2-的核心概念-1"><code>HTTP/2</code> 的核心概念</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221007794.png"
+<h3 id="http2-的核心概念-1">
+    <a href="#http2-%e7%9a%84%e6%a0%b8%e5%bf%83%e6%a6%82%e5%bf%b5-1" class="header-anchor">#</a>
+    <code>HTTP/2</code> 的核心概念
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221007794.png"
 	
 	
 	
@@ -1020,8 +1073,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2-的核心概念-2"><code>HTTP/2</code> 的核心概念</h3>
-<ul>
+<h3 id="http2-的核心概念-2">
+    <a href="#http2-%e7%9a%84%e6%a0%b8%e5%bf%83%e6%a6%82%e5%bf%b5-2" class="header-anchor">#</a>
+    <code>HTTP/2</code> 的核心概念
+</h3><ul>
 <li>所有<code>HTTP/2</code>通信都在一个TCP连接上完成</li>
 <li><code>流</code>是连接中的一个虚拟信道，可以承载双向的消息</li>
 <li>一个连接可以承载任意数量的<code>流</code>，每个<code>流</code>都有一个唯一的整数标识符(1、2&hellip;N)</li>
@@ -1029,8 +1084,10 @@
 <li><code>消息</code>由一或多个<code>帧</code>组成，这些帧可以交错发送，然后根据每个帧首部的<strong>流标识符</strong>重新组装</li>
 </ul>
 <hr>
-<h3 id="http2请求与响应的多路复用"><code>HTTP/2</code>请求与响应的多路复用</h3>
-<ul>
+<h3 id="http2请求与响应的多路复用">
+    <a href="#http2%e8%af%b7%e6%b1%82%e4%b8%8e%e5%93%8d%e5%ba%94%e7%9a%84%e5%a4%9a%e8%b7%af%e5%a4%8d%e7%94%a8" class="header-anchor">#</a>
+    <code>HTTP/2</code>请求与响应的多路复用
+</h3><ul>
 <li><code>HTTP/1.x</code>中，如果客户端想发送多个并行的请求，那么必须使用多个<code>TCP</code>连接</li>
 <li><code>HTTP/2</code>中，客户端可以使用多个流发送请求，同时<code>HTTP</code>消息被分解为互不依赖的帧，交错传输，最后在另一端重新组装</li>
 </ul>
@@ -1045,8 +1102,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2-帧格式"><code>HTTP/2</code> 帧格式</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221008713.png"
+<h3 id="http2-帧格式">
+    <a href="#http2-%e5%b8%a7%e6%a0%bc%e5%bc%8f" class="header-anchor">#</a>
+    <code>HTTP/2</code> 帧格式
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221008713.png"
 	
 	
 	
@@ -1061,8 +1120,10 @@
     >HTTP/2规范</a></li>
 </ul>
 <hr>
-<h3 id="http2-帧类型"><code>HTTP/2</code> 帧类型</h3>
-<ul>
+<h3 id="http2-帧类型">
+    <a href="#http2-%e5%b8%a7%e7%b1%bb%e5%9e%8b" class="header-anchor">#</a>
+    <code>HTTP/2</code> 帧类型
+</h3><ul>
 <li>客户端通过<code>HEADERS</code>帧来发起新的<code>流</code></li>
 <li>服务器通过<code>PUSH_PROMISE</code>帧来发起推送流</li>
 </ul>
@@ -1128,8 +1189,10 @@
 </tbody>
 </table></div>
 <hr>
-<h3 id="http2-请求优先级"><code>HTTP/2</code> 请求优先级</h3>
-<ul>
+<h3 id="http2-请求优先级">
+    <a href="#http2-%e8%af%b7%e6%b1%82%e4%bc%98%e5%85%88%e7%ba%a7" class="header-anchor">#</a>
+    <code>HTTP/2</code> 请求优先级
+</h3><ul>
 <li><code>HTTP/2</code>允许每个流关联一个31<code>bit</code>的优先值
 <ul>
 <li><code>0</code> 最高优先级</li>
@@ -1141,16 +1204,20 @@
 <li><code>HTTP/2</code>没有规定具体的优先级算法</li>
 </ul>
 <hr>
-<h3 id="http2-流量控制"><code>HTTP/2</code> 流量控制</h3>
-<ul>
+<h3 id="http2-流量控制">
+    <a href="#http2-%e6%b5%81%e9%87%8f%e6%8e%a7%e5%88%b6" class="header-anchor">#</a>
+    <code>HTTP/2</code> 流量控制
+</h3><ul>
 <li>流量控制有方向性，即接收方可能根据自己的情况为每个<code>流</code>，乃至整个连接设置任意窗口大小</li>
 <li>连接建立后，客户端与服务器交换<code>SETTINGS</code>帧，设置 双向的流量控制窗口大小</li>
 <li>流量控制窗口大小通过<code>WINDOW_UPDATE</code>帧更新</li>
 <li><code>HTTP/2</code>流量控制和<code>TCP</code>流量控制的机制相同，但<code>TCP</code>流量控制不能对同一个连接内的多个<code>流</code>实施差异化策略</li>
 </ul>
 <hr>
-<h3 id="http2-服务器端推送"><code>HTTP/2</code> 服务器端推送</h3>
-<ul>
+<h3 id="http2-服务器端推送">
+    <a href="#http2-%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%ab%af%e6%8e%a8%e9%80%81" class="header-anchor">#</a>
+    <code>HTTP/2</code> 服务器端推送
+</h3><ul>
 <li>服务器可以对一个客户端请求发送多个响应</li>
 <li>服务器通过发送<code>PUSH_PROMISE</code>帧来发起推送流</li>
 <li>客户端可以使用<code>HTTP header</code>向服务器发送信号，列出它希望推送的资源</li>
@@ -1167,8 +1234,10 @@
 	
 ></p>
 <hr>
-<h3 id="http-header压缩"><code>HTTP header</code>压缩</h3>
-<ul>
+<h3 id="http-header压缩">
+    <a href="#http-header%e5%8e%8b%e7%bc%a9" class="header-anchor">#</a>
+    <code>HTTP header</code>压缩
+</h3><ul>
 <li><code>HTTP/2</code>使用<a class="link" href="https://tools.ietf.org/html/rfc7541"  target="_blank" rel="noopener"
     >HPACK</a>压缩格式压缩请求/响应头
 <ul>
@@ -1178,8 +1247,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http-header压缩-1"><code>HTTP header</code>压缩</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221009736.png"
+<h3 id="http-header压缩-1">
+    <a href="#http-header%e5%8e%8b%e7%bc%a9-1" class="header-anchor">#</a>
+    <code>HTTP header</code>压缩
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221009736.png"
 	
 	
 	
@@ -1190,8 +1261,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2-vs-http11"><code>HTTP/2</code> vs <code>HTTP/1.1</code></h3>
-<ul>
+<h3 id="http2-vs-http11">
+    <a href="#http2-vs-http11" class="header-anchor">#</a>
+    <code>HTTP/2</code> vs <code>HTTP/1.1</code>
+</h3><ul>
 <li>
 <p><a class="link" href="https://http2.akamai.com/demo"  target="_blank" rel="noopener"
     >https://http2.akamai.com/demo</a></p>
@@ -1208,8 +1281,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http2的升级与发现"><code>HTTP/2</code>的升级与发现</h3>
-<ul>
+<h3 id="http2的升级与发现">
+    <a href="#http2%e7%9a%84%e5%8d%87%e7%ba%a7%e4%b8%8e%e5%8f%91%e7%8e%b0" class="header-anchor">#</a>
+    <code>HTTP/2</code>的升级与发现
+</h3><ul>
 <li><code>HTTP/1.x</code>还将长期存在，客户端和服务器必须同时支持<code>1.x</code>和<code>2.0</code></li>
 <li>客户端和服务器在开始交换数据前，必须发现和协商使用哪个版本的协议进行通信</li>
 <li><code>HTTP/2</code>定义了两种协商机制
@@ -1220,8 +1295,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="http2的升级与发现-1"><code>HTTP/2</code>的升级与发现</h3>
-<ul>
+<h3 id="http2的升级与发现-1">
+    <a href="#http2%e7%9a%84%e5%8d%87%e7%ba%a7%e4%b8%8e%e5%8f%91%e7%8e%b0-1" class="header-anchor">#</a>
+    <code>HTTP/2</code>的升级与发现
+</h3><ul>
 <li><code>HTTP/2</code>标准不要求必须基于<code>TLS</code>，但浏览器要求必须基于<code>TLS</code>
 <ul>
 <li>Web上存在大量的代理和中间设备：缓存服务器、安全网关、加速器等等</li>
@@ -1232,8 +1309,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="h2和h2c升级协商机制"><code>h2</code>和<code>h2c</code>升级协商机制</h3>
-<ul>
+<h3 id="h2和h2c升级协商机制">
+    <a href="#h2%e5%92%8ch2c%e5%8d%87%e7%ba%a7%e5%8d%8f%e5%95%86%e6%9c%ba%e5%88%b6" class="header-anchor">#</a>
+    <code>h2</code>和<code>h2c</code>升级协商机制
+</h3><ul>
 <li>基于<code>TLS</code>运行的<code>HTTP/2</code>被称为<code>h2</code></li>
 <li>直接在<code>TCP</code>之上运行的<code>HTTP/2</code>被称为<code>h2c</code></li>
 </ul>
@@ -1248,8 +1327,10 @@
 	
 ></p>
 <hr>
-<h3 id="h2c演示环境"><code>h2c</code>演示环境</h3>
-<ul>
+<h3 id="h2c演示环境">
+    <a href="#h2c%e6%bc%94%e7%a4%ba%e7%8e%af%e5%a2%83" class="header-anchor">#</a>
+    <code>h2c</code>演示环境
+</h3><ul>
 <li>客户端测试工具 <code>curl</code> (&gt; 7.46.0)</li>
 <li>服务器端 <code>Tomcat 9.x</code></li>
 </ul>
@@ -1272,8 +1353,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="h2c协议升级"><code>h2c</code>协议升级</h3>
-<ul>
+<h3 id="h2c协议升级">
+    <a href="#h2c%e5%8d%8f%e8%ae%ae%e5%8d%87%e7%ba%a7" class="header-anchor">#</a>
+    <code>h2c</code>协议升级
+</h3><ul>
 <li><code>curl http://localhost:8080 --http2 -v</code></li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -1305,8 +1388,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="http2连接建立"><code>HTTP/2</code>连接建立</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221011974.png"
+<h3 id="http2连接建立">
+    <a href="#http2%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b" class="header-anchor">#</a>
+    <code>HTTP/2</code>连接建立
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221011974.png"
 	
 	
 	
@@ -1317,8 +1402,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2连接建立-1"><code>HTTP/2</code>连接建立</h3>
-<ul>
+<h3 id="http2连接建立-1">
+    <a href="#http2%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b-1" class="header-anchor">#</a>
+    <code>HTTP/2</code>连接建立
+</h3><ul>
 <li>Magic帧
 <ul>
 <li>ASCII 编码，12字节</li>
@@ -1343,8 +1430,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2连接建立-2"><code>HTTP/2</code>连接建立</h3>
-<ul>
+<h3 id="http2连接建立-2">
+    <a href="#http2%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b-2" class="header-anchor">#</a>
+    <code>HTTP/2</code>连接建立
+</h3><ul>
 <li>交换<code>settings</code>帧(client -&gt; server)</li>
 </ul>
 <p><img src="https://cdn.mazhen.tech/images/202209221012482.png"
@@ -1358,8 +1447,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2连接建立-3"><code>HTTP/2</code>连接建立</h3>
-<ul>
+<h3 id="http2连接建立-3">
+    <a href="#http2%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b-3" class="header-anchor">#</a>
+    <code>HTTP/2</code>连接建立
+</h3><ul>
 <li>交换<code>settings</code>帧(server -&gt; client)</li>
 </ul>
 <p><img src="https://cdn.mazhen.tech/images/202209221013497.png"
@@ -1373,8 +1464,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2连接建立-4"><code>HTTP/2</code>连接建立</h3>
-<ul>
+<h3 id="http2连接建立-4">
+    <a href="#http2%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b-4" class="header-anchor">#</a>
+    <code>HTTP/2</code>连接建立
+</h3><ul>
 <li><code>settings</code> ACK 帧 (client &lt;-&gt; server)</li>
 </ul>
 <p><img src="https://cdn.mazhen.tech/images/202209221013850.png"
@@ -1388,15 +1481,19 @@
 	
 ></p>
 <hr>
-<h3 id="tls协议的设计目标"><code>TLS</code>协议的设计目标</h3>
-<ul>
+<h3 id="tls协议的设计目标">
+    <a href="#tls%e5%8d%8f%e8%ae%ae%e7%9a%84%e8%ae%be%e8%ae%a1%e7%9b%ae%e6%a0%87" class="header-anchor">#</a>
+    <code>TLS</code>协议的设计目标
+</h3><ul>
 <li>保密性</li>
 <li>完整性</li>
 <li>身份验证</li>
 </ul>
 <hr>
-<h3 id="tls发展史"><code>TLS</code>发展史</h3>
-<ul>
+<h3 id="tls发展史">
+    <a href="#tls%e5%8f%91%e5%b1%95%e5%8f%b2" class="header-anchor">#</a>
+    <code>TLS</code>发展史
+</h3><ul>
 <li>1994年，NetScape 设计了<code>SSL</code>协议(Secure Sockets Layer) 1.0，未正式发布</li>
 <li>1995年，NetScape 发布 <code>SSL</code> 2.0</li>
 <li>1996年，发布<code>SSL</code> 3.0</li>
@@ -1406,8 +1503,10 @@
 <li>2018年8月，<code>TLS</code> 1.3正式发布</li>
 </ul>
 <hr>
-<h3 id="tls-12-握手过程"><code>TLS</code> 1.2 握手过程</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221014737.png"
+<h3 id="tls-12-握手过程">
+    <a href="#tls-12-%e6%8f%a1%e6%89%8b%e8%bf%87%e7%a8%8b" class="header-anchor">#</a>
+    <code>TLS</code> 1.2 握手过程
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221014737.png"
 	
 	
 	
@@ -1425,8 +1524,10 @@
 非对称加密只在建立<code>TLS</code>信道时使用，之后的通信使用握手时生成的共享密钥加密</li>
 </ul>
 <hr>
-<h3 id="tls-安全密码套件"><code>TLS</code> 安全密码套件</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221015276.png"
+<h3 id="tls-安全密码套件">
+    <a href="#tls-%e5%ae%89%e5%85%a8%e5%af%86%e7%a0%81%e5%a5%97%e4%bb%b6" class="header-anchor">#</a>
+    <code>TLS</code> 安全密码套件
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221015276.png"
 	
 	
 	
@@ -1457,8 +1558,10 @@
 <li>hash签名算法</li>
 </ul>
 <hr>
-<h3 id="tls13的握手优化"><code>TLS</code>1.3的握手优化</h3>
-<ul>
+<h3 id="tls13的握手优化">
+    <a href="#tls13%e7%9a%84%e6%8f%a1%e6%89%8b%e4%bc%98%e5%8c%96" class="header-anchor">#</a>
+    <code>TLS</code>1.3的握手优化
+</h3><ul>
 <li><a class="link" href="https://www.thesslstore.com/blog/explaining-ssl-handshake/"  target="_blank" rel="noopener"
     >An Overview of TLS 1.3 – Faster and More Secure</a></li>
 </ul>
@@ -1473,8 +1576,10 @@
 	
 ></p>
 <hr>
-<h3 id="测试tls的支持情况">测试<code>TLS</code>的支持情况</h3>
-<ul>
+<h3 id="测试tls的支持情况">
+    <a href="#%e6%b5%8b%e8%af%95tls%e7%9a%84%e6%94%af%e6%8c%81%e6%83%85%e5%86%b5" class="header-anchor">#</a>
+    测试<code>TLS</code>的支持情况
+</h3><ul>
 <li><a class="link" href="https://www.ssllabs.com/ssltest/index.html"  target="_blank" rel="noopener"
     >https://www.ssllabs.com/ssltest/index.html</a></li>
 </ul>
@@ -1489,8 +1594,10 @@
 	
 ></p>
 <hr>
-<h3 id="application-layer-protocol-negotiation">Application-Layer Protocol Negotiation</h3>
-<ul>
+<h3 id="application-layer-protocol-negotiation">
+    <a href="#application-layer-protocol-negotiation" class="header-anchor">#</a>
+    Application-Layer Protocol Negotiation
+</h3><ul>
 <li>
 <p>基于<code>TLS</code>运行的<code>HTTP/2</code>使用<code>ALPN</code>扩展做协议协商</p>
 <ul>
@@ -1503,8 +1610,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="alpn">ALPN</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221016783.png"
+<h3 id="alpn">
+    <a href="#alpn" class="header-anchor">#</a>
+    ALPN
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221016783.png"
 	
 	
 	
@@ -1515,8 +1624,10 @@
 	
 ></p>
 <hr>
-<h3 id="h2演示环境"><code>h2</code>演示环境</h3>
-<ul>
+<h3 id="h2演示环境">
+    <a href="#h2%e6%bc%94%e7%a4%ba%e7%8e%af%e5%a2%83" class="header-anchor">#</a>
+    <code>h2</code>演示环境
+</h3><ul>
 <li>客户端：浏览器</li>
 <li>服务器端：<code>Tomcat 9.x</code>
 <ul>
@@ -1531,8 +1642,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="tomcat三种tls实现"><code>Tomcat</code>三种<code>TLS</code>实现</h3>
-<ul>
+<h3 id="tomcat三种tls实现">
+    <a href="#tomcat%e4%b8%89%e7%a7%8dtls%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    <code>Tomcat</code>三种<code>TLS</code>实现
+</h3><ul>
 <li>JSSE
 <ul>
 <li>非常慢</li>
@@ -1554,8 +1667,10 @@
 </li>
 </ul>
 <hr>
-<h3 id="tls实现的性能对比"><code>TLS</code>实现的性能对比</h3>
-<ul>
+<h3 id="tls实现的性能对比">
+    <a href="#tls%e5%ae%9e%e7%8e%b0%e7%9a%84%e6%80%a7%e8%83%bd%e5%af%b9%e6%af%94" class="header-anchor">#</a>
+    <code>TLS</code>实现的性能对比
+</h3><ul>
 <li><code>OpenSSL</code>性能比纯Java实现好很多；使用<code>TLS</code>可以不再需要<code>APR</code></li>
 <li><code>Linux</code>上<code>NIO.2</code>是通过<code>epoll</code>来模拟实现的<a class="link" href="https://github.com/openjdk/jdk/blob/6bab0f539fba8fb441697846347597b4a0ade428/src/java.base/linux/classes/sun/nio/ch/EPollPort.java"  target="_blank" rel="noopener"
     >EPollPort.java</a></li>
@@ -1571,8 +1686,10 @@
 	
 ></p>
 <hr>
-<h3 id="使用jsse">使用<code>JSSE</code></h3>
-<ul>
+<h3 id="使用jsse">
+    <a href="#%e4%bd%bf%e7%94%a8jsse" class="header-anchor">#</a>
+    使用<code>JSSE</code>
+</h3><ul>
 <li>生成private key和自签名证书
 <ul>
 <li><code>keytool -genkey -alias tomcat -keyalg RSA</code></li>
@@ -1609,8 +1726,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="使用jsse-1">使用<code>JSSE</code></h3>
-<ul>
+<h3 id="使用jsse-1">
+    <a href="#%e4%bd%bf%e7%94%a8jsse-1" class="header-anchor">#</a>
+    使用<code>JSSE</code>
+</h3><ul>
 <li><code>JDK8</code>不支持<code>ALPN</code></li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -1647,8 +1766,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="使用openssl">使用<code>OpenSSL</code></h3>
-<ul>
+<h3 id="使用openssl">
+    <a href="#%e4%bd%bf%e7%94%a8openssl" class="header-anchor">#</a>
+    使用<code>OpenSSL</code>
+</h3><ul>
 <li>安装<code>tomcat-native</code>
 <ul>
 <li><code>brew install tomcat-native</code></li>
@@ -1686,8 +1807,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="使用openssl-1">使用<code>OpenSSL</code></h3>
-<ul>
+<h3 id="使用openssl-1">
+    <a href="#%e4%bd%bf%e7%94%a8openssl-1" class="header-anchor">#</a>
+    使用<code>OpenSSL</code>
+</h3><ul>
 <li><code>JDK8</code> &amp; <code>JDK11</code></li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -1717,8 +1840,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
-<h3 id="alpn协议协商"><code>ALPN</code>协议协商</h3>
-<ul>
+<h3 id="alpn协议协商">
+    <a href="#alpn%e5%8d%8f%e8%ae%ae%e5%8d%8f%e5%95%86" class="header-anchor">#</a>
+    <code>ALPN</code>协议协商
+</h3><ul>
 <li>ClientHello</li>
 </ul>
 <p><img src="https://cdn.mazhen.tech/images/202209221023075.png"
@@ -1732,8 +1857,10 @@
 	
 ></p>
 <hr>
-<h3 id="alpn协议协商-1"><code>ALPN</code>协议协商</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221024741.png"
+<h3 id="alpn协议协商-1">
+    <a href="#alpn%e5%8d%8f%e8%ae%ae%e5%8d%8f%e5%95%86-1" class="header-anchor">#</a>
+    <code>ALPN</code>协议协商
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221024741.png"
 	
 	
 	
@@ -1747,8 +1874,10 @@
 <li>ServerHello</li>
 </ul>
 <hr>
-<h3 id="使用chrome开发者工具观察">使用Chrome开发者工具观察</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209221024873.png"
+<h3 id="使用chrome开发者工具观察">
+    <a href="#%e4%bd%bf%e7%94%a8chrome%e5%bc%80%e5%8f%91%e8%80%85%e5%b7%a5%e5%85%b7%e8%a7%82%e5%af%9f" class="header-anchor">#</a>
+    使用Chrome开发者工具观察
+</h3><p><img src="https://cdn.mazhen.tech/images/202209221024873.png"
 	
 	
 	
@@ -1759,8 +1888,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2的问题">HTTP/2的问题</h3>
-<ul>
+<h3 id="http2的问题">
+    <a href="#http2%e7%9a%84%e9%97%ae%e9%a2%98" class="header-anchor">#</a>
+    HTTP/2的问题
+</h3><ul>
 <li><code>HTTP/2</code>消除了<code>HTTP</code>协议的队首阻塞现象，但<code>TCP</code>层面上仍然存在队首阻塞</li>
 <li><code>HTTP/2</code>多请求复用一个<code>TCP</code>连接，丢包可能会block住所有的<code>HTTP</code>请求</li>
 </ul>
@@ -1775,8 +1906,10 @@
 	
 ></p>
 <hr>
-<h3 id="http2的问题-1">HTTP/2的问题</h3>
-<ul>
+<h3 id="http2的问题-1">
+    <a href="#http2%e7%9a%84%e9%97%ae%e9%a2%98-1" class="header-anchor">#</a>
+    HTTP/2的问题
+</h3><ul>
 <li><code>TCP</code>及<code>TCP+TLS</code>建立连接需要多次round trips
 <img src="https://cdn.mazhen.tech/images/202209221025218.png"
 	
@@ -1790,8 +1923,10 @@
 ></li>
 </ul>
 <hr>
-<h3 id="quic">QUIC</h3>
-<ul>
+<h3 id="quic">
+    <a href="#quic" class="header-anchor">#</a>
+    QUIC
+</h3><ul>
 <li><strong>Q</strong>uick <strong>U</strong>DP <strong>I</strong>nternet <strong>C</strong>onnections</li>
 <li>由Goolge开发，并已经在Google部署使用</li>
 </ul>
@@ -1806,8 +1941,10 @@
 	
 ></p>
 <hr>
-<h3 id="quic-1">QUIC</h3>
-<p><a class="link" href="https://www.youtube.com/watch?v=hQZ-0mXFmk8"  target="_blank" rel="noopener"
+<h3 id="quic-1">
+    <a href="#quic-1" class="header-anchor">#</a>
+    QUIC
+</h3><p><a class="link" href="https://www.youtube.com/watch?v=hQZ-0mXFmk8"  target="_blank" rel="noopener"
     >QUIC: next generation multiplexed transport over UDP</a></p>
 <p><img src="https://cdn.mazhen.tech/images/202209221026039.png"
 	
@@ -1820,8 +1957,10 @@
 	
 ></p>
 <hr>
-<h3 id="参考资料">参考资料</h3>
-<ul>
+<h3 id="参考资料">
+    <a href="#%e5%8f%82%e8%80%83%e8%b5%84%e6%96%99" class="header-anchor">#</a>
+    参考资料
+</h3><ul>
 <li><a class="link" href="https://hpbn.co/"  target="_blank" rel="noopener"
     >High Performance Browser Networking</a></li>
 <li><a class="link" href="https://coolshell.cn/articles/19840.html"  target="_blank" rel="noopener"
@@ -2001,8 +2140,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

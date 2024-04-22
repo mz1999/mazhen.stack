@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，">
 <title>Kubernetes集群的身份验证</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Kubernetes集群的身份验证'>
-<meta property='og:description' content='用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Kubernetes集群的身份验证">
+<meta property='og:description' content="用户在访问Kubernetes集群的API server时，访问请求需要经过身份验证、授权和准入控制这三个阶段的检查，才能真正到达API服务，">
 <meta property='og:url' content='https://mazhen.tech/p/kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='kubernetes' /><meta property='article:tag' content='security' /><meta property='article:published_time' content='2019-05-19T09:46:53&#43;08:00'/><meta property='article:modified_time' content='2019-05-19T09:46:53&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -469,9 +472,13 @@
 <li>为验证<code>normal users</code>身份的客户端证书方式</li>
 <li>为验证<code>Service accounts</code>身份的 <code>JWT Tokens</code>方式</li>
 </ul>
-<h2 id="使用客户端证书进行身份验证">使用客户端证书进行身份验证</h2>
-<h3 id="理解数字证书">理解数字证书</h3>
-<p>非对称加密算法是证书的基础。数字签名、数字证书等一系列概念有点绕，但只要记住：<strong>公钥用来加密</strong>，<strong>私钥用来签名</strong> 就可以了。</p>
+<h2 id="使用客户端证书进行身份验证">
+    <a href="#%e4%bd%bf%e7%94%a8%e5%ae%a2%e6%88%b7%e7%ab%af%e8%af%81%e4%b9%a6%e8%bf%9b%e8%a1%8c%e8%ba%ab%e4%bb%bd%e9%aa%8c%e8%af%81" class="header-anchor">#</a>
+    使用客户端证书进行身份验证
+</h2><h3 id="理解数字证书">
+    <a href="#%e7%90%86%e8%a7%a3%e6%95%b0%e5%ad%97%e8%af%81%e4%b9%a6" class="header-anchor">#</a>
+    理解数字证书
+</h3><p>非对称加密算法是证书的基础。数字签名、数字证书等一系列概念有点绕，但只要记住：<strong>公钥用来加密</strong>，<strong>私钥用来签名</strong> 就可以了。</p>
 <p>怎么理解呢？公钥可以随意分发，谁都可以持有，如果你用私钥加密，任何持有对应公钥的人都可以解密，这样做和没加密一样，没什么意义。因此，我们需要用公钥加密，只有持有私钥的那个人才能解密。私钥之所以称为私钥，一定会私密保存，不会向其他人泄漏。同时，用私钥加密虽然没有意义，但如果别人用公钥解开了私钥加密的信息，就能够证明信息是由私钥持有者发出的，验证了信息发送者的身份，这就是数字签名。</p>
 <p>每个人制作好自己的公钥和私钥，然后把公钥发布出去。两个人如果都有对方的公钥，就可以用对方的公钥给对方发送加密信息，同时附上用私钥加密的信息摘要作为数字签名，证明消息发送者的身份。</p>
 <p>通过加密防止了窃听风险，通过数字签名防止了冒充风险，数字签名内的消息摘要防止了篡改风险，一起看似很完美。</p>
@@ -514,8 +521,10 @@
     >引起轩然大波</a>。最终12306在17年底的时候换成了Digicert的证书。</p>
 <p>简单总结一下基于非对称加密算法的公钥/私钥体系，<strong>公钥用来加密</strong>，<strong>私钥用来签名</strong>，<strong>引入<code>CA</code>保证公钥的安全分发</strong>。你可以找<code>CA</code>签发数字证书，那么你的客户就可以根据本地“受信任的根证书”验证你的数字证书，从而确认你的身份，然后用证书内包含的公钥给你发加密的信息。同样，你也可以要求对方的数字证书，以便确认对方的身份，并给他回加密的信息。</p>
 <p>理解了数字证书的基本原理，我们再看看<code>Kubernetes</code>中如何使用客户端证书进行身份验证。</p>
-<h3 id="数字证书在kubernetes中的应用">数字证书在Kubernetes中的应用</h3>
-<p><code>Kubernetes</code>各组件之间的通信都是基于<code>TLS</code>，实现服务的加密访问，同时支持基于证书的双向认证。</p>
+<h3 id="数字证书在kubernetes中的应用">
+    <a href="#%e6%95%b0%e5%ad%97%e8%af%81%e4%b9%a6%e5%9c%a8kubernetes%e4%b8%ad%e7%9a%84%e5%ba%94%e7%94%a8" class="header-anchor">#</a>
+    数字证书在Kubernetes中的应用
+</h3><p><code>Kubernetes</code>各组件之间的通信都是基于<code>TLS</code>，实现服务的加密访问，同时支持基于证书的双向认证。</p>
 <p>我们在搭建私有<code>Kubernetes</code>集群时，一般是自建<code>root CA</code>，因为参与认证的所有集群节点，包括远程访问集群的客户端桌面都完全由自己控制，我们可以安全的将根证书分发到所有节点。有了<code>CA</code>，我们再用<code>CA</code>的私钥/公钥为各个组件签发所需的证书。</p>
 <p><code>CA</code>的创建，以及一系列客户端、服务端证书的签发，实际上是建立了<code>Kubernetes</code>集群的<a class="link" href="https://en.wikipedia.org/wiki/Public_key_infrastructure"  target="_blank" rel="noopener"
     >PKI(Public key infrastructure)</a>。</p>
@@ -671,8 +680,10 @@
     >启动参数</a>，参数名称让人容易混淆，有人还专门提了<a class="link" href="https://github.com/kubernetes/kubernetes/issues/54665"  target="_blank" rel="noopener"
     >issue</a>，<a class="link" href="https://github.com/kubernetes/kubernetes/issues/54665#issuecomment-340960398"  target="_blank" rel="noopener"
     >这个回答</a>根据用途对这些参数进行了分类，说明的非常清晰。</p>
-<h3 id="api-server-如何用客户端证书进行身份验证">API server 如何用客户端证书进行身份验证</h3>
-<p>前面提到，当用户使用<code>kubectl</code>访问<code>API server</code>时，需要以某种方式进行身份验证，最常用的方式就是使用客户端证书。<code>Kubernetes</code>是没有 <code>user</code> 这种 API 对象，<code>kubectl</code>的用户身份信息就包含在客户端证书中。<code>API server</code>验证了客户端证书，也就可以从证书中获得用户名和所属的<code>group</code>。</p>
+<h3 id="api-server-如何用客户端证书进行身份验证">
+    <a href="#api-server-%e5%a6%82%e4%bd%95%e7%94%a8%e5%ae%a2%e6%88%b7%e7%ab%af%e8%af%81%e4%b9%a6%e8%bf%9b%e8%a1%8c%e8%ba%ab%e4%bb%bd%e9%aa%8c%e8%af%81" class="header-anchor">#</a>
+    API server 如何用客户端证书进行身份验证
+</h3><p>前面提到，当用户使用<code>kubectl</code>访问<code>API server</code>时，需要以某种方式进行身份验证，最常用的方式就是使用客户端证书。<code>Kubernetes</code>是没有 <code>user</code> 这种 API 对象，<code>kubectl</code>的用户身份信息就包含在客户端证书中。<code>API server</code>验证了客户端证书，也就可以从证书中获得用户名和所属的<code>group</code>。</p>
 <p>我们以<code>/etc/kubernetes/admin.conf</code> 为例，看看客户端证书中提供了那些信息。</p>
 <p>先查看<code>admin.conf</code>文件的内容：</p>
 <div class="highlight"><div class="chroma">
@@ -938,8 +949,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>从<code>rules</code>列表可以看出，<code>cluster-admin</code>这个角色对所有资源都有无限制的操作权限。因此，使用了这个<code>kubeconfig file</code>的<code>kubectl</code>的请求就有了操控和管理整个集群的权限。</p>
-<h2 id="使用jwt-tokens进行身份验证">使用<code>JWT Tokens</code>进行身份验证</h2>
-<p>运行在<code>Pod</code>中的进程需要访问<code>API server</code>时，同样需要进行身份验证和授权检查。如何让<code>Pod</code>具有用户身份呢？通过给<code>Pod</code>指定<code>service account</code>来实现。<code>service account</code>是<code>Kubernetes</code>内置的一种 “服务账户”，它为<code>Pod</code>中的进程提供了一种身份标识。如果<code>Pod</code>没有显式的指定<code>service account</code>，系统会自动为其关联<code>default service account</code>。</p>
+<h2 id="使用jwt-tokens进行身份验证">
+    <a href="#%e4%bd%bf%e7%94%a8jwt-tokens%e8%bf%9b%e8%a1%8c%e8%ba%ab%e4%bb%bd%e9%aa%8c%e8%af%81" class="header-anchor">#</a>
+    使用<code>JWT Tokens</code>进行身份验证
+</h2><p>运行在<code>Pod</code>中的进程需要访问<code>API server</code>时，同样需要进行身份验证和授权检查。如何让<code>Pod</code>具有用户身份呢？通过给<code>Pod</code>指定<code>service account</code>来实现。<code>service account</code>是<code>Kubernetes</code>内置的一种 “服务账户”，它为<code>Pod</code>中的进程提供了一种身份标识。如果<code>Pod</code>没有显式的指定<code>service account</code>，系统会自动为其关联<code>default service account</code>。</p>
 <p>我们自己创建<code>service account</code>对象非常简单：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1312,8 +1325,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>通过绑定的创建，<code>service account</code>就拥有了<code>role</code>定义的权限。</p>
-<h2 id="总结">总结</h2>
-<p>用户对<code>API server</code>的访问需要通过身份验证、授权和准入控制这三个阶段的检查。</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>用户对<code>API server</code>的访问需要通过身份验证、授权和准入控制这三个阶段的检查。</p>
 <p>一般集群外部用户访问<code>API Server</code>使用客户端证书进行身份验证。<code>Kubernetes</code>各组件之间的通信都使用了<code>TLS</code>加密传输，同时支持基于证书的双向认证。因此<code>Kubernetes</code>的安装过程涉及很多证书的创建，本文分类介绍了这些证书的作用。</p>
 <p>集群内<code>Pod</code>中的进程访问<code>API server</code>时，使用<code>service account</code>关联的<code>token</code>进行身份验证。</p>
 <p>每个<code>Pod</code>都会关联一个<code>service account</code>，没有明确指定时使用<code>default</code>。当我们创建<code>service account</code>对象，<code>controller-manager</code>会为这个<code>service account</code>生成<code>Secret</code>，内部包含了用来身份验证的<code>JWT Tokens</code>。<code>Kubernetes</code>会将<code>token</code>文件<code>mount</code>到<code>Pod</code>的<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>，<code>Pod</code>内的进程在向<code>API server</code>发起的<code>HTTP</code>时，就可以在请求头中携带这个<code>token</code>。</p>
@@ -1487,8 +1502,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

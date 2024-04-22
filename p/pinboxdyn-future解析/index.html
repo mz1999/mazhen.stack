@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response">
 <title>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析'>
-<meta property='og:description' content='Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Pin<Box<dyn Future<>>>解析">
+<meta property='og:description' content="Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response">
 <meta property='og:url' content='https://mazhen.tech/p/pinboxdyn-future%E8%A7%A3%E6%9E%90/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='rust' /><meta property='article:published_time' content='2022-10-12T09:14:10&#43;08:00'/><meta property='article:modified_time' content='2022-10-12T09:14:10&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
-    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;解析">
+    <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Pin<Box<dyn Future<>>>解析">
 <meta name="twitter:description" content="Tower 是一个专注于对网络编程进行抽象的框架，最核心的抽象为 Service trait。Service::call 接受一个 request 进行处理，成功则返回 response">
     <link rel="shortcut icon" href="/favicon.png" />
 
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -466,8 +469,10 @@
 <pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">call</span><span class="p">(</span><span class="n">Request</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="o">&gt;</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="service-trait-的定义">Service trait 的定义</h2>
-<p>我们希望 Service 是异步编程风格，也就是 call 为 async 方法：</p>
+</div><h2 id="service-trait-的定义">
+    <a href="#service-trait-%e7%9a%84%e5%ae%9a%e4%b9%89" class="header-anchor">#</a>
+    Service trait 的定义
+</h2><p>我们希望 Service 是异步编程风格，也就是 call 为 async 方法：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -535,8 +540,10 @@
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="实现自己的-future-类型">实现自己的 Future 类型</h2>
-<p>我们在实现 Service 时，仍然需要为<code>type Future</code> 设置具体的类型。</p>
+</div><h2 id="实现自己的-future-类型">
+    <a href="#%e5%ae%9e%e7%8e%b0%e8%87%aa%e5%b7%b1%e7%9a%84-future-%e7%b1%bb%e5%9e%8b" class="header-anchor">#</a>
+    实现自己的 Future 类型
+</h2><p>我们在实现 Service 时，仍然需要为<code>type Future</code> 设置具体的类型。</p>
 <p>既然没法让 call 直接返回 <code>impl Future</code>，一种方法是定义自己的 <code>Future</code> 类型，例如：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -656,8 +663,10 @@
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="使用-async-blocks">使用 async blocks</h2>
-<p>手工实现 Future 会比较麻烦，我们一般都是用 <code>async fn</code>/<code>async blocks</code>语法糖生成 Future，那么这时 <code>Service::call</code> 返回什么类型呢？</p>
+</div><h2 id="使用-async-blocks">
+    <a href="#%e4%bd%bf%e7%94%a8-async-blocks" class="header-anchor">#</a>
+    使用 async blocks
+</h2><p>手工实现 Future 会比较麻烦，我们一般都是用 <code>async fn</code>/<code>async blocks</code>语法糖生成 Future，那么这时 <code>Service::call</code> 返回什么类型呢？</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -735,10 +744,14 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>编译错误提示的没有实现 <code>Unpin</code> trait 是什么意思？那要先从 Pin 说起。</p>
-<h2 id="一句话解释pin">一句话解释Pin</h2>
-<p>Pin 本质上解决的问题是保证 <code>Pin&lt;P&lt;T&gt;&gt;</code> 中的 T 不会被 move，除非 T 满足 T: Unpin。</p>
-<h2 id="什么是move">什么是move</h2>
-<p>所有权转移的这个过程就是 move，例如：</p>
+<h2 id="一句话解释pin">
+    <a href="#%e4%b8%80%e5%8f%a5%e8%af%9d%e8%a7%a3%e9%87%8apin" class="header-anchor">#</a>
+    一句话解释Pin
+</h2><p>Pin 本质上解决的问题是保证 <code>Pin&lt;P&lt;T&gt;&gt;</code> 中的 T 不会被 move，除非 T 满足 T: Unpin。</p>
+<h2 id="什么是move">
+    <a href="#%e4%bb%80%e4%b9%88%e6%98%afmove" class="header-anchor">#</a>
+    什么是move
+</h2><p>所有权转移的这个过程就是 move，例如：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -751,8 +764,10 @@
 </div>
 </div><p>s2 浅copy s1 的内容，同时 String 的所有权转移给了 s2。</p>
 <p>通过<code>std::mem::swap()</code>方法交换了两个可变借用 <strong>&amp;mut</strong> 的内容，也发生了move。</p>
-<h2 id="为什么要pin">为什么要Pin</h2>
-<p>自引用结构体，move了以后会出问题。</p>
+<h2 id="为什么要pin">
+    <a href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a6%81pin" class="header-anchor">#</a>
+    为什么要Pin
+</h2><p>自引用结构体，move了以后会出问题。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209201529136.webp"
 	
 	
@@ -764,15 +779,19 @@
 	
 ></p>
 <p>所以需要 Pin，不能move。</p>
-<h2 id="怎么-pin-住的">怎么 Pin 住的</h2>
-<p>保证 T 不会被move，需要避免两种情况：</p>
+<h2 id="怎么-pin-住的">
+    <a href="#%e6%80%8e%e4%b9%88-pin-%e4%bd%8f%e7%9a%84" class="header-anchor">#</a>
+    怎么 Pin 住的
+</h2><p>保证 T 不会被move，需要避免两种情况：</p>
 <ul>
 <li>不能暴露 T ，否则赋值、方法调用等都会move</li>
 <li>不能暴露 &amp;mut T，开发者可以调用 <code>std::mem::swap()</code> 或 <code>std::mem::replace()</code> 这类方法来 move 掉 T</li>
 </ul>
 <p><code>Pin&lt;P&lt;T&gt;&gt;</code>没有暴露T，而且没法让你获得 <code>&amp;mut T</code>，所以就 Pin 住了T。但注意有个前提条件：T 没有实现 <strong>Unpin</strong></p>
-<h2 id="谁没有实现-unpin">谁没有实现 Unpin</h2>
-<p><code>Unpin</code> 是一个auto trait，编译器默认会给所有类型实现 <code>Unpin</code>。唯独有几个例外，他们实现的是 <code>!Unpin</code>。</p>
+<h2 id="谁没有实现-unpin">
+    <a href="#%e8%b0%81%e6%b2%a1%e6%9c%89%e5%ae%9e%e7%8e%b0-unpin" class="header-anchor">#</a>
+    谁没有实现 Unpin
+</h2><p><code>Unpin</code> 是一个auto trait，编译器默认会给所有类型实现 <code>Unpin</code>。唯独有几个例外，他们实现的是 <code>!Unpin</code>。</p>
 <ul>
 <li>PhantomPinned</li>
 </ul>
@@ -832,19 +851,25 @@
 </div><ul>
 <li>编译器为 <code>async fn</code> 生成的匿名结构体实现的是 <code>!Unpin</code></li>
 </ul>
-<h2 id="async-fn">async fn</h2>
-<p><code>async fn</code> 是语法糖，在编译时，编译器使用<a class="link" href="https://doc.rust-lang.org/std/ops/trait.Generator.html"  target="_blank" rel="noopener"
+<h2 id="async-fn">
+    <a href="#async-fn" class="header-anchor">#</a>
+    async fn
+</h2><p><code>async fn</code> 是语法糖，在编译时，编译器使用<a class="link" href="https://doc.rust-lang.org/std/ops/trait.Generator.html"  target="_blank" rel="noopener"
     >Generator</a>为 <code>async fn</code> 生成匿名结构体，这个结构体实现了 <code>Future</code>。</p>
 <p>这个匿名结构体是自引用的。原因是，如果 <code>async fn</code> 内有多个 <code>await</code>，执行到 <code>await</code> 可能因为资源没准备好而让出 CPU 暂停执行，随后该 <code>Future</code> 可能被调度到其他线程接着执行。所以这个匿名结构体需要保存跨 <code>await</code> 的数据，形成了自引用结构。</p>
 <p>由于为 <code>async fn</code> 生成的结构体是自引用的，所以这个结构体实现了 <code>!Unpin</code>，表示它不能被 move。</p>
 <p>这也是为什么不能给<code>Future::poll</code> 直接传 <code>&amp;mut Self</code> 的原因：生成的匿名结构体不能被move，而拿到 <code>&amp;mut Self</code>就可以使用 swap 或 replace之类的方法进行move，这样不安全，所以必须使用 <code>Pin&lt;&amp;mut Self&gt;</code>。</p>
-<h2 id="future-都是-unpin-的吗">Future 都是 !Unpin 的吗</h2>
-<p>不一定。</p>
+<h2 id="future-都是-unpin-的吗">
+    <a href="#future-%e9%83%bd%e6%98%af-unpin-%e7%9a%84%e5%90%97" class="header-anchor">#</a>
+    Future 都是 !Unpin 的吗
+</h2><p>不一定。</p>
 <p><code>async fn</code> 语法糖生成的实现了 Future 的匿名结构，内部包含自引用，它会明确实现 <code>!Unpin</code>，不能 move。</p>
 <p>但如果你自己实现的 Future，内部没有自引用，它就不是 <code>!Unpin</code>，当然可以 move。</p>
 <p>也就是说，<code>Future</code> 和 <code>!Unpin</code> 是两个 trait，虽然它们经常联系在一起，但并不是实现了 <code>Future</code> 的类型都必须同时实现 <code>!Unpin</code>，没有包含自引用的 <code>Future</code>当然可以安全的 move 了。</p>
-<h2 id="实现了-unpin-的-future">实现了 Unpin 的 Future</h2>
-<p>如果是可以 move 的 Future，也就是实现了 Unpin 的 Future，在调用 <code>Future::poll</code> 的时候，要求传入 <code>Pin&lt;&amp;mut Self&gt;</code>，会不会有什么问题呢？</p>
+<h2 id="实现了-unpin-的-future">
+    <a href="#%e5%ae%9e%e7%8e%b0%e4%ba%86-unpin-%e7%9a%84-future" class="header-anchor">#</a>
+    实现了 Unpin 的 Future
+</h2><p>如果是可以 move 的 Future，也就是实现了 Unpin 的 Future，在调用 <code>Future::poll</code> 的时候，要求传入 <code>Pin&lt;&amp;mut Self&gt;</code>，会不会有什么问题呢？</p>
 <p>首先，如果 <code>T：Unpin</code>，那么 <code>Pin&lt;&amp;mut T&gt;</code> 就完全等同于 <code>&amp;mut T</code>。换句话说，<code>Unpin</code> 意味着这个类型可以被移动，即使是在 Pin 住的情况下，所以 Pin 对这样的类型没有影响。因为 Pin 是智能指针，它实现了 <code>Deref/DerefMut</code>，只要满足 <code>T: Unpin</code>，你就能拿到<code>&amp;mut T</code>：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -891,8 +916,10 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>所以，如果你的 <code>Future</code> 是 <code>Unpin</code>，那么即使<code>Future::poll</code> 要求传入的是 <code>Pin&lt;&amp;mut Self&gt;</code>，对你也没有任何影响。</p>
-<h2 id="boxdyn-futrue-的问题">Box&lt;dyn Futrue&lt;&gt;&gt; 的问题</h2>
-<p>回到上面的问题，我们想让 <code>Service::call</code> 返回 <code>trait object</code>，也就是 <code>Box&lt;dyn Futrue&lt;&gt;&gt;</code>，会编译不过，为什么呢？</p>
+<h2 id="boxdyn-futrue-的问题">
+    <a href="#boxdyn-futrue-%e7%9a%84%e9%97%ae%e9%a2%98" class="header-anchor">#</a>
+    Box&lt;dyn Futrue&lt;&gt;&gt; 的问题
+</h2><p>回到上面的问题，我们想让 <code>Service::call</code> 返回 <code>trait object</code>，也就是 <code>Box&lt;dyn Futrue&lt;&gt;&gt;</code>，会编译不过，为什么呢？</p>
 <p>因为标准库为 Box 实现了 Future，但要求 Box 包装的 Future 必须同时实现了 Unpin ：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -909,8 +936,10 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>前面已经讲过，async 解语法糖生成的 Future 没有实现 Unpin，所以<code>Box::new(async{...})</code> 不满足类型约束，它没有实现 Future，不能在它上面await。</p>
-<h2 id="pin-实现了-future">Pin 实现了 Future</h2>
-<p>前面讲过，在 Future 上 poll 的时候，不能直接传入<code>&amp;mut Self</code>，而需要传入 <code>Pin&lt;&amp;mut Self&gt;</code>，需要这样调用 <code>Future::poll(Pin::new(&amp;mut future), ctx)</code>。如果 Pin 实现了 Future ，我们就可以直接这样 poll 了： <code>Pin::new(&amp;mut future).poll(ctx)</code>。</p>
+<h2 id="pin-实现了-future">
+    <a href="#pin-%e5%ae%9e%e7%8e%b0%e4%ba%86-future" class="header-anchor">#</a>
+    Pin 实现了 Future
+</h2><p>前面讲过，在 Future 上 poll 的时候，不能直接传入<code>&amp;mut Self</code>，而需要传入 <code>Pin&lt;&amp;mut Self&gt;</code>，需要这样调用 <code>Future::poll(Pin::new(&amp;mut future), ctx)</code>。如果 Pin 实现了 Future ，我们就可以直接这样 poll 了： <code>Pin::new(&amp;mut future).poll(ctx)</code>。</p>
 <p>标准库也确实为 Pin 实现了 Future：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -966,8 +995,10 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>这回终于可以了。事实上，在异步场景下，我们经常会看到使用 <code>Box::pin</code> 去包装 <code>async block</code>。</p>
-<h2 id="pinboxdyn-future">Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</h2>
-<p><code>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</code> 除了实现了Future，也实现了 Unpin。</p>
+<h2 id="pinboxdyn-future">
+    <a href="#pinboxdyn-future" class="header-anchor">#</a>
+    Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;
+</h2><p><code>Pin&lt;Box&lt;dyn Future&lt;&gt;&gt;&gt;</code> 除了实现了Future，也实现了 Unpin。</p>
 <p>因为 Pin 实现了 Unpin，只要 P 是 Unpin 的：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1168,8 +1199,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

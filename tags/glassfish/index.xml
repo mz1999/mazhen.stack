@@ -17,8 +17,10 @@
     &gt;GlassFish&lt;/a&gt; , which provides a series of subcommands. Using &lt;code&gt;asadmin&lt;/code&gt;, you can complete all management tasks of &lt;code&gt;GlassFish&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The subcommand &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#start-domain&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;start-domain&lt;/a&gt; of &lt;code&gt;asadmin&lt;/code&gt; can start &lt;code&gt;GlassFish&lt;/code&gt;. The following will describe the main process of &lt;code&gt;GlassFish&lt;/code&gt; startup, starting from the execution of the &lt;code&gt;asadmin&lt;/code&gt; command.&lt;/p&gt;
-&lt;h2 id=&#34;asadmin-execution-process&#34;&gt;asadmin Execution Process&lt;/h2&gt;
-&lt;p&gt;The entry point of the &lt;code&gt;asadmin&lt;/code&gt; command is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;asadmin-execution-process&#34;&gt;
+    &lt;a href=&#34;#asadmin-execution-process&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    asadmin Execution Process
+&lt;/h2&gt;&lt;p&gt;The entry point of the &lt;code&gt;asadmin&lt;/code&gt; command is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;org.glassfish.admin.cli.AsadminMain&lt;/a&gt;, which is included in the &lt;code&gt;${AS_INSTALL_LIB}/client/appserver-cli.jar&lt;/code&gt; package.&lt;/p&gt;
 &lt;p&gt;The main process of &lt;code&gt;AsadminMain&lt;/code&gt; execution is as follows:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/mz1999/material/master/images/202307211620151.png&#34;
@@ -75,8 +77,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Next, we analyze the startup process of the &lt;code&gt;GlassFish&lt;/code&gt; main process.&lt;/p&gt;
-&lt;h2 id=&#34;main-process-startup-process&#34;&gt;Main Process Startup Process&lt;/h2&gt;
-&lt;p&gt;The entry point of the &lt;code&gt;GlassFish&lt;/code&gt; main process is the &lt;code&gt;main&lt;/code&gt; method of  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;main-process-startup-process&#34;&gt;
+    &lt;a href=&#34;#main-process-startup-process&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Main Process Startup Process
+&lt;/h2&gt;&lt;p&gt;The entry point of the &lt;code&gt;GlassFish&lt;/code&gt; main process is the &lt;code&gt;main&lt;/code&gt; method of  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt; , and the main process of the startup process is as follows:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/mz1999/material/master/images/202307211631595.png&#34;
 	
@@ -98,8 +102,10 @@
     &gt;GlassFishRuntime&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Start the &lt;code&gt;Glassfish&lt;/code&gt; instance by calling &lt;code&gt;GlassFish.start()&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;creating-glassfishruntime&#34;&gt;Creating GlassFishRuntime&lt;/h3&gt;
-&lt;p&gt;The main steps to create &lt;code&gt;GlassFishRuntime&lt;/code&gt; include:&lt;/p&gt;
+&lt;h3 id=&#34;creating-glassfishruntime&#34;&gt;
+    &lt;a href=&#34;#creating-glassfishruntime&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Creating GlassFishRuntime
+&lt;/h3&gt;&lt;p&gt;The main steps to create &lt;code&gt;GlassFishRuntime&lt;/code&gt; include:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Create &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
@@ -135,8 +141,10 @@
     &gt;ModulesRegistry&lt;/a&gt; is a key component of HK2. All modules in HK2 are registered here. In the OSGi environment, the specific implementation class of &lt;code&gt;ModulesRegistry&lt;/code&gt; is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;OSGiModulesRegistryImpl&lt;/a&gt;, which will find and register the HK2 modules contained in the &lt;code&gt;META-INF/hk2-locator&lt;/code&gt; directory of all bundle Jars.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;ModulesRegistry&lt;/code&gt; and &lt;code&gt;HK2Main&lt;/code&gt; will be registered as OSGi&amp;rsquo;s service.&lt;/p&gt;
-&lt;h3 id=&#34;creating-glassfish-instance&#34;&gt;Creating GlassFish Instance&lt;/h3&gt;
-&lt;p&gt;Create a GlassFish instance through &lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt;. This process mainly does two things:&lt;/p&gt;
+&lt;h3 id=&#34;creating-glassfish-instance&#34;&gt;
+    &lt;a href=&#34;#creating-glassfish-instance&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Creating GlassFish Instance
+&lt;/h3&gt;&lt;p&gt;Create a GlassFish instance through &lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt;. This process mainly does two things:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Create HK2&amp;rsquo;s &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
@@ -151,8 +159,10 @@
 &lt;p&gt;&lt;code&gt;ServiceLocator&lt;/code&gt; is the registry of HK2 services, which provides a series of methods to get HK2 service.&lt;/p&gt;
 &lt;p&gt;The relationship between HK2 &lt;code&gt;Module&lt;/code&gt; and &lt;code&gt;Service&lt;/code&gt; can be regarded as the relationship between container and content. &lt;code&gt;Module&lt;/code&gt; (container) contains a group of &lt;code&gt;Service&lt;/code&gt; (content) and is responsible for registering these Services in &lt;code&gt;ServiceLocator&lt;/code&gt;. When a &lt;code&gt;Module&lt;/code&gt; is initialized, all its Services will be registered in &lt;code&gt;ServiceLocator&lt;/code&gt;, and then these Services can be found and used by other Services.&lt;/p&gt;
 &lt;p&gt;Finally, create a GlassFish instance with &lt;code&gt;AppServerStartup&lt;/code&gt; and &lt;code&gt;ServiceLocator&lt;/code&gt; as the parameters of the constructor.&lt;/p&gt;
-&lt;h3 id=&#34;starting-glassfish-instance&#34;&gt;Starting GlassFish Instance&lt;/h3&gt;
-&lt;p&gt;Use &lt;code&gt;GlassFish.start()&lt;/code&gt; to start the &lt;code&gt;Glassfish&lt;/code&gt; instance. The most critical step is to call &lt;code&gt;AppServerStartup.start()&lt;/code&gt;, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.&lt;/p&gt;
+&lt;h3 id=&#34;starting-glassfish-instance&#34;&gt;
+    &lt;a href=&#34;#starting-glassfish-instance&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Starting GlassFish Instance
+&lt;/h3&gt;&lt;p&gt;Use &lt;code&gt;GlassFish.start()&lt;/code&gt; to start the &lt;code&gt;Glassfish&lt;/code&gt; instance. The most critical step is to call &lt;code&gt;AppServerStartup.start()&lt;/code&gt;, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.&lt;/p&gt;
 &lt;p&gt;After &lt;code&gt;AppServerStartup.start()&lt;/code&gt; runs, all services start, and Glassfish completes startup and runs.&lt;/p&gt;
 </description>
         </item>
@@ -167,8 +177,10 @@
     &gt;GlassFish&lt;/a&gt; 的命令行工具，它提供了一系列子命令，使用 &lt;code&gt;asadmin&lt;/code&gt; 可以让你完成 &lt;code&gt;Glassfish&lt;/code&gt; 的所有管理任务。&lt;/p&gt;
 &lt;p&gt;使用 &lt;code&gt;asadmin&lt;/code&gt; 的子命令 &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#start-domain&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;start-domain&lt;/a&gt; 可以启动 &lt;code&gt;GlassFish&lt;/code&gt;。下面将描述 &lt;code&gt;GlassFish&lt;/code&gt;启动过程的主要流程。先从 &lt;code&gt;asadmin&lt;/code&gt; 命令的执行开始。&lt;/p&gt;
-&lt;h2 id=&#34;asadmin-执行流程&#34;&gt;asadmin 执行流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;asadmin&lt;/code&gt; 命令的入口是  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;asadmin-执行流程&#34;&gt;
+    &lt;a href=&#34;#asadmin-%e6%89%a7%e8%a1%8c%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    asadmin 执行流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;asadmin&lt;/code&gt; 命令的入口是  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;org.glassfish.admin.cli.AsadminMain&lt;/a&gt;， 包含在 &lt;code&gt;${AS_INSTALL_LIB}/client/appserver-cli.jar&lt;/code&gt;包中。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AsadminMain&lt;/code&gt; 执行的主要流程如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202307191450899.png&#34;
@@ -225,8 +237,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;下面分析 &lt;code&gt;GlassFish&lt;/code&gt; 主进程的启动流程。&lt;/p&gt;
-&lt;h2 id=&#34;主进程启动流程&#34;&gt;主进程启动流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;GlassFish&lt;/code&gt; 主进程的入口是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;主进程启动流程&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%bb%e8%bf%9b%e7%a8%8b%e5%90%af%e5%8a%a8%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    主进程启动流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;GlassFish&lt;/code&gt; 主进程的入口是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt; 的 &lt;code&gt;main&lt;/code&gt;方法，启动过程的主要流程如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202307210950607.png&#34;
 	
@@ -248,8 +262,10 @@
     &gt;GlassFish&lt;/a&gt; 实例&lt;/li&gt;
 &lt;li&gt;调用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;创建-glassfishruntime&#34;&gt;创建 GlassFishRuntime&lt;/h3&gt;
-&lt;p&gt;创建 &lt;code&gt;GlassFishRuntime&lt;/code&gt; 的主要步骤包括：&lt;/p&gt;
+&lt;h3 id=&#34;创建-glassfishruntime&#34;&gt;
+    &lt;a href=&#34;#%e5%88%9b%e5%bb%ba-glassfishruntime&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    创建 GlassFishRuntime
+&lt;/h3&gt;&lt;p&gt;创建 &lt;code&gt;GlassFishRuntime&lt;/code&gt; 的主要步骤包括：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;创建 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
@@ -287,8 +303,10 @@
     &gt;ModulesRegistry&lt;/a&gt; 是 HK2 的关键组件，HK2 中的 modules 都注册在这里。在 OSGi 环境下，ModulesRegistry 的具体实现类是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;OSGiModulesRegistryImpl&lt;/a&gt;，它会从所有 bundle Jar 的 &lt;code&gt;META-INF/hk2-locator&lt;/code&gt; 目录中查找并注册该 bundle 包含的 HK2 modules。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;ModulesRegistry&lt;/code&gt; 和 &lt;code&gt;HK2Main&lt;/code&gt; 都会注册为 OSGi 的 service。&lt;/p&gt;
-&lt;h3 id=&#34;创建-glassfish-实例&#34;&gt;创建 GlassFish 实例&lt;/h3&gt;
-&lt;p&gt;通过&lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt; 创建出 GlassFish 实例，这个过程主要做了两件事：&lt;/p&gt;
+&lt;h3 id=&#34;创建-glassfish-实例&#34;&gt;
+    &lt;a href=&#34;#%e5%88%9b%e5%bb%ba-glassfish-%e5%ae%9e%e4%be%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    创建 GlassFish 实例
+&lt;/h3&gt;&lt;p&gt;通过&lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt; 创建出 GlassFish 实例，这个过程主要做了两件事：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;创建出 HK2 的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
@@ -303,8 +321,10 @@
 &lt;p&gt;&lt;code&gt;ServiceLocator&lt;/code&gt; 是 HK2 service 的注册表，它提供了一系列获取 HK2 service 的方法。&lt;/p&gt;
 &lt;p&gt;HK2 Module 和 Service 的关系可以看作是容器和内容的关系。Module（容器）包含了一组 Service（内容），并且负责将这些 Service 注册到 &lt;code&gt;ServiceLocator&lt;/code&gt; 中。当一个 Module 被初始化时，它的所有 Service 都会被注册到 &lt;code&gt;ServiceLocator&lt;/code&gt; 中，然后这些 Service 就可以被其他 Service 查找和使用。&lt;/p&gt;
 &lt;p&gt;最后将 &lt;code&gt;AppServerStartup&lt;/code&gt; 和 &lt;code&gt;ServiceLocator&lt;/code&gt; 作为构造函数的参数，创建出 &lt;code&gt;GlassFish&lt;/code&gt; 实例。&lt;/p&gt;
-&lt;h3 id=&#34;启动-glassfish-实例&#34;&gt;启动 Glassfish 实例&lt;/h3&gt;
-&lt;p&gt;使用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例。其中最关键的步骤是调用 &lt;code&gt;AppServerStartup.start()&lt;/code&gt;，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。&lt;/p&gt;
+&lt;h3 id=&#34;启动-glassfish-实例&#34;&gt;
+    &lt;a href=&#34;#%e5%90%af%e5%8a%a8-glassfish-%e5%ae%9e%e4%be%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    启动 Glassfish 实例
+&lt;/h3&gt;&lt;p&gt;使用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例。其中最关键的步骤是调用 &lt;code&gt;AppServerStartup.start()&lt;/code&gt;，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AppServerStartup.start()&lt;/code&gt; 运行完成，所有 service 启动，Glassfish 完成启动并运行。&lt;/p&gt;
 </description>
         </item>

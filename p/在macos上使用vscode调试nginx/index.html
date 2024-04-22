@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='下载Nginx源码 在 nginx: download 选择当前稳定版本下载 1 2 curl -OL https://nginx.org/download/nginx-1.22.1.tar.gz tar -zxvf nginx-1.22.1.tar.gz 下载Nginx依赖 PCRE rewrite 模块依赖 从 sourceforge 下载 pcre-8.45.tar.gz，和Ngi'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 下载Nginx源码 在 nginx: download 选择当前稳定版本下载 1 2 curl -OL https://nginx.org/download/nginx-1.22.1.tar.gz tar -zxvf nginx-1.22.1.tar.gz # 下载Nginx依赖 PCRE rewrite 模块依赖 从 sourceforge 下载 pcre-8.45.tar.gz，和N">
 <title>在macOS上使用VSCode调试NGINX</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E4%BD%BF%E7%94%A8vscode%E8%B0%83%E8%AF%95nginx/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='在macOS上使用VSCode调试NGINX'>
-<meta property='og:description' content='下载Nginx源码 在 nginx: download 选择当前稳定版本下载 1 2 curl -OL https://nginx.org/download/nginx-1.22.1.tar.gz tar -zxvf nginx-1.22.1.tar.gz 下载Nginx依赖 PCRE rewrite 模块依赖 从 sourceforge 下载 pcre-8.45.tar.gz，和Ngi'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="在macOS上使用VSCode调试NGINX">
+<meta property='og:description' content="# 下载Nginx源码 在 nginx: download 选择当前稳定版本下载 1 2 curl -OL https://nginx.org/download/nginx-1.22.1.tar.gz tar -zxvf nginx-1.22.1.tar.gz # 下载Nginx依赖 PCRE rewrite 模块依赖 从 sourceforge 下载 pcre-8.45.tar.gz，和N">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E4%BD%BF%E7%94%A8vscode%E8%B0%83%E8%AF%95nginx/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='nginx' /><meta property='article:published_time' content='2022-11-21T11:18:25&#43;08:00'/><meta property='article:modified_time' content='2022-11-21T11:18:25&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="在macOS上使用VSCode调试NGINX">
-<meta name="twitter:description" content="下载Nginx源码 在 nginx: download 选择当前稳定版本下载 1 2 curl -OL https://nginx.org/download/nginx-1.22.1.tar.gz tar -zxvf nginx-1.22.1.tar.gz 下载Nginx依赖 PCRE rewrite 模块依赖 从 sourceforge 下载 pcre-8.45.tar.gz，和Ngi">
+<meta name="twitter:description" content="# 下载Nginx源码 在 nginx: download 选择当前稳定版本下载 1 2 curl -OL https://nginx.org/download/nginx-1.22.1.tar.gz tar -zxvf nginx-1.22.1.tar.gz # 下载Nginx依赖 PCRE rewrite 模块依赖 从 sourceforge 下载 pcre-8.45.tar.gz，和N">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -447,8 +450,10 @@
     <section class="article-content">
     
     
-    <h2 id="下载nginx源码">下载Nginx源码</h2>
-<p>在 <a class="link" href="https://nginx.org/en/download.html"  target="_blank" rel="noopener"
+    <h2 id="下载nginx源码">
+    <a href="#%e4%b8%8b%e8%bd%bdnginx%e6%ba%90%e7%a0%81" class="header-anchor">#</a>
+    下载Nginx源码
+</h2><p>在 <a class="link" href="https://nginx.org/en/download.html"  target="_blank" rel="noopener"
     >nginx: download</a> 选择当前稳定版本下载</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -460,8 +465,10 @@
 </span></span><span class="line"><span class="cl">tar -zxvf nginx-1.22.1.tar.gz  
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="下载nginx依赖">下载Nginx依赖</h2>
-<ol>
+</div><h2 id="下载nginx依赖">
+    <a href="#%e4%b8%8b%e8%bd%bdnginx%e4%be%9d%e8%b5%96" class="header-anchor">#</a>
+    下载Nginx依赖
+</h2><ol>
 <li><a class="link" href="[http://www.pcre.org]%28https://links.jianshu.com/go?to=http%3A%2F%2Fwww.pcre.org%29" >PCRE</a>  rewrite 模块依赖</li>
 </ol>
 <p>从 <a class="link" href="https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.gz/download"  target="_blank" rel="noopener"
@@ -495,8 +502,10 @@
 </span></span><span class="line"><span class="cl">tar -zxvf openssl-1.1.1s.tar.gz
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="修改默认配置">修改默认配置</h2>
-<p>Nginx默认以 daemon 形式运行，会使用 <a class="link" href="https://stackoverflow.com/questions/881388/what-is-the-reason-for-performing-a-double-fork-when-creating-a-daemon"  target="_blank" rel="noopener"
+</div><h2 id="修改默认配置">
+    <a href="#%e4%bf%ae%e6%94%b9%e9%bb%98%e8%ae%a4%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    修改默认配置
+</h2><p>Nginx默认以 daemon 形式运行，会使用 <a class="link" href="https://stackoverflow.com/questions/881388/what-is-the-reason-for-performing-a-double-fork-when-creating-a-daemon"  target="_blank" rel="noopener"
     >double fork</a> 技巧，调用 <code>fork()</code> 创建子进程并且把父进程直接丢弃，达到将 daemon 进程与会话的控制终端分离的目的。同时，Nginx 默认是多进程架构，有一个 master 父进程和多个 worker 子进程。为了调试方便，可以修改默认配置 <code>conf/nginx.conf</code>，关闭 daemon，并以单进程模式运行：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -508,8 +517,10 @@
 </span></span><span class="line"><span class="cl"><span class="k">master_process</span> <span class="no">off</span><span class="p">;</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="编译选项配置">编译选项配置</h2>
-<p>使用 configure 命令进行相关编译参数配置：</p>
+</div><h2 id="编译选项配置">
+    <a href="#%e7%bc%96%e8%af%91%e9%80%89%e9%a1%b9%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    编译选项配置
+</h2><p>使用 configure 命令进行相关编译参数配置：</p>
 <ul>
 <li><code>--with-debug</code>  启用 <a class="link" href="https://nginx.org/en/docs/debugging_log.html"  target="_blank" rel="noopener"
     >debugging log</a></li>
@@ -535,8 +546,10 @@
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>--with-openssl<span class="o">=</span>../openssl-1.1.1s
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="编译和安装">编译和安装</h2>
-<div class="highlight"><div class="chroma">
+</div><h2 id="编译和安装">
+    <a href="#%e7%bc%96%e8%af%91%e5%92%8c%e5%ae%89%e8%a3%85" class="header-anchor">#</a>
+    编译和安装
+</h2><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
@@ -546,8 +559,10 @@
 </span></span><span class="line"><span class="cl">make install
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="配置vscode">配置VSCode</h2>
-<p>首先参考 <a class="link" href="https://code.visualstudio.com/docs/cpp/config-clang-mac"  target="_blank" rel="noopener"
+</div><h2 id="配置vscode">
+    <a href="#%e9%85%8d%e7%bd%aevscode" class="header-anchor">#</a>
+    配置VSCode
+</h2><p>首先参考 <a class="link" href="https://code.visualstudio.com/docs/cpp/config-clang-mac"  target="_blank" rel="noopener"
     >VSCode 官方文档</a>，完成 VS Code C++ 开发环境的配置。</p>
 <ul>
 <li>确认本机是否已经安装了 Clang 编译器：</li>
@@ -790,8 +805,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

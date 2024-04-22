@@ -12,8 +12,10 @@
         <pubDate>Sat, 17 Sep 2022 16:42:59 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;读写流程&#34;&gt;读写流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Ledger&lt;/code&gt; 的元数据信息保存在zookeeper中。&lt;/p&gt;
+        <description>&lt;h2 id=&#34;读写流程&#34;&gt;
+    &lt;a href=&#34;#%e8%af%bb%e5%86%99%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    读写流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Ledger&lt;/code&gt; 的元数据信息保存在zookeeper中。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101559715.png&#34;
 	
 	
@@ -24,8 +26,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;写入流程&#34;&gt;写入流程&lt;/h3&gt;
-&lt;p&gt;当写入发生时，首先 &lt;code&gt;entry&lt;/code&gt; 被写入一个 &lt;code&gt;journal&lt;/code&gt; 文件。&lt;code&gt;journal&lt;/code&gt; 是一个 &lt;code&gt;write-ahead log&lt;/code&gt;（&lt;code&gt;WAL&lt;/code&gt;），它帮助 BookKeeper 在发生故障时避免数据丢失。这与关系型数据库实现数据持久化的机制相同。&lt;/p&gt;
+&lt;h3 id=&#34;写入流程&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%85%a5%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写入流程
+&lt;/h3&gt;&lt;p&gt;当写入发生时，首先 &lt;code&gt;entry&lt;/code&gt; 被写入一个 &lt;code&gt;journal&lt;/code&gt; 文件。&lt;code&gt;journal&lt;/code&gt; 是一个 &lt;code&gt;write-ahead log&lt;/code&gt;（&lt;code&gt;WAL&lt;/code&gt;），它帮助 BookKeeper 在发生故障时避免数据丢失。这与关系型数据库实现数据持久化的机制相同。&lt;/p&gt;
 &lt;p&gt;同时 &lt;code&gt;entry&lt;/code&gt; 会被加入到 &lt;code&gt;write cache&lt;/code&gt; 中。&lt;code&gt;write cache&lt;/code&gt; 中累积的 &lt;code&gt;entry&lt;/code&gt; 会定期排序，异步刷盘到 &lt;code&gt;entry log&lt;/code&gt; 文件中。同一个 &lt;code&gt;ledger&lt;/code&gt; 的 &lt;code&gt;entry&lt;/code&gt; 排序后会被放在一起，这样有利于提高读取的性能。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;write cache&lt;/code&gt; 中的 &lt;code&gt;entry&lt;/code&gt; 也将被写入 &lt;code&gt;RocksDB&lt;/code&gt;， &lt;code&gt;RocksDB&lt;/code&gt; 记录了每个 &lt;code&gt;entry&lt;/code&gt; 在 &lt;code&gt;entry log&lt;/code&gt; 文件中的位置，是 &lt;code&gt;(ledgerId, entryId)&lt;/code&gt; 到 &lt;code&gt;(entry log file, offset)&lt;/code&gt; 的映射，即可以通过&lt;code&gt;(ledgerId, entryId)&lt;/code&gt;，在 &lt;code&gt;entry log&lt;/code&gt; 文件中定位到 entry。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101601220.png&#34;
@@ -38,10 +42,14 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;读取流程&#34;&gt;读取流程&lt;/h3&gt;
-&lt;p&gt;读取时会首先查看 &lt;code&gt;write cache&lt;/code&gt; ，因为 &lt;code&gt;write cache&lt;/code&gt; 中有最新的 entry。如果 &lt;code&gt;write cache&lt;/code&gt; 中没有，那么接着查看 &lt;code&gt;read cache&lt;/code&gt;。如果 &lt;code&gt;read cache&lt;/code&gt; 中还是没有，那么就通过 &lt;code&gt;(ledgerId, entryId)&lt;/code&gt; 在 &lt;code&gt;RocksDB&lt;/code&gt; 中查找到该 &lt;code&gt;entry&lt;/code&gt; 所在的 &lt;code&gt;entry log&lt;/code&gt; 文件及偏移量，然后从 &lt;code&gt;entry log&lt;/code&gt; 文件中读取该 &lt;code&gt;entry&lt;/code&gt; ，并更新到 &lt;code&gt;read cache&lt;/code&gt; 中，以便后续请求能在 &lt;code&gt;read cache&lt;/code&gt; 中命中。两层缓存让绝大多数的读取通常是从内存获取。&lt;/p&gt;
-&lt;h3 id=&#34;读写隔离&#34;&gt;读写隔离&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101852204.png&#34;
+&lt;h3 id=&#34;读取流程&#34;&gt;
+    &lt;a href=&#34;#%e8%af%bb%e5%8f%96%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    读取流程
+&lt;/h3&gt;&lt;p&gt;读取时会首先查看 &lt;code&gt;write cache&lt;/code&gt; ，因为 &lt;code&gt;write cache&lt;/code&gt; 中有最新的 entry。如果 &lt;code&gt;write cache&lt;/code&gt; 中没有，那么接着查看 &lt;code&gt;read cache&lt;/code&gt;。如果 &lt;code&gt;read cache&lt;/code&gt; 中还是没有，那么就通过 &lt;code&gt;(ledgerId, entryId)&lt;/code&gt; 在 &lt;code&gt;RocksDB&lt;/code&gt; 中查找到该 &lt;code&gt;entry&lt;/code&gt; 所在的 &lt;code&gt;entry log&lt;/code&gt; 文件及偏移量，然后从 &lt;code&gt;entry log&lt;/code&gt; 文件中读取该 &lt;code&gt;entry&lt;/code&gt; ，并更新到 &lt;code&gt;read cache&lt;/code&gt; 中，以便后续请求能在 &lt;code&gt;read cache&lt;/code&gt; 中命中。两层缓存让绝大多数的读取通常是从内存获取。&lt;/p&gt;
+&lt;h3 id=&#34;读写隔离&#34;&gt;
+    &lt;a href=&#34;#%e8%af%bb%e5%86%99%e9%9a%94%e7%a6%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    读写隔离
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101852204.png&#34;
 	
 	
 	
@@ -51,8 +59,10 @@
 	
 	
 &gt; BookKeeper 中的写入都是顺序写入 &lt;code&gt;journal&lt;/code&gt; 文件，该文件可以存储在专用磁盘上，可以获得更大的吞吐量。&lt;code&gt;write cache&lt;/code&gt; 中的 &lt;code&gt;entry&lt;/code&gt; 会异步批量写入 &lt;code&gt;entry log&lt;/code&gt; 文件和 &lt;code&gt;RocksDB&lt;/code&gt;，通常配置在另外一块磁盘。因此，一个磁盘用于同步写入（ &lt;code&gt;journal&lt;/code&gt; 文件），另一个磁盘用于异步优化写入，以及所有的读取。&lt;/p&gt;
-&lt;h2 id=&#34;数据一致性&#34;&gt;数据一致性&lt;/h2&gt;
-&lt;p&gt;Bookie 操作基本都是在客户端完成和实现的，比如副本复制、读写 entry 等操作。这些有助于确保 BookKeeper 的一致性。&lt;/p&gt;
+&lt;h2 id=&#34;数据一致性&#34;&gt;
+    &lt;a href=&#34;#%e6%95%b0%e6%8d%ae%e4%b8%80%e8%87%b4%e6%80%a7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    数据一致性
+&lt;/h2&gt;&lt;p&gt;Bookie 操作基本都是在客户端完成和实现的，比如副本复制、读写 entry 等操作。这些有助于确保 BookKeeper 的一致性。&lt;/p&gt;
 &lt;p&gt;客户端在创建 ledger 时，会出现 Ensemble、Write Quorum 和 Ack Quorum 这些数据指标。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -77,8 +87,10 @@
 	
 &gt; （5,3,2) 代表了对于一个 ledger ，会挑 5 台 bookie 去存储所有的 entry。所以当 entry 0 生成时，可以根据hash模型计算出应该放置到哪台 bookie。比如 E0 对应 B1，B2，B3，那 E1 就对应 B2，B3，B4，以此类推。&lt;/p&gt;
 &lt;p&gt;虽然总体是需要 5 台 bookie，但是每条 entry 只会占用 3 台 bookie 去存放，并只需等待其中的 2 台 bookie 给出应答即可。&lt;/p&gt;
-&lt;h3 id=&#34;lastaddconfirm&#34;&gt;LastAddConfirm&lt;/h3&gt;
-&lt;p&gt;LAC（LastAddConfirm）是由 LAP（LastAddPush） 延伸而来是根据客户端进行维护并发布的最后一条 entry id，从 0 开始递增。所以 LAC 是由应答确认回来的最后一条 entry id 构成，如下图右侧显示。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101850540.png&#34;
+&lt;h3 id=&#34;lastaddconfirm&#34;&gt;
+    &lt;a href=&#34;#lastaddconfirm&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    LastAddConfirm
+&lt;/h3&gt;&lt;p&gt;LAC（LastAddConfirm）是由 LAP（LastAddPush） 延伸而来是根据客户端进行维护并发布的最后一条 entry id，从 0 开始递增。所以 LAC 是由应答确认回来的最后一条 entry id 构成，如下图右侧显示。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101850540.png&#34;
 	
 	
 	
@@ -97,8 +109,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;ensemble-change&#34;&gt;Ensemble change&lt;/h3&gt;
-&lt;p&gt;当其中的某个 bookie 挂掉时，客户端会进行一个 ensemble change 的操作，用新的 bookie 替换挂掉的旧 bookie。比如 当bookie 4 挂掉时，可以使用 bookie 6 进行替换。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101857539.png&#34;
+&lt;h3 id=&#34;ensemble-change&#34;&gt;
+    &lt;a href=&#34;#ensemble-change&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Ensemble change
+&lt;/h3&gt;&lt;p&gt;当其中的某个 bookie 挂掉时，客户端会进行一个 ensemble change 的操作，用新的 bookie 替换挂掉的旧 bookie。比如 当bookie 4 挂掉时，可以使用 bookie 6 进行替换。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101857539.png&#34;
 	
 	
 	
@@ -118,8 +132,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;bookie-fencing&#34;&gt;Bookie Fencing&lt;/h3&gt;
-&lt;p&gt;BookKeeper 有一个极其重要的功能，叫做 &lt;strong&gt;fencing&lt;/strong&gt;。&lt;strong&gt;fencing&lt;/strong&gt; 功能让 BookKeeper 保证只有一个写入者（Pulsar broker）可以写入一个 ledger。&lt;/p&gt;
+&lt;h3 id=&#34;bookie-fencing&#34;&gt;
+    &lt;a href=&#34;#bookie-fencing&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Bookie Fencing
+&lt;/h3&gt;&lt;p&gt;BookKeeper 有一个极其重要的功能，叫做 &lt;strong&gt;fencing&lt;/strong&gt;。&lt;strong&gt;fencing&lt;/strong&gt; 功能让 BookKeeper 保证只有一个写入者（Pulsar broker）可以写入一个 ledger。&lt;/p&gt;
 &lt;p&gt;Broker（B1）挂掉，Broker（B2）接管 B1 上topic X的流程：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
@@ -144,8 +160,10 @@
 &lt;p&gt;整个失效恢复的过程，是没有回头复用 ledger 的。因为复用意味着所有元素都处于相同状态且都同意后才能继续去读写，这个是很难控制的。&lt;/p&gt;
 &lt;p&gt;我们从主从复制方式进行切入，将其定义为物理文件。数据从主复制到从，由于复制过程的速度差异，为了保证所有的一致性，需要做一些「删除/清空类」的操作。但是这个过程中一旦包含覆盖的操作，就会在过程中更改文件状态，容易出现 bug。&lt;/p&gt;
 &lt;p&gt;BookKeeper 在运行的过程中，不是一个物理文件，而是逻辑上的序。同时在失效恢复过程中，没有进行任何的复用，使得数据恢复变得简单又清晰。其次它在整个修复过程中，没有去额外动用 ledger X 的数据。&lt;/p&gt;
-&lt;h2 id=&#34;自动恢复&#34;&gt;自动恢复&lt;/h2&gt;
-&lt;p&gt;当一个 bookie 失败时，这个 bookie 上所有 ledger 的 fragments 都将被复制到其他节点，以确保每个 ledger 的复制系数（Write quorum）得到保证。&lt;/p&gt;
+&lt;h2 id=&#34;自动恢复&#34;&gt;
+    &lt;a href=&#34;#%e8%87%aa%e5%8a%a8%e6%81%a2%e5%a4%8d&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    自动恢复
+&lt;/h2&gt;&lt;p&gt;当一个 bookie 失败时，这个 bookie 上所有 ledger 的 fragments 都将被复制到其他节点，以确保每个 ledger 的复制系数（Write quorum）得到保证。&lt;/p&gt;
 &lt;p&gt;recovery 不是 BookKeeper 复制协议的一部分，而是在 BookKeeper 外部运行，作为一种异步修复机制使用。&lt;/p&gt;
 &lt;p&gt;有两种类型的recovery：手动或自动。&lt;/p&gt;
 &lt;p&gt;自动恢复进程 AutoRecoveryMain 可以在独立的服务器上运行，也可以和bookie跑在一起。其中一个自动恢复进程被选为审核员，然后进行如下操作：&lt;/p&gt;

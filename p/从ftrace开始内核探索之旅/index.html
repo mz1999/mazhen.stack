@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='操作系统内核对应用开发工程师来说就像一个黑盒，似乎很难窥探到其内部的运行机制。其实Linux内核很早就内置了一个强大的tracing工具：F'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="操作系统内核对应用开发工程师来说就像一个黑盒，似乎很难窥探到其内部的运行机制。其实Linux内核很早就内置了一个强大的tracing工具：F">
 <title>从Ftrace开始内核探索之旅</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%BB%8Eftrace%E5%BC%80%E5%A7%8B%E5%86%85%E6%A0%B8%E6%8E%A2%E7%B4%A2%E4%B9%8B%E6%97%85/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='从Ftrace开始内核探索之旅'>
-<meta property='og:description' content='操作系统内核对应用开发工程师来说就像一个黑盒，似乎很难窥探到其内部的运行机制。其实Linux内核很早就内置了一个强大的tracing工具：F'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="从Ftrace开始内核探索之旅">
+<meta property='og:description' content="操作系统内核对应用开发工程师来说就像一个黑盒，似乎很难窥探到其内部的运行机制。其实Linux内核很早就内置了一个强大的tracing工具：F">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%BB%8Eftrace%E5%BC%80%E5%A7%8B%E5%86%85%E6%A0%B8%E6%8E%A2%E7%B4%A2%E4%B9%8B%E6%97%85/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2021-06-21T11:44:02&#43;08:00'/><meta property='article:modified_time' content='2021-06-21T11:44:02&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -452,8 +455,10 @@
     <p>操作系统内核对应用开发工程师来说就像一个黑盒，似乎很难窥探到其内部的运行机制。其实Linux内核很早就内置了一个强大的tracing工具：<a class="link" href="https://www.kernel.org/doc/html/latest/trace/ftrace.html"  target="_blank" rel="noopener"
     >Ftrace</a>，它几乎可以跟踪内核的所有函数，不仅可以用于调试和分析，还可以用于观察学习Linux内核的内部运行。虽然<code>Ftrace</code>在<a class="link" href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=16444a8a40d4c7b4f6de34af0cae1f76a4f6c901"  target="_blank" rel="noopener"
     >2008年就加入了内核</a>，但很多应用开发工程师仍然不知道它的存在。本文就给你介绍一下<code>Ftrace</code>的基本使用。</p>
-<h2 id="ftrace初体验">Ftrace初体验</h2>
-<p>先用一个例子体验一下<code>Ftrace</code>的使用简单，且功能强大。使用 root 用户进入<code>/sys/kernel/debug/tracing</code>目录，执行 <code>echo</code> 和 <code>cat</code> 命令：</p>
+<h2 id="ftrace初体验">
+    <a href="#ftrace%e5%88%9d%e4%bd%93%e9%aa%8c" class="header-anchor">#</a>
+    Ftrace初体验
+</h2><p>先用一个例子体验一下<code>Ftrace</code>的使用简单，且功能强大。使用 root 用户进入<code>/sys/kernel/debug/tracing</code>目录，执行 <code>echo</code> 和 <code>cat</code> 命令：</p>
 <pre><code>
 # <b>echo _do_fork > set_graph_function</b>
 # <b>echo function_graph > current_tracer</b>
@@ -493,8 +498,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>使用 <code>Ftrace</code> 的 <code>function_graph</code> 功能，可以查看内核函数的子函数调用链，帮助我们理解复杂的代码流程，而这只是 <code>Ftrace</code> 的功能之一。这么强大的功能，我们不必安装额外的用户空间工具，只要使用 <code>echo</code> 和 <code>cat</code> 命令访问特定的文件就能实现。<code>Ftrace</code> 对用户的使用接口正是<strong>tracefs</strong>文件系统。</p>
-<h2 id="tracefs-文件系统">tracefs 文件系统</h2>
-<p>用户通过<strong>tracefs</strong>文件系统使用<code>Ftrace</code>，这很符合一切皆文件的Linux哲学。<strong>tracefs</strong>文件系统一般挂载在<code>/sys/kernel/tracing</code>目录。由于<code>Ftrace</code>最初是<code>debugfs</code>文件系统的一部分，后来才被拆分为自己的<code>tracefs</code>。所以如果系统已经挂载了<code>debugfs</code>，那么仍然会保留原来的目录结构，将<code>tracefs</code>挂载到<code>debugfs</code>的子目录下。我们可以使用 <code>mount</code> 命令查看当前系统<code>debugfs</code>和<code>tracefs</code>挂载点：</p>
+<h2 id="tracefs-文件系统">
+    <a href="#tracefs-%e6%96%87%e4%bb%b6%e7%b3%bb%e7%bb%9f" class="header-anchor">#</a>
+    tracefs 文件系统
+</h2><p>用户通过<strong>tracefs</strong>文件系统使用<code>Ftrace</code>，这很符合一切皆文件的Linux哲学。<strong>tracefs</strong>文件系统一般挂载在<code>/sys/kernel/tracing</code>目录。由于<code>Ftrace</code>最初是<code>debugfs</code>文件系统的一部分，后来才被拆分为自己的<code>tracefs</code>。所以如果系统已经挂载了<code>debugfs</code>，那么仍然会保留原来的目录结构，将<code>tracefs</code>挂载到<code>debugfs</code>的子目录下。我们可以使用 <code>mount</code> 命令查看当前系统<code>debugfs</code>和<code>tracefs</code>挂载点：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -533,8 +540,10 @@ kprobe_events               set_graph_notrace       uprobe_events
 kprobe_profile              snapshot                uprobe_profile
 </code></pre>
 <p>本文后面的示例假定你已经处在了<code>/sys/kernel/tracing</code>或<code>/sys/kernel/debug/tracing</code>目录下。</p>
-<h2 id="函数跟踪">函数跟踪</h2>
-<p><code>Ftrace</code> 实际上代表的就是<code>function trace</code>（函数跟踪），因此函数追踪是<code>Ftrace</code>最初的一个主要功能。</p>
+<h2 id="函数跟踪">
+    <a href="#%e5%87%bd%e6%95%b0%e8%b7%9f%e8%b8%aa" class="header-anchor">#</a>
+    函数跟踪
+</h2><p><code>Ftrace</code> 实际上代表的就是<code>function trace</code>（函数跟踪），因此函数追踪是<code>Ftrace</code>最初的一个主要功能。</p>
 <p><code>Ftrace</code> 可以跟踪几乎所有内核函数调用的详细信息，这是怎么做到的呢？简单来说，在编译内核的时候使用了 <code>gcc</code> 的 <code>-pg</code> 选项，编译器会在每个内核函数的入口处调用一个特殊的汇编函数“<strong>mcount</strong>” 或 “<strong>__fentry__</strong>”，如果跟踪功能被打开，<code>mcount/fentry</code> 会调用当前设置的 <code>tracer</code>，<code>tracer</code>将不同的数据写入<strong>ring buffer</strong>。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241145662.png"
 	
@@ -623,8 +632,10 @@ nostacktrace
 <pre><code>
 # <b>echo > set_ftrace_pid</b>
 </code></pre>
-<h2 id="ftrace-function_graph">Ftrace function_graph</h2>
-<p>文章开始例子已经展示过，<code>function_graph</code> 可以打印出函数的调用图，揭示代码的流程。<code>function_graph</code> 不仅跟踪函数的输入，而且跟踪函数的返回，这使得 tracer 能够知道被调用的函数的深度。<code>function_graph</code> 可以让人更容易跟踪内核的执行流程。</p>
+<h2 id="ftrace-function_graph">
+    <a href="#ftrace-function_graph" class="header-anchor">#</a>
+    Ftrace function_graph
+</h2><p>文章开始例子已经展示过，<code>function_graph</code> 可以打印出函数的调用图，揭示代码的流程。<code>function_graph</code> 不仅跟踪函数的输入，而且跟踪函数的返回，这使得 tracer 能够知道被调用的函数的深度。<code>function_graph</code> 可以让人更容易跟踪内核的执行流程。</p>
 <p>我们再看一个例子：</p>
 <pre><code>
 # <b>echo try_to_wake_up > set_graph_function</b>
@@ -663,8 +674,10 @@ nostacktrace
 <li><strong>!</strong> ：延迟大于 100 μs</li>
 <li><strong>+</strong> ：延迟大于 10 μs</li>
 </ul>
-<h2 id="函数profiler">函数Profiler</h2>
-<p>函数Profiler提供了内核函数调用的统计数据，可以观察哪些内核函数正在被使用，并能发现哪些函数的执行耗时最长。</p>
+<h2 id="函数profiler">
+    <a href="#%e5%87%bd%e6%95%b0profiler" class="header-anchor">#</a>
+    函数Profiler
+</h2><p>函数Profiler提供了内核函数调用的统计数据，可以观察哪些内核函数正在被使用，并能发现哪些函数的执行耗时最长。</p>
 <pre><code>
 # echo nop > current_tracer
 # echo 1 > function_profile_enabled
@@ -727,8 +740,10 @@ function0  function1  function2  function3
 </code></pre>
 <p>第一行是每一列的名称，分别是函数名称（Function），调用次数（Hit），函数的总时间（Time）、平均函数时间（Avg）和标准差（s^2）。输出结果显示，<code>tcp_sendmsg()</code> 在3个 CPU 上都是最频繁的，<code>tcp_v4_rcv()</code> 在 CPU2 上被调用了1618次，平均延迟为 <code>17.218 us</code>。</p>
 <p>最后要注意一点，在使用 Ftrace Profiler 时，尽量通过 <code>set_ftrace_filter</code> 限制 profile 的范围，避免对所有的内核函数都进行 profile。</p>
-<h2 id="追踪点-tracepoints">追踪点 Tracepoints</h2>
-<p><strong>Tracepoints</strong>是内核的静态埋点。内核维护者在他认为重要的位置放置静态 tracepoints 记录上下文信息，方便后续排查问题。例如系统调用的开始和结束，中断被触发，网络数据包发送等等。</p>
+<h2 id="追踪点-tracepoints">
+    <a href="#%e8%bf%bd%e8%b8%aa%e7%82%b9-tracepoints" class="header-anchor">#</a>
+    追踪点 Tracepoints
+</h2><p><strong>Tracepoints</strong>是内核的静态埋点。内核维护者在他认为重要的位置放置静态 tracepoints 记录上下文信息，方便后续排查问题。例如系统调用的开始和结束，中断被触发，网络数据包发送等等。</p>
 <p>在Linux的早期，内核维护者就一直想在内核中加入静态 tracepoints，尝试过各种策略。Ftrace 创造了<a class="link" href="https://www.kernel.org/doc/html/latest/trace/events.html"  target="_blank" rel="noopener"
     >Event Tracing</a> 基础设施，让开发者使用 <a class="link" href="https://lwn.net/Articles/379903/"  target="_blank" rel="noopener"
     >TRACE_EVENT() 宏添加内核 tracepoints</a>，不用创建自定义内核模块，使用 <code>Event Tracing</code> 基础设施来注册埋点函数。</p>
@@ -921,8 +936,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 <p><a class="link" href="https://www.kernel.org/doc/html/latest/trace/events.html"  target="_blank" rel="noopener"
     >Event Tracing</a> 基础设施应该是 Ftrace 的另一大贡献，它提供的 <code>TRACE_EVENT</code> 宏统一了内核 tracepoint 的实现方式，为 tracepoint events 提供了基础支持。<a class="link" href="https://perf.wiki.kernel.org/index.php/Main_Page"  target="_blank" rel="noopener"
     >perf</a> 的 tracepoint events 也是基于 Ftrace 实现的。</p>
-<h2 id="利用-tracepoints-理解内核代码">利用 Tracepoints 理解内核代码</h2>
-<p>由于 tracepoints 是内核维护者在流程重要位置设置的埋点，因此我们可以从 tracepoints 入手来学习内核代码。所有的 tracepoints 都定义在 <a class="link" href="https://github.com/torvalds/linux/tree/master/include/trace/events"  target="_blank" rel="noopener"
+<h2 id="利用-tracepoints-理解内核代码">
+    <a href="#%e5%88%a9%e7%94%a8-tracepoints-%e7%90%86%e8%a7%a3%e5%86%85%e6%a0%b8%e4%bb%a3%e7%a0%81" class="header-anchor">#</a>
+    利用 Tracepoints 理解内核代码
+</h2><p>由于 tracepoints 是内核维护者在流程重要位置设置的埋点，因此我们可以从 tracepoints 入手来学习内核代码。所有的 tracepoints 都定义在 <a class="link" href="https://github.com/torvalds/linux/tree/master/include/trace/events"  target="_blank" rel="noopener"
     >include/trace/events/</a> 目录下的头文件中，例如进程调度相关的 tracepoints 定义在 <a class="link" href="https://github.com/torvalds/linux/blob/master/include/trace/events/sched.h"  target="_blank" rel="noopener"
     >include/trace/events/sched.h</a>中，我们以 <a class="link" href="https://github.com/torvalds/linux/blob/bcf876870b95592b52519ed4aafcf9d95999bc9c/include/trace/events/sched.h#L138"  target="_blank" rel="noopener"
     >sched_switch</a> 为例：</p>
@@ -995,8 +1012,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>这样我们就找到了 scheduler 的主流程，可以从这里开始阅读进程调度的源码。</p>
-<h2 id="写在最后">写在最后</h2>
-<p>Ftrace 就包含在内核源码中 <a class="link" href="https://github.com/torvalds/linux/tree/master/kernel/trace"  target="_blank" rel="noopener"
+<h2 id="写在最后">
+    <a href="#%e5%86%99%e5%9c%a8%e6%9c%80%e5%90%8e" class="header-anchor">#</a>
+    写在最后
+</h2><p>Ftrace 就包含在内核源码中 <a class="link" href="https://github.com/torvalds/linux/tree/master/kernel/trace"  target="_blank" rel="noopener"
     >kernel/trace</a>，理解了 Ftrace 内核不再是黑箱，你会有豁然开朗的感觉，内核源码忽然有条理了起来。让我们从 Ftrace 开始内核探索之旅吧。</p>
 
 </section>
@@ -1168,8 +1187,8 @@ btrfs:btrfs_get_extent_show_fi_inline
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

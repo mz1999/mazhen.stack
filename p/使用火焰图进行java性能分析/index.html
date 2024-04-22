@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的网'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的">
 <title>使用火焰图进行Java性能分析</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='使用火焰图进行Java性能分析'>
-<meta property='og:description' content='性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的网'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="使用火焰图进行Java性能分析">
+<meta property='og:description' content="# 性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='performance' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2020-03-23T11:01:58&#43;08:00'/><meta property='article:modified_time' content='2020-03-23T11:01:58&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="使用火焰图进行Java性能分析">
-<meta name="twitter:description" content="性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的网">
+<meta name="twitter:description" content="# 性能分析工具的分类 性能分析的技术和工具可以分为以下几类： Counters 内核维护着各种统计信息，被称为Counters，用于对事件进行计数。例如，接收的">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -479,8 +482,10 @@
     <section class="article-content">
     
     
-    <h2 id="性能分析工具的分类">性能分析工具的分类</h2>
-<p>性能分析的技术和工具可以分为以下几类：</p>
+    <h2 id="性能分析工具的分类">
+    <a href="#%e6%80%a7%e8%83%bd%e5%88%86%e6%9e%90%e5%b7%a5%e5%85%b7%e7%9a%84%e5%88%86%e7%b1%bb" class="header-anchor">#</a>
+    性能分析工具的分类
+</h2><p>性能分析的技术和工具可以分为以下几类：</p>
 <ol>
 <li><strong>Counters</strong></li>
 </ol>
@@ -549,8 +554,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>本文主要讨论如何使用<code>perf</code>和<code>BPF</code>进行<code>CPU Profiling</code>。</p>
-<h2 id="perf">perf</h2>
-<p><strong>perf</strong>最初是使用<code>Linux</code>性能计数器子系统的工具，因此<code>perf</code>开始的名称是<code>Performance Counters for Linux</code>(PCL)。<code>perf</code>在Linux<code>2.6.31</code>合并进内核，位于<a class="link" href="https://github.com/torvalds/linux/tree/master/tools/perf"  target="_blank" rel="noopener"
+<h2 id="perf">
+    <a href="#perf" class="header-anchor">#</a>
+    perf
+</h2><p><strong>perf</strong>最初是使用<code>Linux</code>性能计数器子系统的工具，因此<code>perf</code>开始的名称是<code>Performance Counters for Linux</code>(PCL)。<code>perf</code>在Linux<code>2.6.31</code>合并进内核，位于<a class="link" href="https://github.com/torvalds/linux/tree/master/tools/perf"  target="_blank" rel="noopener"
     >tools/perf</a>目录下。</p>
 <p>随后<code>perf</code>进行了各种增强，增加了<code>tracing</code>、<code>profiling</code>等能力，可用于性能瓶颈的查找和热点代码的定位。</p>
 <p><code>perf</code>是一个面向事件（event-oriented）的性能剖析工具，因此它也被称为<code>Linux perf events (LPE)</code>，或<code>perf_events</code>。</p>
@@ -572,8 +579,10 @@
 </ul>
 <p>内核依赖的硬件，比如说<code>CPU</code>，一般会内置一些性能统计方面的寄存器（<a class="link" href="https://en.wikipedia.org/wiki/Hardware_performance_counter"  target="_blank" rel="noopener"
     >Hardware Performance Counter</a>），通过软件读取这些特殊寄存器里的信息，我们也可以得到很多直接关于硬件的信息。<code>perf</code>最初就是用来监测<code>CPU</code>的性能监控单元（performance monitoring unit, PMU）的。</p>
-<h3 id="perf-events分类">perf Events分类</h3>
-<p><code>perf</code>支持多种性能事件：</p>
+<h3 id="perf-events分类">
+    <a href="#perf-events%e5%88%86%e7%b1%bb" class="header-anchor">#</a>
+    perf Events分类
+</h3><p><code>perf</code>支持多种性能事件：</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241110166.png"
 	
 	
@@ -660,8 +669,10 @@
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="perf的使用">perf的使用</h3>
-<p>如果还没有安装<code>perf</code>，可以使用<code>apt</code>或<code>yum</code>进行安装：</p>
+</div><h3 id="perf的使用">
+    <a href="#perf%e7%9a%84%e4%bd%bf%e7%94%a8" class="header-anchor">#</a>
+    perf的使用
+</h3><p>如果还没有安装<code>perf</code>，可以使用<code>apt</code>或<code>yum</code>进行安装：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -792,8 +803,10 @@
 	
 ></p>
 <p>后面我们会介绍<strong>火焰图</strong>，以可视化的方式展示<code>stack traces</code>，比<code>perf report</code>更加直观。</p>
-<h2 id="bpf">BPF</h2>
-<p><strong>BPF</strong>是<strong>Berkeley Packet Filter</strong>的缩写，最初是为BSD开发，第一个版本于1992年发布，<a class="link" href="https://www.tcpdump.org/papers/bpf-usenix93.pdf"  target="_blank" rel="noopener"
+<h2 id="bpf">
+    <a href="#bpf" class="header-anchor">#</a>
+    BPF
+</h2><p><strong>BPF</strong>是<strong>Berkeley Packet Filter</strong>的缩写，最初是为BSD开发，第一个版本于1992年发布，<a class="link" href="https://www.tcpdump.org/papers/bpf-usenix93.pdf"  target="_blank" rel="noopener"
     >用于改进网络数据包捕获的性能</a>。<code>BPF</code>是在内核级别进行过滤，不必将每个数据包拷贝到用户空间，从而提高了数据包过滤的性能。<code>tcpdump</code>使用的就是<code>BPF</code>。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241113910.png"
 	
@@ -841,8 +854,10 @@
 	
 ></p>
 <p><code>BPF</code>已经内置在Linux内核中，因此你无需再安装任何新的内核组件，就可以在生产环境中使用BPF。</p>
-<h2 id="bcc和bpftrace">BCC和bpftrace</h2>
-<p>直接使用<code>BPF</code>指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了<code>BCC</code>和<code>bpftrace</code>。</p>
+<h2 id="bcc和bpftrace">
+    <a href="#bcc%e5%92%8cbpftrace" class="header-anchor">#</a>
+    BCC和bpftrace
+</h2><p>直接使用<code>BPF</code>指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了<code>BCC</code>和<code>bpftrace</code>。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241116502.png"
 	
 	
@@ -863,8 +878,10 @@
 <li><a class="link" href="https://github.com/iovisor/bpftrace"  target="_blank" rel="noopener"
     >iovisor/bpftrace</a></li>
 </ul>
-<h3 id="bcc的安装">BCC的安装</h3>
-<p><code>BCC</code>可以参考官方的<a class="link" href="https://github.com/iovisor/bcc/blob/master/INSTALL.md"  target="_blank" rel="noopener"
+<h3 id="bcc的安装">
+    <a href="#bcc%e7%9a%84%e5%ae%89%e8%a3%85" class="header-anchor">#</a>
+    BCC的安装
+</h3><p><code>BCC</code>可以参考官方的<a class="link" href="https://github.com/iovisor/bcc/blob/master/INSTALL.md"  target="_blank" rel="noopener"
     >安装文档</a>。以<code>Ubuntu 18.04 LTS</code>为例，建议从源码build安装：</p>
 <ul>
 <li>安装build依赖</li>
@@ -1006,8 +1023,10 @@
 ></p>
 <p><code>off-CPU</code>分析是对<code>on-CPU</code>的补充，让我们知道线程所有的时间花费，更全面的了解程序的运行情况。</p>
 <p>后面会介绍<code>profile</code>，<code>offcputime</code>如何生成火焰图进行可视化分析。</p>
-<h3 id="bpftrace的安装">bpftrace的安装</h3>
-<p><a class="link" href="https://github.com/iovisor/bpftrace"  target="_blank" rel="noopener"
+<h3 id="bpftrace的安装">
+    <a href="#bpftrace%e7%9a%84%e5%ae%89%e8%a3%85" class="header-anchor">#</a>
+    bpftrace的安装
+</h3><p><a class="link" href="https://github.com/iovisor/bpftrace"  target="_blank" rel="noopener"
     >bpftrace</a> 建议运行在Linux 4.9 kernel或更高版本。根据<a class="link" href="https://github.com/iovisor/bpftrace/blob/master/INSTALL.md"  target="_blank" rel="noopener"
     >安装文档</a>的说明，是因为<code>kprobes</code>、<code>uprobes</code>、<code>tracepoints</code>等主要特性是在<code>4.x</code>以上加入内核的：</p>
 <blockquote>
@@ -1116,14 +1135,18 @@
 </div>
 </div><p>关于<code>bpftrace</code>脚本编写不在本文的讨论范围，感兴趣的可以参考<a class="link" href="https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md"  target="_blank" rel="noopener"
     >reference_guide</a>。</p>
-<h2 id="火焰图">火焰图</h2>
-<p><a class="link" href="http://www.brendangregg.com/flamegraphs.html"  target="_blank" rel="noopener"
+<h2 id="火焰图">
+    <a href="#%e7%81%ab%e7%84%b0%e5%9b%be" class="header-anchor">#</a>
+    火焰图
+</h2><p><a class="link" href="http://www.brendangregg.com/flamegraphs.html"  target="_blank" rel="noopener"
     >火焰图</a>是<a class="link" href="http://www.brendangregg.com/"  target="_blank" rel="noopener"
     >Brendan Gregg</a>发明的将<code>stack traces</code>可视化展示的方法。火焰图把时间和空间两个维度上的信息融合在一张图上，将频繁执行的代码路径以可视化的形式，非常直观的展现了出来。</p>
 <p>火焰图可以用于可视化来自任何<code>profiler</code>工具的记录的<code>stack traces</code>信息，除了用来<code>CPU profiling</code>，还适用于<code>off-CPU</code>，<code>page faults</code>等多种场景的分析。本文只讨论 <code>on-CPU</code> 和 <code>off-CPU</code> 火焰图的生成。</p>
 <p>要理解火焰图，先从理解<code>Stack Trace</code>开始。</p>
-<h3 id="stack-trace">Stack Trace</h3>
-<p><code>Stack Trace</code>是程序执行过程中，在特定时间点的函数调用列表。例如，<code>func_a()</code>调用<code>func_b()</code>，<code>func_b()</code>调用<code>func_c()</code>，此时的<code>Stack Trace</code>可写为：</p>
+<h3 id="stack-trace">
+    <a href="#stack-trace" class="header-anchor">#</a>
+    Stack Trace
+</h3><p><code>Stack Trace</code>是程序执行过程中，在特定时间点的函数调用列表。例如，<code>func_a()</code>调用<code>func_b()</code>，<code>func_b()</code>调用<code>func_c()</code>，此时的<code>Stack Trace</code>可写为：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1136,8 +1159,10 @@
 </span></span><span class="line"><span class="cl">func_a
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="profiling-stack-traces">Profiling Stack Traces</h3>
-<p>我们做<code>CPU profiling</code>时，会使用perf或bcc定时采样<code>Stack Trace</code>，这样会收集到非常多的<code>Stack Trace</code>。前面介绍了<code>perf report</code>会将<code>Stack Trace</code>样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？</p>
+</div><h3 id="profiling-stack-traces">
+    <a href="#profiling-stack-traces" class="header-anchor">#</a>
+    Profiling Stack Traces
+</h3><p>我们做<code>CPU profiling</code>时，会使用perf或bcc定时采样<code>Stack Trace</code>，这样会收集到非常多的<code>Stack Trace</code>。前面介绍了<code>perf report</code>会将<code>Stack Trace</code>样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？</p>
 <p>考虑下面的示例，我们用perf定时采样收集了多个<code>Stack Trace</code>，然后将相同的<code>Stack Trace</code>归纳合并，统计出次数：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1174,8 +1199,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到，总共收集了10个样本，其中代码路径<code>func_a-&gt;func_b-&gt;func_c</code>有7次，该路径上的<code>func_c</code>在CPU上运行。 <code>func_a-&gt;func_b</code>进行了两次采样，<code>func_b</code>在CPU上运行。<code>func_a-&gt;func_b-&gt;func_d-&gt;func_e</code>一次采样，<code>func_e</code>在CPU上运行。</p>
-<h3 id="火焰图-1">火焰图</h3>
-<p>根据前面对<code>Stack Trace</code>的统计信息，可以绘制出如下的火焰图：</p>
+<h3 id="火焰图-1">
+    <a href="#%e7%81%ab%e7%84%b0%e5%9b%be-1" class="header-anchor">#</a>
+    火焰图
+</h3><p>根据前面对<code>Stack Trace</code>的统计信息，可以绘制出如下的火焰图：</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241117302.png"
 	
 	
@@ -1205,8 +1232,10 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/brendangregg/FlameGraph.git
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="java-cpu-profiling">Java CPU Profiling</h2>
-<p>虽然有很多Java专用的<code>profiler</code>工具，但这些工具一般只能看到Java方法的执行，缺少了<code>GC</code>，<code>JVM</code>的CPU时间消耗，并且有些工具的<code>Method tracing</code>性能损耗比较大。</p>
+</div><h2 id="java-cpu-profiling">
+    <a href="#java-cpu-profiling" class="header-anchor">#</a>
+    Java CPU Profiling
+</h2><p>虽然有很多Java专用的<code>profiler</code>工具，但这些工具一般只能看到Java方法的执行，缺少了<code>GC</code>，<code>JVM</code>的CPU时间消耗，并且有些工具的<code>Method tracing</code>性能损耗比较大。</p>
 <p><code>perf</code>和<code>BCC profile</code>的优点是它很高效，在内核上下文中对堆栈进行计数，并能完整显示用户态和内核态的CPU使用，能看到native libraries（例如libc），JVM（libjvm），Java方法和内核中花费的时间。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209241118729.png"
 	
@@ -1232,8 +1261,10 @@
     >AsyncGetCallTrace</a>结合了起来，同样能够获得mixed-mode火焰图。同时，此方法不需要启用帧指针，所以不用加上<code>-XX:+PreserveFramePointer</code>参数。</li>
 </ul>
 <p>下面我们就分别演示这两种方式。</p>
-<h3 id="perf-map-agent">perf-map-agent</h3>
-<p><code>perf</code>期望能从<code>/tmp/perf-&lt;pid&gt;.map</code>中获得在未知内存区域执行的代码的符号表。<code>perf-map-agent</code>可以为<code>JIT</code>编译的方法生成<code>/tmp/perf-&lt;pid&gt;.map</code>文件，以满足<code>perf</code>的要求。</p>
+<h3 id="perf-map-agent">
+    <a href="#perf-map-agent" class="header-anchor">#</a>
+    perf-map-agent
+</h3><p><code>perf</code>期望能从<code>/tmp/perf-&lt;pid&gt;.map</code>中获得在未知内存区域执行的代码的符号表。<code>perf-map-agent</code>可以为<code>JIT</code>编译的方法生成<code>/tmp/perf-&lt;pid&gt;.map</code>文件，以满足<code>perf</code>的要求。</p>
 <p>首先下载并编译<code>perf-map-agent</code>：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1249,8 +1280,10 @@
 </span></span><span class="line"><span class="cl"><span class="n">make</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="配合perf使用">配合<code>perf</code>使用</h4>
-<p><code>perf-map-agent</code>提供了<a class="link" href="https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames"  target="_blank" rel="noopener"
+</div><h4 id="配合perf使用">
+    <a href="#%e9%85%8d%e5%90%88perf%e4%bd%bf%e7%94%a8" class="header-anchor">#</a>
+    配合<code>perf</code>使用
+</h4><p><code>perf-map-agent</code>提供了<a class="link" href="https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames"  target="_blank" rel="noopener"
     >perf-java-flames</a>脚本，可以一步生成火焰图。</p>
 <p><code>perf-java-flames</code>接收<code>perf record</code>命令参数，它会调用<code>perf</code>进行采样，然后使用<a class="link" href="https://github.com/brendangregg/FlameGraph"  target="_blank" rel="noopener"
     >FlameGraph</a>生成火焰图，一步完成，非常方便。</p>
@@ -1305,8 +1338,10 @@
 </span></span><span class="line"><span class="cl">sudo perf report --stdio
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="配合bcc-profile使用">配合<code>bcc profile</code>使用</h4>
-<p><code>FlameGraph</code>项目提供了<a class="link" href="https://github.com/brendangregg/FlameGraph/blob/master/jmaps"  target="_blank" rel="noopener"
+</div><h4 id="配合bcc-profile使用">
+    <a href="#%e9%85%8d%e5%90%88bcc-profile%e4%bd%bf%e7%94%a8" class="header-anchor">#</a>
+    配合<code>bcc profile</code>使用
+</h4><p><code>FlameGraph</code>项目提供了<a class="link" href="https://github.com/brendangregg/FlameGraph/blob/master/jmaps"  target="_blank" rel="noopener"
     >jmaps</a>脚本，它会调用<code>perf-map-agent</code>为当前运行的所有Java进程生成符号表。</p>
 <p>首先为<code>jmaps</code>脚本设置好<code>JAVA_HOME</code>和<code>perf-map-agent</code>的正确位置：</p>
 <div class="highlight"><div class="chroma">
@@ -1424,8 +1459,10 @@
 </span></span><span class="line"><span class="cl"><span class="o">./</span><span class="n">flamegraph</span><span class="o">.</span><span class="n">pl</span> <span class="o">--</span><span class="n">color</span><span class="o">=</span><span class="n">io</span> <span class="o">--</span><span class="n">countname</span><span class="o">=</span><span class="n">ms</span> <span class="o">&lt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">txt</span> <span class="o">&gt;</span> <span class="n">out</span><span class="o">.</span><span class="n">offcpu01</span><span class="o">.</span><span class="n">svg</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="async-profiler">async-profiler</h3>
-<p><a class="link" href="https://github.com/jvm-profiling-tools/async-profiler"  target="_blank" rel="noopener"
+</div><h3 id="async-profiler">
+    <a href="#async-profiler" class="header-anchor">#</a>
+    async-profiler
+</h3><p><a class="link" href="https://github.com/jvm-profiling-tools/async-profiler"  target="_blank" rel="noopener"
     >async-profiler</a>将<code>perf</code>的堆栈追踪和JDK提供的<a class="link" href="http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html"  target="_blank" rel="noopener"
     >AsyncGetCallTrace</a>结合了起来，做到同时采样Java栈与Native栈，因此也就可以同时分析Java代码和Native代码中存在的性能热点。</p>
 <p><code>AsyncGetCallTrace</code>是JDK内部提供的一个函数，它的原型如下：</p>
@@ -1464,8 +1501,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看出，该函数直接通过<code>ucontext</code>就能获取到完整的Java调用栈。</p>
-<h4 id="async-profiler的使用">async-profiler的使用</h4>
-<p>下载并解压好<code>async-profiler</code>安装包。</p>
+<h4 id="async-profiler的使用">
+    <a href="#async-profiler%e7%9a%84%e4%bd%bf%e7%94%a8" class="header-anchor">#</a>
+    async-profiler的使用
+</h4><p>下载并解压好<code>async-profiler</code>安装包。</p>
 <p>从Linux 4.6开始，从<code>non-root</code>进程使用<code>perf</code>捕获内核的<code>call stacks</code>，需要设置如下两个内核参数：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1496,8 +1535,10 @@
 	
 	
 ></p>
-<h2 id="总结">总结</h2>
-<p>为Java生成<code>CPU profiling</code>火焰图，基本的流程都是：</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>为Java生成<code>CPU profiling</code>火焰图，基本的流程都是：</p>
 <ol>
 <li>使用工具采集样本</li>
 <li>使用<code>FlameGraph</code>项目提供的脚本，将采集的样本归纳合并，统计出<code>Stack Trace</code>出现的频率</li>
@@ -1509,8 +1550,10 @@
 <li><code>async-profiler</code>（内部会使用到<code>perf</code>）</li>
 </ol>
 <p>如果只是对Java进程做<code>on-CPU</code>分析，<code>async-profiler</code>更加方便好用。如果需要更全面的了解Java进程的运行情况，例如分析系统锁的开销，阻塞的 I/O 操作，以及进程调度器（<code>scheduler</code>）的工作，那么还是需要使用功能更强大的<code>perf</code>和<code>bcc</code>。</p>
-<h2 id="参考资料">参考资料</h2>
-<ul>
+<h2 id="参考资料">
+    <a href="#%e5%8f%82%e8%80%83%e8%b5%84%e6%96%99" class="header-anchor">#</a>
+    参考资料
+</h2><ul>
 <li><a class="link" href="http://www.brendangregg.com/perf.html"  target="_blank" rel="noopener"
     >perf Examples</a></li>
 <li><a class="link" href="http://www.brendangregg.com/ebpf.html"  target="_blank" rel="noopener"
@@ -1694,8 +1737,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

@@ -1,28 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish.
-The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command.
-asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.
-The main process of AsadminMain execution is as follows:'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish. The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command. # asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.">
 <title>GlassFish Startup Process</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/glassfish-startup-process/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='GlassFish Startup Process'>
-<meta property='og:description' content='asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish.
-The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command.
-asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.
-The main process of AsadminMain execution is as follows:'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="GlassFish Startup Process">
+<meta property='og:description' content="asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish. The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command. # asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.">
 <meta property='og:url' content='https://mazhen.tech/p/glassfish-startup-process/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='glassfish' /><meta property='article:published_time' content='2023-07-21T16:48:55&#43;08:00'/><meta property='article:modified_time' content='2023-07-21T16:48:55&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="GlassFish Startup Process">
-<meta name="twitter:description" content="asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish.
-The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command.
-asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.
-The main process of AsadminMain execution is as follows:">
+<meta name="twitter:description" content="asadmin is a command-line tool for GlassFish , which provides a series of subcommands. Using asadmin, you can complete all management tasks of GlassFish. The subcommand start-domain of asadmin can start GlassFish. The following will describe the main process of GlassFish startup, starting from the execution of the asadmin command. # asadmin Execution Process The entry point of the asadmin command is org.glassfish.admin.cli.AsadminMain, which is included in the ${AS_INSTALL_LIB}/client/appserver-cli.jar package.">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -104,7 +95,7 @@ The main process of AsadminMain execution is as follows:">
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -300,10 +291,11 @@ The main process of AsadminMain execution is as follows:">
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -314,19 +306,20 @@ The main process of AsadminMain execution is as follows:">
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -334,7 +327,7 @@ The main process of AsadminMain execution is as follows:">
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -342,10 +335,11 @@ The main process of AsadminMain execution is as follows:">
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -463,8 +457,10 @@ The main process of AsadminMain execution is as follows:">
     >GlassFish</a> , which provides a series of subcommands. Using <code>asadmin</code>, you can complete all management tasks of <code>GlassFish</code>.</p>
 <p>The subcommand <a class="link" href="https://glassfish.org/docs/latest/reference-manual.html#start-domain"  target="_blank" rel="noopener"
     >start-domain</a> of <code>asadmin</code> can start <code>GlassFish</code>. The following will describe the main process of <code>GlassFish</code> startup, starting from the execution of the <code>asadmin</code> command.</p>
-<h2 id="asadmin-execution-process">asadmin Execution Process</h2>
-<p>The entry point of the <code>asadmin</code> command is  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java"  target="_blank" rel="noopener"
+<h2 id="asadmin-execution-process">
+    <a href="#asadmin-execution-process" class="header-anchor">#</a>
+    asadmin Execution Process
+</h2><p>The entry point of the <code>asadmin</code> command is  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java"  target="_blank" rel="noopener"
     >org.glassfish.admin.cli.AsadminMain</a>, which is included in the <code>${AS_INSTALL_LIB}/client/appserver-cli.jar</code> package.</p>
 <p>The main process of <code>AsadminMain</code> execution is as follows:</p>
 <p><img src="https://raw.githubusercontent.com/mz1999/material/master/images/202307211620151.png"
@@ -521,8 +517,10 @@ The main process of AsadminMain execution is as follows:">
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>Next, we analyze the startup process of the <code>GlassFish</code> main process.</p>
-<h2 id="main-process-startup-process">Main Process Startup Process</h2>
-<p>The entry point of the <code>GlassFish</code> main process is the <code>main</code> method of  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
+<h2 id="main-process-startup-process">
+    <a href="#main-process-startup-process" class="header-anchor">#</a>
+    Main Process Startup Process
+</h2><p>The entry point of the <code>GlassFish</code> main process is the <code>main</code> method of  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
     >com.sun.enterprise.glassfish.bootstrap.ASMain</a> , and the main process of the startup process is as follows:</p>
 <p><img src="https://raw.githubusercontent.com/mz1999/material/master/images/202307211631595.png"
 	
@@ -544,8 +542,10 @@ The main process of AsadminMain execution is as follows:">
     >GlassFishRuntime</a></li>
 <li>Start the <code>Glassfish</code> instance by calling <code>GlassFish.start()</code></li>
 </ol>
-<h3 id="creating-glassfishruntime">Creating GlassFishRuntime</h3>
-<p>The main steps to create <code>GlassFishRuntime</code> include:</p>
+<h3 id="creating-glassfishruntime">
+    <a href="#creating-glassfishruntime" class="header-anchor">#</a>
+    Creating GlassFishRuntime
+</h3><p>The main steps to create <code>GlassFishRuntime</code> include:</p>
 <ol>
 <li>Create <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java"  target="_blank" rel="noopener"
     >RuntimeBuilder</a></li>
@@ -581,8 +581,10 @@ The main process of AsadminMain execution is as follows:">
     >ModulesRegistry</a> is a key component of HK2. All modules in HK2 are registered here. In the OSGi environment, the specific implementation class of <code>ModulesRegistry</code> is  <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java"  target="_blank" rel="noopener"
     >OSGiModulesRegistryImpl</a>, which will find and register the HK2 modules contained in the <code>META-INF/hk2-locator</code> directory of all bundle Jars.</p>
 <p><code>ModulesRegistry</code> and <code>HK2Main</code> will be registered as OSGi&rsquo;s service.</p>
-<h3 id="creating-glassfish-instance">Creating GlassFish Instance</h3>
-<p>Create a GlassFish instance through <code>GlassFishRuntime.newGlassFish()</code>. This process mainly does two things:</p>
+<h3 id="creating-glassfish-instance">
+    <a href="#creating-glassfish-instance" class="header-anchor">#</a>
+    Creating GlassFish Instance
+</h3><p>Create a GlassFish instance through <code>GlassFishRuntime.newGlassFish()</code>. This process mainly does two things:</p>
 <ol>
 <li>Create HK2&rsquo;s <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java"  target="_blank" rel="noopener"
     >ServiceLocator</a></li>
@@ -597,8 +599,10 @@ The main process of AsadminMain execution is as follows:">
 <p><code>ServiceLocator</code> is the registry of HK2 services, which provides a series of methods to get HK2 service.</p>
 <p>The relationship between HK2 <code>Module</code> and <code>Service</code> can be regarded as the relationship between container and content. <code>Module</code> (container) contains a group of <code>Service</code> (content) and is responsible for registering these Services in <code>ServiceLocator</code>. When a <code>Module</code> is initialized, all its Services will be registered in <code>ServiceLocator</code>, and then these Services can be found and used by other Services.</p>
 <p>Finally, create a GlassFish instance with <code>AppServerStartup</code> and <code>ServiceLocator</code> as the parameters of the constructor.</p>
-<h3 id="starting-glassfish-instance">Starting GlassFish Instance</h3>
-<p>Use <code>GlassFish.start()</code> to start the <code>Glassfish</code> instance. The most critical step is to call <code>AppServerStartup.start()</code>, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.</p>
+<h3 id="starting-glassfish-instance">
+    <a href="#starting-glassfish-instance" class="header-anchor">#</a>
+    Starting GlassFish Instance
+</h3><p>Use <code>GlassFish.start()</code> to start the <code>Glassfish</code> instance. The most critical step is to call <code>AppServerStartup.start()</code>, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.</p>
 <p>After <code>AppServerStartup.start()</code> runs, all services start, and Glassfish completes startup and runs.</p>
 
 </section>
@@ -770,8 +774,8 @@ The main process of AsadminMain execution is as follows:">
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

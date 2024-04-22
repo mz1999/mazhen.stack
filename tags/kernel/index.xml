@@ -22,8 +22,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;perf-是什么&#34;&gt;perf 是什么&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;perf-是什么&#34;&gt;
+    &lt;a href=&#34;#perf-%e6%98%af%e4%bb%80%e4%b9%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf 是什么
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf&lt;/a&gt; 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;perf&lt;/strong&gt; 命令，用户空间的应用程序&lt;/li&gt;
@@ -50,8 +52,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;perf-事件源&#34;&gt;perf 事件源&lt;/h2&gt;
-&lt;p&gt;perf 支持来自硬件和软件方面的各种事件。硬件事件来自芯片组中的硬件性能计数器（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hardware_performance_counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;perf-事件源&#34;&gt;
+    &lt;a href=&#34;#perf-%e4%ba%8b%e4%bb%b6%e6%ba%90&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf 事件源
+&lt;/h2&gt;&lt;p&gt;perf 支持来自硬件和软件方面的各种事件。硬件事件来自芯片组中的硬件性能计数器（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hardware_performance_counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;hardware performance counters&lt;/a&gt;），而软件事件则由&lt;a class=&#34;link&#34; href=&#34;https://docs.kernel.org/trace/events.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;tracepoints&lt;/a&gt;、&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/trace/kprobes.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;kprobe&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://docs.kernel.org/trace/uprobetracer.html?highlight=uprobe&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -133,8 +137,10 @@
     &gt;TRACE_EVENT&lt;/a&gt; 宏定义。TRACE_EVENT 自动生成静态追踪代码，定义并格式化其参数，并将跟踪事件放入 tracefs （/sys/kernel/debug/tracing）和 &lt;a class=&#34;link&#34; href=&#34;https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf_event_open&lt;/a&gt; 接口。&lt;/p&gt;
 &lt;p&gt;与其他性能分析工具相比，perf 特别适合 CPU 分析，它能对运行在 CPU 上代码调用栈（stack traces）进行采样，以确定程序在 CPU 上的运行情况，识别和优化代码中的热点。这种 CPU Profiling 能力是基于硬件计数器 (performance monitoring counters，PMC) 实现的，而 PMC 被内核子系统 &lt;code&gt;perf_events&lt;/code&gt;  包装成了 &lt;strong&gt;Hardware Event&lt;/strong&gt;，下面重点介绍。&lt;/p&gt;
-&lt;h2 id=&#34;hardware-event&#34;&gt;Hardware Event&lt;/h2&gt;
-&lt;p&gt;CPU 和其他硬件设备通常提供用于观测性能数据的 PMC。简单来说，&lt;strong&gt;PMC&lt;/strong&gt; 就是 CPU 上的&lt;strong&gt;可编程寄存器&lt;/strong&gt;，可通过编程对特定硬件事件进行计数。通过 PMC 可以监控和计算 CPU 内部各种事件，比如 CPU 指令的执行效率、CPU caches 的命中率、分支预测的成功率等 micro-architectural 级的性能信息。利用这些数据分析性能，可以实现各种性能优化。&lt;/p&gt;
+&lt;h2 id=&#34;hardware-event&#34;&gt;
+    &lt;a href=&#34;#hardware-event&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Hardware Event
+&lt;/h2&gt;&lt;p&gt;CPU 和其他硬件设备通常提供用于观测性能数据的 PMC。简单来说，&lt;strong&gt;PMC&lt;/strong&gt; 就是 CPU 上的&lt;strong&gt;可编程寄存器&lt;/strong&gt;，可通过编程对特定硬件事件进行计数。通过 PMC 可以监控和计算 CPU 内部各种事件，比如 CPU 指令的执行效率、CPU caches 的命中率、分支预测的成功率等 micro-architectural 级的性能信息。利用这些数据分析性能，可以实现各种性能优化。&lt;/p&gt;
 &lt;p&gt;perf 命令通过 &lt;a class=&#34;link&#34; href=&#34;https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf_event_open(2)&lt;/a&gt; 系统调用访问 PMC，配置想要捕获的硬件事件。PMC 可以在两种模式下使用：&lt;/p&gt;
 &lt;ul&gt;
@@ -263,8 +269,10 @@
 &lt;/div&gt;&lt;p&gt;对于 Intel CPU，&lt;code&gt;instructions&lt;/code&gt; 事件的原始事件代码为 &lt;code&gt;r00c0&lt;/code&gt;，两者可以等价使用。&lt;/p&gt;
 &lt;p&gt;对于大部分通用事件，我们不需要记住这些原始事件代码，perf 都提供了可读的映射。但在某些情况下，例如最新 CPU 增加的事件还没有在 perf 中添加映射，或者某种 CPU 的特定事件不会通过可读的名称暴露出来，这时就只能通过指定原始硬件事件代码来监控事件。&lt;/p&gt;
 &lt;p&gt;简单了解了 PMC 后，我们来看如何基于 PMC 事件进行 CPU Profiling。&lt;/p&gt;
-&lt;h2 id=&#34;cpu-profiling&#34;&gt;CPU Profiling&lt;/h2&gt;
-&lt;p&gt;perf 是事件驱动的方式工作，通过 &lt;strong&gt;-e&lt;/strong&gt; 参数指定想要收集的特定事件，例如：&lt;/p&gt;
+&lt;h2 id=&#34;cpu-profiling&#34;&gt;
+    &lt;a href=&#34;#cpu-profiling&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    CPU Profiling
+&lt;/h2&gt;&lt;p&gt;perf 是事件驱动的方式工作，通过 &lt;strong&gt;-e&lt;/strong&gt; 参数指定想要收集的特定事件，例如：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -292,8 +300,10 @@
 &lt;/ol&gt;
 &lt;p&gt;前四个事件都是 PMC 提供的 CPU &lt;strong&gt;cycles&lt;/strong&gt; 事件，区别在于精确度不同，从最精确（&lt;code&gt;ppp&lt;/code&gt;）到无精确设置（没有 &lt;code&gt;p&lt;/code&gt;），最精确的事件优先被选择。&lt;strong&gt;cpu-clock&lt;/strong&gt; 是基于软件的 CPU 频率采样，在没有硬件 &lt;strong&gt;cycles&lt;/strong&gt; 事件可用时，会选择使用 &lt;strong&gt;cpu-clock&lt;/strong&gt; 软件事件。&lt;/p&gt;
 &lt;p&gt;那么什么是CPU &lt;strong&gt;cycles&lt;/strong&gt; 事件，为什么对 &lt;strong&gt;cycles&lt;/strong&gt; 事件进行采样可以分析 CPU 的性能？&lt;/p&gt;
-&lt;h3 id=&#34;cycles-事件&#34;&gt;cycles 事件&lt;/h3&gt;
-&lt;p&gt;首先介绍一个关于 CPU 性能的重要概念，&lt;strong&gt;Clock Rate&lt;/strong&gt;（时钟频率）。Clock（时钟）是驱动 CPU 的数字信号，CPU 以特定的时钟频率执行，例如 4 GHz的 CPU 每秒可执行40亿个 cycles（周期）。&lt;/p&gt;
+&lt;h3 id=&#34;cycles-事件&#34;&gt;
+    &lt;a href=&#34;#cycles-%e4%ba%8b%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    cycles 事件
+&lt;/h3&gt;&lt;p&gt;首先介绍一个关于 CPU 性能的重要概念，&lt;strong&gt;Clock Rate&lt;/strong&gt;（时钟频率）。Clock（时钟）是驱动 CPU 的数字信号，CPU 以特定的时钟频率执行，例如 4 GHz的 CPU 每秒可执行40亿个 cycles（周期）。&lt;/p&gt;
 &lt;p&gt;CPU &lt;strong&gt;cycles （周期）&lt;strong&gt;是 CPU 执行指令的时间单位，而&lt;/strong&gt;时钟频率&lt;/strong&gt;表示 CPU 每秒执行的 CPU 周期数。每个 CPU 指令执行可能需要一个或多个 CPU 周期。 通常情况下，更高的时钟频率意味着更快的CPU，因为它允许 CPU 在单位时间内执行更多的指令。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202311091031747.jpg&#34;
 	
@@ -307,8 +317,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;每经过一个 CPU 周期都会触发一个 &lt;strong&gt;cycles&lt;/strong&gt; 事件。可以认为，&lt;strong&gt;cycles&lt;/strong&gt; 事件是均匀的分布在程序的执行期间。这样，以固定频率去采样的 &lt;strong&gt;cycles&lt;/strong&gt; 事件，也是均匀的分布在程序的执行期间。我们在采样 &lt;strong&gt;cycles&lt;/strong&gt; 事件时，记录 CPU 正在干什么，持续一段时间收集到多个采样后，我们就能基于这些信息分析程序的行为，多次出现的同样动作，可以认为是程序的热点，成为下一步分析重点关注的方面。&lt;/p&gt;
 &lt;p&gt;因为 &lt;strong&gt;cycles&lt;/strong&gt; 事件的均匀分布，通过以固定频率采样 &lt;strong&gt;cycles&lt;/strong&gt; 事件获得的信息，我们就能进行 CPU 性能分析。那么如何指定采样频率呢？&lt;/p&gt;
-&lt;h3 id=&#34;设置采样频率&#34;&gt;设置采样频率&lt;/h3&gt;
-&lt;p&gt;在使用 perf record 记录 PMC 事件时，会使用一个默认的采样频率，不是每个事件都会被记录。例如记录 cycles 事件：&lt;/p&gt;
+&lt;h3 id=&#34;设置采样频率&#34;&gt;
+    &lt;a href=&#34;#%e8%ae%be%e7%bd%ae%e9%87%87%e6%a0%b7%e9%a2%91%e7%8e%87&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    设置采样频率
+&lt;/h3&gt;&lt;p&gt;在使用 perf record 记录 PMC 事件时，会使用一个默认的采样频率，不是每个事件都会被记录。例如记录 cycles 事件：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -379,10 +391,14 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;在这个示例中，&lt;strong&gt;-c&lt;/strong&gt; 选项设置采样周期为 1000，即每隔 1000 次事件进行一次采样。&lt;/p&gt;
 &lt;p&gt;现在我们知道了如何以固定的频率对 cycles 事件进行采样，那么如何获知在采样时，CPU 正在干什么呢？&lt;/p&gt;
-&lt;h2 id=&#34;背景知识&#34;&gt;背景知识&lt;/h2&gt;
-&lt;p&gt;要知道  cycles 事件发生时 CPU 正在干什么，我们需要了解一些硬件知识，以及内核与硬件是如何配合工作的。先看看 CPU 是如何执行指令的。&lt;/p&gt;
-&lt;h3 id=&#34;cpu-执行指令&#34;&gt;CPU 执行指令&lt;/h3&gt;
-&lt;p&gt;CPU 内部有多种不同功能的寄存器，涉及到指令执行的，有三个重要的寄存器：&lt;/p&gt;
+&lt;h2 id=&#34;背景知识&#34;&gt;
+    &lt;a href=&#34;#%e8%83%8c%e6%99%af%e7%9f%a5%e8%af%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    背景知识
+&lt;/h2&gt;&lt;p&gt;要知道  cycles 事件发生时 CPU 正在干什么，我们需要了解一些硬件知识，以及内核与硬件是如何配合工作的。先看看 CPU 是如何执行指令的。&lt;/p&gt;
+&lt;h3 id=&#34;cpu-执行指令&#34;&gt;
+    &lt;a href=&#34;#cpu-%e6%89%a7%e8%a1%8c%e6%8c%87%e4%bb%a4&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    CPU 执行指令
+&lt;/h3&gt;&lt;p&gt;CPU 内部有多种不同功能的寄存器，涉及到指令执行的，有三个重要的寄存器：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;PC 寄存器（&lt;strong&gt;PC&lt;/strong&gt;，Program Counter），存放下一条指令的内存地址&lt;/li&gt;
 &lt;li&gt;指令寄存器（&lt;strong&gt;IR&lt;/strong&gt;，Instruction Register），存放当前正在执行的指令&lt;/li&gt;
@@ -405,8 +421,10 @@
 &lt;p&gt;在编译程序时，可以让编译器生成一个映射，将源代码行与生成的机器指令关联起来，这个映射通常存储在 &lt;a class=&#34;link&#34; href=&#34;https://dwarfstd.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;DWARF 格式（Debugging With Attributed Record Formats）&lt;/a&gt;的调试信息中。同时编译时会生成&lt;strong&gt;符号表（Symbol Table）&lt;/strong&gt;，其中包含了程序中各种符号（如函数名、变量名）及其地址的映射。perf 借助调试信息和符号表（symbol table），可以将采样时寄存器中的指令地址转换为对应的函数名、源代码行号等信息。&lt;/p&gt;
 &lt;p&gt;知道了 CPU 当时的“动作”还不够，我们还需要知道 CPU 是怎么做这个“动作”的，也就是代码的执行路径。下面介绍函数调用栈的相关概念。&lt;/p&gt;
-&lt;h3 id=&#34;还原函数调用栈&#34;&gt;还原函数调用栈&lt;/h3&gt;
-&lt;p&gt;函数是软件中的一个关键抽象概念，它让开发者将具有特定功能的代码打包，然后这个功能可以在程序的多个位置被调用。&lt;/p&gt;
+&lt;h3 id=&#34;还原函数调用栈&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%98%e5%8e%9f%e5%87%bd%e6%95%b0%e8%b0%83%e7%94%a8%e6%a0%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    还原函数调用栈
+&lt;/h3&gt;&lt;p&gt;函数是软件中的一个关键抽象概念，它让开发者将具有特定功能的代码打包，然后这个功能可以在程序的多个位置被调用。&lt;/p&gt;
 &lt;p&gt;假设函数 P 调用函数 Q，然后 Q 执行并返回结果给 P，这个过程涉及到以下机制：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;传递控制&lt;/strong&gt;：在进入函数 Q 时，&lt;strong&gt;PC&lt;/strong&gt; 寄存器设置为 Q 的起始地址；在从 Q 返回时，&lt;strong&gt;PC&lt;/strong&gt; 寄存器设置为 P 中调用 Q 后的下一条指令处。&lt;/li&gt;
@@ -460,8 +478,10 @@
 &lt;p&gt;本文就不详细讨论其他两种还原调用栈的方法，感兴趣的可以参考&lt;a class=&#34;link&#34; href=&#34;https://www.brendangregg.com/bpf-performance-tools-book.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《BPF Performance Tools》&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;在 Linux 上，进程的执行分为了用户态和内核态，要知道完整的代码执行路径，就需要分别还原用户栈和内核栈。什么是用户态和内核态呢？&lt;/p&gt;
-&lt;h3 id=&#34;用户态和内核态&#34;&gt;用户态和内核态&lt;/h3&gt;
-&lt;p&gt;操作系统需要能够限制对关键系统资源的访问，提供对资源不同级别的访问权限，这样可以保护系统免受错误和恶意行为的侵害。这种访问权限由 CPU 在硬件级别上实现，例如 x86 架构定义了特权级别，也称为保护环（&lt;strong&gt;protection rings&lt;/strong&gt;），从 &lt;strong&gt;Ring 0&lt;/strong&gt; 到 &lt;strong&gt;Ring 3&lt;/strong&gt; ，每个级别定义了可使用的指令集和可访问的资源，&lt;strong&gt;Ring 0&lt;/strong&gt; 具有最高的特权级别。&lt;/p&gt;
+&lt;h3 id=&#34;用户态和内核态&#34;&gt;
+    &lt;a href=&#34;#%e7%94%a8%e6%88%b7%e6%80%81%e5%92%8c%e5%86%85%e6%a0%b8%e6%80%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    用户态和内核态
+&lt;/h3&gt;&lt;p&gt;操作系统需要能够限制对关键系统资源的访问，提供对资源不同级别的访问权限，这样可以保护系统免受错误和恶意行为的侵害。这种访问权限由 CPU 在硬件级别上实现，例如 x86 架构定义了特权级别，也称为保护环（&lt;strong&gt;protection rings&lt;/strong&gt;），从 &lt;strong&gt;Ring 0&lt;/strong&gt; 到 &lt;strong&gt;Ring 3&lt;/strong&gt; ，每个级别定义了可使用的指令集和可访问的资源，&lt;strong&gt;Ring 0&lt;/strong&gt; 具有最高的特权级别。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202311151103732.png&#34;
 	
 	
@@ -478,8 +498,10 @@
 &lt;li&gt;&lt;strong&gt;Ring 3&lt;/strong&gt;: 最低特权级别，用于普通的应用程序，这些应用程序不能直接执行影响系统稳定性或安全性的操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Linux 主要使用了 &lt;strong&gt;Ring 0&lt;/strong&gt; 和 &lt;strong&gt;Ring 3&lt;/strong&gt;，将能够访问关键资源的内核放在 Ring0，称为内核态（&lt;strong&gt;Kernel Mode&lt;/strong&gt;），普通的应用程序将放在 Ring3，称为用户态（&lt;strong&gt;User Mode&lt;/strong&gt;）。&lt;/p&gt;
-&lt;h3 id=&#34;系统调用&#34;&gt;系统调用&lt;/h3&gt;
-&lt;p&gt;如果用户态代码需要访问核心资源，它必须通过&lt;strong&gt;系统调用（system call ）&lt;/strong&gt;。系统调用是进入内核的入口点，内核通过系统调用向程序提供一系列服务，如文件读写、进程创建、输入输出操作等。应用程序通过系统调用请求内核代为执行这些服务。&lt;/p&gt;
+&lt;h3 id=&#34;系统调用&#34;&gt;
+    &lt;a href=&#34;#%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    系统调用
+&lt;/h3&gt;&lt;p&gt;如果用户态代码需要访问核心资源，它必须通过&lt;strong&gt;系统调用（system call ）&lt;/strong&gt;。系统调用是进入内核的入口点，内核通过系统调用向程序提供一系列服务，如文件读写、进程创建、输入输出操作等。应用程序通过系统调用请求内核代为执行这些服务。&lt;/p&gt;
 &lt;p&gt;调用系统调用看起来很像调用 C 函数。但实际上，在系统调用的执行过程中，会进行多个步骤。以 x86 平台的实现为例，包括以下几个关键环节：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202311211416813.png&#34;
 	
@@ -499,15 +521,19 @@
 &lt;li&gt;内核响应中断，把当前的寄存器值保存到内核栈数据结构 &lt;strong&gt;struct pt_regs&lt;/strong&gt; 中，根据编号在一个表格中找到相应的系统调用服务程序，并执行它，然后返回结果。&lt;/li&gt;
 &lt;li&gt;完成操作后，内核将寄存器值恢复到原始状态，并将控制权返回给用户空间的应用程序，同时返回系统调用的结果。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;用户栈和内核栈&#34;&gt;用户栈和内核栈&lt;/h3&gt;
-&lt;p&gt;可以看出在执行系统调用时，进程具有两个栈：&lt;strong&gt;用户栈（User Stack）&lt;strong&gt;和&lt;/strong&gt;内核栈（Kernel Stack）&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;用户栈和内核栈&#34;&gt;
+    &lt;a href=&#34;#%e7%94%a8%e6%88%b7%e6%a0%88%e5%92%8c%e5%86%85%e6%a0%b8%e6%a0%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    用户栈和内核栈
+&lt;/h3&gt;&lt;p&gt;可以看出在执行系统调用时，进程具有两个栈：&lt;strong&gt;用户栈（User Stack）&lt;strong&gt;和&lt;/strong&gt;内核栈（Kernel Stack）&lt;/strong&gt;。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;用户栈（User Stack）&lt;/strong&gt; 保留了进入系统调用前的状态，用户栈在系统调用期间不会改变&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;内核栈（Kernel Stack）&lt;/strong&gt; 是在系统调用期间使用，用于存储在内核态下执行的状态信息，包括寄存器的值和系统调用的参数。此外处理中断和异常时，也会使用内核栈。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;用户栈和内核栈在什么什么位置？我们需要先了解虚拟地址空间的概念。&lt;/p&gt;
-&lt;h3 id=&#34;进程虚拟地址空间&#34;&gt;进程虚拟地址空间&lt;/h3&gt;
-&lt;p&gt;在现代操作系统上，用户程序都不能直接操作物理内存。操作系统会给进程分配虚拟内存空间，所有进程看到的这个地址都是一样的，里面的内存都是从 0 开始编号。&lt;/p&gt;
+&lt;h3 id=&#34;进程虚拟地址空间&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%9b%e7%a8%8b%e8%99%9a%e6%8b%9f%e5%9c%b0%e5%9d%80%e7%a9%ba%e9%97%b4&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    进程虚拟地址空间
+&lt;/h3&gt;&lt;p&gt;在现代操作系统上，用户程序都不能直接操作物理内存。操作系统会给进程分配虚拟内存空间，所有进程看到的这个地址都是一样的，里面的内存都是从 0 开始编号。&lt;/p&gt;
 &lt;p&gt;程序里指令操作的都是虚拟地址。内核会维护一个虚拟内存到物理内存的映射表，将不同进程的虚拟地址和不同的物理地址映射起来。当程序要访问虚拟地址时，会通过映射表进行转换，找到对应的物理内存地址。不同进程相同的虚拟地址，会映射到不同的物理地址，不会发生冲突。这样每个进程的地址空间都是独立的，相互隔离互不影响。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202311151758027.png&#34;
 	
@@ -548,8 +574,10 @@
     &gt;struct pt_regs&lt;/a&gt; 内，以便在系统调用完成后能够准确地恢复，继续执行因系统调用而暂停的用户空间操作。&lt;/p&gt;
 &lt;p&gt;执行内核代码会使用&lt;strong&gt;内核栈（Kernel-Stack）&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;现在有了进程虚拟地址空间的全景图，我们再回头看看还原函数调用栈的问题。&lt;/p&gt;
-&lt;h3 id=&#34;还原完整调用栈&#34;&gt;还原完整调用栈&lt;/h3&gt;
-&lt;p&gt;在 Linux 系统中，我们可以说在任何给定的时刻，CPU 处于下面三种状态之一：&lt;/p&gt;
+&lt;h3 id=&#34;还原完整调用栈&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%98%e5%8e%9f%e5%ae%8c%e6%95%b4%e8%b0%83%e7%94%a8%e6%a0%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    还原完整调用栈
+&lt;/h3&gt;&lt;p&gt;在 Linux 系统中，我们可以说在任何给定的时刻，CPU 处于下面三种状态之一：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;在用户空间，执行某个进程里的用户级代码&lt;/li&gt;
 &lt;li&gt;在内核空间，以进程的身份运行，为特定的进程服务，也就是执行系统调用&lt;/li&gt;
@@ -559,8 +587,10 @@
 &lt;p&gt;对于第二种情况，进程正好陷入内核执行系统调用，那么通过 &lt;strong&gt;Frame Pointer&lt;/strong&gt;（ &lt;strong&gt;rsp&lt;/strong&gt; 寄存器）可以还原内核代码的执行路径。然后再通过内核数据结构 &lt;a class=&#34;link&#34; href=&#34;https://elixir.bootlin.com/linux/v6.6.1/source/arch/x86/include/asm/ptrace.h#L59&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;struct pt_regs&lt;/a&gt; 内保存的寄存器状态，还原进入内核前用户空间的代码执行路径。这样我们就能获得采样事件触发时，包含了用户态和内核态的完整代码执行路径。&lt;/p&gt;
 &lt;p&gt;通过 &lt;strong&gt;PC&lt;/strong&gt; 寄存器、 &lt;strong&gt;rsp&lt;/strong&gt; 寄存器，以及内核数据结构&lt;strong&gt;pt_regs&lt;/strong&gt;，我们能知道 CPU 瞬时的“动作”，以及它是怎么做这个动作的（代码执行路径），那么还剩最后一个问题，我们怎么知道采样发生时刻 CPU 寄存器的内容呢？&lt;/p&gt;
-&lt;h3 id=&#34;中断处理&#34;&gt;中断处理&lt;/h3&gt;
-&lt;p&gt;内核是被动工作模式，它“躺”在内核空间不会主动工作，要么通过系统调用让它为用户进程服务，要么由时钟中断和各种外部设备中断事件驱动执行。&lt;/p&gt;
+&lt;h3 id=&#34;中断处理&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%ad%e6%96%ad%e5%a4%84%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    中断处理
+&lt;/h3&gt;&lt;p&gt;内核是被动工作模式，它“躺”在内核空间不会主动工作，要么通过系统调用让它为用户进程服务，要么由时钟中断和各种外部设备中断事件驱动执行。&lt;/p&gt;
 &lt;p&gt;中断是 Linux 的核心功能之一，它允许 CPU 响应外部或内部事件，如源自硬件设备的键盘、鼠标、网卡，或来自软件的异常。当这些事件，也就是中断事件发生时，CPU 会暂停当前的工作，转入内核的&lt;strong&gt;中断处理程序（Interrupt Handler）&lt;/strong&gt;。当处理完成后，会从中断处理程序返回到原来被中断的代码处继续执行。&lt;/p&gt;
 &lt;p&gt;中断可以分为**同步（Synchronous）&lt;strong&gt;中断和&lt;/strong&gt;异步（Asynchronous）**中断两类：&lt;/p&gt;
 &lt;ul&gt;
@@ -947,8 +977,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看到，第二个参数 &lt;strong&gt;pt_regs&lt;/strong&gt; 在前面介绍系统调用时已经出现过，是内核用来保存寄存器状态的结构体。这样在&lt;strong&gt;perf_event_nmi_handler&lt;/strong&gt;中，我们就可以使用 &lt;strong&gt;pt_regs&lt;/strong&gt; 中保存的寄存器状态，还原出 &lt;strong&gt;PMI&lt;/strong&gt; 中断发生时，CPU 当时的动作，以及包含了用户态和内核态的完整代码执行路径。&lt;/p&gt;
 &lt;p&gt;至此，我们了解了 perf 在进行 CPU Profiling 时涉及的全部技术机制。&lt;/p&gt;
-&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
-&lt;p&gt;现在再回顾我们使用 perf 进行 CPU Profiling 时的命令：&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;
+    &lt;a href=&#34;#%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    总结
+&lt;/h2&gt;&lt;p&gt;现在再回顾我们使用 perf 进行 CPU Profiling 时的命令：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -1058,8 +1090,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;安装预编译二进制包&#34;&gt;安装预编译二进制包&lt;/h2&gt;
-&lt;p&gt;perf 包含在 linux-tools-common 中，首先安装该软件包：&lt;/p&gt;
+&lt;h2 id=&#34;安装预编译二进制包&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%89%e8%a3%85%e9%a2%84%e7%bc%96%e8%af%91%e4%ba%8c%e8%bf%9b%e5%88%b6%e5%8c%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    安装预编译二进制包
+&lt;/h2&gt;&lt;p&gt;perf 包含在 linux-tools-common 中，首先安装该软件包：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -1104,8 +1138,10 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo apt install linux-tools-6.2.0-35-generic
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;安装-debug-symbol&#34;&gt;安装 Debug Symbol&lt;/h2&gt;
-&lt;p&gt;perf 像其他调试工具一样，需要调试符号表信息（Debug symbols）。这些符号信息用于将内存地址转换为函数和变量名称。如果没有符号信息，你将看到代表被分析内存地址的十六进制数字。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;安装-debug-symbol&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%89%e8%a3%85-debug-symbol&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    安装 Debug Symbol
+&lt;/h2&gt;&lt;p&gt;perf 像其他调试工具一样，需要调试符号表信息（Debug symbols）。这些符号信息用于将内存地址转换为函数和变量名称。如果没有符号信息，你将看到代表被分析内存地址的十六进制数字。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -1227,8 +1263,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo apt install linux-image-&lt;span class=&#34;sb&#34;&gt;`&lt;/span&gt;uname -r&lt;span class=&#34;sb&#34;&gt;`&lt;/span&gt;-dbgsym
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;kernel-tracepoints&#34;&gt;Kernel Tracepoints&lt;/h2&gt;
-&lt;p&gt;Kernel &lt;strong&gt;tracepoint&lt;/strong&gt; 是在内核源码中关键位置的埋点，允许开发人员监视内核中的各种事件和操作，例如系统调用、TCP事件、文件系统I/O、磁盘I/O等，以了解内核的行为，进行性能分析和故障诊断。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;kernel-tracepoints&#34;&gt;
+    &lt;a href=&#34;#kernel-tracepoints&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Kernel Tracepoints
+&lt;/h2&gt;&lt;p&gt;Kernel &lt;strong&gt;tracepoint&lt;/strong&gt; 是在内核源码中关键位置的埋点，允许开发人员监视内核中的各种事件和操作，例如系统调用、TCP事件、文件系统I/O、磁盘I/O等，以了解内核的行为，进行性能分析和故障诊断。&lt;/p&gt;
 &lt;p&gt;使用 perf 可以对 tracepoints 进行统计、追踪和采样。例如可以使用下面的命令对上下文切换进行 1 秒钟的跟踪：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -1340,9 +1378,13 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.man7.org/linux/man-pages/man3/libtraceevent.3.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;libtraceevent&lt;/a&gt; 提供了访问内核 tracepoint 事件的 API。注意到最后一行，说明 perf 在 build 时没有打开 &lt;code&gt;libtraceevent&lt;/code&gt;的支持。因此我们安装的预编译二进制包不能进行 tracepoint 追踪。我们需要自己从源码构建 perf。&lt;/p&gt;
-&lt;h2 id=&#34;从源码构建-perf&#34;&gt;从源码构建 perf&lt;/h2&gt;
-&lt;h3 id=&#34;源码下载&#34;&gt;源码下载&lt;/h3&gt;
-&lt;p&gt;首先下载 perf 的源代码。perf 的源码位于 Linux 内核源码中的 &lt;code&gt;tools/perf&lt;/code&gt; 目录下。perf 是一个复杂的用户空间应用程序，而它却位于Linux 内核源代码树中，可能是唯一一个被包含在 Linux 源代码中的复杂用户软件。&lt;/p&gt;
+&lt;h2 id=&#34;从源码构建-perf&#34;&gt;
+    &lt;a href=&#34;#%e4%bb%8e%e6%ba%90%e7%a0%81%e6%9e%84%e5%bb%ba-perf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    从源码构建 perf
+&lt;/h2&gt;&lt;h3 id=&#34;源码下载&#34;&gt;
+    &lt;a href=&#34;#%e6%ba%90%e7%a0%81%e4%b8%8b%e8%bd%bd&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    源码下载
+&lt;/h3&gt;&lt;p&gt;首先下载 perf 的源代码。perf 的源码位于 Linux 内核源码中的 &lt;code&gt;tools/perf&lt;/code&gt; 目录下。perf 是一个复杂的用户空间应用程序，而它却位于Linux 内核源代码树中，可能是唯一一个被包含在 Linux 源代码中的复杂用户软件。&lt;/p&gt;
 &lt;p&gt;为了下载和内核匹配的源码，先确定内核版本：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -1356,8 +1398,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;然后去 &lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/pub/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;https://www.kernel.org/pub/&lt;/a&gt; 浏览并下载正确版本的源码。&lt;/p&gt;
-&lt;h3 id=&#34;安装依赖&#34;&gt;安装依赖&lt;/h3&gt;
-&lt;p&gt;安装构建依赖：&lt;/p&gt;
+&lt;h3 id=&#34;安装依赖&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%89%e8%a3%85%e4%be%9d%e8%b5%96&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    安装依赖
+&lt;/h3&gt;&lt;p&gt;安装构建依赖：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -1377,8 +1421,10 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo apt install libtraceevent-dev
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;构建&#34;&gt;构建&lt;/h3&gt;
-&lt;p&gt;解压下载的 Linux 源码，进入源码目录，运行下面的命令：&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;构建&#34;&gt;
+    &lt;a href=&#34;#%e6%9e%84%e5%bb%ba&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    构建
+&lt;/h3&gt;&lt;p&gt;解压下载的 Linux 源码，进入源码目录，运行下面的命令：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -1388,8 +1434,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;成功构建后 perf 被安装到了 &lt;code&gt;$HOME/bin&lt;/code&gt; 目录。&lt;/p&gt;
-&lt;h3 id=&#34;测试验证&#34;&gt;测试验证&lt;/h3&gt;
-&lt;p&gt;卸载先前安装的预编译版本：&lt;/p&gt;
+&lt;h3 id=&#34;测试验证&#34;&gt;
+    &lt;a href=&#34;#%e6%b5%8b%e8%af%95%e9%aa%8c%e8%af%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    测试验证
+&lt;/h3&gt;&lt;p&gt;卸载先前安装的预编译版本：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -1876,8 +1924,10 @@
         
         <guid>https://mazhen.tech/p/linux-%E4%BF%A1%E5%8F%B7signal/</guid>
         <description>&lt;p&gt;我们经常会使用 &lt;code&gt;kill&lt;/code&gt; 命令杀掉运行中的进程，对多次杀不死的进程进一步用 &lt;code&gt;kill -9&lt;/code&gt; 干掉它。你可能知道这是在用 &lt;code&gt;kill&lt;/code&gt; 命令向进程发送信号，优雅或粗暴的让进程退出。我们能向进程发送很多类型的信号，其中一些常见的信号 &lt;strong&gt;SIGINT&lt;/strong&gt; 、&lt;strong&gt;SIGQUIT&lt;/strong&gt;、 &lt;strong&gt;SIGTERM&lt;/strong&gt; 和 &lt;strong&gt;SIGKILL&lt;/strong&gt; 都是通知进程退出，但它们有什么区别呢？很多人经常把它们搞混，这篇文章会让你了解 Linux 的信号机制，以及一些常见信号的作用。&lt;/p&gt;
-&lt;h2 id=&#34;什么是信号&#34;&gt;什么是信号&lt;/h2&gt;
-&lt;p&gt;信号（Signal）是 Linux 进程收到的一个通知。当进程收到一个信号时，该进程会中断其执行，并执行收到信号对应的处理程序。&lt;/p&gt;
+&lt;h2 id=&#34;什么是信号&#34;&gt;
+    &lt;a href=&#34;#%e4%bb%80%e4%b9%88%e6%98%af%e4%bf%a1%e5%8f%b7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    什么是信号
+&lt;/h2&gt;&lt;p&gt;信号（Signal）是 Linux 进程收到的一个通知。当进程收到一个信号时，该进程会中断其执行，并执行收到信号对应的处理程序。&lt;/p&gt;
 &lt;p&gt;信号机制作为 Linux 进程间通信的一种方法。Linux 进程间通信常用的方法还有管道、消息、共享内存等。&lt;/p&gt;
 &lt;p&gt;信号的产生有多种来源：&lt;/p&gt;
 &lt;ul&gt;
@@ -1955,13 +2005,17 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;...&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;信号和中断&#34;&gt;信号和中断&lt;/h2&gt;
-&lt;p&gt;信号处理是一种典型的&lt;strong&gt;异步事件处理方式&lt;/strong&gt;：进程需要提前向内核注册信号处理函数，当某个信号到来时，内核会就执行相应的信号处理函数。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;信号和中断&#34;&gt;
+    &lt;a href=&#34;#%e4%bf%a1%e5%8f%b7%e5%92%8c%e4%b8%ad%e6%96%ad&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    信号和中断
+&lt;/h2&gt;&lt;p&gt;信号处理是一种典型的&lt;strong&gt;异步事件处理方式&lt;/strong&gt;：进程需要提前向内核注册信号处理函数，当某个信号到来时，内核会就执行相应的信号处理函数。&lt;/p&gt;
 &lt;p&gt;我们知道，硬件中断也是一种内核的&lt;strong&gt;异步事件处理方式&lt;/strong&gt;。当外部设备出现一个必须由 CPU 处理的事件，如键盘敲击、数据到达网卡等，内核会收到中断通知，暂时打断当前程序的执行，跳转到该中断类型对应的中断处理程序。中断处理程序是由 BIOS 和操作系统在系统启动过程中预先注册在内核中的。&lt;/p&gt;
 &lt;p&gt;中断和信号通知都是在内核产生。中断是完全在内核里完成处理，而&lt;strong&gt;信号的处理则是在用户态完成的&lt;/strong&gt;。也就是说，内核只是将信号保存在进程相关的数据结构里面，在执行信号处理程序之前，需要从内核态切换到用户态，执行完信号处理程序之后，又回到内核态，再恢复进程正常的运行。&lt;/p&gt;
 &lt;p&gt;可以看出，中断和信号的严重程度不一样。信号影响的是一个进程，信号处理出了问题，最多是这个进程被干掉。而中断影响的是整个系统，一旦中断处理程序出了问题，可能整个系统都会挂掉。&lt;/p&gt;
-&lt;h2 id=&#34;信号处理&#34;&gt;信号处理&lt;/h2&gt;
-&lt;p&gt;一旦有信号产生，进程对它的处理都有下面三个选择。&lt;/p&gt;
+&lt;h2 id=&#34;信号处理&#34;&gt;
+    &lt;a href=&#34;#%e4%bf%a1%e5%8f%b7%e5%a4%84%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    信号处理
+&lt;/h2&gt;&lt;p&gt;一旦有信号产生，进程对它的处理都有下面三个选择。&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;执行缺省操作（Default）&lt;/strong&gt;。Linux 为每个信号都定义了一个缺省的行为。例如，信号 SIGKILL 的缺省操作是 Term，也就是终止进程的意思。信号 SIGQUIT 的缺省操作是 Core，即终止进程后，通过 Core Dump 将当前进程的运行状态保存在文件里面。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;捕捉信号（Catch）&lt;/strong&gt;。这个是指让用户进程可以注册自己针对这个信号的处理函数。当信号发生时，就执行我们注册的信号处理函数。&lt;/li&gt;
@@ -2061,8 +2115,10 @@
     &gt;task_struct-&amp;gt;pending&lt;/a&gt; 是线程私有的。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;stask_struct-&amp;gt;sighand&lt;/code&gt; 里面有一个 &lt;code&gt;action&lt;/code&gt;，这是一个数组，下标是信号，数组内容就是注册的信号处理函数。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;task_struct-&amp;gt;pending&lt;/code&gt; 内包含了一个链表，保存了本线程所有的待处理信号。&lt;code&gt;task_struct-&amp;gt;signal-&amp;gt;shared_pending&lt;/code&gt; 上也有一个待处理信号链表，这个链表保存的是线程组内共享的信号。&lt;/p&gt;
-&lt;h2 id=&#34;常见信号&#34;&gt;常见信号&lt;/h2&gt;
-&lt;p&gt;下面的列表列举了一些常见的信号。&lt;/p&gt;
+&lt;h2 id=&#34;常见信号&#34;&gt;
+    &lt;a href=&#34;#%e5%b8%b8%e8%a7%81%e4%bf%a1%e5%8f%b7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    常见信号
+&lt;/h2&gt;&lt;p&gt;下面的列表列举了一些常见的信号。&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -2188,8 +2244,10 @@
 &lt;/ul&gt;
 &lt;p&gt;有一些信号在 TTY 终端做了键盘按键绑定，例如 &lt;code&gt;CTRL+c&lt;/code&gt;  会向终端上运行的前台进程发送  SIGINT 信号。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h3 id=&#34;sighup&#34;&gt;SIGHUP&lt;/h3&gt;
-&lt;p&gt;运行在终端中，由 bash 启动的进程，都是 bash 的子进程。终端退出结束时会向 bash 的每一个子进程发送 &lt;strong&gt;SIGHUP&lt;/strong&gt; 信号。由于 &lt;strong&gt;SIGHUP&lt;/strong&gt; 的缺省行为是 Term，因此，即使运行在后台的进程也会和终端一起结束。&lt;/p&gt;
+&lt;h3 id=&#34;sighup&#34;&gt;
+    &lt;a href=&#34;#sighup&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SIGHUP
+&lt;/h3&gt;&lt;p&gt;运行在终端中，由 bash 启动的进程，都是 bash 的子进程。终端退出结束时会向 bash 的每一个子进程发送 &lt;strong&gt;SIGHUP&lt;/strong&gt; 信号。由于 &lt;strong&gt;SIGHUP&lt;/strong&gt; 的缺省行为是 Term，因此，即使运行在后台的进程也会和终端一起结束。&lt;/p&gt;
 &lt;p&gt;使用 &lt;code&gt;nohup&lt;/code&gt; 命令可解决这个问题，它的作用是让进程忽略 SIGHUP 信号：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -2201,8 +2259,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;这样，即使我们退出了终端，运行在后台的程序会忽视 &lt;strong&gt;SIGHUP&lt;/strong&gt; 信号而继续运行。由于作为父进程的 bash 进程已经结束，因此 &lt;code&gt;/sbin/init&lt;/code&gt; 就成为孤儿进程新的父进程。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h3 id=&#34;sigint-sigquit-sigterm-和-sigkill&#34;&gt;SIGINT, SIGQUIT, SIGTERM 和 SIGKILL&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;SIGTERM&lt;/strong&gt; 和 &lt;strong&gt;SIGKILL&lt;/strong&gt; 是通用的终止进程请求，&lt;strong&gt;SIGINT&lt;/strong&gt; 和 &lt;strong&gt;SIGQUIT&lt;/strong&gt; 是专门用于来自终端的终止进程请求。他们的关键不同点是：&lt;strong&gt;SIGINT&lt;/strong&gt; 和 &lt;strong&gt;SIGQUIT&lt;/strong&gt; 可以是用户在终端使用快捷键生成的，而 &lt;strong&gt;SIGTERM&lt;/strong&gt; 和 &lt;strong&gt;SIGKILL&lt;/strong&gt; 必须由另一个程序以某种方式生成（例如通过 kill 命令）。&lt;/p&gt;
+&lt;h3 id=&#34;sigint-sigquit-sigterm-和-sigkill&#34;&gt;
+    &lt;a href=&#34;#sigint-sigquit-sigterm-%e5%92%8c-sigkill&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SIGINT, SIGQUIT, SIGTERM 和 SIGKILL
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;SIGTERM&lt;/strong&gt; 和 &lt;strong&gt;SIGKILL&lt;/strong&gt; 是通用的终止进程请求，&lt;strong&gt;SIGINT&lt;/strong&gt; 和 &lt;strong&gt;SIGQUIT&lt;/strong&gt; 是专门用于来自终端的终止进程请求。他们的关键不同点是：&lt;strong&gt;SIGINT&lt;/strong&gt; 和 &lt;strong&gt;SIGQUIT&lt;/strong&gt; 可以是用户在终端使用快捷键生成的，而 &lt;strong&gt;SIGTERM&lt;/strong&gt; 和 &lt;strong&gt;SIGKILL&lt;/strong&gt; 必须由另一个程序以某种方式生成（例如通过 kill 命令）。&lt;/p&gt;
 &lt;p&gt;当用户按下 &lt;strong&gt;ctrl-c&lt;/strong&gt; 时，终端将发送 &lt;strong&gt;SIGINT&lt;/strong&gt; 到前台进程。 SIGINT 的缺省行为是终止进程（Term），但它可以被捕获或忽略。 信号 SIGINT 的目的是为进程提供一种有序、优雅的关闭机制。&lt;/p&gt;
 &lt;p&gt;当用户按下 &lt;strong&gt;ctrl-\&lt;/strong&gt; 时，终端将发送 &lt;strong&gt;SIGQUIT&lt;/strong&gt; 到前台进程。 SIGQUIT 的缺省行为是终止进程并 core dump，它同样可以被捕获或忽略。 你可以认为 &lt;strong&gt;SIGINT&lt;/strong&gt; 是用户发起的&lt;em&gt;愉快的终止&lt;/em&gt;，而 &lt;strong&gt;SIGQUIT&lt;/strong&gt; 是用户发起的&lt;em&gt;不愉快终止&lt;/em&gt;，需要生成 Core Dump ，方便用户事后进行分析问题在哪里。&lt;/p&gt;
 &lt;p&gt;在 ubuntu 上由 &lt;a class=&#34;link&#34; href=&#34;http://manpages.ubuntu.com/manpages/focal/man8/systemd-coredump.8.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2225,18 +2285,24 @@
 &lt;p&gt;&lt;strong&gt;SIGKILL&lt;/strong&gt;  唯一的行为是立即终止进程。 由于 &lt;strong&gt;SIGKILL&lt;/strong&gt; 是特权信号，进程无法捕获和忽略，因此进程在收到该信号后无法进行清理，立刻退出。&lt;/p&gt;
 &lt;p&gt;例如 docker 在停止容器的时候，先给容器里的1号进程发送 &lt;strong&gt;SIGTERM&lt;/strong&gt;，如果不起作用，那么等待30秒后会会发送 &lt;strong&gt;SIGKILL&lt;/strong&gt;，保证容器最终会被停止。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h3 id=&#34;sigstop--sigtstp-和-sigcont&#34;&gt;SIGSTOP 、 SIGTSTP 和 SIGCONT&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;SIGSTOP&lt;/strong&gt; 和 &lt;strong&gt;SIGTSTP&lt;/strong&gt; 这两个信号都是为了暂停一个进程，但 &lt;strong&gt;SIGSTOP&lt;/strong&gt;  是特权信息，不能被捕获或忽略。&lt;/p&gt;
+&lt;h3 id=&#34;sigstop--sigtstp-和-sigcont&#34;&gt;
+    &lt;a href=&#34;#sigstop--sigtstp-%e5%92%8c-sigcont&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SIGSTOP 、 SIGTSTP 和 SIGCONT
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;SIGSTOP&lt;/strong&gt; 和 &lt;strong&gt;SIGTSTP&lt;/strong&gt; 这两个信号都是为了暂停一个进程，但 &lt;strong&gt;SIGSTOP&lt;/strong&gt;  是特权信息，不能被捕获或忽略。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;SIGSTOP&lt;/strong&gt; 必须由另一个程序以某种方式生成（例如：kill -SIGSTOP pid），而&lt;strong&gt;SIGTSTP&lt;/strong&gt; 也可以由用户在键盘上键入快捷键 &lt;code&gt;Ctrl-z&lt;/code&gt; 生成。&lt;/p&gt;
 &lt;p&gt;被暂停的进程通过信号 &lt;strong&gt;SIGCONT&lt;/strong&gt; 恢复。当用户调用 &lt;strong&gt;fg&lt;/strong&gt; 命令时，&lt;strong&gt;SIGCONT&lt;/strong&gt; 由 shell 显式发送给被暂停的进程。&lt;/p&gt;
 &lt;p&gt;Linux 使用他们进行作业控制，让你能够手动干预和停止正在运行的应用程序，并在未来某个时间恢复程序的执行。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h3 id=&#34;sigttou-和-sigttin&#34;&gt;SIGTTOU 和 SIGTTIN&lt;/h3&gt;
-&lt;p&gt;Linux 系统中可以有多个会话（&lt;strong&gt;session&lt;/strong&gt;），每个会话可以包含多个进程组，每个进程组可以包含多个进程。&lt;/p&gt;
+&lt;h3 id=&#34;sigttou-和-sigttin&#34;&gt;
+    &lt;a href=&#34;#sigttou-%e5%92%8c-sigttin&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SIGTTOU 和 SIGTTIN
+&lt;/h3&gt;&lt;p&gt;Linux 系统中可以有多个会话（&lt;strong&gt;session&lt;/strong&gt;），每个会话可以包含多个进程组，每个进程组可以包含多个进程。&lt;/p&gt;
 &lt;p&gt;会话是用户登录系统到退出的所有活动，从登录到结束前创建的所有进程都属于这次会话。会话有一个前台进程组，还可以有一个或多个后台进程组。只有前台进程可以从终端接收输入，也只有前台进程才被允许向终端输出。如果一个后台作业中的进程试图进行终端读写操作，终端会向整个作业发送 &lt;strong&gt;SIGTTOU&lt;/strong&gt; 或 &lt;strong&gt;SIGTTIN&lt;/strong&gt; 信号，默认的行为是暂停进程。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2 id=&#34;jvm-对信号的处理&#34;&gt;JVM 对信号的处理&lt;/h2&gt;
-&lt;p&gt;如果你使用 &lt;code&gt;strace&lt;/code&gt; 追踪 Java 应用，发现 Java 程序会抛出大量 &lt;code&gt;SIGSEGV&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;jvm-对信号的处理&#34;&gt;
+    &lt;a href=&#34;#jvm-%e5%af%b9%e4%bf%a1%e5%8f%b7%e7%9a%84%e5%a4%84%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JVM 对信号的处理
+&lt;/h2&gt;&lt;p&gt;如果你使用 &lt;code&gt;strace&lt;/code&gt; 追踪 Java 应用，发现 Java 程序会抛出大量 &lt;code&gt;SIGSEGV&lt;/code&gt;。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -2374,8 +2440,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 不仅能加速对文件内容的访问，对共享库建立 &lt;strong&gt;Page Cache&lt;/strong&gt;，可以在多个进程间共享，避免每个进程都单独加载，造成宝贵内存资源的浪费。&lt;/p&gt;
-&lt;h2 id=&#34;page-cache-是什么&#34;&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 是什么&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 是由内核管理的内存，位于 &lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/filesystems/vfs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;page-cache-是什么&#34;&gt;
+    &lt;a href=&#34;#page-cache-%e6%98%af%e4%bb%80%e4%b9%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;Page Cache&lt;/strong&gt; 是什么
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 是由内核管理的内存，位于 &lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/filesystems/vfs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;VFS(Virtual File System)&lt;/a&gt; 层和具体文件系统层（例如ext4，ext3）之间。应用进程使用 &lt;code&gt;read&lt;/code&gt;/&lt;code&gt;write&lt;/code&gt; 等文件操作，通过系统调用进入到 &lt;strong&gt;VFS&lt;/strong&gt; 层，根据 &lt;strong&gt;O_DIRECT&lt;/strong&gt; 标志，可以使用 &lt;strong&gt;Page Cache&lt;/strong&gt; 作为文件内容的缓存，也可以跳过 &lt;strong&gt;Page Cache&lt;/strong&gt; 不使用内核提供的缓存功能。&lt;/p&gt;
 &lt;p&gt;另外，应用程序可以使用 &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/mmap.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;mmap&lt;/a&gt; ，将文件内容映射到进程的虚拟地址空间，可以像读写内存一样直接读写硬盘上的文件。进程的虚拟内存直接和 &lt;strong&gt;Page Cache&lt;/strong&gt; 映射。&lt;/p&gt;
@@ -2441,8 +2509,10 @@
     &gt;inode&lt;/a&gt; 一一对应，我们可以认为  &lt;a class=&#34;link&#34; href=&#34;https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;inode&lt;/a&gt; 是 &lt;strong&gt;Page Cache&lt;/strong&gt; 的宿主（&lt;code&gt;host&lt;/code&gt;），内核通过 &lt;code&gt;inode-&amp;gt;imapping-&amp;gt;i_pages&lt;/code&gt; 指向的树，管理维护着 &lt;strong&gt;Page Cache&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 是如何产生和释放，又是如何与进程相关联的呢？我们需要先了解进程虚拟地址空间。&lt;/p&gt;
-&lt;h2 id=&#34;进程虚拟地址空间&#34;&gt;进程虚拟地址空间&lt;/h2&gt;
-&lt;p&gt;Linux 是多任务系统，它支持多个进程的的并发执行。操作系统和 CPU 联手制造了一个假象：每个进程都独享连续的虚拟内存空间，并且各个进程的地址空间是完全隔离的，因此进程并不会意识到彼此的存在。从进程的角度来看，它会认为自己是系统中唯一的进程。&lt;/p&gt;
+&lt;h2 id=&#34;进程虚拟地址空间&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%9b%e7%a8%8b%e8%99%9a%e6%8b%9f%e5%9c%b0%e5%9d%80%e7%a9%ba%e9%97%b4&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    进程虚拟地址空间
+&lt;/h2&gt;&lt;p&gt;Linux 是多任务系统，它支持多个进程的的并发执行。操作系统和 CPU 联手制造了一个假象：每个进程都独享连续的虚拟内存空间，并且各个进程的地址空间是完全隔离的，因此进程并不会意识到彼此的存在。从进程的角度来看，它会认为自己是系统中唯一的进程。&lt;/p&gt;
 &lt;p&gt;进程看到的是虚拟内存的地址空间，它也不能直接访问物理地址。当进程访问某个虚拟地址的时候，该虚拟地址由内核负责转换成物理内存地址，即完成虚拟地址到物理地址的映射。这样不同进程在运行的时候，即使访问相同的虚拟地址，但内核会将它们映射到不同的物理地址，因此不会发生冲突。&lt;/p&gt;
 &lt;p&gt;进程在 Linux 内核由 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;task_struct&lt;/a&gt; 所描述。估计 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/sched.h#L728&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2482,8 +2552,10 @@
 &lt;p&gt;另外，在虚拟内存中连续的页面，在物理内存中不必是连续的。只要维护好从虚拟内存页到物理内存页的映射关系，你就能正确地使用内存。由于每个进程都有独立的地址空间，为了完成虚拟地址到物理地址的映射，每个进程都要有独立的进程页表。在一个实际的进程里面，虚拟内存占用的地址空间，通常是两段连续的空间，而不是完全散落的随机的内存地址。基于这个特点，内核使用多级页表保存映射关系，可以大大减少页表本身的空间占用。最顶级的页表保存在  &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/f443e374ae131c168a065ea1748feac6b2e76613/include/linux/mm_types.h#L458&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;mm_struct&lt;/a&gt; 的 &lt;code&gt;pgd&lt;/code&gt; 字段中。&lt;/p&gt;
 &lt;p&gt;好了，我们对进程虚拟地址空间有了基本的了解，下面看看 &lt;strong&gt;Page Cache&lt;/strong&gt; 的产生和释放，以及如何与进程空间发生联系的。&lt;/p&gt;
-&lt;h2 id=&#34;page-cache-的产生和释放&#34;&gt;Page Cache 的产生和释放&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 的产生有两种不同的方式：&lt;/p&gt;
+&lt;h2 id=&#34;page-cache-的产生和释放&#34;&gt;
+    &lt;a href=&#34;#page-cache-%e7%9a%84%e4%ba%a7%e7%94%9f%e5%92%8c%e9%87%8a%e6%94%be&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Page Cache 的产生和释放
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Page Cache&lt;/strong&gt; 的产生有两种不同的方式：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Buffered I/O&lt;/li&gt;
 &lt;li&gt;Memory-Mapped file&lt;/li&gt;
@@ -2512,8 +2584,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;使用 &lt;code&gt;Buffered I/O&lt;/code&gt; 时，&lt;strong&gt;Page Cache&lt;/strong&gt; 并没有和进程的虚拟内存空间产生直接的关联，而是通过用户缓冲区作为中转。效率更好的&lt;code&gt;Memory-Mapped file&lt;/code&gt;方式，看着比较简单，但背后的实现却有些复杂。下面我们看一下内核是如何实现 &lt;code&gt;Memory-Mapped file&lt;/code&gt; 的。&lt;/p&gt;
-&lt;h2 id=&#34;内存文件映射&#34;&gt;内存文件映射&lt;/h2&gt;
-&lt;p&gt;前面我们介绍过，  &lt;a class=&#34;link&#34; href=&#34;https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;内存文件映射&#34;&gt;
+    &lt;a href=&#34;#%e5%86%85%e5%ad%98%e6%96%87%e4%bb%b6%e6%98%a0%e5%b0%84&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    内存文件映射
+&lt;/h2&gt;&lt;p&gt;前面我们介绍过，  &lt;a class=&#34;link&#34; href=&#34;https://elixir.bootlin.com/linux/v5.17/source/include/linux/fs.h#L614&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;inode&lt;/a&gt; 是 &lt;strong&gt;Page Cache&lt;/strong&gt; 的宿主（&lt;code&gt;host&lt;/code&gt;），内核通过 &lt;code&gt;inode-&amp;gt;imapping-&amp;gt;i_pages&lt;/code&gt; 指向的树，管理维护着 &lt;strong&gt;Page Cache&lt;/strong&gt;。那么内核是如何完成内存文件映射，直接把缓存了文件内容的 &lt;strong&gt;Page Cache&lt;/strong&gt; 映射到进程虚拟内存空间的呢？&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241612690.png&#34;
 	
@@ -2555,8 +2629,10 @@
     &gt;address_space&lt;/a&gt; 主要管理着两颗树：&lt;code&gt;i_pages&lt;/code&gt; 指向的 &lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/core-api/xarray.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;xarray&lt;/a&gt; 树，维护着的所有 Page Cache 页；&lt;code&gt;i_mmap&lt;/code&gt; 指向的 PST 树，维护着文件映射所形成的  &lt;a class=&#34;link&#34; href=&#34;https://elixir.bootlin.com/linux/v5.17/source/include/linux/sched.h#L728&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;vm_area_struct&lt;/a&gt; 虚拟内存区域，用来在释放 Page Cache 页时，查找映射了该文件的进程。如果文件没有被映射到进程空间，那么 &lt;code&gt;i_mmap&lt;/code&gt; 对应的 PST 树为空。&lt;/p&gt;
-&lt;h2 id=&#34;page-cache-的观测&#34;&gt;Page Cache 的观测&lt;/h2&gt;
-&lt;p&gt;可以通过查看 &lt;code&gt;/proc/meminfo&lt;/code&gt; 文件获知 &lt;strong&gt;Page Cache&lt;/strong&gt; 相关的各种指标。&lt;/p&gt;
+&lt;h2 id=&#34;page-cache-的观测&#34;&gt;
+    &lt;a href=&#34;#page-cache-%e7%9a%84%e8%a7%82%e6%b5%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Page Cache 的观测
+&lt;/h2&gt;&lt;p&gt;可以通过查看 &lt;code&gt;/proc/meminfo&lt;/code&gt; 文件获知 &lt;strong&gt;Page Cache&lt;/strong&gt; 相关的各种指标。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;/proc&lt;/code&gt; 是伪文件系统（Pseudo filesystems ）。Linux 通过伪文件系统，让系统和内核信息在用户空间可用。使用 &lt;code&gt;free&lt;/code&gt;、&lt;code&gt;vmstat&lt;/code&gt;等命令查看到的内存信息，数据实际上都来自 &lt;code&gt;/proc/meminfo&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;我们看一个示例：&lt;/p&gt;
 &lt;pre&gt;
@@ -2752,8 +2828,10 @@ Mapped:           761076 kB
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   ...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;mmap系统调用&#34;&gt;mmap系统调用&lt;/h2&gt;
-&lt;p&gt;系统调用 &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/mmap.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h2 id=&#34;mmap系统调用&#34;&gt;
+    &lt;a href=&#34;#mmap%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    mmap系统调用
+&lt;/h2&gt;&lt;p&gt;系统调用 &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/mmap.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;mmap&lt;/a&gt;是最重要的内存管理接口。使用 &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/mmap.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;mmap&lt;/a&gt; 可以创建文件映射，从而产生 Page Cache。使用  &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/mmap.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;mmap&lt;/a&gt; 还可以用来申请堆内存。glibc 提供的  &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man3/free.3.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2808,8 +2886,10 @@ Mapped:           761076 kB
 &gt;&lt;/p&gt;
 &lt;p&gt;私有映射都属于 &lt;strong&gt;AnonPages&lt;/strong&gt;，共享映射都是 &lt;strong&gt;Page cache&lt;/strong&gt;。前面讨论过，共享的匿名映射 &lt;strong&gt;Shmem&lt;/strong&gt;，虽然没有关联真实的磁盘文件，但是关联了虚拟内存文件，所以也属于 &lt;strong&gt;Page Cache&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;私有文件映射，如果文件是只读的话，这块内存属于 &lt;strong&gt;Page Cache&lt;/strong&gt;。如果有进程写文件，因为这一段内存区域的属性是私有的，所以内核就会做一次写时复制，为写文件的进程单独地创建一份副本，这个副本就属于 &lt;strong&gt;AnonPages&lt;/strong&gt; 了。&lt;/p&gt;
-&lt;h2 id=&#34;写在最后&#34;&gt;写在最后&lt;/h2&gt;
-&lt;p&gt;Page Cache 机制涉及了进程空间，文件系统，内存管理等多个内核功能，Page Cache 就像一条线将这几部分串在了一起。因此深入理解 Page Cache 机制，对学习内核会有很大的帮助。&lt;/p&gt;
+&lt;h2 id=&#34;写在最后&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%9c%a8%e6%9c%80%e5%90%8e&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写在最后
+&lt;/h2&gt;&lt;p&gt;Page Cache 机制涉及了进程空间，文件系统，内存管理等多个内核功能，Page Cache 就像一条线将这几部分串在了一起。因此深入理解 Page Cache 机制，对学习内核会有很大的帮助。&lt;/p&gt;
 </description>
         </item>
         <item>
@@ -2818,11 +2898,15 @@ Mapped:           761076 kB
         <pubDate>Sun, 14 Nov 2021 16:02:22 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E8%BF%9B%E7%A8%8Bid%E5%8F%8A%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/</guid>
-        <description>&lt;h2 id=&#34;进程id&#34;&gt;进程ID&lt;/h2&gt;
-&lt;p&gt;进程相关的 &lt;code&gt;ID&lt;/code&gt; 有多种，除了进程标识 &lt;strong&gt;PID&lt;/strong&gt; 外，还包括：线程组标识 &lt;strong&gt;TGID&lt;/strong&gt;，进程组标识 &lt;strong&gt;PGID&lt;/strong&gt;，回话标识 &lt;strong&gt;SID&lt;/strong&gt;。&lt;strong&gt;TGID/PGID/SID&lt;/strong&gt; 分别是相关线程组长/进程组长/回话 leader 进程的 &lt;strong&gt;PID&lt;/strong&gt;。&lt;/p&gt;
+        <description>&lt;h2 id=&#34;进程id&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%9b%e7%a8%8bid&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    进程ID
+&lt;/h2&gt;&lt;p&gt;进程相关的 &lt;code&gt;ID&lt;/code&gt; 有多种，除了进程标识 &lt;strong&gt;PID&lt;/strong&gt; 外，还包括：线程组标识 &lt;strong&gt;TGID&lt;/strong&gt;，进程组标识 &lt;strong&gt;PGID&lt;/strong&gt;，回话标识 &lt;strong&gt;SID&lt;/strong&gt;。&lt;strong&gt;TGID/PGID/SID&lt;/strong&gt; 分别是相关线程组长/进程组长/回话 leader 进程的 &lt;strong&gt;PID&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;下面分别介绍这几种ID。&lt;/p&gt;
-&lt;h3 id=&#34;pid&#34;&gt;PID&lt;/h3&gt;
-&lt;ul&gt;
+&lt;h3 id=&#34;pid&#34;&gt;
+    &lt;a href=&#34;#pid&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    PID
+&lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;进程总是会被分配一个唯一标识它们的进程ID号，简称 &lt;strong&gt;PID&lt;/strong&gt;。&lt;/p&gt;
 &lt;/li&gt;
@@ -2834,8 +2918,10 @@ Mapped:           761076 kB
     &gt;task_struct-&amp;gt;pid&lt;/a&gt;中。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;tgid&#34;&gt;TGID&lt;/h3&gt;
-&lt;ul&gt;
+&lt;h3 id=&#34;tgid&#34;&gt;
+    &lt;a href=&#34;#tgid&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    TGID
+&lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;进程以 &lt;code&gt;CLONE_THREAD&lt;/code&gt; 标志调用 &lt;code&gt;clone&lt;/code&gt; 方法，创建与该进程共享资源的线程。线程有独立的&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L723&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;task_struct&lt;/a&gt;，但它 &lt;code&gt;task_struct&lt;/code&gt;内的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L1070&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2860,8 +2946,10 @@ Mapped:           761076 kB
     &gt;task_struct-&amp;gt;group_leader&lt;/a&gt; 指向主线程的 &lt;code&gt;task_struct&lt;/code&gt;。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;pgid&#34;&gt;PGID&lt;/h3&gt;
-&lt;ul&gt;
+&lt;h3 id=&#34;pgid&#34;&gt;
+    &lt;a href=&#34;#pgid&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    PGID
+&lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;如果 &lt;code&gt;shell&lt;/code&gt; 具有作业管理能力，则它所创建的相关进程构成一个进程组，同一进程组的进程都有相同的 &lt;strong&gt;PGID&lt;/strong&gt;。例如，用管道连接的进程包含在同一个进程组中。&lt;/p&gt;
 &lt;/li&gt;
@@ -2904,8 +2992,10 @@ Mapped:           761076 kB
 &lt;li&gt;&lt;code&gt;task_struce-&amp;gt;signal&lt;/code&gt; 是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/8bb7eca972ad531c9b149c0a51ab43a417385813/include/linux/sched/signal.h?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L82&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;signal_struct&lt;/a&gt; 类型，维护了进程收到的信号，&lt;code&gt;task_struce-&amp;gt;signal&lt;/code&gt; 被该进程的所有线程共享。从 &lt;strong&gt;PGID&lt;/strong&gt; 保存在 &lt;code&gt;task_struct-&amp;gt;signal-&amp;gt;pids[PIDTYPE_PGID]&lt;/code&gt;中可以看出进程组和信号处理相关。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;sid&#34;&gt;SID&lt;/h3&gt;
-&lt;ul&gt;
+&lt;h3 id=&#34;sid&#34;&gt;
+    &lt;a href=&#34;#sid&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SID
+&lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;用户一次登录所涉及所有活动称为一个会话（&lt;strong&gt;session&lt;/strong&gt;），其间产生的所有进程都有相同的会话ID（&lt;strong&gt;SID&lt;/strong&gt;），等于会话 leader 进程的  &lt;strong&gt;PID&lt;/strong&gt;。&lt;/p&gt;
 &lt;/li&gt;
@@ -2914,8 +3004,10 @@ Mapped:           761076 kB
     &gt;task_struct-&amp;gt;signal-&amp;gt;pids[PIDTYPE_SID].pid&lt;/a&gt;中。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;pidtgidpgidsid总结&#34;&gt;&lt;strong&gt;PID/TGID/PGID/SID&lt;/strong&gt;总结&lt;/h3&gt;
-&lt;p&gt;用一幅图来总结 &lt;strong&gt;PID/TGID/PGID/SID&lt;/strong&gt; ：&lt;/p&gt;
+&lt;h3 id=&#34;pidtgidpgidsid总结&#34;&gt;
+    &lt;a href=&#34;#pidtgidpgidsid%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;PID/TGID/PGID/SID&lt;/strong&gt;总结
+&lt;/h3&gt;&lt;p&gt;用一幅图来总结 &lt;strong&gt;PID/TGID/PGID/SID&lt;/strong&gt; ：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241603321.png&#34;
 	
 	
@@ -2926,10 +3018,14 @@ Mapped:           761076 kB
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;进程间关系&#34;&gt;进程间关系&lt;/h2&gt;
-&lt;p&gt;内核中所有进程的 &lt;code&gt;task_struct&lt;/code&gt; 会形成多种组织关系。根据进程的创建过程会有亲属关系，进程间的父子关系组织成一个进程树；根据用户登录活动会有会话和进程组关系。&lt;/p&gt;
-&lt;h3 id=&#34;亲属关系&#34;&gt;亲属关系&lt;/h3&gt;
-&lt;p&gt;进程通过 &lt;code&gt;fork()&lt;/code&gt; 创建出一个子进程，就形成来父子关系，如果创建出多个子进程，那么这些子进程间属于兄弟关系。可以用 &lt;code&gt;pstree&lt;/code&gt; 命令查看当前系统的进程树。&lt;/p&gt;
+&lt;h2 id=&#34;进程间关系&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%9b%e7%a8%8b%e9%97%b4%e5%85%b3%e7%b3%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    进程间关系
+&lt;/h2&gt;&lt;p&gt;内核中所有进程的 &lt;code&gt;task_struct&lt;/code&gt; 会形成多种组织关系。根据进程的创建过程会有亲属关系，进程间的父子关系组织成一个进程树；根据用户登录活动会有会话和进程组关系。&lt;/p&gt;
+&lt;h3 id=&#34;亲属关系&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%b2%e5%b1%9e%e5%85%b3%e7%b3%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    亲属关系
+&lt;/h3&gt;&lt;p&gt;进程通过 &lt;code&gt;fork()&lt;/code&gt; 创建出一个子进程，就形成来父子关系，如果创建出多个子进程，那么这些子进程间属于兄弟关系。可以用 &lt;code&gt;pstree&lt;/code&gt; 命令查看当前系统的进程树。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -2976,8 +3072,10 @@ Mapped:           761076 kB
 &gt;&lt;/p&gt;
 &lt;p&gt;当一个进程创建了子进程后，它应该通过系统调用 &lt;code&gt;wait()&lt;/code&gt; 或者 &lt;code&gt;waitpid()&lt;/code&gt; 等待子进程结束，回收子进程的资源。而子进程在结束时，会向它的父进程发送 &lt;code&gt;SIGCHLD&lt;/code&gt; 信号。因此父进程还可以注册 &lt;code&gt;SIGCHLD&lt;/code&gt; 信号的处理函数，异步回收资源。&lt;/p&gt;
 &lt;p&gt;如果父进程提前结束，那么子进程将把1号进程 &lt;code&gt;init&lt;/code&gt; 作为父进程。总之，进程都有父进程，负责进程结束后的资源回收。在子进程退出且父进程完成回收前，子进程变成僵尸进程。僵尸进程持续的时间通常比较短，在父进程回收它的资源后就会消亡。如果父进程没有处理子进程的终止，那么子进程就会一直处于僵尸状态。&lt;/p&gt;
-&lt;h3 id=&#34;会话进程组关系&#34;&gt;会话、进程组关系&lt;/h3&gt;
-&lt;p&gt;Linux 系统中可以有多个会话（&lt;strong&gt;session&lt;/strong&gt;），每个会话可以包含多个进程组，每个进程组可以包含多个进程。&lt;/p&gt;
+&lt;h3 id=&#34;会话进程组关系&#34;&gt;
+    &lt;a href=&#34;#%e4%bc%9a%e8%af%9d%e8%bf%9b%e7%a8%8b%e7%bb%84%e5%85%b3%e7%b3%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    会话、进程组关系
+&lt;/h3&gt;&lt;p&gt;Linux 系统中可以有多个会话（&lt;strong&gt;session&lt;/strong&gt;），每个会话可以包含多个进程组，每个进程组可以包含多个进程。&lt;/p&gt;
 &lt;p&gt;会话是用户登录系统到退出的所有活动，从登录到结束前创建的所有进程都属于这次会话。登录后第一个被创建的进程（通常是 &lt;code&gt;shell&lt;/code&gt;），被称为 &lt;strong&gt;会话 leader&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;进程组用于作业控制。一个终端上可以启动多个作业，也就是进程组，并能控制哪个作业在前台，前台作业可以访问终端，哪些作业运行在后台，不能读写终端。&lt;/p&gt;
 &lt;p&gt;我们来看一个会话和进程组的例子。&lt;/p&gt;
@@ -3092,12 +3190,16 @@ Mapped:           761076 kB
 &lt;p&gt;于是，Facebook的工程师 Johannes Weiner 发明了一个新的指标 &lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/accounting/psi.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;PSI(Pressure Stall Information)&lt;/a&gt;，并向内核提交了这个&lt;a class=&#34;link&#34; href=&#34;https://lwn.net/Articles/763629/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;patch&lt;/a&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;psi-概览&#34;&gt;PSI 概览&lt;/h2&gt;
-&lt;p&gt;当 CPU、内存或 IO 设备争夺激烈的时候，系统会出现负载的延迟峰值、吞吐量下降，并可能触发内核的 &lt;code&gt;OOM Killer&lt;/code&gt;。&lt;strong&gt;PSI(Pressure Stall Information)&lt;/strong&gt; 字面意思就是由于资源（CPU、内存和 IO）压力造成的任务执行停顿。&lt;strong&gt;PSI&lt;/strong&gt; 量化了由于硬件资源紧张造成的任务执行中断，统计了系统中任务等待硬件资源的时间。我们可以用 &lt;strong&gt;PSI&lt;/strong&gt; 作为指标，来衡量硬件资源的压力情况。停顿的时间越长，说明资源面临的压力越大。&lt;/p&gt;
+&lt;h2 id=&#34;psi-概览&#34;&gt;
+    &lt;a href=&#34;#psi-%e6%a6%82%e8%a7%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    PSI 概览
+&lt;/h2&gt;&lt;p&gt;当 CPU、内存或 IO 设备争夺激烈的时候，系统会出现负载的延迟峰值、吞吐量下降，并可能触发内核的 &lt;code&gt;OOM Killer&lt;/code&gt;。&lt;strong&gt;PSI(Pressure Stall Information)&lt;/strong&gt; 字面意思就是由于资源（CPU、内存和 IO）压力造成的任务执行停顿。&lt;strong&gt;PSI&lt;/strong&gt; 量化了由于硬件资源紧张造成的任务执行中断，统计了系统中任务等待硬件资源的时间。我们可以用 &lt;strong&gt;PSI&lt;/strong&gt; 作为指标，来衡量硬件资源的压力情况。停顿的时间越长，说明资源面临的压力越大。&lt;/p&gt;
 &lt;p&gt;如果持续监控 &lt;code&gt;PSI&lt;/code&gt; 指标并绘制变化曲线图，可以发现吞吐量下降与资源短缺的关系，让用户在资源变得紧张前，采取更主动的措施，例如将任务迁移到其他服务器，杀死低优先级的任务等。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;PSI&lt;/code&gt; 已经包含在 4.20及以上版本的 Linux 内核中。&lt;/p&gt;
-&lt;h2 id=&#34;psi-接口文件&#34;&gt;PSI 接口文件&lt;/h2&gt;
-&lt;p&gt;CPU、内存和 IO 的压力信息导出到了 &lt;code&gt;/proc/pressure/&lt;/code&gt; 目录下对应的文件，你可以使用 &lt;code&gt;cat&lt;/code&gt; 命令查询资源的压力统计信息：&lt;/p&gt;
+&lt;h2 id=&#34;psi-接口文件&#34;&gt;
+    &lt;a href=&#34;#psi-%e6%8e%a5%e5%8f%a3%e6%96%87%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    PSI 接口文件
+&lt;/h2&gt;&lt;p&gt;CPU、内存和 IO 的压力信息导出到了 &lt;code&gt;/proc/pressure/&lt;/code&gt; 目录下对应的文件，你可以使用 &lt;code&gt;cat&lt;/code&gt; 命令查询资源的压力统计信息：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -3128,8 +3230,10 @@ Mapped:           761076 kB
 &lt;p&gt;&lt;strong&gt;avg&lt;/strong&gt; 给出了任务由于硬件资源不可用而被停顿的时间百分比。&lt;strong&gt;avg10&lt;/strong&gt;、&lt;strong&gt;avg60&lt;/strong&gt;和&lt;strong&gt;avg300&lt;/strong&gt;分别是最近10秒、60秒和300秒的停顿时间百分比。&lt;/p&gt;
 &lt;p&gt;例如上面 &lt;code&gt;/proc/pressure/cpu&lt;/code&gt; 的输出，&lt;strong&gt;avg10=0.03&lt;/strong&gt; 意思是任务因为CPU资源的不可用，在最近的10秒内，有0.03%的时间停顿等待 CPU。如果 avg 大于 40 ，也就是有 40% 时间在等待硬件资源，就说明这种资源的压力已经比较大了。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;total&lt;/strong&gt; 是任务停顿的总时间，以微秒（microseconds）为单位。通过 total 可以检测出停顿持续太短而无法影响平均值的情况。&lt;/p&gt;
-&lt;h2 id=&#34;some-和-full-的定义&#34;&gt;some 和 full 的定义&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;some&lt;/strong&gt; 指标说明一个或多个任务由于等待资源而被停顿的时间百分比。在下图的例子中，在最近的60秒内，任务A的运行没有停顿，而由于内存紧张，任务B在运行过程中花了30秒等待内存，则 some 的值为50%。&lt;/p&gt;
+&lt;h2 id=&#34;some-和-full-的定义&#34;&gt;
+    &lt;a href=&#34;#some-%e5%92%8c-full-%e7%9a%84%e5%ae%9a%e4%b9%89&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    some 和 full 的定义
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;some&lt;/strong&gt; 指标说明一个或多个任务由于等待资源而被停顿的时间百分比。在下图的例子中，在最近的60秒内，任务A的运行没有停顿，而由于内存紧张，任务B在运行过程中花了30秒等待内存，则 some 的值为50%。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241153234.png&#34;
 	
 	
@@ -3165,8 +3269,10 @@ Mapped:           761076 kB
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;理解了 &lt;strong&gt;some&lt;/strong&gt; 和 &lt;strong&gt;full&lt;/strong&gt; 的含义，就明白了 CPU 为什么没有 &lt;strong&gt;full&lt;/strong&gt; 指标，因为不可能所有的任务都同时饿死在 CPU 上，CPU 总是在执行一个任务。&lt;/p&gt;
-&lt;h2 id=&#34;psi-阈值监控&#34;&gt;PSI 阈值监控&lt;/h2&gt;
-&lt;p&gt;用户可以向 PSI 注册触发器，在资源压力超过自定义的阈值时获得通知。一个触发器定义了特定时间窗口内最大累积停顿时间，例如，在任何 500ms 的窗口内，累计 100ms 的停顿时间会产生一个通知事件。&lt;/p&gt;
+&lt;h2 id=&#34;psi-阈值监控&#34;&gt;
+    &lt;a href=&#34;#psi-%e9%98%88%e5%80%bc%e7%9b%91%e6%8e%a7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    PSI 阈值监控
+&lt;/h2&gt;&lt;p&gt;用户可以向 PSI 注册触发器，在资源压力超过自定义的阈值时获得通知。一个触发器定义了特定时间窗口内最大累积停顿时间，例如，在任何 500ms 的窗口内，累计 100ms 的停顿时间会产生一个通知事件。&lt;/p&gt;
 &lt;p&gt;如何向 PSI 注册触发器呢？打开 &lt;code&gt;/proc/pressure/&lt;/code&gt; 目录下资源对应的 PSI 接口文件，写入想要的阈值和时间窗口，然后在打开的文件描述符上使用 &lt;code&gt;select()&lt;/code&gt;、&lt;code&gt;poll()&lt;/code&gt; 或 &lt;code&gt;epoll()&lt;/code&gt; 方法等待通知事件。写入 PSI 接口文件的数据格式为：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -3323,8 +3429,10 @@ Mapped:           761076 kB
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;psi-应用案例&#34;&gt;PSI 应用案例&lt;/h2&gt;
-&lt;p&gt;Facebook 是因为一些实际的需求开发了 PSI。其中一个案例是为了避免内核 OOM(Out-Of-Memory) killer 的触发。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;psi-应用案例&#34;&gt;
+    &lt;a href=&#34;#psi-%e5%ba%94%e7%94%a8%e6%a1%88%e4%be%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    PSI 应用案例
+&lt;/h2&gt;&lt;p&gt;Facebook 是因为一些实际的需求开发了 PSI。其中一个案例是为了避免内核 OOM(Out-Of-Memory) killer 的触发。&lt;/p&gt;
 &lt;p&gt;应用在申请内存的时候，如果没有足够的 free 内存，可以通过回收 &lt;strong&gt;Page Cache&lt;/strong&gt; 释放内存，如果这时 free 内存还是不够，就会触发内核的 OOM Killer，挑选一个进程 kill 掉释放内存。这个过程是同步的，申请分配内存的进程一直被阻塞等待，而且内核选择 kill 掉哪个进程释放内存，用户不可控。因此，Facebook 开发了用户空间的 OOM Killer 工具 &lt;a class=&#34;link&#34; href=&#34;https://github.com/facebookincubator/oomd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;oomd&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/facebookincubator/oomd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -3340,8 +3448,10 @@ Mapped:           761076 kB
         
         <guid>https://mazhen.tech/p/%E7%90%86%E8%A7%A3linux-%E7%BB%88%E7%AB%AF%E7%BB%88%E7%AB%AF%E6%A8%A1%E6%8B%9F%E5%99%A8%E5%92%8C%E4%BC%AA%E7%BB%88%E7%AB%AF/</guid>
         <description>&lt;p&gt;你可能听说过 &lt;strong&gt;TTY&lt;/strong&gt; 和 &lt;strong&gt;PTY&lt;/strong&gt; 这些缩写，也在 &lt;code&gt;/dev&lt;/code&gt; 目录下看到过 &lt;code&gt;/dev/tty[n]&lt;/code&gt; 设备，大概知道它们和 Linux 终端的概念有关。可是你清楚 &lt;code&gt;TTY&lt;/code&gt;、&lt;code&gt;PTY&lt;/code&gt; 具体指的是什么，它们有什么区别，以及它们和 &lt;code&gt;shell&lt;/code&gt; 又是什么关系呢？为了理解这些，我们需要先回顾一下历史。&lt;/p&gt;
-&lt;h2 id=&#34;回顾历史&#34;&gt;回顾历史&lt;/h2&gt;
-&lt;p&gt;在计算机诞生之前，人们发明了 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Teleprinter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;回顾历史&#34;&gt;
+    &lt;a href=&#34;#%e5%9b%9e%e9%a1%be%e5%8e%86%e5%8f%b2&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    回顾历史
+&lt;/h2&gt;&lt;p&gt;在计算机诞生之前，人们发明了 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Teleprinter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Teleprinter(电传打字机)&lt;/a&gt;，通过长长的电线点对点连接，发送和接收打印的信息，用于远距离传输电报信息。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241147437.jpg&#34;
 	
@@ -3378,8 +3488,10 @@ Mapped:           761076 kB
 &lt;p&gt;电传打字机通过两根电缆连接：一根用于向计算机发送指令，一根用于接收计算机的输出。这两根电缆插入 &lt;strong&gt;UART&lt;/strong&gt; （Universal Asynchronous Receiver and Transmitter，通用异步接收和发送器）的串行接口连接到计算机。&lt;/p&gt;
 &lt;p&gt;操作系统包含一个 &lt;code&gt;UART&lt;/code&gt; 驱动程序，管理字节的物理传输，包括奇偶校验和流量控制。然后输入的字符序列被传递给 &lt;code&gt;TTY&lt;/code&gt; 驱动，该驱动包含一个 &lt;strong&gt;line discipline&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;line discipline&lt;/strong&gt; 负责转换特殊字符（如退格、擦除字、清空行），并将收到的内容回传给电传打字机，以便用户可以看到输入的内容。&lt;strong&gt;line discipline&lt;/strong&gt; 还负责对字符进行缓冲，当按下回车键时，缓冲的数据被传递给与 &lt;code&gt;TTY&lt;/code&gt; 相关的前台用户进程。用户可以并行的执行几个进程，但每次只与一个进程交互，其他进程在后台工作。&lt;/p&gt;
-&lt;h2 id=&#34;终端模拟器terminal-emulator&#34;&gt;终端模拟器(terminal emulator)&lt;/h2&gt;
-&lt;p&gt;今天电传打字机已经进了博物馆，但 Linux/Unix 仍然保留了当初 TTY驱动和 &lt;strong&gt;line discipline&lt;/strong&gt; 的设计和功能。终端不再是一个需要通过 UART 连接到计算机上物理设备。终端成为内核的一个模块，它可以直接向 TTY 驱动发送字符，并从 TTY 驱动读取响应然后打印到屏幕上。也就是说，用内核模块模拟物理终端设备，因此被称为&lt;strong&gt;终端模拟器&lt;/strong&gt;(terminal emulator)。&lt;/p&gt;
+&lt;h2 id=&#34;终端模拟器terminal-emulator&#34;&gt;
+    &lt;a href=&#34;#%e7%bb%88%e7%ab%af%e6%a8%a1%e6%8b%9f%e5%99%a8terminal-emulator&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    终端模拟器(terminal emulator)
+&lt;/h2&gt;&lt;p&gt;今天电传打字机已经进了博物馆，但 Linux/Unix 仍然保留了当初 TTY驱动和 &lt;strong&gt;line discipline&lt;/strong&gt; 的设计和功能。终端不再是一个需要通过 UART 连接到计算机上物理设备。终端成为内核的一个模块，它可以直接向 TTY 驱动发送字符，并从 TTY 驱动读取响应然后打印到屏幕上。也就是说，用内核模块模拟物理终端设备，因此被称为&lt;strong&gt;终端模拟器&lt;/strong&gt;(terminal emulator)。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241149126.png&#34;
 	
 	
@@ -3448,8 +3560,10 @@ Mapped:           761076 kB
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;再按 &lt;code&gt;Ctrl+Alt+F4&lt;/code&gt; 切换到 tty4，能看到从 tty3 发送来的信息。&lt;/p&gt;
-&lt;h2 id=&#34;伪终端pseudo-terminal-pty&#34;&gt;伪终端（pseudo terminal, PTY）&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;终端模拟器(terminal emulator)&lt;/strong&gt; 是运行在内核的模块，我们也可以让终端模拟程序运行在用户区。运行在用户区的终端模拟程序，就被称为&lt;strong&gt;伪终端（pseudo terminal, PTY）&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;伪终端pseudo-terminal-pty&#34;&gt;
+    &lt;a href=&#34;#%e4%bc%aa%e7%bb%88%e7%ab%afpseudo-terminal-pty&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    伪终端（pseudo terminal, PTY）
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;终端模拟器(terminal emulator)&lt;/strong&gt; 是运行在内核的模块，我们也可以让终端模拟程序运行在用户区。运行在用户区的终端模拟程序，就被称为&lt;strong&gt;伪终端（pseudo terminal, PTY）&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;PTY 运行在用户区，更加安全和灵活，同时仍然保留了 TTY 驱动和 &lt;strong&gt;line discipline&lt;/strong&gt; 的功能。常用的伪终端有 xterm，gnome-terminal，以及远程终端 ssh。我们以 Ubuntu 桌面版提供的 gnome-terminal 为例，介绍伪终端如何与 TTY 驱动交互。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241149477.png&#34;
 	
@@ -3507,12 +3621,16 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;li&gt;TTY 驱动将字符复制到&lt;code&gt;PTY master&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;gnome-terminal&lt;/code&gt; 循环从 &lt;code&gt;PTY master&lt;/code&gt; 读取字节，绘制到用户界面上。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;shell&#34;&gt;Shell&lt;/h2&gt;
-&lt;p&gt;我们经常不去区分 terminal 和 Shell，会说打开一个 terminal，或打开一个 Shell。从前面介绍的命令执行过程可以看出，Shell 不处理键盘事件，也不负责字符的显示，这是 terminal 要为它处理好的。&lt;/p&gt;
+&lt;h2 id=&#34;shell&#34;&gt;
+    &lt;a href=&#34;#shell&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Shell
+&lt;/h2&gt;&lt;p&gt;我们经常不去区分 terminal 和 Shell，会说打开一个 terminal，或打开一个 Shell。从前面介绍的命令执行过程可以看出，Shell 不处理键盘事件，也不负责字符的显示，这是 terminal 要为它处理好的。&lt;/p&gt;
 &lt;p&gt;Shell是用户空间的应用程序，通常由 terminal fork出来，是 terminal 的子进程。Shell用来提示用户输入，解释用户输入的字符，然后处理来自底层操作系统的输出。&lt;/p&gt;
 &lt;p&gt;通常我们使用较多的 shell 有 Bash、Zsh 和 sh。&lt;/p&gt;
-&lt;h2 id=&#34;配置-tty-设备&#34;&gt;配置 TTY 设备&lt;/h2&gt;
-&lt;p&gt;内核将使用 TTY 驱动来处理 terminal 和 Shell 之间的通信。&lt;strong&gt;line discipline&lt;/strong&gt; 是 TTY 驱动的一个逻辑组件。&lt;strong&gt;line discipline&lt;/strong&gt; 主要有以下功能：&lt;/p&gt;
+&lt;h2 id=&#34;配置-tty-设备&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e7%bd%ae-tty-%e8%ae%be%e5%a4%87&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配置 TTY 设备
+&lt;/h2&gt;&lt;p&gt;内核将使用 TTY 驱动来处理 terminal 和 Shell 之间的通信。&lt;strong&gt;line discipline&lt;/strong&gt; 是 TTY 驱动的一个逻辑组件。&lt;strong&gt;line discipline&lt;/strong&gt; 主要有以下功能：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;当用户输入时，字符会被回传到&lt;code&gt;PTY master&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;line discipline&lt;/strong&gt; 会在内存中缓冲这些字符。当用户按回车键时，它才将这些字符发送到&lt;code&gt;PTY slave&lt;/code&gt;&lt;/li&gt;
@@ -3591,8 +3709,10 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以通过 &lt;code&gt;stty raw&lt;/code&gt; 命令来禁用所有的 &lt;strong&gt;line discipline&lt;/strong&gt; 规则，这样的终端被称为 &lt;code&gt;raw terminal&lt;/code&gt;。像 vi 这样的编辑器会将终端设置为 raw ，因为它需要自己处理字符。后面介绍的远程终端也是需要一个 &lt;code&gt;raw terminal&lt;/code&gt;，同样会禁用所有的 &lt;strong&gt;line discipline&lt;/strong&gt; 规则。&lt;/p&gt;
-&lt;h2 id=&#34;远程终端&#34;&gt;远程终端&lt;/h2&gt;
-&lt;p&gt;我们经常通过 ssh 连接到一个远程主机，这时候远程主机上的 &lt;code&gt;ssh server&lt;/code&gt; 就是一个伪终端 PTY，它同样持有 &lt;code&gt;PTY master&lt;/code&gt;，但 &lt;code&gt;ssh server&lt;/code&gt; 不再监听键盘事件，以及在屏幕上绘制输出结果，而是通过 TCP 连接，向 &lt;code&gt;ssh client&lt;/code&gt; 发送或接收字符。&lt;/p&gt;
+&lt;h2 id=&#34;远程终端&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%9c%e7%a8%8b%e7%bb%88%e7%ab%af&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    远程终端
+&lt;/h2&gt;&lt;p&gt;我们经常通过 ssh 连接到一个远程主机，这时候远程主机上的 &lt;code&gt;ssh server&lt;/code&gt; 就是一个伪终端 PTY，它同样持有 &lt;code&gt;PTY master&lt;/code&gt;，但 &lt;code&gt;ssh server&lt;/code&gt; 不再监听键盘事件，以及在屏幕上绘制输出结果，而是通过 TCP 连接，向 &lt;code&gt;ssh client&lt;/code&gt; 发送或接收字符。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241150827.png&#34;
 	
 	
@@ -3623,8 +3743,10 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;注意在客户端，我们在屏幕上看到的所有字符都来自于远程服务器。包括我们输入的内容，也是远程服务器上的 &lt;strong&gt;line discipline&lt;/strong&gt; 应用 &lt;code&gt;echo&lt;/code&gt; 规则的结果，将这些字符回显了回来。表面看似简单的在远程终端上执行了一条命令，实际上底下确是波涛汹涌。&lt;/p&gt;
-&lt;h2 id=&#34;写在最后&#34;&gt;写在最后&lt;/h2&gt;
-&lt;p&gt;简单回顾总结一下本文的主要内容：&lt;/p&gt;
+&lt;h2 id=&#34;写在最后&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%9c%a8%e6%9c%80%e5%90%8e&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写在最后
+&lt;/h2&gt;&lt;p&gt;简单回顾总结一下本文的主要内容：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;电传打字机（TTY）是物理设备，最初是为电报设计的，后来被连接到计算机上，发送输入和获取输出。&lt;/li&gt;
 &lt;li&gt;电传打字机（TTY）现在被运行在内核中的模块所模拟，被称为&lt;strong&gt;终端模拟器(terminal emulator)&lt;/strong&gt;。&lt;/li&gt;
@@ -3647,8 +3769,10 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
         <description>&lt;p&gt;操作系统内核对应用开发工程师来说就像一个黑盒，似乎很难窥探到其内部的运行机制。其实Linux内核很早就内置了一个强大的tracing工具：&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/trace/ftrace.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Ftrace&lt;/a&gt;，它几乎可以跟踪内核的所有函数，不仅可以用于调试和分析，还可以用于观察学习Linux内核的内部运行。虽然&lt;code&gt;Ftrace&lt;/code&gt;在&lt;a class=&#34;link&#34; href=&#34;https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=16444a8a40d4c7b4f6de34af0cae1f76a4f6c901&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;2008年就加入了内核&lt;/a&gt;，但很多应用开发工程师仍然不知道它的存在。本文就给你介绍一下&lt;code&gt;Ftrace&lt;/code&gt;的基本使用。&lt;/p&gt;
-&lt;h2 id=&#34;ftrace初体验&#34;&gt;Ftrace初体验&lt;/h2&gt;
-&lt;p&gt;先用一个例子体验一下&lt;code&gt;Ftrace&lt;/code&gt;的使用简单，且功能强大。使用 root 用户进入&lt;code&gt;/sys/kernel/debug/tracing&lt;/code&gt;目录，执行 &lt;code&gt;echo&lt;/code&gt; 和 &lt;code&gt;cat&lt;/code&gt; 命令：&lt;/p&gt;
+&lt;h2 id=&#34;ftrace初体验&#34;&gt;
+    &lt;a href=&#34;#ftrace%e5%88%9d%e4%bd%93%e9%aa%8c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Ftrace初体验
+&lt;/h2&gt;&lt;p&gt;先用一个例子体验一下&lt;code&gt;Ftrace&lt;/code&gt;的使用简单，且功能强大。使用 root 用户进入&lt;code&gt;/sys/kernel/debug/tracing&lt;/code&gt;目录，执行 &lt;code&gt;echo&lt;/code&gt; 和 &lt;code&gt;cat&lt;/code&gt; 命令：&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;
 # &lt;b&gt;echo _do_fork &gt; set_graph_function&lt;/b&gt;
 # &lt;b&gt;echo function_graph &gt; current_tracer&lt;/b&gt;
@@ -3688,8 +3812,10 @@ gnome-terminal 负责监听键盘事件，通过&lt;code&gt;PTY master&lt;/code&
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;Ftrace&lt;/code&gt; 的 &lt;code&gt;function_graph&lt;/code&gt; 功能，可以查看内核函数的子函数调用链，帮助我们理解复杂的代码流程，而这只是 &lt;code&gt;Ftrace&lt;/code&gt; 的功能之一。这么强大的功能，我们不必安装额外的用户空间工具，只要使用 &lt;code&gt;echo&lt;/code&gt; 和 &lt;code&gt;cat&lt;/code&gt; 命令访问特定的文件就能实现。&lt;code&gt;Ftrace&lt;/code&gt; 对用户的使用接口正是&lt;strong&gt;tracefs&lt;/strong&gt;文件系统。&lt;/p&gt;
-&lt;h2 id=&#34;tracefs-文件系统&#34;&gt;tracefs 文件系统&lt;/h2&gt;
-&lt;p&gt;用户通过&lt;strong&gt;tracefs&lt;/strong&gt;文件系统使用&lt;code&gt;Ftrace&lt;/code&gt;，这很符合一切皆文件的Linux哲学。&lt;strong&gt;tracefs&lt;/strong&gt;文件系统一般挂载在&lt;code&gt;/sys/kernel/tracing&lt;/code&gt;目录。由于&lt;code&gt;Ftrace&lt;/code&gt;最初是&lt;code&gt;debugfs&lt;/code&gt;文件系统的一部分，后来才被拆分为自己的&lt;code&gt;tracefs&lt;/code&gt;。所以如果系统已经挂载了&lt;code&gt;debugfs&lt;/code&gt;，那么仍然会保留原来的目录结构，将&lt;code&gt;tracefs&lt;/code&gt;挂载到&lt;code&gt;debugfs&lt;/code&gt;的子目录下。我们可以使用 &lt;code&gt;mount&lt;/code&gt; 命令查看当前系统&lt;code&gt;debugfs&lt;/code&gt;和&lt;code&gt;tracefs&lt;/code&gt;挂载点：&lt;/p&gt;
+&lt;h2 id=&#34;tracefs-文件系统&#34;&gt;
+    &lt;a href=&#34;#tracefs-%e6%96%87%e4%bb%b6%e7%b3%bb%e7%bb%9f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    tracefs 文件系统
+&lt;/h2&gt;&lt;p&gt;用户通过&lt;strong&gt;tracefs&lt;/strong&gt;文件系统使用&lt;code&gt;Ftrace&lt;/code&gt;，这很符合一切皆文件的Linux哲学。&lt;strong&gt;tracefs&lt;/strong&gt;文件系统一般挂载在&lt;code&gt;/sys/kernel/tracing&lt;/code&gt;目录。由于&lt;code&gt;Ftrace&lt;/code&gt;最初是&lt;code&gt;debugfs&lt;/code&gt;文件系统的一部分，后来才被拆分为自己的&lt;code&gt;tracefs&lt;/code&gt;。所以如果系统已经挂载了&lt;code&gt;debugfs&lt;/code&gt;，那么仍然会保留原来的目录结构，将&lt;code&gt;tracefs&lt;/code&gt;挂载到&lt;code&gt;debugfs&lt;/code&gt;的子目录下。我们可以使用 &lt;code&gt;mount&lt;/code&gt; 命令查看当前系统&lt;code&gt;debugfs&lt;/code&gt;和&lt;code&gt;tracefs&lt;/code&gt;挂载点：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -3728,8 +3854,10 @@ kprobe_events               set_graph_notrace       uprobe_events
 kprobe_profile              snapshot                uprobe_profile
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;本文后面的示例假定你已经处在了&lt;code&gt;/sys/kernel/tracing&lt;/code&gt;或&lt;code&gt;/sys/kernel/debug/tracing&lt;/code&gt;目录下。&lt;/p&gt;
-&lt;h2 id=&#34;函数跟踪&#34;&gt;函数跟踪&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Ftrace&lt;/code&gt; 实际上代表的就是&lt;code&gt;function trace&lt;/code&gt;（函数跟踪），因此函数追踪是&lt;code&gt;Ftrace&lt;/code&gt;最初的一个主要功能。&lt;/p&gt;
+&lt;h2 id=&#34;函数跟踪&#34;&gt;
+    &lt;a href=&#34;#%e5%87%bd%e6%95%b0%e8%b7%9f%e8%b8%aa&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    函数跟踪
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Ftrace&lt;/code&gt; 实际上代表的就是&lt;code&gt;function trace&lt;/code&gt;（函数跟踪），因此函数追踪是&lt;code&gt;Ftrace&lt;/code&gt;最初的一个主要功能。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Ftrace&lt;/code&gt; 可以跟踪几乎所有内核函数调用的详细信息，这是怎么做到的呢？简单来说，在编译内核的时候使用了 &lt;code&gt;gcc&lt;/code&gt; 的 &lt;code&gt;-pg&lt;/code&gt; 选项，编译器会在每个内核函数的入口处调用一个特殊的汇编函数“&lt;strong&gt;mcount&lt;/strong&gt;” 或 “&lt;strong&gt;__fentry__&lt;/strong&gt;”，如果跟踪功能被打开，&lt;code&gt;mcount/fentry&lt;/code&gt; 会调用当前设置的 &lt;code&gt;tracer&lt;/code&gt;，&lt;code&gt;tracer&lt;/code&gt;将不同的数据写入&lt;strong&gt;ring buffer&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241145662.png&#34;
 	
@@ -3818,8 +3946,10 @@ nostacktrace
 &lt;pre&gt;&lt;code&gt;
 # &lt;b&gt;echo &gt; set_ftrace_pid&lt;/b&gt;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;ftrace-function_graph&#34;&gt;Ftrace function_graph&lt;/h2&gt;
-&lt;p&gt;文章开始例子已经展示过，&lt;code&gt;function_graph&lt;/code&gt; 可以打印出函数的调用图，揭示代码的流程。&lt;code&gt;function_graph&lt;/code&gt; 不仅跟踪函数的输入，而且跟踪函数的返回，这使得 tracer 能够知道被调用的函数的深度。&lt;code&gt;function_graph&lt;/code&gt; 可以让人更容易跟踪内核的执行流程。&lt;/p&gt;
+&lt;h2 id=&#34;ftrace-function_graph&#34;&gt;
+    &lt;a href=&#34;#ftrace-function_graph&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Ftrace function_graph
+&lt;/h2&gt;&lt;p&gt;文章开始例子已经展示过，&lt;code&gt;function_graph&lt;/code&gt; 可以打印出函数的调用图，揭示代码的流程。&lt;code&gt;function_graph&lt;/code&gt; 不仅跟踪函数的输入，而且跟踪函数的返回，这使得 tracer 能够知道被调用的函数的深度。&lt;code&gt;function_graph&lt;/code&gt; 可以让人更容易跟踪内核的执行流程。&lt;/p&gt;
 &lt;p&gt;我们再看一个例子：&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;
 # &lt;b&gt;echo try_to_wake_up &gt; set_graph_function&lt;/b&gt;
@@ -3858,8 +3988,10 @@ nostacktrace
 &lt;li&gt;&lt;strong&gt;!&lt;/strong&gt; ：延迟大于 100 μs&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;+&lt;/strong&gt; ：延迟大于 10 μs&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;函数profiler&#34;&gt;函数Profiler&lt;/h2&gt;
-&lt;p&gt;函数Profiler提供了内核函数调用的统计数据，可以观察哪些内核函数正在被使用，并能发现哪些函数的执行耗时最长。&lt;/p&gt;
+&lt;h2 id=&#34;函数profiler&#34;&gt;
+    &lt;a href=&#34;#%e5%87%bd%e6%95%b0profiler&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    函数Profiler
+&lt;/h2&gt;&lt;p&gt;函数Profiler提供了内核函数调用的统计数据，可以观察哪些内核函数正在被使用，并能发现哪些函数的执行耗时最长。&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;
 # echo nop &gt; current_tracer
 # echo 1 &gt; function_profile_enabled
@@ -3922,8 +4054,10 @@ function0  function1  function2  function3
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;第一行是每一列的名称，分别是函数名称（Function），调用次数（Hit），函数的总时间（Time）、平均函数时间（Avg）和标准差（s^2）。输出结果显示，&lt;code&gt;tcp_sendmsg()&lt;/code&gt; 在3个 CPU 上都是最频繁的，&lt;code&gt;tcp_v4_rcv()&lt;/code&gt; 在 CPU2 上被调用了1618次，平均延迟为 &lt;code&gt;17.218 us&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;最后要注意一点，在使用 Ftrace Profiler 时，尽量通过 &lt;code&gt;set_ftrace_filter&lt;/code&gt; 限制 profile 的范围，避免对所有的内核函数都进行 profile。&lt;/p&gt;
-&lt;h2 id=&#34;追踪点-tracepoints&#34;&gt;追踪点 Tracepoints&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Tracepoints&lt;/strong&gt;是内核的静态埋点。内核维护者在他认为重要的位置放置静态 tracepoints 记录上下文信息，方便后续排查问题。例如系统调用的开始和结束，中断被触发，网络数据包发送等等。&lt;/p&gt;
+&lt;h2 id=&#34;追踪点-tracepoints&#34;&gt;
+    &lt;a href=&#34;#%e8%bf%bd%e8%b8%aa%e7%82%b9-tracepoints&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    追踪点 Tracepoints
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Tracepoints&lt;/strong&gt;是内核的静态埋点。内核维护者在他认为重要的位置放置静态 tracepoints 记录上下文信息，方便后续排查问题。例如系统调用的开始和结束，中断被触发，网络数据包发送等等。&lt;/p&gt;
 &lt;p&gt;在Linux的早期，内核维护者就一直想在内核中加入静态 tracepoints，尝试过各种策略。Ftrace 创造了&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/trace/events.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Event Tracing&lt;/a&gt; 基础设施，让开发者使用 &lt;a class=&#34;link&#34; href=&#34;https://lwn.net/Articles/379903/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;TRACE_EVENT() 宏添加内核 tracepoints&lt;/a&gt;，不用创建自定义内核模块，使用 &lt;code&gt;Event Tracing&lt;/code&gt; 基础设施来注册埋点函数。&lt;/p&gt;
@@ -4116,8 +4250,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.kernel.org/doc/html/latest/trace/events.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Event Tracing&lt;/a&gt; 基础设施应该是 Ftrace 的另一大贡献，它提供的 &lt;code&gt;TRACE_EVENT&lt;/code&gt; 宏统一了内核 tracepoint 的实现方式，为 tracepoint events 提供了基础支持。&lt;a class=&#34;link&#34; href=&#34;https://perf.wiki.kernel.org/index.php/Main_Page&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf&lt;/a&gt; 的 tracepoint events 也是基于 Ftrace 实现的。&lt;/p&gt;
-&lt;h2 id=&#34;利用-tracepoints-理解内核代码&#34;&gt;利用 Tracepoints 理解内核代码&lt;/h2&gt;
-&lt;p&gt;由于 tracepoints 是内核维护者在流程重要位置设置的埋点，因此我们可以从 tracepoints 入手来学习内核代码。所有的 tracepoints 都定义在 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/include/trace/events&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;利用-tracepoints-理解内核代码&#34;&gt;
+    &lt;a href=&#34;#%e5%88%a9%e7%94%a8-tracepoints-%e7%90%86%e8%a7%a3%e5%86%85%e6%a0%b8%e4%bb%a3%e7%a0%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    利用 Tracepoints 理解内核代码
+&lt;/h2&gt;&lt;p&gt;由于 tracepoints 是内核维护者在流程重要位置设置的埋点，因此我们可以从 tracepoints 入手来学习内核代码。所有的 tracepoints 都定义在 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/include/trace/events&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;include/trace/events/&lt;/a&gt; 目录下的头文件中，例如进程调度相关的 tracepoints 定义在 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/master/include/trace/events/sched.h&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;include/trace/events/sched.h&lt;/a&gt;中，我们以 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/bcf876870b95592b52519ed4aafcf9d95999bc9c/include/trace/events/sched.h#L138&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;sched_switch&lt;/a&gt; 为例：&lt;/p&gt;
@@ -4190,8 +4326,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;这样我们就找到了 scheduler 的主流程，可以从这里开始阅读进程调度的源码。&lt;/p&gt;
-&lt;h2 id=&#34;写在最后&#34;&gt;写在最后&lt;/h2&gt;
-&lt;p&gt;Ftrace 就包含在内核源码中 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/kernel/trace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;写在最后&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%9c%a8%e6%9c%80%e5%90%8e&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写在最后
+&lt;/h2&gt;&lt;p&gt;Ftrace 就包含在内核源码中 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/kernel/trace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;kernel/trace&lt;/a&gt;，理解了 Ftrace 内核不再是黑箱，你会有豁然开朗的感觉，内核源码忽然有条理了起来。让我们从 Ftrace 开始内核探索之旅吧。&lt;/p&gt;
 </description>
         </item>
@@ -4217,10 +4355,14 @@ btrfs:btrfs_get_extent_show_fi_inline
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;本文将介绍如何在本机搭建Linux内核调试环境，步骤比较繁琐，还会涉及到编译内核。作为内核小白，我会尽量写的详细些，毕竟我折腾了很久才成功。&lt;/p&gt;
-&lt;h2 id=&#34;本机环境&#34;&gt;本机环境&lt;/h2&gt;
-&lt;p&gt;我使用的&lt;code&gt;Ubuntu 20.04.2 LTS&lt;/code&gt;，&lt;code&gt;gdb&lt;/code&gt;版本为9.2。&lt;/p&gt;
-&lt;h2 id=&#34;安装qemukvm和virsh&#34;&gt;安装QEMU/KVM和Virsh&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Virsh&lt;/strong&gt;是&lt;code&gt;Virtual Shell&lt;/code&gt;的缩写，是一个用于管理虚拟机的命令行工具。你可以使用&lt;strong&gt;Virsh&lt;/strong&gt;创建、编辑、启动、停止、关闭和删除&lt;strong&gt;VM&lt;/strong&gt;。&lt;strong&gt;Virsh&lt;/strong&gt;目前支持&lt;code&gt;KVM&lt;/code&gt;，&lt;code&gt;LXC&lt;/code&gt;，&lt;code&gt;Xen&lt;/code&gt;，&lt;code&gt;QEMU&lt;/code&gt;，&lt;code&gt;OpenVZ&lt;/code&gt;，&lt;code&gt;VirtualBox&lt;/code&gt;和&lt;code&gt;VMware ESX&lt;/code&gt;。这里我们使用&lt;strong&gt;Virsh&lt;/strong&gt;管理&lt;strong&gt;QEMU/KVM&lt;/strong&gt;虚拟机。&lt;/p&gt;
+&lt;h2 id=&#34;本机环境&#34;&gt;
+    &lt;a href=&#34;#%e6%9c%ac%e6%9c%ba%e7%8e%af%e5%a2%83&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    本机环境
+&lt;/h2&gt;&lt;p&gt;我使用的&lt;code&gt;Ubuntu 20.04.2 LTS&lt;/code&gt;，&lt;code&gt;gdb&lt;/code&gt;版本为9.2。&lt;/p&gt;
+&lt;h2 id=&#34;安装qemukvm和virsh&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%89%e8%a3%85qemukvm%e5%92%8cvirsh&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    安装QEMU/KVM和Virsh
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Virsh&lt;/strong&gt;是&lt;code&gt;Virtual Shell&lt;/code&gt;的缩写，是一个用于管理虚拟机的命令行工具。你可以使用&lt;strong&gt;Virsh&lt;/strong&gt;创建、编辑、启动、停止、关闭和删除&lt;strong&gt;VM&lt;/strong&gt;。&lt;strong&gt;Virsh&lt;/strong&gt;目前支持&lt;code&gt;KVM&lt;/code&gt;，&lt;code&gt;LXC&lt;/code&gt;，&lt;code&gt;Xen&lt;/code&gt;，&lt;code&gt;QEMU&lt;/code&gt;，&lt;code&gt;OpenVZ&lt;/code&gt;，&lt;code&gt;VirtualBox&lt;/code&gt;和&lt;code&gt;VMware ESX&lt;/code&gt;。这里我们使用&lt;strong&gt;Virsh&lt;/strong&gt;管理&lt;strong&gt;QEMU/KVM&lt;/strong&gt;虚拟机。&lt;/p&gt;
 &lt;p&gt;在安装之前，首先要确认你的&lt;code&gt;CPU&lt;/code&gt;是否支持虚拟化技术。使用&lt;code&gt;grep&lt;/code&gt;查看&lt;code&gt;cpuinfo&lt;/code&gt;是否有&amp;quot;&lt;strong&gt;vmx&lt;/strong&gt;&amp;quot;(Intel-VT 技术)或&amp;quot;&lt;strong&gt;svm&lt;/strong&gt;&amp;quot;(AMD-V 支持)输出：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -4284,8 +4426,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo systemctl start libvirtd
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;创建虚拟机镜像&#34;&gt;创建虚拟机镜像&lt;/h2&gt;
-&lt;p&gt;创建一个虚拟机镜像，大小为40G，&lt;strong&gt;qcow2&lt;/strong&gt; 格式为动态分配磁盘占用空间。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;创建虚拟机镜像&#34;&gt;
+    &lt;a href=&#34;#%e5%88%9b%e5%bb%ba%e8%99%9a%e6%8b%9f%e6%9c%ba%e9%95%9c%e5%83%8f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    创建虚拟机镜像
+&lt;/h2&gt;&lt;p&gt;创建一个虚拟机镜像，大小为40G，&lt;strong&gt;qcow2&lt;/strong&gt; 格式为动态分配磁盘占用空间。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -4294,8 +4438,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;qemu-img create -f qcow2 ubuntutest.img 40G
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;创建虚拟机安装操作系统&#34;&gt;创建虚拟机，安装操作系统&lt;/h2&gt;
-&lt;p&gt;使用下面的命令启动虚拟机，&lt;strong&gt;-cdrom&lt;/strong&gt;参数为虚拟机挂载了&lt;code&gt;Ubuntu&lt;/code&gt;的安装光盘：&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;创建虚拟机安装操作系统&#34;&gt;
+    &lt;a href=&#34;#%e5%88%9b%e5%bb%ba%e8%99%9a%e6%8b%9f%e6%9c%ba%e5%ae%89%e8%a3%85%e6%93%8d%e4%bd%9c%e7%b3%bb%e7%bb%9f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    创建虚拟机，安装操作系统
+&lt;/h2&gt;&lt;p&gt;使用下面的命令启动虚拟机，&lt;strong&gt;-cdrom&lt;/strong&gt;参数为虚拟机挂载了&lt;code&gt;Ubuntu&lt;/code&gt;的安装光盘：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -4336,8 +4482,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;qemu-system-x86_64 -enable-kvm -name ubuntutest  -m 4096 -hda ubuntutest.img -boot d -vnc :19
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;配置虚拟机网络&#34;&gt;配置虚拟机网络&lt;/h2&gt;
-&lt;p&gt;为了让虚拟机能访问外部网络，我们需要形成下面的结构：&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;配置虚拟机网络&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e7%bd%ae%e8%99%9a%e6%8b%9f%e6%9c%ba%e7%bd%91%e7%bb%9c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配置虚拟机网络
+&lt;/h2&gt;&lt;p&gt;为了让虚拟机能访问外部网络，我们需要形成下面的结构：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241140591.png&#34;
 	
 	
@@ -4575,8 +4723,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;我们可以看到，网关配置的就是&lt;strong&gt;br0&lt;/strong&gt;的&lt;code&gt;IP&lt;/code&gt;地址。然后，使用命令 &lt;strong&gt;netplan apply&lt;/strong&gt;让配置生效。这样，虚拟机的网络就配置好了，可以在虚拟机里访问到外网。这时我们就可以在宿主机上使用&lt;strong&gt;ssh&lt;/strong&gt;登录虚拟机，这样比使用&lt;strong&gt;VNC Viewer&lt;/strong&gt;操作更方便一些。&lt;/p&gt;
-&lt;h2 id=&#34;下载linux内核源码&#34;&gt;下载Linux内核源码&lt;/h2&gt;
-&lt;p&gt;在虚拟机上下载Linux内核源码：&lt;/p&gt;
+&lt;h2 id=&#34;下载linux内核源码&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%8b%e8%bd%bdlinux%e5%86%85%e6%a0%b8%e6%ba%90%e7%a0%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    下载Linux内核源码
+&lt;/h2&gt;&lt;p&gt;在虚拟机上下载Linux内核源码：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -4596,8 +4746,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;内核源码被解压缩到了&lt;code&gt;/usr/src/linux-source-5.4.0&lt;/code&gt;目录下。&lt;/p&gt;
-&lt;h2 id=&#34;编译linux内核&#34;&gt;编译Linux内核&lt;/h2&gt;
-&lt;p&gt;首先我们需要安装编译内核用到的依赖包：&lt;/p&gt;
+&lt;h2 id=&#34;编译linux内核&#34;&gt;
+    &lt;a href=&#34;#%e7%bc%96%e8%af%91linux%e5%86%85%e6%a0%b8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    编译Linux内核
+&lt;/h2&gt;&lt;p&gt;首先我们需要安装编译内核用到的依赖包：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -4759,8 +4911,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;code&gt;vmlinuz-5.4.106&lt;/code&gt;就是我们新编译的内核。&lt;/p&gt;
 &lt;p&gt;重启虚拟机。在&lt;code&gt;GRUB&lt;/code&gt;界面选择 &lt;code&gt;Ubuntu 高级选项&lt;/code&gt;，选择第一项进去，就进入了新的内核。&lt;/p&gt;
-&lt;h2 id=&#34;启用gdb监听端口&#34;&gt;启用gdb监听端口&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;QEMU&lt;/strong&gt;有个命令行参数&lt;code&gt;-s&lt;/code&gt;，它代表参数&lt;code&gt;-gdb tcp::1234&lt;/code&gt;，意思是&lt;strong&gt;QEMU&lt;/strong&gt;监听 1234端口，这样&lt;code&gt;gdb&lt;/code&gt; 可以 &lt;code&gt;attach&lt;/code&gt; 到这个端口上，调试&lt;strong&gt;QEMU&lt;/strong&gt;里面的内核。&lt;/p&gt;
+&lt;h2 id=&#34;启用gdb监听端口&#34;&gt;
+    &lt;a href=&#34;#%e5%90%af%e7%94%a8gdb%e7%9b%91%e5%90%ac%e7%ab%af%e5%8f%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    启用gdb监听端口
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;QEMU&lt;/strong&gt;有个命令行参数&lt;code&gt;-s&lt;/code&gt;，它代表参数&lt;code&gt;-gdb tcp::1234&lt;/code&gt;，意思是&lt;strong&gt;QEMU&lt;/strong&gt;监听 1234端口，这样&lt;code&gt;gdb&lt;/code&gt; 可以 &lt;code&gt;attach&lt;/code&gt; 到这个端口上，调试&lt;strong&gt;QEMU&lt;/strong&gt;里面的内核。&lt;/p&gt;
 &lt;p&gt;实际上在前面的&lt;code&gt;domain.xml&lt;/code&gt;中我们已经为&lt;strong&gt;QEMU&lt;/strong&gt;加了&lt;code&gt;-s&lt;/code&gt;参数。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -4781,8 +4935,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;所以这时运行在虚拟机里的内核已经可以被调试了。&lt;/p&gt;
-&lt;h2 id=&#34;调试内核&#34;&gt;调试内核&lt;/h2&gt;
-&lt;p&gt;在宿主机上运行&lt;code&gt;gdb&lt;/code&gt;需要内核的二进制文件，这个文件就是在虚拟机&lt;code&gt;GRUB&lt;/code&gt;里配置的&lt;code&gt;/boot/vmlinuz-5.4.106&lt;/code&gt;。为了方便在调试过程中查看源代码，我们可以将虚拟机的&lt;code&gt;/usr/src/linux-source-5.4.0&lt;/code&gt;整个目录都拷贝到宿主机上来。&lt;/p&gt;
+&lt;h2 id=&#34;调试内核&#34;&gt;
+    &lt;a href=&#34;#%e8%b0%83%e8%af%95%e5%86%85%e6%a0%b8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    调试内核
+&lt;/h2&gt;&lt;p&gt;在宿主机上运行&lt;code&gt;gdb&lt;/code&gt;需要内核的二进制文件，这个文件就是在虚拟机&lt;code&gt;GRUB&lt;/code&gt;里配置的&lt;code&gt;/boot/vmlinuz-5.4.106&lt;/code&gt;。为了方便在调试过程中查看源代码，我们可以将虚拟机的&lt;code&gt;/usr/src/linux-source-5.4.0&lt;/code&gt;整个目录都拷贝到宿主机上来。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -4976,8 +5132,10 @@ btrfs:btrfs_get_extent_show_fi_inline
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;你现在可以像调试普通应用程序一样，调试Linux内核了！&lt;/p&gt;
-&lt;h2 id=&#34;写在最后&#34;&gt;写在最后&lt;/h2&gt;
-&lt;p&gt;在本机搭建Linux内核调试环境的步骤有点繁杂，但使用&lt;code&gt;GDB&lt;/code&gt;能调试内核，会成为我们学习内核的利器，进程管理、内存管理、文件系统，对源码有什么困惑就可以debug一下。
+&lt;h2 id=&#34;写在最后&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%9c%a8%e6%9c%80%e5%90%8e&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写在最后
+&lt;/h2&gt;&lt;p&gt;在本机搭建Linux内核调试环境的步骤有点繁杂，但使用&lt;code&gt;GDB&lt;/code&gt;能调试内核，会成为我们学习内核的利器，进程管理、内存管理、文件系统，对源码有什么困惑就可以debug一下。
 Enjoy it!&lt;/p&gt;
 </description>
         </item>
@@ -4987,8 +5145,10 @@ Enjoy it!&lt;/p&gt;
         <pubDate>Mon, 23 Mar 2020 11:01:58 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;性能分析工具的分类&lt;/h2&gt;
-&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
+        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;
+    &lt;a href=&#34;#%e6%80%a7%e8%83%bd%e5%88%86%e6%9e%90%e5%b7%a5%e5%85%b7%e7%9a%84%e5%88%86%e7%b1%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    性能分析工具的分类
+&lt;/h2&gt;&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;Counters&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
@@ -5057,8 +5217,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;本文主要讨论如何使用&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BPF&lt;/code&gt;进行&lt;code&gt;CPU Profiling&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;perf&#34;&gt;perf&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;perf&#34;&gt;
+    &lt;a href=&#34;#perf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;tools/perf&lt;/a&gt;目录下。&lt;/p&gt;
 &lt;p&gt;随后&lt;code&gt;perf&lt;/code&gt;进行了各种增强，增加了&lt;code&gt;tracing&lt;/code&gt;、&lt;code&gt;profiling&lt;/code&gt;等能力，可用于性能瓶颈的查找和热点代码的定位。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf&lt;/code&gt;是一个面向事件（event-oriented）的性能剖析工具，因此它也被称为&lt;code&gt;Linux perf events (LPE)&lt;/code&gt;，或&lt;code&gt;perf_events&lt;/code&gt;。&lt;/p&gt;
@@ -5080,8 +5242,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;内核依赖的硬件，比如说&lt;code&gt;CPU&lt;/code&gt;，一般会内置一些性能统计方面的寄存器（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hardware_performance_counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Hardware Performance Counter&lt;/a&gt;），通过软件读取这些特殊寄存器里的信息，我们也可以得到很多直接关于硬件的信息。&lt;code&gt;perf&lt;/code&gt;最初就是用来监测&lt;code&gt;CPU&lt;/code&gt;的性能监控单元（performance monitoring unit, PMU）的。&lt;/p&gt;
-&lt;h3 id=&#34;perf-events分类&#34;&gt;perf Events分类&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
+&lt;h3 id=&#34;perf-events分类&#34;&gt;
+    &lt;a href=&#34;#perf-events%e5%88%86%e7%b1%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf Events分类
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241110166.png&#34;
 	
 	
@@ -5168,8 +5332,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;perf的使用&lt;/h3&gt;
-&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;
+    &lt;a href=&#34;#perf%e7%9a%84%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf的使用
+&lt;/h3&gt;&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -5300,8 +5466,10 @@ Enjoy it!&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;后面我们会介绍&lt;strong&gt;火焰图&lt;/strong&gt;，以可视化的方式展示&lt;code&gt;stack traces&lt;/code&gt;，比&lt;code&gt;perf report&lt;/code&gt;更加直观。&lt;/p&gt;
-&lt;h2 id=&#34;bpf&#34;&gt;BPF&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;bpf&#34;&gt;
+    &lt;a href=&#34;#bpf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BPF
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;用于改进网络数据包捕获的性能&lt;/a&gt;。&lt;code&gt;BPF&lt;/code&gt;是在内核级别进行过滤，不必将每个数据包拷贝到用户空间，从而提高了数据包过滤的性能。&lt;code&gt;tcpdump&lt;/code&gt;使用的就是&lt;code&gt;BPF&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241113910.png&#34;
 	
@@ -5349,8 +5517,10 @@ Enjoy it!&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;已经内置在Linux内核中，因此你无需再安装任何新的内核组件，就可以在生产环境中使用BPF。&lt;/p&gt;
-&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;BCC和bpftrace&lt;/h2&gt;
-&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;
+    &lt;a href=&#34;#bcc%e5%92%8cbpftrace&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BCC和bpftrace
+&lt;/h2&gt;&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241116502.png&#34;
 	
 	
@@ -5371,8 +5541,10 @@ Enjoy it!&lt;/p&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;iovisor/bpftrace&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;bcc的安装&#34;&gt;BCC的安装&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;bcc的安装&#34;&gt;
+    &lt;a href=&#34;#bcc%e7%9a%84%e5%ae%89%e8%a3%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BCC的安装
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;安装文档&lt;/a&gt;。以&lt;code&gt;Ubuntu 18.04 LTS&lt;/code&gt;为例，建议从源码build安装：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;安装build依赖&lt;/li&gt;
@@ -5514,8 +5686,10 @@ Enjoy it!&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;off-CPU&lt;/code&gt;分析是对&lt;code&gt;on-CPU&lt;/code&gt;的补充，让我们知道线程所有的时间花费，更全面的了解程序的运行情况。&lt;/p&gt;
 &lt;p&gt;后面会介绍&lt;code&gt;profile&lt;/code&gt;，&lt;code&gt;offcputime&lt;/code&gt;如何生成火焰图进行可视化分析。&lt;/p&gt;
-&lt;h3 id=&#34;bpftrace的安装&#34;&gt;bpftrace的安装&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;bpftrace的安装&#34;&gt;
+    &lt;a href=&#34;#bpftrace%e7%9a%84%e5%ae%89%e8%a3%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    bpftrace的安装
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;bpftrace&lt;/a&gt; 建议运行在Linux 4.9 kernel或更高版本。根据&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;安装文档&lt;/a&gt;的说明，是因为&lt;code&gt;kprobes&lt;/code&gt;、&lt;code&gt;uprobes&lt;/code&gt;、&lt;code&gt;tracepoints&lt;/code&gt;等主要特性是在&lt;code&gt;4.x&lt;/code&gt;以上加入内核的：&lt;/p&gt;
 &lt;blockquote&gt;
@@ -5624,14 +5798,18 @@ Enjoy it!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;关于&lt;code&gt;bpftrace&lt;/code&gt;脚本编写不在本文的讨论范围，感兴趣的可以参考&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;reference_guide&lt;/a&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;火焰图&#34;&gt;火焰图&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;火焰图&#34;&gt;
+    &lt;a href=&#34;#%e7%81%ab%e7%84%b0%e5%9b%be&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    火焰图
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;火焰图&lt;/a&gt;是&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Brendan Gregg&lt;/a&gt;发明的将&lt;code&gt;stack traces&lt;/code&gt;可视化展示的方法。火焰图把时间和空间两个维度上的信息融合在一张图上，将频繁执行的代码路径以可视化的形式，非常直观的展现了出来。&lt;/p&gt;
 &lt;p&gt;火焰图可以用于可视化来自任何&lt;code&gt;profiler&lt;/code&gt;工具的记录的&lt;code&gt;stack traces&lt;/code&gt;信息，除了用来&lt;code&gt;CPU profiling&lt;/code&gt;，还适用于&lt;code&gt;off-CPU&lt;/code&gt;，&lt;code&gt;page faults&lt;/code&gt;等多种场景的分析。本文只讨论 &lt;code&gt;on-CPU&lt;/code&gt; 和 &lt;code&gt;off-CPU&lt;/code&gt; 火焰图的生成。&lt;/p&gt;
 &lt;p&gt;要理解火焰图，先从理解&lt;code&gt;Stack Trace&lt;/code&gt;开始。&lt;/p&gt;
-&lt;h3 id=&#34;stack-trace&#34;&gt;Stack Trace&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
+&lt;h3 id=&#34;stack-trace&#34;&gt;
+    &lt;a href=&#34;#stack-trace&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Stack Trace
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -5644,8 +5822,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;Profiling Stack Traces&lt;/h3&gt;
-&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;
+    &lt;a href=&#34;#profiling-stack-traces&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Profiling Stack Traces
+&lt;/h3&gt;&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
 &lt;p&gt;考虑下面的示例，我们用perf定时采样收集了多个&lt;code&gt;Stack Trace&lt;/code&gt;，然后将相同的&lt;code&gt;Stack Trace&lt;/code&gt;归纳合并，统计出次数：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -5682,8 +5862,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看到，总共收集了10个样本，其中代码路径&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_c&lt;/code&gt;有7次，该路径上的&lt;code&gt;func_c&lt;/code&gt;在CPU上运行。 &lt;code&gt;func_a-&amp;gt;func_b&lt;/code&gt;进行了两次采样，&lt;code&gt;func_b&lt;/code&gt;在CPU上运行。&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_d-&amp;gt;func_e&lt;/code&gt;一次采样，&lt;code&gt;func_e&lt;/code&gt;在CPU上运行。&lt;/p&gt;
-&lt;h3 id=&#34;火焰图-1&#34;&gt;火焰图&lt;/h3&gt;
-&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
+&lt;h3 id=&#34;火焰图-1&#34;&gt;
+    &lt;a href=&#34;#%e7%81%ab%e7%84%b0%e5%9b%be-1&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    火焰图
+&lt;/h3&gt;&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241117302.png&#34;
 	
 	
@@ -5713,8 +5895,10 @@ Enjoy it!&lt;/p&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/brendangregg/FlameGraph.git
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;Java CPU Profiling&lt;/h2&gt;
-&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;
+    &lt;a href=&#34;#java-cpu-profiling&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java CPU Profiling
+&lt;/h2&gt;&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BCC profile&lt;/code&gt;的优点是它很高效，在内核上下文中对堆栈进行计数，并能完整显示用户态和内核态的CPU使用，能看到native libraries（例如libc），JVM（libjvm），Java方法和内核中花费的时间。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241118729.png&#34;
 	
@@ -5740,8 +5924,10 @@ Enjoy it!&lt;/p&gt;
     &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，同样能够获得mixed-mode火焰图。同时，此方法不需要启用帧指针，所以不用加上&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt;参数。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;下面我们就分别演示这两种方式。&lt;/p&gt;
-&lt;h3 id=&#34;perf-map-agent&#34;&gt;perf-map-agent&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
+&lt;h3 id=&#34;perf-map-agent&#34;&gt;
+    &lt;a href=&#34;#perf-map-agent&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf-map-agent
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
 &lt;p&gt;首先下载并编译&lt;code&gt;perf-map-agent&lt;/code&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -5757,8 +5943,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;make&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;配合&lt;code&gt;perf&lt;/code&gt;使用&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e5%90%88perf%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配合&lt;code&gt;perf&lt;/code&gt;使用
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf-java-flames&lt;/a&gt;脚本，可以一步生成火焰图。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf-java-flames&lt;/code&gt;接收&lt;code&gt;perf record&lt;/code&gt;命令参数，它会调用&lt;code&gt;perf&lt;/code&gt;进行采样，然后使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;FlameGraph&lt;/a&gt;生成火焰图，一步完成，非常方便。&lt;/p&gt;
@@ -5813,8 +6001,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo perf report --stdio
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;配合&lt;code&gt;bcc profile&lt;/code&gt;使用&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e5%90%88bcc-profile%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配合&lt;code&gt;bcc profile&lt;/code&gt;使用
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;jmaps&lt;/a&gt;脚本，它会调用&lt;code&gt;perf-map-agent&lt;/code&gt;为当前运行的所有Java进程生成符号表。&lt;/p&gt;
 &lt;p&gt;首先为&lt;code&gt;jmaps&lt;/code&gt;脚本设置好&lt;code&gt;JAVA_HOME&lt;/code&gt;和&lt;code&gt;perf-map-agent&lt;/code&gt;的正确位置：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -5932,8 +6122,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;./&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;flamegraph&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pl&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;--&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;io&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;--&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;countname&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offcpu01&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;txt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offcpu01&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;svg&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;async-profiler&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;
+    &lt;a href=&#34;#async-profiler&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async-profiler
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;async-profiler&lt;/a&gt;将&lt;code&gt;perf&lt;/code&gt;的堆栈追踪和JDK提供的&lt;a class=&#34;link&#34; href=&#34;http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，做到同时采样Java栈与Native栈，因此也就可以同时分析Java代码和Native代码中存在的性能热点。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AsyncGetCallTrace&lt;/code&gt;是JDK内部提供的一个函数，它的原型如下：&lt;/p&gt;
@@ -5972,8 +6164,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看出，该函数直接通过&lt;code&gt;ucontext&lt;/code&gt;就能获取到完整的Java调用栈。&lt;/p&gt;
-&lt;h4 id=&#34;async-profiler的使用&#34;&gt;async-profiler的使用&lt;/h4&gt;
-&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
+&lt;h4 id=&#34;async-profiler的使用&#34;&gt;
+    &lt;a href=&#34;#async-profiler%e7%9a%84%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async-profiler的使用
+&lt;/h4&gt;&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
 &lt;p&gt;从Linux 4.6开始，从&lt;code&gt;non-root&lt;/code&gt;进程使用&lt;code&gt;perf&lt;/code&gt;捕获内核的&lt;code&gt;call stacks&lt;/code&gt;，需要设置如下两个内核参数：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -6004,8 +6198,10 @@ Enjoy it!&lt;/p&gt;
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
-&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;
+    &lt;a href=&#34;#%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    总结
+&lt;/h2&gt;&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;使用工具采集样本&lt;/li&gt;
 &lt;li&gt;使用&lt;code&gt;FlameGraph&lt;/code&gt;项目提供的脚本，将采集的样本归纳合并，统计出&lt;code&gt;Stack Trace&lt;/code&gt;出现的频率&lt;/li&gt;
@@ -6017,8 +6213,10 @@ Enjoy it!&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;async-profiler&lt;/code&gt;（内部会使用到&lt;code&gt;perf&lt;/code&gt;）&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如果只是对Java进程做&lt;code&gt;on-CPU&lt;/code&gt;分析，&lt;code&gt;async-profiler&lt;/code&gt;更加方便好用。如果需要更全面的了解Java进程的运行情况，例如分析系统锁的开销，阻塞的 I/O 操作，以及进程调度器（&lt;code&gt;scheduler&lt;/code&gt;）的工作，那么还是需要使用功能更强大的&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;bcc&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;
+    &lt;a href=&#34;#%e5%8f%82%e8%80%83%e8%b5%84%e6%96%99&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    参考资料
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/perf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf Examples&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/ebpf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -6040,8 +6238,10 @@ Enjoy it!&lt;/p&gt;
         <guid>https://mazhen.tech/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
         <description>&lt;p&gt;在Linux上做网络应用的性能优化时，一般都会对TCP相关的内核参数进行调节，特别是和缓冲、队列有关的参数。网上搜到的文章会告诉你需要修改哪些参数，但我们经常是知其然而不知其所以然，每次照抄过来后，可能很快就忘记或混淆了它们的含义。本文尝试总结TCP队列缓冲相关的内核参数，从协议栈的角度梳理它们，希望可以更容易的理解和记忆。注意，本文内容均来源于参考文档，没有去读相关的内核源码做验证，不能保证内容严谨正确。作为Java程序员没读过内核源码是硬伤。&lt;/p&gt;
 &lt;p&gt;下面我以server端为视角，从&lt;strong&gt;连接建立&lt;/strong&gt;、&lt;strong&gt;数据包接收&lt;/strong&gt;和&lt;strong&gt;数据包发送&lt;/strong&gt;这3条路径对参数进行归类梳理。&lt;/p&gt;
-&lt;h3 id=&#34;一连接建立&#34;&gt;一、连接建立&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011113863.png&#34;
+&lt;h3 id=&#34;一连接建立&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%80%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    一、连接建立
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011113863.png&#34;
 	
 	
 	
@@ -6073,8 +6273,10 @@ Enjoy it!&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;如果我们设置的&lt;code&gt;backlog&lt;/code&gt;大于&lt;code&gt;net.core.somaxconn&lt;/code&gt;，&lt;code&gt;accept&lt;/code&gt;队列的长度将被设置为&lt;code&gt;net.core.somaxconn&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;另外，为了应对&lt;code&gt;SYN flooding&lt;/code&gt;（即客户端只发送SYN包发起握手而不回应ACK完成连接建立，填满server端的半连接队列，让它无法处理正常的握手请求），Linux实现了一种称为&lt;code&gt;SYN cookie&lt;/code&gt;的机制，通过&lt;code&gt;net.ipv4.tcp_syncookies&lt;/code&gt;控制，设置为1表示开启。简单说&lt;code&gt;SYN cookie&lt;/code&gt;就是将连接信息编码在&lt;code&gt;ISN&lt;/code&gt;(initial sequence number)中返回给客户端，这时server不需要将半连接保存在队列中，而是利用客户端随后发来的ACK带回的&lt;code&gt;ISN&lt;/code&gt;还原连接信息，以完成连接的建立，避免了半连接队列被攻击&lt;code&gt;SYN&lt;/code&gt;包填满。对于一去不复返的客户端握手，不理它就是了。&lt;/p&gt;
-&lt;h3 id=&#34;二数据包的接收&#34;&gt;二、数据包的接收&lt;/h3&gt;
-&lt;p&gt;先看看接收数据包经过的路径：&lt;/p&gt;
+&lt;h3 id=&#34;二数据包的接收&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8c%e6%95%b0%e6%8d%ae%e5%8c%85%e7%9a%84%e6%8e%a5%e6%94%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    二、数据包的接收
+&lt;/h3&gt;&lt;p&gt;先看看接收数据包经过的路径：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011113357.png&#34;
 	
 	
@@ -6230,8 +6432,10 @@ echo &amp;quot;80&amp;quot; &amp;gt; /proc/irq/106/smp_affinity
 &lt;p&gt;Buffer / 2&lt;sup&gt;tcp_adv_win_scale&lt;/sup&gt;&lt;/p&gt;
 &lt;p&gt;如果&lt;code&gt;net.ipv4.tcp_adv_win_scale&lt;/code&gt;的值为1，则二分之一的缓冲空间用来做额外开销，如果为2的话，则四分之一缓冲空间用来做额外开销。因此&lt;code&gt;recv buffer&lt;/code&gt;的最佳值应该设置为：&lt;/p&gt;
 &lt;p&gt;BDP / (1 – 1 / 2&lt;sup&gt;tcp_adv_win_scale&lt;/sup&gt;)&lt;/p&gt;
-&lt;h3 id=&#34;三数据包的发送&#34;&gt;三、数据包的发送&lt;/h3&gt;
-&lt;p&gt;发送数据包经过的路径：&lt;/p&gt;
+&lt;h3 id=&#34;三数据包的发送&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%89%e6%95%b0%e6%8d%ae%e5%8c%85%e7%9a%84%e5%8f%91%e9%80%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    三、数据包的发送
+&lt;/h3&gt;&lt;p&gt;发送数据包经过的路径：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011117967.png&#34;
 	
 	

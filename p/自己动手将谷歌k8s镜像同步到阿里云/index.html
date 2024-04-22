@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Kubernetes 相关的docker镜像存放在Google的镜像仓库 k8s.gcr.io，在国内网络环境内无法访问。有人已经将这些镜像同步到了阿里云，你可以'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Kubernetes 相关的docker镜像存放在Google的镜像仓库 k8s.gcr.io，在国内网络环境内无法访问。有人已经将这些镜像同步到了阿里云，你可以">
 <title>自己动手将谷歌k8s镜像同步到阿里云</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='自己动手将谷歌k8s镜像同步到阿里云'>
-<meta property='og:description' content='Kubernetes 相关的docker镜像存放在Google的镜像仓库 k8s.gcr.io，在国内网络环境内无法访问。有人已经将这些镜像同步到了阿里云，你可以'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="自己动手将谷歌k8s镜像同步到阿里云">
+<meta property='og:description' content="Kubernetes 相关的docker镜像存放在Google的镜像仓库 k8s.gcr.io，在国内网络环境内无法访问。有人已经将这些镜像同步到了阿里云，你可以">
 <meta property='og:url' content='https://mazhen.tech/p/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%B0%86%E8%B0%B7%E6%AD%8Ck8s%E9%95%9C%E5%83%8F%E5%90%8C%E6%AD%A5%E5%88%B0%E9%98%BF%E9%87%8C%E4%BA%91/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2019-06-06T09:53:24&#43;08:00'/><meta property='article:modified_time' content='2019-06-06T09:53:24&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -454,8 +457,10 @@
     >阿里云容器镜像服务</a>中搜索到它们。几乎所有的k8s镜像都已经同步到了阿里云。<a class="link" href="https://www.aliyun.com/product/containerservice"  target="_blank" rel="noopener"
     >阿里云容器服务</a>团队甚至还有一个开源项目<a class="link" href="https://github.com/AliyunContainerService/sync-repo"  target="_blank" rel="noopener"
     >sync-repo</a>，专门做<code>Docker Registry</code>之间的同步。但是，如果你不放心别人同步的镜像，或者最新版本的镜像还没人同步过来，你可以按照本文将介绍的步骤，自己将<code>gcr.io</code>上的<code>docker</code>镜像搬到阿里云。</p>
-<h2 id="安装配置shadowsocks客户端">安装配置shadowsocks客户端</h2>
-<p>先简单介绍下<code>Shadowsocks</code>协议，详细的工作原理可以参考<a class="link" href="https://www.desgard.com/Shadowsocks-1/"  target="_blank" rel="noopener"
+<h2 id="安装配置shadowsocks客户端">
+    <a href="#%e5%ae%89%e8%a3%85%e9%85%8d%e7%bd%aeshadowsocks%e5%ae%a2%e6%88%b7%e7%ab%af" class="header-anchor">#</a>
+    安装配置shadowsocks客户端
+</h2><p>先简单介绍下<code>Shadowsocks</code>协议，详细的工作原理可以参考<a class="link" href="https://www.desgard.com/Shadowsocks-1/"  target="_blank" rel="noopener"
     >这篇博客</a>：</p>
 <p><img src="https://cdn.mazhen.tech/images/202209220955184.png"
 	
@@ -526,8 +531,10 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">nohup ss-local -c ss-client.conf &amp;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="安装配置http代理">安装配置HTTP代理</h2>
-<p><code>shadowsocks client</code>创建的是<code>socks5</code>代理，不过一些程序无法使用 <code>socks5</code> ，它们需要通过 <code>http_proxy</code> 和 <code>https_proxy</code> 环境变量，使用 <code>HTTP</code> 代理。<code>polipo</code> 可以帮助我们将 <code>socks5</code> 代理转换为 <code>HTTP</code> 代理。</p>
+</div><h2 id="安装配置http代理">
+    <a href="#%e5%ae%89%e8%a3%85%e9%85%8d%e7%bd%aehttp%e4%bb%a3%e7%90%86" class="header-anchor">#</a>
+    安装配置HTTP代理
+</h2><p><code>shadowsocks client</code>创建的是<code>socks5</code>代理，不过一些程序无法使用 <code>socks5</code> ，它们需要通过 <code>http_proxy</code> 和 <code>https_proxy</code> 环境变量，使用 <code>HTTP</code> 代理。<code>polipo</code> 可以帮助我们将 <code>socks5</code> 代理转换为 <code>HTTP</code> 代理。</p>
 <ul>
 <li><code>macOS</code>下安装<code>polipo</code></li>
 </ul>
@@ -582,8 +589,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>应该可以正常访问到Google。</p>
-<h2 id="设置docker-http代理">设置Docker HTTP代理</h2>
-<p>如果是在<code>macOS</code>上使用<code>Docker Desctop</code>，可以在<code>Preference</code>中的<code>Proxies</code>设置上一步启动的HTTP代理：</p>
+<h2 id="设置docker-http代理">
+    <a href="#%e8%ae%be%e7%bd%aedocker-http%e4%bb%a3%e7%90%86" class="header-anchor">#</a>
+    设置Docker HTTP代理
+</h2><p>如果是在<code>macOS</code>上使用<code>Docker Desctop</code>，可以在<code>Preference</code>中的<code>Proxies</code>设置上一步启动的HTTP代理：</p>
 <p><img src="https://cdn.mazhen.tech/images/202209220957013.png"
 	
 	
@@ -596,8 +605,10 @@
 ></p>
 <p>如果是<code>Linux</code>平台，请参考Docker的<a class="link" href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy"  target="_blank" rel="noopener"
     >官方文档</a>进行设置。</p>
-<h2 id="在阿里云创建容器镜像的命名空间">在阿里云创建容器镜像的命名空间</h2>
-<p>为了将镜像同步到阿里云，首先需要在阿里云的<a class="link" href="https://cr.console.aliyun.com/cn-shenzhen/instances/namespaces"  target="_blank" rel="noopener"
+<h2 id="在阿里云创建容器镜像的命名空间">
+    <a href="#%e5%9c%a8%e9%98%bf%e9%87%8c%e4%ba%91%e5%88%9b%e5%bb%ba%e5%ae%b9%e5%99%a8%e9%95%9c%e5%83%8f%e7%9a%84%e5%91%bd%e5%90%8d%e7%a9%ba%e9%97%b4" class="header-anchor">#</a>
+    在阿里云创建容器镜像的命名空间
+</h2><p>为了将镜像同步到阿里云，首先需要在阿里云的<a class="link" href="https://cr.console.aliyun.com/cn-shenzhen/instances/namespaces"  target="_blank" rel="noopener"
     >容器镜像服务控制台</a>创建镜像的命名空间。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209220958603.png"
 	
@@ -610,8 +621,10 @@
 	
 ></p>
 <p>建议将仓库类型设置为“公开”，这样其他人也能搜索、下载到镜像。</p>
-<h2 id="从gcrio下载镜像">从<code>gcr.io</code>下载镜像</h2>
-<p>在本机从<code>gcr.io</code>下载镜像，我们以镜像<code>pause:3.1</code>为例：</p>
+<h2 id="从gcrio下载镜像">
+    <a href="#%e4%bb%8egcrio%e4%b8%8b%e8%bd%bd%e9%95%9c%e5%83%8f" class="header-anchor">#</a>
+    从<code>gcr.io</code>下载镜像
+</h2><p>在本机从<code>gcr.io</code>下载镜像，我们以镜像<code>pause:3.1</code>为例：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -620,8 +633,10 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">docker pull k8s.gcr.io/pause:3.1
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="给镜像标记新的tag">给镜像标记新的<code>tag</code></h2>
-<p>根据前面在阿里云创建的命名空间，给镜像标记新的<code>tag</code>：</p>
+</div><h2 id="给镜像标记新的tag">
+    <a href="#%e7%bb%99%e9%95%9c%e5%83%8f%e6%a0%87%e8%ae%b0%e6%96%b0%e7%9a%84tag" class="header-anchor">#</a>
+    给镜像标记新的<code>tag</code>
+</h2><p>根据前面在阿里云创建的命名空间，给镜像标记新的<code>tag</code>：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -648,8 +663,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>通过<code>IMAGE ID</code>可以看出，两个镜像为同一个。</p>
-<h2 id="将镜像上传到阿里云">将镜像上传到阿里云</h2>
-<p>登录阿里云镜像仓库：</p>
+<h2 id="将镜像上传到阿里云">
+    <a href="#%e5%b0%86%e9%95%9c%e5%83%8f%e4%b8%8a%e4%bc%a0%e5%88%b0%e9%98%bf%e9%87%8c%e4%ba%91" class="header-anchor">#</a>
+    将镜像上传到阿里云
+</h2><p>登录阿里云镜像仓库：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -668,8 +685,10 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">docker push registry.cn-shenzhen.aliyuncs.com/mz-k8s/pause:3.1
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="从阿里云下载镜像">从阿里云下载镜像</h2>
-<p>现在可以在其他机器上从阿里云下载<code>pause:3.1</code>镜像，这时候已经不需要科学上网了：</p>
+</div><h2 id="从阿里云下载镜像">
+    <a href="#%e4%bb%8e%e9%98%bf%e9%87%8c%e4%ba%91%e4%b8%8b%e8%bd%bd%e9%95%9c%e5%83%8f" class="header-anchor">#</a>
+    从阿里云下载镜像
+</h2><p>现在可以在其他机器上从阿里云下载<code>pause:3.1</code>镜像，这时候已经不需要科学上网了：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -860,8 +879,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

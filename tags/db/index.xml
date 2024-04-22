@@ -35,8 +35,10 @@
         <guid>https://mazhen.tech/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/</guid>
         <description>&lt;p&gt;在计算机科学中，&lt;strong&gt;事务处理&lt;/strong&gt;（&lt;strong&gt;transaction processing&lt;/strong&gt; ）是将信息处理划分为独立的、不可分割的操作，称为&lt;strong&gt;事务&lt;/strong&gt;（&lt;strong&gt;Transaction&lt;/strong&gt;）。每个事务必须作为一个完整的执行单元，要么整个事务成功（提交），要么失败（中止，回滚），它永远不能只是部分完成。使用事务可以简化应用程序的错误处理，因为它不需要担心部分失败，系统（通常是数据库或某些现代文件系统）的完整性始终处于已知的、一致的状态。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;事务处理&lt;/strong&gt;是一项关键技术，可以应用于多个问题领域——企业架构、电子商务解决方案、金融系统和许多其他领域。事务的一个很好的例子就是，资金从一家银行的账户转移到另一家银行的账户。资金转移涉及在一个账户上扣款，并在另一个账户上增加相同的金额。使用事务可以确保不会出现由于其中一项操作失败，而导致资金丢失或产生的不一致状态。&lt;/p&gt;
-&lt;h2 id=&#34;事务处理简史&#34;&gt;事务处理简史&lt;/h2&gt;
-&lt;p&gt;现代事务处理技术是在20世纪60年代开始的大型机计算背景下发展起来的，在许多方面，我们今天使用的技术是对这些模型的改进和调整。第一个&lt;strong&gt;事务处理系统&lt;/strong&gt;（&lt;strong&gt;Transaction processing system&lt;/strong&gt;）是著名的 SABRE 航空预订系统，由IBM和美国航空公司在20世纪50年代末和60年代初开发。以今天的标准来看，SABRE 相当粗糙： ACID 事务语义完全是由应用程序实现的。IBM 很快就意识到这种技术可以应用于其他行业，由此产生了&lt;strong&gt;CICS&lt;/strong&gt;（Customer Information Control System）产品，它最初是完全用汇编语言编写，并没有使用现代意义上的数据库，而是依赖于扁平文件和其他低级数据结构，但 CICS 已经实现了基本的事务处理功能。&lt;/p&gt;
+&lt;h2 id=&#34;事务处理简史&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e5%a4%84%e7%90%86%e7%ae%80%e5%8f%b2&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务处理简史
+&lt;/h2&gt;&lt;p&gt;现代事务处理技术是在20世纪60年代开始的大型机计算背景下发展起来的，在许多方面，我们今天使用的技术是对这些模型的改进和调整。第一个&lt;strong&gt;事务处理系统&lt;/strong&gt;（&lt;strong&gt;Transaction processing system&lt;/strong&gt;）是著名的 SABRE 航空预订系统，由IBM和美国航空公司在20世纪50年代末和60年代初开发。以今天的标准来看，SABRE 相当粗糙： ACID 事务语义完全是由应用程序实现的。IBM 很快就意识到这种技术可以应用于其他行业，由此产生了&lt;strong&gt;CICS&lt;/strong&gt;（Customer Information Control System）产品，它最初是完全用汇编语言编写，并没有使用现代意义上的数据库，而是依赖于扁平文件和其他低级数据结构，但 CICS 已经实现了基本的事务处理功能。&lt;/p&gt;
 &lt;p&gt;1970年 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Edgar_F._Codd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Edgar F. Codd&lt;/a&gt; 发表了一篇名为&lt;a class=&#34;link&#34; href=&#34;https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《A Relational Model of Data for Large Shared Data Banks》&lt;/a&gt;的论文，首次提出了关系模型的概念，这一模型为后来的关系数据库管理系统（RDBMS）奠定了基础。随后关系数据库管理系统开始兴起，IBM 的 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/IBM_System_R&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -51,30 +53,44 @@
     &gt;CORBA Object Transaction Service (OTS) &lt;/a&gt; 是一个定义在 &lt;a class=&#34;link&#34; href=&#34;https://www.omg.org/spec/CORBA&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CORBA（Common Object Request Broker Architecture）&lt;/a&gt; 规范中的分布式事务服务。&lt;strong&gt;OTS&lt;/strong&gt; 将分布式事务处理模型（DTP）扩展到了对象领域，它提供了一种在分布式对象系统中进行事务处理的方法。&lt;strong&gt;OTS&lt;/strong&gt; 定义了一组标准的接口和协议，允许 CORBA 对象参与分布式事务。&lt;/p&gt;
 &lt;p&gt;Java EE 应用服务器是在 X/Open DTP 模型和 CORBA OTS 的基础上发展出来的事务处理监视器，&lt;strong&gt;TP Monitor&lt;/strong&gt; 开始融入 Java EE应用服务器，提供更丰富的中间件服务和组件化的应用程序模型。&lt;strong&gt;TP Monitor&lt;/strong&gt; 本质上是一个具有事务感知功能的&lt;strong&gt;应用服务器&lt;/strong&gt;，事实上，&lt;strong&gt;Java EE 应用服务器&lt;/strong&gt;中的许多功能都源于TP Monitor。同样地，许多现代的 TP Monitor 是带有事务服务核心的 Java EE 应用服务器。&lt;/p&gt;
-&lt;h2 id=&#34;事务概念基础&#34;&gt;事务概念基础&lt;/h2&gt;
-&lt;p&gt;本章我们简要地回顾一些事务处理的基本概念，它们塑造了中间件对事务的支持。&lt;/p&gt;
-&lt;h3 id=&#34;acid-属性&#34;&gt;ACID 属性&lt;/h3&gt;
-&lt;p&gt;事务提供的安全保障通常用缩写&lt;strong&gt;ACID&lt;/strong&gt;来描述，它代表原子性（&lt;strong&gt;atomicity&lt;/strong&gt;）、一致性（&lt;strong&gt;consistency&lt;/strong&gt;）、隔离性（&lt;strong&gt;Isolation&lt;/strong&gt;）和持久性（&lt;strong&gt;Durability&lt;/strong&gt;）。事务是一个&lt;strong&gt;原子&lt;/strong&gt;（&lt;strong&gt;Atomicity&lt;/strong&gt;）工作单元，它将系统从一个&lt;strong&gt;一致&lt;/strong&gt;（&lt;strong&gt;Consistency&lt;/strong&gt;）的状态转换为另一个一致状态，执行时不受其他同时执行的事务的干扰（&lt;strong&gt;isolation&lt;/strong&gt;），并且一旦提交，就不能因系统故障而撤消(&lt;strong&gt;Durability&lt;/strong&gt;)。ACID 是1983年由 Theo Härder 和Andreas Reuter 在论文&lt;a class=&#34;link&#34; href=&#34;https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.2812&amp;amp;rep=rep1&amp;amp;type=pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;事务概念基础&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e6%a6%82%e5%bf%b5%e5%9f%ba%e7%a1%80&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务概念基础
+&lt;/h2&gt;&lt;p&gt;本章我们简要地回顾一些事务处理的基本概念，它们塑造了中间件对事务的支持。&lt;/p&gt;
+&lt;h3 id=&#34;acid-属性&#34;&gt;
+    &lt;a href=&#34;#acid-%e5%b1%9e%e6%80%a7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    ACID 属性
+&lt;/h3&gt;&lt;p&gt;事务提供的安全保障通常用缩写&lt;strong&gt;ACID&lt;/strong&gt;来描述，它代表原子性（&lt;strong&gt;atomicity&lt;/strong&gt;）、一致性（&lt;strong&gt;consistency&lt;/strong&gt;）、隔离性（&lt;strong&gt;Isolation&lt;/strong&gt;）和持久性（&lt;strong&gt;Durability&lt;/strong&gt;）。事务是一个&lt;strong&gt;原子&lt;/strong&gt;（&lt;strong&gt;Atomicity&lt;/strong&gt;）工作单元，它将系统从一个&lt;strong&gt;一致&lt;/strong&gt;（&lt;strong&gt;Consistency&lt;/strong&gt;）的状态转换为另一个一致状态，执行时不受其他同时执行的事务的干扰（&lt;strong&gt;isolation&lt;/strong&gt;），并且一旦提交，就不能因系统故障而撤消(&lt;strong&gt;Durability&lt;/strong&gt;)。ACID 是1983年由 Theo Härder 和Andreas Reuter 在论文&lt;a class=&#34;link&#34; href=&#34;https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.2812&amp;amp;rep=rep1&amp;amp;type=pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《 Principles of Transaction-Oriented Database Recovery》&lt;/a&gt;中首次提出。&lt;/p&gt;
 &lt;p&gt;下面我们更详细地研究一下ACID属性，这将让我们更深入的理解事务。&lt;/p&gt;
-&lt;h4 id=&#34;atomicity&#34;&gt;Atomicity&lt;/h4&gt;
-&lt;p&gt;Atomicity 这个术语在不同的领域有着类似但又不相同的含义。例如在多线程编程领域，如果一个线程执行了一个&lt;strong&gt;原子&lt;/strong&gt;操作，这意味着另一个线程不可能看到这个操作的半成品。系统只能处于操作前或操作后的状态，而不能介于两者之间。&lt;/p&gt;
+&lt;h4 id=&#34;atomicity&#34;&gt;
+    &lt;a href=&#34;#atomicity&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Atomicity
+&lt;/h4&gt;&lt;p&gt;Atomicity 这个术语在不同的领域有着类似但又不相同的含义。例如在多线程编程领域，如果一个线程执行了一个&lt;strong&gt;原子&lt;/strong&gt;操作，这意味着另一个线程不可能看到这个操作的半成品。系统只能处于操作前或操作后的状态，而不能介于两者之间。&lt;/p&gt;
 &lt;p&gt;在 ACID 的背景下，Atomicity 不是关于并发性的，它并没有描述当多个进程试图同时访问相同的数据时会发生什么，因为关于并发访问的场景是在隔离性（Isolation）中描述的。&lt;/p&gt;
 &lt;p&gt;ACID 原子性描述的是，如果一个客户想要进行多次写入，但在处理部分写操作后出现故障的情况。这些故障可能是进程崩溃、网络连接中断、磁盘已满等。如果将这些写操作组合到一个事务中，由于故障无法完成事务提交，那么该事务将被中止，并且数据库必须撤消之前的任何写操作。&lt;/p&gt;
 &lt;p&gt;在没有 Atomicity 保证的情况下，如果在进行多次修改的过程中发生错误，就很难知道哪些修改已经生效，哪些没有生效。Atomicity 简化了这个问题：如果事务被中止，应用程序可以确定它没有改变任何东西。&lt;/p&gt;
 &lt;p&gt;所以 Atomicity 的本质是，&lt;strong&gt;在出错时中止事务，并丢弃该事务对数据的所有修改&lt;/strong&gt;。&lt;/p&gt;
-&lt;h4 id=&#34;consistency&#34;&gt;Consistency&lt;/h4&gt;
-&lt;p&gt;事务应该确保系统从一个一致性状态转换到另一个一致性状态。在事务开始和结束时，系统的完整性约束必须得到满足。&lt;/p&gt;
+&lt;h4 id=&#34;consistency&#34;&gt;
+    &lt;a href=&#34;#consistency&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Consistency
+&lt;/h4&gt;&lt;p&gt;事务应该确保系统从一个一致性状态转换到另一个一致性状态。在事务开始和结束时，系统的完整性约束必须得到满足。&lt;/p&gt;
 &lt;p&gt;我们所说的一致性，有些是通过数据库的完整性约束来保证的，例如使用主键作为员工编号，那么由数据库来保证所有主键都是唯一的。&lt;/p&gt;
 &lt;p&gt;但在很多情况下，一致性都是有具体业务含义的，应用程序定义了什么状态是有效或无效的，例如每个部门的支出必须小于或等于该部门的预算，这种一致性只能由应用程序来保证。&lt;/p&gt;
 &lt;p&gt;原子性、隔离性和持久性是数据库的属性，而一致性是应用程序的属性。维护事务的一致性是应用程序和数据库的共同责任，应用程序是依靠数据库的原子性和隔离性来实现一致性。&lt;/p&gt;
-&lt;h4 id=&#34;isolation&#34;&gt;Isolation&lt;/h4&gt;
-&lt;p&gt;如果多个用户同时读写数据库相同的记录，就会遇到并发问题。Isolation 意味着同时执行的事务是相互隔离的，事务的执行不会受到其他并发事务的影响，每个事务都可以假装它是整个数据库中唯一运行的事务。&lt;/p&gt;
-&lt;h4 id=&#34;durability&#34;&gt;Durability&lt;/h4&gt;
-&lt;p&gt;持久性是指一旦事务成功提交，它所写入的任何数据都不会丢失，即使出现硬件故障或数据库崩溃。改变系统持久状态的唯一方法是提交一个事务。&lt;/p&gt;
+&lt;h4 id=&#34;isolation&#34;&gt;
+    &lt;a href=&#34;#isolation&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Isolation
+&lt;/h4&gt;&lt;p&gt;如果多个用户同时读写数据库相同的记录，就会遇到并发问题。Isolation 意味着同时执行的事务是相互隔离的，事务的执行不会受到其他并发事务的影响，每个事务都可以假装它是整个数据库中唯一运行的事务。&lt;/p&gt;
+&lt;h4 id=&#34;durability&#34;&gt;
+    &lt;a href=&#34;#durability&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Durability
+&lt;/h4&gt;&lt;p&gt;持久性是指一旦事务成功提交，它所写入的任何数据都不会丢失，即使出现硬件故障或数据库崩溃。改变系统持久状态的唯一方法是提交一个事务。&lt;/p&gt;
 &lt;p&gt;对于单节点数据库，持久性通常意味着数据已写入硬盘或 SSD 等非易失性存储中。数据库一般都会使用&lt;strong&gt;WAL&lt;/strong&gt;（write-ahead log）技术，在向持久化存储写入未提交的变更之前，先向日志中写入相应的事务日志记录，并确保事务日志记录在事务提交之前被持久化。当遇到故障重启系统时，数据库可以通过重新执行所有已提交事务的日志记录，撤消所有中止事务的日志记录，让数据库恢复到一致性状态。&lt;/p&gt;
-&lt;h3 id=&#34;隔离级别&#34;&gt;隔离级别&lt;/h3&gt;
-&lt;p&gt;隔离性（Isolation）是事务 ACID 四个属性之一，它确保多个并发事务在操作数据库时，彼此之间不会互相干扰，从而保证数据的一致性。&lt;/p&gt;
+&lt;h3 id=&#34;隔离级别&#34;&gt;
+    &lt;a href=&#34;#%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    隔离级别
+&lt;/h3&gt;&lt;p&gt;隔离性（Isolation）是事务 ACID 四个属性之一，它确保多个并发事务在操作数据库时，彼此之间不会互相干扰，从而保证数据的一致性。&lt;/p&gt;
 &lt;p&gt;当一个事务读取被另一个事务同时修改的数据，或者两个事务试图同时修改相同的数据时，会出现并发性问题。数据库通过提供&lt;strong&gt;事务隔离&lt;/strong&gt;向应用开发人员隐藏了并发性问题的复杂性。&lt;/p&gt;
 &lt;p&gt;隔离级别（Isolation Level）定义了不同的隔离性强度，以在性能和数据一致性之间取得平衡。可串行化（serializable）的隔离意味着数据库保证事务具有与串行运行相同的效果，即事务一个接着一个的运行，没有任何并发。然而在实践中，可串行化（serializable）的隔离有一定的性能成本，因此使用较弱的隔离级别是很常见的。根据SQL标准，隔离级别分为四个等级，从低到高分别为：&lt;/p&gt;
 &lt;ul&gt;
@@ -97,10 +113,14 @@
 &lt;li&gt;&lt;strong&gt;快照隔离&lt;/strong&gt;通过为每个事务提供一个数据快照来实现，在一个事务执行过程中，它只能看到和操作事务开始时的数据快照，而不会受到其他并发事务的影响。快照隔离的实现通常依赖于多版本并发控制（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/w/index.php?title=Multiversion_concurrency_control&amp;amp;useskin=vector&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;MVCC，Multi-Version Concurrency Control&lt;/a&gt;）技术。快照隔离能够解决脏读、不可重复读和幻读问题，但它会导致写偏斜（Write Skew），即两个或多个事务同时读取相同的数据，然后基于读取到的数据做出独立的修改，最终导致数据不一致的状态。因此，快照隔离比可串行化的保证要弱。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;分布式事务&#34;&gt;分布式事务&lt;/h3&gt;
-&lt;p&gt;随着计算机网络的发展，分布式计算变得越来越普遍。这导致了分布式事务处理的需求，即在多个独立的数据库或资源管理器上执行的事务。分布式事务处理具有更高的复杂性，需要协调和管理跨越不同系统的事务。这样的事务处理通常需要遵循分布式事务处理的规范和算法，如两阶段提交协议。&lt;/p&gt;
-&lt;h3 id=&#34;两阶段提交&#34;&gt;两阶段提交&lt;/h3&gt;
-&lt;p&gt;为了使分布式事务的操作表现得像一个原子单元，参与的分布式资源必须根据事务的结果全部提交或全部放弃。两阶段提交（2PC，Two-Phase Commit）协议是一种用于分布式事务处理的原子性协议，它通过在所有事务参与者之间进行协调和同步，以确保分布式事务的原子性得以维护。&lt;/p&gt;
+&lt;h3 id=&#34;分布式事务&#34;&gt;
+    &lt;a href=&#34;#%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    分布式事务
+&lt;/h3&gt;&lt;p&gt;随着计算机网络的发展，分布式计算变得越来越普遍。这导致了分布式事务处理的需求，即在多个独立的数据库或资源管理器上执行的事务。分布式事务处理具有更高的复杂性，需要协调和管理跨越不同系统的事务。这样的事务处理通常需要遵循分布式事务处理的规范和算法，如两阶段提交协议。&lt;/p&gt;
+&lt;h3 id=&#34;两阶段提交&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%a4%e9%98%b6%e6%ae%b5%e6%8f%90%e4%ba%a4&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    两阶段提交
+&lt;/h3&gt;&lt;p&gt;为了使分布式事务的操作表现得像一个原子单元，参与的分布式资源必须根据事务的结果全部提交或全部放弃。两阶段提交（2PC，Two-Phase Commit）协议是一种用于分布式事务处理的原子性协议，它通过在所有事务参与者之间进行协调和同步，以确保分布式事务的原子性得以维护。&lt;/p&gt;
 &lt;p&gt;两阶段提交协议引入了一个新的组件：协调器 &lt;em&gt;coordinator&lt;/em&gt;，也被称为&lt;em&gt;transaction manager&lt;/em&gt;。coordinator 通常和应用进程在同一个进程中，例如 Java EE应用服务器中 &lt;em&gt;transaction manager&lt;/em&gt;，但它也可以是一个单独的程序或服务。&lt;/p&gt;
 &lt;p&gt;两阶段提交协议包括两个阶段：提交请求阶段（Prepare Phase）和提交阶段（Commit Phase）。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304171538027.png&#34;
@@ -133,8 +153,10 @@
 &lt;/ol&gt;
 &lt;p&gt;两阶段提交协议的目标是确保分布式事务中的所有参与者要么都提交事务，要么都中止事务，从而满足原子性要求。&lt;/p&gt;
 &lt;p&gt;两阶段提交协议也有一些局限性，例如性能开销、同步延迟和单点故障风险。&lt;/p&gt;
-&lt;h4 id=&#34;coordinator-故障&#34;&gt;coordinator 故障&lt;/h4&gt;
-&lt;p&gt;如果任何一个Prepare请求失败或超时，coordinator 将中止交易；如果任何一个 commit 或 abort 请求失败，coordinator 将无限期地重试它们。如果 coordinator 失败了会怎么样呢？&lt;/p&gt;
+&lt;h4 id=&#34;coordinator-故障&#34;&gt;
+    &lt;a href=&#34;#coordinator-%e6%95%85%e9%9a%9c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    coordinator 故障
+&lt;/h4&gt;&lt;p&gt;如果任何一个Prepare请求失败或超时，coordinator 将中止交易；如果任何一个 commit 或 abort 请求失败，coordinator 将无限期地重试它们。如果 coordinator 失败了会怎么样呢？&lt;/p&gt;
 &lt;p&gt;如果 coordinator 在发送 Prepare 请求之前就失败了，参与者可以安全地中止事务。但是，一旦参与者收到Prepare 请求并投了 &amp;ldquo;yes&amp;rdquo;，参与者不能再单方面中止，必须等待 coordinator 的回复，以确定事务是被 commit 还是被 abort。如果 coordinator 在这时崩溃或发生网络故障，事务处于 &lt;em&gt;in doubt&lt;/em&gt; 状态，参与者除了等待之外什么也做不了。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304171703938.png&#34;
 	
@@ -146,20 +168,26 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h4 id=&#34;单点故障风险&#34;&gt;单点故障风险&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;两阶段提交协议&lt;/code&gt;的问题是，一旦事务参与者完成投票，它必须等待 coordinator 给出指示，提交或放弃。如果这时coordinator 挂了，事务参与者除了等待什么也做不了，事务处于未决状态。coordinator 成为了整个系统的&lt;strong&gt;单点故障&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;单点故障风险&#34;&gt;
+    &lt;a href=&#34;#%e5%8d%95%e7%82%b9%e6%95%85%e9%9a%9c%e9%a3%8e%e9%99%a9&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    单点故障风险
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;两阶段提交协议&lt;/code&gt;的问题是，一旦事务参与者完成投票，它必须等待 coordinator 给出指示，提交或放弃。如果这时coordinator 挂了，事务参与者除了等待什么也做不了，事务处于未决状态。coordinator 成为了整个系统的&lt;strong&gt;单点故障&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;coordinator 在向参与者发送提交或中止请求之前，必须将事务的最终结果写入到磁盘上的事务日志中。当coordinator 从故障中恢复时，它通过事务日志来确定所有未决状态事务的处理。所以从本质上看，&lt;code&gt;两阶段提交协议&lt;/code&gt;为了达到一致性，实际上是退化到由 coordinator 单节点来实现 atomic commit。&lt;/p&gt;
 &lt;p&gt;因为&lt;code&gt;两阶段提交协议&lt;/code&gt;会在等待 coordinator 恢复的过程中处于阻塞状态，所以它被称为&lt;code&gt;阻塞原子提交&lt;/code&gt;（&lt;em&gt;blocking&lt;/em&gt; atomic commit）协议。&lt;/p&gt;
-&lt;h4 id=&#34;coordinator-的故障恢复&#34;&gt;coordinator 的故障恢复&lt;/h4&gt;
-&lt;p&gt;如果 coordinator 发生故障，如何进行故障恢复呢？有三种解决方法：&lt;/p&gt;
+&lt;h4 id=&#34;coordinator-的故障恢复&#34;&gt;
+    &lt;a href=&#34;#coordinator-%e7%9a%84%e6%95%85%e9%9a%9c%e6%81%a2%e5%a4%8d&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    coordinator 的故障恢复
+&lt;/h4&gt;&lt;p&gt;如果 coordinator 发生故障，如何进行故障恢复呢？有三种解决方法：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;等待 coordinator 恢复，并接受在此期间系统将被阻塞的事实。&lt;/li&gt;
 &lt;li&gt;由人工选择一个新的 coordinator 节点，进行手动故障切换。&lt;/li&gt;
 &lt;li&gt;使用一个算法来自动选择一个新的 coordinator。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;后两种解决方法的前提是，事务日志必须安全可靠的存储，不能因为 coordinator 的任何故障而被损坏。&lt;/p&gt;
-&lt;h4 id=&#34;启发式决策&#34;&gt;启发式决策&lt;/h4&gt;
-&lt;p&gt;为了保证原子性，&lt;code&gt;两阶段提交协议&lt;/code&gt;必须是阻塞的。这意味着，即使存在故障恢复机制，参与者也可能长时间内被阻塞，但一些应用可能无法容忍这种长时间的阻塞。更糟的情况是，如果事务日志丢失或损坏， 即使 coordinator 恢复了也不能决定事务的最终结果。 未决的事务不会自动解决，它们会驻留在数据库中，持有锁并阻塞其他事务。这时即使重启数据库也不能解决问题，因为数据库必须在重新启动时保留对未决事务的锁定，否则将可能违反两阶段提交的原子性保证。&lt;/p&gt;
+&lt;h4 id=&#34;启发式决策&#34;&gt;
+    &lt;a href=&#34;#%e5%90%af%e5%8f%91%e5%bc%8f%e5%86%b3%e7%ad%96&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    启发式决策
+&lt;/h4&gt;&lt;p&gt;为了保证原子性，&lt;code&gt;两阶段提交协议&lt;/code&gt;必须是阻塞的。这意味着，即使存在故障恢复机制，参与者也可能长时间内被阻塞，但一些应用可能无法容忍这种长时间的阻塞。更糟的情况是，如果事务日志丢失或损坏， 即使 coordinator 恢复了也不能决定事务的最终结果。 未决的事务不会自动解决，它们会驻留在数据库中，持有锁并阻塞其他事务。这时即使重启数据库也不能解决问题，因为数据库必须在重新启动时保留对未决事务的锁定，否则将可能违反两阶段提交的原子性保证。&lt;/p&gt;
 &lt;p&gt;为了打破两阶段提交的阻塞性，事务参与者在没有 coordinator 的明确指示下，独立决定中止或提交一个未决事务，这就是&lt;strong&gt;启发式决策&lt;/strong&gt;（heuristic decision）。&lt;/p&gt;
 &lt;p&gt;启发式决策可能导致数据不一致，因为事务参与者在没有 coordinator 指示的情况下独立决定事务的命运。这可能导致某些参与者提交事务，而另一些参与者中止事务。事实上，启发式决策违反了两阶段提交协议的承诺，因此，做出启发式决策只是用于摆脱灾难性的情况，而不是常规使用。&lt;/p&gt;
 &lt;p&gt;JTA 定义了几种与启发式决策有关异常。&lt;/p&gt;
@@ -168,10 +196,14 @@
 &lt;li&gt;&lt;strong&gt;javax.transaction.HeuristicRollbackException&lt;/strong&gt; coordinator 要求事务参与者提交，但事务参与者此前已经做出了回滚的启发式决策。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;javax.transaction.HeuristicMixedException&lt;/strong&gt; 是最糟糕的启发式异常。抛出它表示事务的一部分已提交，而其他部分被回滚。当一些事务参与者进行启发式提交，而其他事务参与者进行启发式回滚时，coordinator会抛出此异常。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;事务模式&#34;&gt;事务模式&lt;/h3&gt;
-&lt;p&gt;事务模型（Transaction Models）是指在事务处理系统中使用的一组原则和方法，用于定义事务的结构、范围、行为和执行方式。不同的事务模型反映了不同的设计和实现方法，以满足特定的应用需求。以下是三种常见的事务模型。&lt;/p&gt;
-&lt;h4 id=&#34;扁平事务模型&#34;&gt;扁平事务模型&lt;/h4&gt;
-&lt;p&gt;扁平事务模型（&lt;strong&gt;Flat Transaction Model&lt;/strong&gt;）是最简单和最常见的事务模型，其中每个事务都是独立的，并且没有任何嵌套或链接关系。扁平事务模型规定在任何给定时间只有一个事务在其他事务中处于活动状态。&lt;/p&gt;
+&lt;h3 id=&#34;事务模式&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%bc%8f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务模式
+&lt;/h3&gt;&lt;p&gt;事务模型（Transaction Models）是指在事务处理系统中使用的一组原则和方法，用于定义事务的结构、范围、行为和执行方式。不同的事务模型反映了不同的设计和实现方法，以满足特定的应用需求。以下是三种常见的事务模型。&lt;/p&gt;
+&lt;h4 id=&#34;扁平事务模型&#34;&gt;
+    &lt;a href=&#34;#%e6%89%81%e5%b9%b3%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    扁平事务模型
+&lt;/h4&gt;&lt;p&gt;扁平事务模型（&lt;strong&gt;Flat Transaction Model&lt;/strong&gt;）是最简单和最常见的事务模型，其中每个事务都是独立的，并且没有任何嵌套或链接关系。扁平事务模型规定在任何给定时间只有一个事务在其他事务中处于活动状态。&lt;/p&gt;
 &lt;p&gt;我们是否可以在一个事务中同时开始另一个事务？有两种方法可以做到这一点：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -182,18 +214,26 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;扁平事务模型广泛应用于各种数据库系统和应用程序。应用服务器必须支持扁平事务模型。&lt;/p&gt;
-&lt;h4 id=&#34;链式事务模型&#34;&gt;链式事务模型&lt;/h4&gt;
-&lt;p&gt;在链式事务模型（&lt;strong&gt;Chained Transaction Model&lt;/strong&gt;）中，多个事务可以相互链接，使得一个事务的结束与下一个事务的开始紧密相连。当一个事务提交或回滚时，立即启动另一个事务，而不需要显式地发出BEGIN TRANSACTION命令。链式事务模型有助于提高事务处理的效率，尤其是在需要频繁执行事务的应用场景中。&lt;/p&gt;
-&lt;h4 id=&#34;嵌套事务模型&#34;&gt;嵌套事务模型&lt;/h4&gt;
-&lt;p&gt;在嵌套事务模型（&lt;strong&gt;Nested Transaction Model&lt;/strong&gt;）中，事务可以嵌套在其他事务之内，形成一个层次结构。这意味着一个事务可以包含一个或多个子事务，子事务又可以包含它们自己的子事务。一个嵌套的子事务可以单独提交或中止。因此，复杂的事务可以被分解成更容易管理的子事务。子交易可以提交或回滚，而不需要整个交易提交或回滚。&lt;/p&gt;
+&lt;h4 id=&#34;链式事务模型&#34;&gt;
+    &lt;a href=&#34;#%e9%93%be%e5%bc%8f%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    链式事务模型
+&lt;/h4&gt;&lt;p&gt;在链式事务模型（&lt;strong&gt;Chained Transaction Model&lt;/strong&gt;）中，多个事务可以相互链接，使得一个事务的结束与下一个事务的开始紧密相连。当一个事务提交或回滚时，立即启动另一个事务，而不需要显式地发出BEGIN TRANSACTION命令。链式事务模型有助于提高事务处理的效率，尤其是在需要频繁执行事务的应用场景中。&lt;/p&gt;
+&lt;h4 id=&#34;嵌套事务模型&#34;&gt;
+    &lt;a href=&#34;#%e5%b5%8c%e5%a5%97%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    嵌套事务模型
+&lt;/h4&gt;&lt;p&gt;在嵌套事务模型（&lt;strong&gt;Nested Transaction Model&lt;/strong&gt;）中，事务可以嵌套在其他事务之内，形成一个层次结构。这意味着一个事务可以包含一个或多个子事务，子事务又可以包含它们自己的子事务。一个嵌套的子事务可以单独提交或中止。因此，复杂的事务可以被分解成更容易管理的子事务。子交易可以提交或回滚，而不需要整个交易提交或回滚。&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;JTA（Java Transaction API ）&lt;/a&gt;规范不要求支持嵌套事务模型。大多数 JTA 实现只支持扁平事务模型。&lt;/p&gt;
-&lt;h2 id=&#34;分布式事务处理模型&#34;&gt;分布式事务处理模型&lt;/h2&gt;
-&lt;p&gt;分布式事务是一个涉及到由多个分布式应用程序执行的操作，以及可能涉及多个分布式数据库的事务。在分布式环境中保证事务遵守 ACID 原则是很困难的，需要协调和管理跨越不同系统的事务。对于复杂、异构的分布式系统来说，应用程序必须遵守同一个标准来协调事务工作，以进行分布式事务处理（&lt;strong&gt;DTP&lt;/strong&gt;，&lt;em&gt;distributed transaction processing&lt;/em&gt; ）。其中一个 DTP 标准是由 &lt;a class=&#34;link&#34; href=&#34;https://www.opengroup.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;分布式事务处理模型&#34;&gt;
+    &lt;a href=&#34;#%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1%e5%a4%84%e7%90%86%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    分布式事务处理模型
+&lt;/h2&gt;&lt;p&gt;分布式事务是一个涉及到由多个分布式应用程序执行的操作，以及可能涉及多个分布式数据库的事务。在分布式环境中保证事务遵守 ACID 原则是很困难的，需要协调和管理跨越不同系统的事务。对于复杂、异构的分布式系统来说，应用程序必须遵守同一个标准来协调事务工作，以进行分布式事务处理（&lt;strong&gt;DTP&lt;/strong&gt;，&lt;em&gt;distributed transaction processing&lt;/em&gt; ）。其中一个 DTP 标准是由 &lt;a class=&#34;link&#34; href=&#34;https://www.opengroup.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Open Group&lt;/a&gt; 开发的 &lt;a class=&#34;link&#34; href=&#34;https://pubs.opengroup.org/onlinepubs/9294999599/toc.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;X/Open DTP&lt;/a&gt;。Java EE 中的全局事务处理使用的就是 &lt;strong&gt;X/Open DTP&lt;/strong&gt; 模型。&lt;strong&gt;在企业 Java 应用的世界中，X/Open DTP 是事务处理的基石。&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;xopen-dtp&#34;&gt;X/Open DTP&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/X/Open&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;xopen-dtp&#34;&gt;
+    &lt;a href=&#34;#xopen-dtp&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    X/Open DTP
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/X/Open&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;X/Open&lt;/a&gt; 是一家成立于1984年的非营利性质的技术联盟，其目标是制定开放系统标准，以便于实现操作系统、数据库、网络和分布式计算等领域的互操作性。1996 年，X/Open 与 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Open_Software_Foundation&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Open Software Foundation&lt;/a&gt;合并，组成 &lt;a class=&#34;link&#34; href=&#34;https://www.opengroup.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;The Open Group&lt;/a&gt;。&lt;/p&gt;
@@ -217,8 +257,10 @@
     &gt;TxRPC&lt;/a&gt;、&lt;a class=&#34;link&#34; href=&#34;https://pubs.opengroup.org/onlinepubs/009649399/toc.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XATMI&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://pubs.opengroup.org/onlinepubs/009658099/toc.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CPI-C&lt;/a&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;xopen-xa&#34;&gt;X/Open XA&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;xopen-xa&#34;&gt;
+    &lt;a href=&#34;#xopen-xa&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    X/Open XA
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;X/Open XA规范&lt;/a&gt;定义了&lt;strong&gt;事务管理器&lt;/strong&gt;（Transaction Manager）与&lt;strong&gt;资源管理器&lt;/strong&gt;（Resource Manager）之间的协作机制，以便在分布式环境中实现两阶段提交2PC协议。X/Open XA规范主要包括以下几个组成部分：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -232,8 +274,10 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;遵循X/Open XA规范的事务管理器和资源管理器可以跨平台、跨系统地协同工作，实现分布式事务处理的互操作性。&lt;/p&gt;
-&lt;h2 id=&#34;java-transaction-api-jta&#34;&gt;Java Transaction API (JTA)&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;java-transaction-api-jta&#34;&gt;
+    &lt;a href=&#34;#java-transaction-api-jta&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java Transaction API (JTA)
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Java Transaction API (JTA)&lt;/a&gt; 是Java平台上的一个事务处理规范，它为 Java 应用程序提供了一组统一的事务处理接口。JTA 是 Java EE 规范的一部分，旨在简化分布式事务处理。JTA 遵循 X/Open DTP模型，将事务管理器和资源管理器的接口抽象为 Java 接口。&lt;/p&gt;
 &lt;p&gt;JTA 规定了事务管理器和分布式事务系统中涉及的各方之间的 Java 接口：应用程序、资源管理器和应用服务器。&lt;/p&gt;
 &lt;p&gt;JTA包由两部分组成：&lt;/p&gt;
@@ -255,8 +299,10 @@
 &lt;p&gt;JTA 组件被定义在 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/package-summary.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;javax.transaction&lt;/a&gt;和 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/package-summary.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;javax.transaction.xa&lt;/a&gt; 两个包内。其中 &lt;strong&gt;javax.transaction.xa&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;jta-事务管理接口&#34;&gt;JTA 事务管理接口&lt;/h3&gt;
-&lt;p&gt;JTA 支持事务管理服务的标准接口，应用服务器主要通过 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/TransactionManager.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;jta-事务管理接口&#34;&gt;
+    &lt;a href=&#34;#jta-%e4%ba%8b%e5%8a%a1%e7%ae%a1%e7%90%86%e6%8e%a5%e5%8f%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTA 事务管理接口
+&lt;/h3&gt;&lt;p&gt;JTA 支持事务管理服务的标准接口，应用服务器主要通过 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/TransactionManager.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;TransactionManager&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/Transaction.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Transaction&lt;/a&gt; 接口来访问这些服务。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304200945512.png&#34;
@@ -274,8 +320,10 @@
 &lt;p&gt;&lt;strong&gt;Transaction&lt;/strong&gt;接口表示具体的事务实例。&lt;strong&gt;Transaction&lt;/strong&gt;由&lt;strong&gt;TransactionManager&lt;/strong&gt;创建，提供了一些与事务相关的方法，如commit()，rollback()和getStatus()等。可以使用 setRollbackOnly() 调用告诉&lt;strong&gt;Transaction&lt;/strong&gt;对象仅允许回滚。&lt;strong&gt;enlistResource&lt;/strong&gt; 方法用于将 &lt;strong&gt;XAResource&lt;/strong&gt; 对象添加到事务上下文中，&lt;strong&gt;delistResource&lt;/strong&gt;方法用于将 &lt;strong&gt;XAResource&lt;/strong&gt;对象从事务上下文中移除。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Synchronization&lt;/strong&gt;接口用于在事务完成时接收回调通知。调用 &lt;strong&gt;Transaction.registerSynchronization()&lt;/strong&gt; 可以将&lt;strong&gt;Synchronization&lt;/strong&gt;注册到与当前线程关联的事务中。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt; 接口定义了一组静态常量，表示事务的状态。&lt;/p&gt;
-&lt;h3 id=&#34;jta-应用接口&#34;&gt;JTA 应用接口&lt;/h3&gt;
-&lt;p&gt;JTA 的应用接口是 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/UserTransaction.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;jta-应用接口&#34;&gt;
+    &lt;a href=&#34;#jta-%e5%ba%94%e7%94%a8%e6%8e%a5%e5%8f%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTA 应用接口
+&lt;/h3&gt;&lt;p&gt;JTA 的应用接口是 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/UserTransaction.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;UserTransaction&lt;/a&gt; ，被应用程序用来控制事务边界。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201015744.png&#34;
 	
@@ -291,8 +339,10 @@
 &lt;p&gt;&lt;strong&gt;UserTransaction.commit()&lt;/strong&gt; 提交与当前线程关联的事务。&lt;strong&gt;UserTransaction.rollback()&lt;/strong&gt; 回滚与当前线程关联的事务。通过调用&lt;strong&gt;UserTransaction.setRollbackOnly()&lt;/strong&gt;，设置与当前线程相关的事务只能被回滚。&lt;/p&gt;
 &lt;p&gt;通过调用&lt;strong&gt;UserTransaction.setTransactionTimeout()&lt;strong&gt;可以设置与事务相关的超时，超时的单位是秒。事务状态&lt;/strong&gt;Status&lt;/strong&gt;可以通过 &lt;strong&gt;UserTransaction.getStatus()&lt;/strong&gt; 获得。&lt;/p&gt;
 &lt;p&gt;EJB 可以依赖声明式和容器管理事务。但是如果希望 EJB 以编程方式管理自己的事务，就可以利用&lt;strong&gt;UserTransaction&lt;/strong&gt;接口。Servlets 和 JSP 也可以利用 &lt;strong&gt;UserTransaction&lt;/strong&gt; 接口来划分事务。&lt;strong&gt;UserTransaction&lt;/strong&gt; 可以从JNDI查询中获得，或者直接从 EJB 容器环境中获得。&lt;/p&gt;
-&lt;h3 id=&#34;jta-和-xopen-xa&#34;&gt;JTA 和 X/Open XA&lt;/h3&gt;
-&lt;p&gt;X/Open 制定的 &lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;jta-和-xopen-xa&#34;&gt;
+    &lt;a href=&#34;#jta-%e5%92%8c-xopen-xa&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTA 和 X/Open XA
+&lt;/h3&gt;&lt;p&gt;X/Open 制定的 &lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XA 规范&lt;/a&gt; 定义了分布式资源管理器的接口，被 X/Open DTP 模型中的分布式事务管理器访问。JTA 使用 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/XAResource.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XAResource&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/Xid.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Xid&lt;/a&gt; 接口封装 XA。&lt;strong&gt;TransactionManager&lt;/strong&gt; 使用 &lt;strong&gt;XAResource&lt;/strong&gt; 接口来管理资源间的分布式事务。&lt;/p&gt;
@@ -311,11 +361,15 @@
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/XAResource.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XAResource&lt;/a&gt; 接口是事务管理器和资源管理器之间标准 X/Open 接口的 Java 映射。资源管理器的资源适配器必须实现 &lt;strong&gt;XAResource&lt;/strong&gt; 接口，使资源能够参与进分布式事务。一个资源管理器的例子是关系数据库，对应的资源适配器就是 JDBC 接口。&lt;/p&gt;
 &lt;p&gt;**XAResource.start()**方法用于将分布式事务与资源关联。**XAResource.end()**将资源与事务分离。&lt;strong&gt;XAResource&lt;/strong&gt;还提供了提交、准备提交、回滚、恢复和遗忘分布式事务的方法。事务超时也可以从XAResource中设置和获取。&lt;/p&gt;
-&lt;h2 id=&#34;java-transaction-service-jts&#34;&gt;Java Transaction Service (JTS)&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;CORBA Object Transaction Service (OTS)&lt;/strong&gt; 将分布式事务处理模型（DTP）扩展到了对象领域，它提供了一种在分布式对象系统中进行事务处理的方法。&lt;strong&gt;OTS&lt;/strong&gt; 定义了一组标准的接口和协议，允许 CORBA 对象参与分布式事务。&lt;strong&gt;Java Transaction Service (JTS)&lt;/strong&gt; 是 &lt;strong&gt;OTS&lt;/strong&gt; 的 Java 映射， &lt;strong&gt;JTA&lt;/strong&gt; 推荐使用 &lt;strong&gt;JTS&lt;/strong&gt; 作为其底层事务系统的实现。&lt;/p&gt;
+&lt;h2 id=&#34;java-transaction-service-jts&#34;&gt;
+    &lt;a href=&#34;#java-transaction-service-jts&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java Transaction Service (JTS)
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;CORBA Object Transaction Service (OTS)&lt;/strong&gt; 将分布式事务处理模型（DTP）扩展到了对象领域，它提供了一种在分布式对象系统中进行事务处理的方法。&lt;strong&gt;OTS&lt;/strong&gt; 定义了一组标准的接口和协议，允许 CORBA 对象参与分布式事务。&lt;strong&gt;Java Transaction Service (JTS)&lt;/strong&gt; 是 &lt;strong&gt;OTS&lt;/strong&gt; 的 Java 映射， &lt;strong&gt;JTA&lt;/strong&gt; 推荐使用 &lt;strong&gt;JTS&lt;/strong&gt; 作为其底层事务系统的实现。&lt;/p&gt;
 &lt;p&gt;从事务管理器的角度来看，JTA 接口是以 high-level 的形式出现，而 JTS 是事务管理器内部使用的 low-level 接口。&lt;strong&gt;应用服务器间的事务互操作性是通过底层使用  JTS 实现获得的。&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;corba&#34;&gt;CORBA&lt;/h3&gt;
-&lt;p&gt;由 &lt;a class=&#34;link&#34; href=&#34;https://www.omg.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;corba&#34;&gt;
+    &lt;a href=&#34;#corba&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    CORBA
+&lt;/h3&gt;&lt;p&gt;由 &lt;a class=&#34;link&#34; href=&#34;https://www.omg.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Object Management Group（OMG）&lt;/a&gt;定义的通用对象请求代理架构（Common Object Request Broker Architecture，CORBA）是一个由包括IBM、BEA和惠普在内的工业联盟制定的标准，它促进了可互操作应用程序的构建，这些应用程序基于分布式对象的概念。&lt;/p&gt;
 &lt;p&gt;CORBA 使用一个标准的通信模型，在这个模型上，用不同的语言组合实现的客户和服务器，以及在不同的硬件和操作系统平台上运行的客户和服务器可以进行交互。CORBA 体系结构主要包含以下几个部分：&lt;/p&gt;
 &lt;ul&gt;
@@ -324,8 +378,10 @@
 &lt;li&gt;通用设施，应用程序可能需要的其他有用服务。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;CORBA 比 Java EE 的出现早了十年，并且不受限于单一的实现语言。在 Java EE 出现之前，CORBA 是企业应用程序的标准开发平台。 EJB 采用的底层分布式对象通信协议是由 CORBA 定义的。EJB 使用 CORBA 通信协议将它们的服务暴露给客户，也可以使用 CORBA 通信协议与其他 EJB 和基于 CORBA 的服务器环境通信。一些 CORBA 服务，如 CORBA 命名服务、CORBA 事务和 CORBA 安全，被 Java EE 标准所接受，作为创建可互操作的 EJB 服务的手段。&lt;/p&gt;
-&lt;h3 id=&#34;orb&#34;&gt;ORB&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;ORB&lt;/strong&gt;是 CORBA 的核心组件，负责在客户端和服务端之间传递请求和响应。ORB的主要功能包括：&lt;/p&gt;
+&lt;h3 id=&#34;orb&#34;&gt;
+    &lt;a href=&#34;#orb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    ORB
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;ORB&lt;/strong&gt;是 CORBA 的核心组件，负责在客户端和服务端之间传递请求和响应。ORB的主要功能包括：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;为客户端提供透明访问：客户端可以像调用本地对象一样调用远程对象，而不用关心底层通信和数据交换的细节。&lt;/li&gt;
 &lt;li&gt;定位和激活服务对象：ORB负责在分布式系统中查找和激活服务对象，以便客户端能够与它们进行通信。&lt;/li&gt;
@@ -333,12 +389,16 @@
 &lt;li&gt;系统间通信：ORB处理不同系统间的通信，包括连接管理、错误处理和安全性。&lt;/li&gt;
 &lt;li&gt;跨平台和跨语言：通过 IDL，ORB 可以实现不同编程语言之间的对象互操作。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;giop-和-iiop&#34;&gt;GIOP 和 IIOP&lt;/h3&gt;
-&lt;p&gt;GIOP 是一种通用的协议，用于定义分布式系统中不同 ORB之间的通信。GIOP 指定了在 ORB 之间传递的消息格式和通信规则。IIOP 是一种基于 TCP/IP 协议的 GIOP 实现。&lt;/p&gt;
+&lt;h3 id=&#34;giop-和-iiop&#34;&gt;
+    &lt;a href=&#34;#giop-%e5%92%8c-iiop&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    GIOP 和 IIOP
+&lt;/h3&gt;&lt;p&gt;GIOP 是一种通用的协议，用于定义分布式系统中不同 ORB之间的通信。GIOP 指定了在 ORB 之间传递的消息格式和通信规则。IIOP 是一种基于 TCP/IP 协议的 GIOP 实现。&lt;/p&gt;
 &lt;p&gt;GIOP 将 IDL 数据类型映射成二进制数据流，并通过网络发送。GIOP 使用通用数据表示（Common Data Representation ，CDR）语法来完成这一任务，以有效地在IDL数据类型和二进制数据流之间进行映射。&lt;/p&gt;
 &lt;p&gt;IIOP 将 GIOP 消息数据映射到 TCP/IP 连接行为，以及对输入/输出流的读/写。当一个 CORBA 服务器对象要被分发时，ORB 通过Interoperable Object Reference (IOR) 使网络上唯一识别该对象的信息可用。IOR 包含 CORBA 服务器对象进程的 IP 地址和 TCP 端口。CORBA 客户端利用IOR 建立和CORBA 服务器的连接。&lt;/p&gt;
-&lt;h3 id=&#34;rmiiiop&#34;&gt;RMI/IIOP&lt;/h3&gt;
-&lt;p&gt;Java 远程方法调用（JAVA REMOTE METHOD INVOCATION，RMI）框架是Java的分布式对象通信框架。RMI允许客户端和服务器将对象作为方法参数和返回值通过值或引用来传递。如果在方法参数或返回类型中使用的类的类型对客户端或服务器都是未知的，它可以被动态加载。RMI还为分布式垃圾收集提供了一种方法，以清理不再被任何分布式客户端引用的任何分布式服务器对象。&lt;/p&gt;
+&lt;h3 id=&#34;rmiiiop&#34;&gt;
+    &lt;a href=&#34;#rmiiiop&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    RMI/IIOP
+&lt;/h3&gt;&lt;p&gt;Java 远程方法调用（JAVA REMOTE METHOD INVOCATION，RMI）框架是Java的分布式对象通信框架。RMI允许客户端和服务器将对象作为方法参数和返回值通过值或引用来传递。如果在方法参数或返回类型中使用的类的类型对客户端或服务器都是未知的，它可以被动态加载。RMI还为分布式垃圾收集提供了一种方法，以清理不再被任何分布式客户端引用的任何分布式服务器对象。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201532758.png&#34;
 	
 	
@@ -363,8 +423,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;JRMP&lt;/strong&gt; 是一个非标准的协议，不能实现与跨语言的 CORBA 对象的通信。与 JRMP 不同，&lt;strong&gt;RMI/IIOP&lt;/strong&gt; 可以在不同平台和编程语言之间进行通信，因为它使用了 CORBA 的 IIOP 协议。RMI/IIOP 使用 IDL 来定义远程对象的接口，这样不同编程语言的客户端都可以调用远程对象。RMI/IIOP 使用 CORBA 的对象传输方式，而不是 Java 序列化，这样可以实现跨平台和跨编程语言的对象传输。&lt;/p&gt;
-&lt;h3 id=&#34;ots&#34;&gt;OTS&lt;/h3&gt;
-&lt;p&gt;OTS 定义了事务服务实现的接口。OTS 的接口基本上可以分为客户端可用的接口和服务器可用的接口。这些接口之间有一些重叠，因为在某些情况下需要同时提供给客户和服务器。&lt;/p&gt;
+&lt;h3 id=&#34;ots&#34;&gt;
+    &lt;a href=&#34;#ots&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    OTS
+&lt;/h3&gt;&lt;p&gt;OTS 定义了事务服务实现的接口。OTS 的接口基本上可以分为客户端可用的接口和服务器可用的接口。这些接口之间有一些重叠，因为在某些情况下需要同时提供给客户和服务器。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201717219.png&#34;
 	
 	
@@ -399,8 +461,10 @@
 &lt;li&gt;Direct/Explicit 模式，事务使用 &lt;strong&gt;TransactionFactory&lt;/strong&gt; 创建，并使用 &lt;strong&gt;Control&lt;/strong&gt; 对象进行提交或回滚。事务传播是通过向每个 IDL 操作添加参数（例如，事务的控制对象）来完成。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;大多数应用程序的首选 Indirect/Implicit 模式，Direct/Explicit 模式提供了更大的灵活性，但更难管理。&lt;/p&gt;
-&lt;h3 id=&#34;jts&#34;&gt;JTS&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;Java Transaction Service&lt;/strong&gt;（JTS）规范是 &lt;strong&gt;OTS&lt;/strong&gt; 规范的Java语言映射。使用符合 JTS 的实现在理论上允许与其他 JTS 实现的互操作。&lt;/p&gt;
+&lt;h3 id=&#34;jts&#34;&gt;
+    &lt;a href=&#34;#jts&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTS
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Java Transaction Service&lt;/strong&gt;（JTS）规范是 &lt;strong&gt;OTS&lt;/strong&gt; 规范的Java语言映射。使用符合 JTS 的实现在理论上允许与其他 JTS 实现的互操作。&lt;/p&gt;
 &lt;p&gt;JTS API 通过规范提供 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/orb/tree/master/omgapi/src/main/idl&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;IDL&lt;/a&gt; 生成，主要的接口在 org.omg.CosTransactions 和 org.omg.CosTSPortability 包中。 Java 应用服务器通过 JTA 接口访问事务管理功能，JTA 通过 JTS 与事务管理的实现进行交互。同样，JTS 可以通过 JTA XA 接口访问资源，也可以访问启用 OTS 的非 XA 资源。JTS 实现可以通过 CORBA OTS 接口进行互操作。JTS 必须支持扁平事务模型。JTS 可以支持嵌套事务模型，但不是必需的。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201812890.png&#34;
@@ -426,8 +490,10 @@
         <guid>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%B4%E5%90%88%E7%AC%AC%E4%B8%89%E6%96%B9%E8%BF%9E%E6%8E%A5%E6%B1%A0/</guid>
         <description>&lt;p&gt;数据库连接池是应用服务器的基本功能，但有时用户因为性能、监控等需求，想使用第三方的连接池。如果只是使用第三方连接池管理数据库连接，那么直接在应用中引入就可以了，但如果用户同时还需要应用服务器的分布式事务和安全服务，就没那么简单了。&lt;/p&gt;
 &lt;p&gt;为了讲清楚，首先需要了解一下 JDBC 基本概念。&lt;/p&gt;
-&lt;h2 id=&#34;connection&#34;&gt;Connection&lt;/h2&gt;
-&lt;p&gt;从 JDBC driver 的角度来看，&lt;strong&gt;Connection&lt;/strong&gt; 表示客户端会话。应用程序可以通过以下两种方式获取连接：&lt;/p&gt;
+&lt;h2 id=&#34;connection&#34;&gt;
+    &lt;a href=&#34;#connection&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Connection
+&lt;/h2&gt;&lt;p&gt;从 JDBC driver 的角度来看，&lt;strong&gt;Connection&lt;/strong&gt; 表示客户端会话。应用程序可以通过以下两种方式获取连接：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;DriverManager&lt;/strong&gt; 最初的JDBC 1.0 API中被引入，当应用程序首次尝试通过指定URL连接到数据源时，&lt;code&gt;DriverManager&lt;/code&gt;将自动加载在 CLASSPATH 中找到的任何 JDBC driver。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;DataSource&lt;/strong&gt; 是在 JDBC 2.0 可选包API中引入的接口。它允许应用程序对底层数据源的细节是透明的。&lt;code&gt;DataSource&lt;/code&gt; 对象的属性被设置为表示特定数据源。当调用其 &lt;code&gt;getConnection&lt;/code&gt;方法时，&lt;code&gt;DataSource&lt;/code&gt; 实例将返回到该数据源的连接。通过简单地更改DataSource对象的属性，可以将应用程序定向到不同的数据源；无需更改应用程序代码。同样，可以更改 &lt;code&gt;DataSource&lt;/code&gt; 实现而不更改使用它的应用程序代码。&lt;/li&gt;
@@ -451,8 +517,10 @@
 &lt;p&gt;&lt;strong&gt;DataSource&lt;/strong&gt;、&lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 和 &lt;strong&gt;XADataSource&lt;/strong&gt; 都继承自 &lt;strong&gt;CommonDataSource&lt;/strong&gt;，但&lt;strong&gt;它们之间没有继承关系&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;从 &lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 获得的是 &lt;strong&gt;PooledConnection&lt;/strong&gt;，&lt;strong&gt;PooledConnection&lt;/strong&gt; 并没有继承 &lt;strong&gt;Connection&lt;/strong&gt;，但可以获得&lt;strong&gt;Connection&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;从 &lt;strong&gt;XADataSource&lt;/strong&gt; 获得的是 &lt;strong&gt;XAConnection&lt;/strong&gt;，&lt;strong&gt;XAConnection&lt;/strong&gt; 继承了 &lt;strong&gt;PooledConnection&lt;/strong&gt;，除了能获得 &lt;strong&gt;Connection&lt;/strong&gt;，还可以获得 &lt;strong&gt;XAResource&lt;/strong&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;application-server-datasource&#34;&gt;Application Server DataSource&lt;/h2&gt;
-&lt;p&gt;应用服务器会为其客户端提供了一个 &lt;strong&gt;DataSource&lt;/strong&gt; 接口的实现，并通过 JNDI 暴露给用户。这个 DataSource 包装了 jdbc driver 连接数据库的能力，并在此基础上提供连接池、事务和安全等服务。&lt;/p&gt;
+&lt;h2 id=&#34;application-server-datasource&#34;&gt;
+    &lt;a href=&#34;#application-server-datasource&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Application Server DataSource
+&lt;/h2&gt;&lt;p&gt;应用服务器会为其客户端提供了一个 &lt;strong&gt;DataSource&lt;/strong&gt; 接口的实现，并通过 JNDI 暴露给用户。这个 DataSource 包装了 jdbc driver 连接数据库的能力，并在此基础上提供连接池、事务和安全等服务。&lt;/p&gt;
 &lt;p&gt;在配置应用服务器的 DataSource 时，一般需要指定 Connection 的获取方式：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -469,8 +537,10 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;这四种连接获取方式都是 JDBC driver 提供的能力，Driver 和 DataSource 是最基本方式。如果应用服务器的 DataSource 想要具备连接池化、分布式事务等服务，除了自身要实现这些功能以外，还需要底层 driver 提供相应的能力配合。&lt;/p&gt;
-&lt;h3 id=&#34;connectionpooldatasource&#34;&gt;ConnectionPoolDataSource&lt;/h3&gt;
-&lt;p&gt;以连接池为例，JDBC driver 提供了 &lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 的实现，应用服务器使用它来构建和管理连接池。客户端在使用相同的 JNDI 和 DataSource API 的同时获得更好的性能和可扩展性。&lt;/p&gt;
+&lt;h3 id=&#34;connectionpooldatasource&#34;&gt;
+    &lt;a href=&#34;#connectionpooldatasource&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    ConnectionPoolDataSource
+&lt;/h3&gt;&lt;p&gt;以连接池为例，JDBC driver 提供了 &lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 的实现，应用服务器使用它来构建和管理连接池。客户端在使用相同的 JNDI 和 DataSource API 的同时获得更好的性能和可扩展性。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202303101503461.png&#34;
 	
 	
@@ -495,8 +565,10 @@
 &lt;p&gt;我们看到，应用程序客户端通过 JNDI 查找一个 DataSource 对象，并请求从 DataSource 获得一个连接。当连接池没有可用连接时，DataSource 的实现从 JDBC driver 的 ConnectionPoolDataSource 中请求一个新的 PooledConnection 。应用服务器的 DataSource 实现会向 PooledConnection 注册一个ConnectionEventListener，随后获得一个新的 Connection 对象。应用客户端在完成操作后调用 &lt;code&gt;Connection.close()&lt;/code&gt;，会生成一个 ConnectionEvent 实例，该实例会返回给应用服务器的数据源实现。在收到连接关闭的通知后，应用服务器可以将连接对象放回连接池中。&lt;/p&gt;
 &lt;p&gt;注意 &lt;strong&gt;ConnectionPoolDataSource 本身不是连接池&lt;/strong&gt;，它是 driver 提供给应用服务器的接口契约，意思是你从 ConnectionPoolDataSource 获得的PooledConnection可以放心的缓存起来，同时连接关闭的时候，driver 会发送事件通知给应用服务器，真正的关闭连接还是放回连接池，由你自己决定。 一般 JDBC driver 提供的 ConnectionPoolDataSource 实现并没有内置连接池功能，需要配合应用服务器或其他第三方连接池一起使用。可以参考  &lt;a class=&#34;link&#34; href=&#34;https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-usagenotes-j2ee-concepts-connection-pooling.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;MySQL Connector &lt;/a&gt;的文档。&lt;/p&gt;
-&lt;h3 id=&#34;xadatasource&#34;&gt;XADataSource&lt;/h3&gt;
-&lt;p&gt;同样，如果想要分布式事务支持，应用服务器的 DataSource  需要依赖 driver 提供的 &lt;strong&gt;XADataSource&lt;/strong&gt; 实现，同时通过 XAResource 和 Transaction Manager 交互。&lt;/p&gt;
+&lt;h3 id=&#34;xadatasource&#34;&gt;
+    &lt;a href=&#34;#xadatasource&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    XADataSource
+&lt;/h3&gt;&lt;p&gt;同样，如果想要分布式事务支持，应用服务器的 DataSource  需要依赖 driver 提供的 &lt;strong&gt;XADataSource&lt;/strong&gt; 实现，同时通过 XAResource 和 Transaction Manager 交互。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202303101754420.png&#34;
 	
 	
@@ -519,8 +591,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;直接整合外部连接池&#34;&gt;直接整合外部连接池&lt;/h2&gt;
-&lt;p&gt;如果想在应用服务器中直接整合第三方的连接池实现是比较困难的，下面分析一下原因。&lt;/p&gt;
+&lt;h2 id=&#34;直接整合外部连接池&#34;&gt;
+    &lt;a href=&#34;#%e7%9b%b4%e6%8e%a5%e6%95%b4%e5%90%88%e5%a4%96%e9%83%a8%e8%bf%9e%e6%8e%a5%e6%b1%a0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    直接整合外部连接池
+&lt;/h2&gt;&lt;p&gt;如果想在应用服务器中直接整合第三方的连接池实现是比较困难的，下面分析一下原因。&lt;/p&gt;
 &lt;p&gt;JTA 规范要求连接必须能够同时处理多个事务，这个功能被称为事务多路复用或事务交错。我们看一个例子：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -574,8 +648,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;而外部连接池不能感知事务的存在，所以没办法做到事务对连接的独占，因此应用服务器不能简单的直接整合第三方连接池。&lt;/p&gt;
-&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
-&lt;p&gt;如果外部连接池实现了 XADataSource，那么我们可以把它当作普通的  JDBC driver，在配置应用服务器的 DataSource 时使用。需要注意几点：&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;
+    &lt;a href=&#34;#%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    解决方案
+&lt;/h2&gt;&lt;p&gt;如果外部连接池实现了 XADataSource，那么我们可以把它当作普通的  JDBC driver，在配置应用服务器的 DataSource 时使用。需要注意几点：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;为外部连接池配置真正的 JDBC driver 时，要使用 driver的 XADataSource 作为连接的获取方式&lt;/p&gt;
@@ -630,8 +706,10 @@
 &lt;li&gt;&lt;strong&gt;storage-service&lt;/strong&gt;：&lt;code&gt;StorageService&lt;/code&gt;的具体实现&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;business-service&lt;/strong&gt;：用户访问入口&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2 id=&#34;事务上下文的传播&#34;&gt;事务上下文的传播&lt;/h2&gt;
-&lt;p&gt;在项目主工程的pom文件中引入&lt;code&gt;Atomikos&lt;/code&gt;依赖，注意要包括&lt;code&gt;transactions-remoting&lt;/code&gt;，正是它才能让事务上下文在&lt;code&gt;RPC&lt;/code&gt;调用时传递。&lt;/p&gt;
+&lt;h2 id=&#34;事务上下文的传播&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e4%b8%8a%e4%b8%8b%e6%96%87%e7%9a%84%e4%bc%a0%e6%92%ad&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务上下文的传播
+&lt;/h2&gt;&lt;p&gt;在项目主工程的pom文件中引入&lt;code&gt;Atomikos&lt;/code&gt;依赖，注意要包括&lt;code&gt;transactions-remoting&lt;/code&gt;，正是它才能让事务上下文在&lt;code&gt;RPC&lt;/code&gt;调用时传递。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -842,8 +920,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;两阶段提交过程&#34;&gt;两阶段提交过程&lt;/h2&gt;
-&lt;p&gt;在处理&lt;code&gt;RPC&lt;/code&gt;调用的响应时，&lt;code&gt;Atomikos&lt;/code&gt;会将参与到全局事务的远程节点注册为&lt;code&gt;Participants&lt;/code&gt;(&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-api/src/main/java/com/atomikos/icatch/Extent.java#L64&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h2 id=&#34;两阶段提交过程&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%a4%e9%98%b6%e6%ae%b5%e6%8f%90%e4%ba%a4%e8%bf%87%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    两阶段提交过程
+&lt;/h2&gt;&lt;p&gt;在处理&lt;code&gt;RPC&lt;/code&gt;调用的响应时，&lt;code&gt;Atomikos&lt;/code&gt;会将参与到全局事务的远程节点注册为&lt;code&gt;Participants&lt;/code&gt;(&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-api/src/main/java/com/atomikos/icatch/Extent.java#L64&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Extent.addRemoteParticipants&lt;/a&gt;)，在事务提交时，所有的&lt;code&gt;Participants&lt;/code&gt;都会&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions/src/main/java/com/atomikos/icatch/imp/CoordinatorImp.java#L673&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;参与到两阶段提交&lt;/a&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -925,8 +1005,10 @@
         <pubDate>Tue, 21 Apr 2020 11:25:09 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;应用服务器的分布式事务支持&#34;&gt;应用服务器的分布式事务支持&lt;/h2&gt;
-&lt;p&gt;我们先看一下分布式事务的需求是如何产生的，以及应用服务器是如何支持分布式事务管理的。&lt;/p&gt;
+        <description>&lt;h2 id=&#34;应用服务器的分布式事务支持&#34;&gt;
+    &lt;a href=&#34;#%e5%ba%94%e7%94%a8%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%9a%84%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1%e6%94%af%e6%8c%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    应用服务器的分布式事务支持
+&lt;/h2&gt;&lt;p&gt;我们先看一下分布式事务的需求是如何产生的，以及应用服务器是如何支持分布式事务管理的。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;单体应用&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -970,8 +1052,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;这就是应用因拆分而遇到分布式事务的问题，以及应用服务器是如何解决这个问题的。&lt;/p&gt;
-&lt;h2 id=&#34;分布式事务中间件&#34;&gt;分布式事务中间件&lt;/h2&gt;
-&lt;p&gt;微服务时代，没人再使用沉重的&lt;code&gt;EJB&lt;/code&gt;，都是将&lt;code&gt;Spring Bean&lt;/code&gt;直接暴露为远程服务。完成一个业务请求需要跨越多个微服务，同样需要面对分布式事务的问题。这时就需要引入&lt;strong&gt;分布式事务中间件&lt;/strong&gt;。我们以蚂蚁金服开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/seata/seata&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;分布式事务中间件&#34;&gt;
+    &lt;a href=&#34;#%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1%e4%b8%ad%e9%97%b4%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    分布式事务中间件
+&lt;/h2&gt;&lt;p&gt;微服务时代，没人再使用沉重的&lt;code&gt;EJB&lt;/code&gt;，都是将&lt;code&gt;Spring Bean&lt;/code&gt;直接暴露为远程服务。完成一个业务请求需要跨越多个微服务，同样需要面对分布式事务的问题。这时就需要引入&lt;strong&gt;分布式事务中间件&lt;/strong&gt;。我们以蚂蚁金服开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/seata/seata&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Seata&lt;/a&gt;为例，看看它是怎么解决微服务场景下的分布式事务问题。&lt;/p&gt;
 &lt;p&gt;将上一小节跑在应用服务器上的业务，使用微服务 + &lt;code&gt;Seata&lt;/code&gt;的重构后，部署架构如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241128875.png&#34;
@@ -986,8 +1070,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;上图中黄色方框（&lt;code&gt;RM&lt;/code&gt;，&lt;code&gt;TM&lt;/code&gt;，&lt;code&gt;TC&lt;/code&gt;）是&lt;code&gt;Seata&lt;/code&gt;的核心组件，它们配合完成对微服务的分布式事务支持。可以看出，和应用服务器的&lt;code&gt;EJB&lt;/code&gt;方案架构上类似，只是多了一个独立运行的&lt;code&gt;TC&lt;/code&gt;组件。&lt;/p&gt;
 &lt;p&gt;我们再看看&lt;code&gt;Seata&lt;/code&gt;各组件的具体作用。&lt;/p&gt;
-&lt;h3 id=&#34;seata的架构&#34;&gt;&lt;code&gt;Seata&lt;/code&gt;的架构&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129681.png&#34;
+&lt;h3 id=&#34;seata的架构&#34;&gt;
+    &lt;a href=&#34;#seata%e7%9a%84%e6%9e%b6%e6%9e%84&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;Seata&lt;/code&gt;的架构
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129681.png&#34;
 	
 	
 	
@@ -1003,8 +1089,10 @@
 &lt;li&gt;&lt;strong&gt;Transaction Manager (TM)&lt;/strong&gt;： 控制全局事务的边界，负责开启一个全局事务，并最终发起全局提交或全局回滚的决议。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Resource Manager (RM)&lt;/strong&gt;： 控制分支事务，负责分支注册、状态汇报，并接收事务协调器的指令，驱动分支（本地）事务的提交和回滚。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;seata-vs-应用服务器&#34;&gt;&lt;code&gt;Seata&lt;/code&gt; vs. 应用服务器&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器的分布式事务支持主要有以下四个差异：&lt;/p&gt;
+&lt;h2 id=&#34;seata-vs-应用服务器&#34;&gt;
+    &lt;a href=&#34;#seata-vs-%e5%ba%94%e7%94%a8%e6%9c%8d%e5%8a%a1%e5%99%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;Seata&lt;/code&gt; vs. 应用服务器
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器的分布式事务支持主要有以下四个差异：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器都可以实现&lt;strong&gt;业务无侵入&lt;/strong&gt;分布式事务支持。但应用服务器的&lt;code&gt;XA&lt;/code&gt;方案实现的是&lt;strong&gt;实时一致性&lt;/strong&gt;，而&lt;code&gt;Seata&lt;/code&gt;的&lt;code&gt;AT 模式&lt;/code&gt;实现的是&lt;strong&gt;最终一致性&lt;/strong&gt;。&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;引入了独立运行的&lt;code&gt;Transaction Coordinator&lt;/code&gt;，维护全局事务的运行状态。而应用服务器的访问入口节点承担了维护全局事务状态的职责。&lt;/li&gt;
@@ -1016,8 +1104,10 @@
     &gt;sofa-rpc&lt;/a&gt;等多种&lt;code&gt;RPC&lt;/code&gt;框架。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器都支持在分布式场景下的全局事务，都可以做到对业务无侵入。&lt;code&gt;Seata&lt;/code&gt;实现的是&lt;strong&gt;最终一致性&lt;/strong&gt;，因此性能比应用服务器的&lt;code&gt;XA&lt;/code&gt;方案好很多，具备海量并发处理能力，这也是互联网公司选择它的原因。由于&lt;code&gt;Seata&lt;/code&gt;不依赖数据库的&lt;strong&gt;XA driver&lt;/strong&gt;，只使用数据库的本地事务，就完成了对分布式事务的支持，相当于承担了部分数据库的职责，因此&lt;code&gt;Seata&lt;/code&gt;的实现难度要比应用服务器的&lt;code&gt;JTA&lt;/code&gt;大。&lt;/p&gt;
-&lt;h2 id=&#34;应用服务器进入微服务时代&#34;&gt;应用服务器进入微服务时代&lt;/h2&gt;
-&lt;p&gt;那么应用服务器的分布式事务支持在微服务时代还有用吗？或者说我们应该怎样改进，才能让应用服务器进入微服务时代？&lt;/p&gt;
+&lt;h2 id=&#34;应用服务器进入微服务时代&#34;&gt;
+    &lt;a href=&#34;#%e5%ba%94%e7%94%a8%e6%9c%8d%e5%8a%a1%e5%99%a8%e8%bf%9b%e5%85%a5%e5%be%ae%e6%9c%8d%e5%8a%a1%e6%97%b6%e4%bb%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    应用服务器进入微服务时代
+&lt;/h2&gt;&lt;p&gt;那么应用服务器的分布式事务支持在微服务时代还有用吗？或者说我们应该怎样改进，才能让应用服务器进入微服务时代？&lt;/p&gt;
 &lt;p&gt;首先我们要看到&lt;code&gt;JTA/XA&lt;/code&gt;的优势：支持数据的实时一致性，对业务开发更加友好。客户对原有的系统进行微服务改造时，如果把业务模型假定成数据最终一致性，客户就不得不做出很大的妥协和变更。特别是有些金融客户对一致性的要求会比较高。&lt;/p&gt;
 &lt;p&gt;我们可以学习&lt;code&gt;Seata&lt;/code&gt;的架构，抛弃掉沉重的&lt;code&gt;EJB/RMI-IIOP&lt;/code&gt;，让&lt;code&gt;Spring Bean&lt;/code&gt;通过&lt;code&gt;dubbo&lt;/code&gt;等&lt;code&gt;RPC&lt;/code&gt;框架直接对外暴露服务，同时&lt;strong&gt;事务上下文&lt;/strong&gt;可以在&lt;code&gt;RPC&lt;/code&gt;调用时进行传递：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129392.png&#34;
@@ -1251,8 +1341,10 @@
         <description>&lt;p&gt;当&lt;a class=&#34;link&#34; href=&#34;https://pingcap.com/blog-cn/#%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;TiDB 源码阅读系列&lt;/a&gt;更新到第六篇&lt;a class=&#34;link&#34; href=&#34;https://pingcap.com/blog-cn/tidb-source-code-reading-6/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《Select 语句概览》&lt;/a&gt;时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是：使用&lt;strong&gt;代数定律&lt;/strong&gt;对查询语句的&lt;strong&gt;代数表达式树&lt;/strong&gt;做等价转换，使改进后的&lt;strong&gt;代数表达式树&lt;/strong&gt;预期可以生成更有效的&lt;strong&gt;物理查询计划&lt;/strong&gt;。有了这些基础知识，看代码才能做到知其然知其所以然。本文希望通过梳理关系数据库背后的知识，为读懂 &lt;code&gt;TiDB&lt;/code&gt; 查询处理器部分的源码扫清障碍。&lt;/p&gt;
-&lt;h2 id=&#34;极简数据库发展史&#34;&gt;极简数据库发展史&lt;/h2&gt;
-&lt;p&gt;数据库的应用及其广泛，已经成为信息系统的核心技术和重要的基础设施。简单说数据库需要做两件事：存储数据，以及随后在你需要的时候能访问读取数据。&lt;/p&gt;
+&lt;h2 id=&#34;极简数据库发展史&#34;&gt;
+    &lt;a href=&#34;#%e6%9e%81%e7%ae%80%e6%95%b0%e6%8d%ae%e5%ba%93%e5%8f%91%e5%b1%95%e5%8f%b2&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    极简数据库发展史
+&lt;/h2&gt;&lt;p&gt;数据库的应用及其广泛，已经成为信息系统的核心技术和重要的基础设施。简单说数据库需要做两件事：存储数据，以及随后在你需要的时候能访问读取数据。&lt;/p&gt;
 &lt;p&gt;最早的数据库是基于&lt;strong&gt;文件系统&lt;/strong&gt;，虽然它满足了长期存储数据的需求，但没有提供对文件的查询语言，读取访问非常不便利。于是人们在文件系统上引入一层抽象：&lt;strong&gt;数据模型&lt;/strong&gt;。数据模型是对现实世界数据特征的抽象，能比较真实地模拟现实世界，容易为人所理解，也便于在计算机上实现。&lt;/p&gt;
 &lt;p&gt;最早出现的是&lt;strong&gt;层次模型&lt;/strong&gt;（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hierarchical_database_model&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Hierarchical Model&lt;/a&gt;），数据被组织为一棵树，类似于今天&lt;strong&gt;文档数据库&lt;/strong&gt;使用的&lt;code&gt;JSON&lt;/code&gt;的结构。&lt;strong&gt;层次模型&lt;/strong&gt;很适合处理&lt;strong&gt;one-to-many&lt;/strong&gt;关系，但要表现&lt;strong&gt;many-to-many&lt;/strong&gt;关系则非常困难，一般也不支持&lt;code&gt;join&lt;/code&gt;。使用&lt;strong&gt;层次模型&lt;/strong&gt;最著名的数据库是 &lt;code&gt;IBM&lt;/code&gt; 的&lt;strong&gt;Information Management System (IMS)&lt;/strong&gt;，它最初是为了解决阿波罗飞船登月计划的需求，协调分散在全球制造的200万个阿波罗飞船零部件的生产进度。&lt;/p&gt;
@@ -1264,11 +1356,15 @@
 &lt;p&gt;到了2010年，&lt;strong&gt;NoSQL&lt;/strong&gt;兴起，试图颠覆&lt;strong&gt;关系数据模型&lt;/strong&gt;的统治地位。随着互联网的爆发式发展，数据库领域又一次发生了摇摆，伴随着互联网的特殊需求，一批有着新鲜血液的 &lt;strong&gt;NoSQL&lt;/strong&gt; 数据库涌现了出来，&lt;strong&gt;层次模型&lt;/strong&gt;又重新站在了大家面前。&lt;strong&gt;NoSQL&lt;/strong&gt;为了应对海量数据存储和高并发访问，决定放弃&lt;strong&gt;关系数据模型&lt;/strong&gt;和&lt;strong&gt;事务&lt;/strong&gt;等关系数据数据库的关键特性。自从 &lt;strong&gt;NoSQL&lt;/strong&gt; 概念横空出世，关系数据库似乎成了低效、高成本、速度慢的数据处理模式的代名词。然而，&lt;strong&gt;NoSQL&lt;/strong&gt;在解决问题的同时也给使用者带来了很多困扰， &lt;strong&gt;最终一致&lt;/strong&gt;让应用开发者要面对各种复杂的场景。&lt;/p&gt;
 &lt;p&gt;数据库技术的发展是螺旋式上升，Google发布的&lt;code&gt;Spanner&lt;/code&gt;和&lt;code&gt;F1&lt;/code&gt;两篇论文，让人们看到了&lt;strong&gt;关系数据模型&lt;/strong&gt; 和 &lt;strong&gt;NoSQL&lt;/strong&gt; 融合的可能性。以 &lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;TiDB&lt;/a&gt; 为代表的 &lt;strong&gt;NewSQL&lt;/strong&gt; 数据库，让人们重新享受关系模型、强一致性事务等对使用者友好的特性，同时也具备了 &lt;strong&gt;NoSQL&lt;/strong&gt; 的水平扩展能力。&lt;/p&gt;
-&lt;h2 id=&#34;关系数据模型-和-关系代数&#34;&gt;关系数据模型 和 关系代数&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;数据模型&lt;/strong&gt;是对现实世界事物的抽象，而&lt;strong&gt;关系数据模型&lt;/strong&gt;将一切事物都抽象为&lt;strong&gt;关系&lt;/strong&gt;，并通过集合运算的方式规定了关系之间的运算过程，模型相对的比较简单，数据证明严谨，因此很快被大家广泛接受。&lt;/p&gt;
+&lt;h2 id=&#34;关系数据模型-和-关系代数&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e7%b3%bb%e6%95%b0%e6%8d%ae%e6%a8%a1%e5%9e%8b-%e5%92%8c-%e5%85%b3%e7%b3%bb%e4%bb%a3%e6%95%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关系数据模型 和 关系代数
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;数据模型&lt;/strong&gt;是对现实世界事物的抽象，而&lt;strong&gt;关系数据模型&lt;/strong&gt;将一切事物都抽象为&lt;strong&gt;关系&lt;/strong&gt;，并通过集合运算的方式规定了关系之间的运算过程，模型相对的比较简单，数据证明严谨，因此很快被大家广泛接受。&lt;/p&gt;
 &lt;p&gt;这一节我将介绍关系数据库的数学基础：&lt;strong&gt;关系数据模型&lt;/strong&gt;和&lt;strong&gt;关系代数&lt;/strong&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;关系数据模型&#34;&gt;关系数据模型&lt;/h3&gt;
-&lt;p&gt;关系模型为人们提供了一种描述数据的方法：一个称为&lt;strong&gt;关系&lt;/strong&gt;（relation）的二维表。现实世界的实体以及实体间的各种联系都可以用&lt;strong&gt;关系&lt;/strong&gt;来表示。我们通过例子来了解关系模型的重要术语：&lt;/p&gt;
+&lt;h3 id=&#34;关系数据模型&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e7%b3%bb%e6%95%b0%e6%8d%ae%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关系数据模型
+&lt;/h3&gt;&lt;p&gt;关系模型为人们提供了一种描述数据的方法：一个称为&lt;strong&gt;关系&lt;/strong&gt;（relation）的二维表。现实世界的实体以及实体间的各种联系都可以用&lt;strong&gt;关系&lt;/strong&gt;来表示。我们通过例子来了解关系模型的重要术语：&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;雇员表&lt;/strong&gt;&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -1319,12 +1415,16 @@
 &lt;li&gt;&lt;strong&gt;域（Domain）&lt;/strong&gt; : 是一组具有相同数据类型的值的集合。属性的取值范围来自某个域。例如性别的域是（男，女）。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;关系模式（schema）&lt;/strong&gt;：对关系的描述，先给出一个关系名，其后是用圆括号扩起来的所有属性，例如：&lt;code&gt;employees（emp_no, name, birth_date, gender, hire_date）&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;关系代数&#34;&gt;关系代数&lt;/h3&gt;
-&lt;p&gt;一门&lt;strong&gt;代数&lt;/strong&gt;是由一些&lt;strong&gt;操作符&lt;/strong&gt;和&lt;strong&gt;操作数&lt;/strong&gt;组成。例如算术代数的加、减、乘、除是操作符，变量&lt;code&gt;x&lt;/code&gt;和常量&lt;code&gt;8&lt;/code&gt;是操作数。任何一门代数都允许把操作符作用在操作数上构造出&lt;strong&gt;表达式（expression）&lt;/strong&gt;，例如算术表达式 &lt;code&gt;(x+y)*3&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;关系代数&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e7%b3%bb%e4%bb%a3%e6%95%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关系代数
+&lt;/h3&gt;&lt;p&gt;一门&lt;strong&gt;代数&lt;/strong&gt;是由一些&lt;strong&gt;操作符&lt;/strong&gt;和&lt;strong&gt;操作数&lt;/strong&gt;组成。例如算术代数的加、减、乘、除是操作符，变量&lt;code&gt;x&lt;/code&gt;和常量&lt;code&gt;8&lt;/code&gt;是操作数。任何一门代数都允许把操作符作用在操作数上构造出&lt;strong&gt;表达式（expression）&lt;/strong&gt;，例如算术表达式 &lt;code&gt;(x+y)*3&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;关系代数&lt;/strong&gt; 也是一门代数，它的操作数是&lt;strong&gt;关系&lt;/strong&gt;，操作运算符有两类：&lt;strong&gt;集合运算符&lt;/strong&gt;和专门的&lt;strong&gt;关系运算符&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;关系代数&lt;/strong&gt;可以认为是一种抽象的查询语言，利用对&lt;strong&gt;关系&lt;/strong&gt;的&lt;strong&gt;运算&lt;/strong&gt;来表达&lt;strong&gt;查询&lt;/strong&gt;，运算对象是&lt;strong&gt;关系&lt;/strong&gt;，运算结果也是&lt;strong&gt;关系&lt;/strong&gt;。因此，&lt;strong&gt;关系代数&lt;/strong&gt;的表达式也被称为&lt;strong&gt;查询（query）&lt;/strong&gt;。&lt;/p&gt;
-&lt;h4 id=&#34;传统的集合运算&#34;&gt;传统的集合运算&lt;/h4&gt;
-&lt;p&gt;三个最常见的集合操作是：&lt;strong&gt;并&lt;/strong&gt;（union）、&lt;strong&gt;交&lt;/strong&gt;（intersection）、&lt;strong&gt;差&lt;/strong&gt;（difference）。&lt;/p&gt;
+&lt;h4 id=&#34;传统的集合运算&#34;&gt;
+    &lt;a href=&#34;#%e4%bc%a0%e7%bb%9f%e7%9a%84%e9%9b%86%e5%90%88%e8%bf%90%e7%ae%97&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    传统的集合运算
+&lt;/h4&gt;&lt;p&gt;三个最常见的集合操作是：&lt;strong&gt;并&lt;/strong&gt;（union）、&lt;strong&gt;交&lt;/strong&gt;（intersection）、&lt;strong&gt;差&lt;/strong&gt;（difference）。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;R ∪ S&lt;/code&gt;，表示关系R和S的&lt;strong&gt;并&lt;/strong&gt;，得到的结果关系的元素来自R或者S，或R和S中都出现过。&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;R ∩ S&lt;/code&gt;，表示关系R和S的&lt;strong&gt;交&lt;/strong&gt;，同时在R和S中存在的元素集合。&lt;/li&gt;
@@ -1436,8 +1536,10 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h4 id=&#34;专门的关系运算&#34;&gt;专门的关系运算&lt;/h4&gt;
-&lt;ul&gt;
+&lt;h4 id=&#34;专门的关系运算&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%93%e9%97%a8%e7%9a%84%e5%85%b3%e7%b3%bb%e8%bf%90%e7%ae%97&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    专门的关系运算
+&lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;选择&lt;/strong&gt;（selection)，当&lt;strong&gt;选择&lt;/strong&gt;操作符应用到关系&lt;code&gt;R&lt;/code&gt;上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及&lt;code&gt;R&lt;/code&gt;中属性的条件&lt;code&gt;C&lt;/code&gt;，表示为 σ&lt;sub&gt;C&lt;/sub&gt;( R )&lt;/p&gt;
 &lt;/li&gt;
@@ -1612,26 +1714,34 @@
 &lt;li&gt;&lt;strong&gt;左外连接&lt;/strong&gt;(LEFT OUTER JOIN或LEFT JOIN)：只保留左边关系&lt;code&gt;R&lt;/code&gt;中的悬浮元组&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;右外连接&lt;/strong&gt;(RIGHT OUTER JOIN或RIGHT JOIN)：只保留右边关系&lt;code&gt;S&lt;/code&gt;中的悬浮元组&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h4 id=&#34;关系代数的扩展操作符&#34;&gt;关系代数的扩展操作符&lt;/h4&gt;
-&lt;ul&gt;
+&lt;h4 id=&#34;关系代数的扩展操作符&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e7%b3%bb%e4%bb%a3%e6%95%b0%e7%9a%84%e6%89%a9%e5%b1%95%e6%93%8d%e4%bd%9c%e7%ac%a6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关系代数的扩展操作符
+&lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;消除重复操作符&lt;/strong&gt;（duplicated-elimination operator）用 &lt;code&gt;δ(R)&lt;/code&gt; 来返回一个没有重复元组的关系&lt;code&gt;R&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;聚集操作符&lt;/strong&gt; （aggregation operator）用来汇总或者聚集关系某一列中出现的值，有 &lt;code&gt;SUM&lt;/code&gt;，&lt;code&gt;AVG&lt;/code&gt;，&lt;code&gt;MIN&lt;/code&gt;，&lt;code&gt;MAX&lt;/code&gt;，&lt;code&gt;COUNT&lt;/code&gt; 等&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;分组操作&lt;/strong&gt;（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 &lt;code&gt;γ&lt;/code&gt; 是组合了&lt;strong&gt;分组&lt;/strong&gt;和&lt;strong&gt;聚合操作&lt;/strong&gt;的一个算子。例如表达式： γ &lt;sub&gt;gender, COUNT(emp_no)-&amp;gt;count&lt;/sub&gt;(employees) 代表把性别（&lt;code&gt;gender&lt;/code&gt;）作为分组属性，然后对每一个分组进行&lt;code&gt;COUNT(emp_no)&lt;/code&gt;的操作。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;排序算子&lt;/strong&gt;（sorting operator）如果关系&lt;code&gt;R&lt;/code&gt;的模式是 &lt;code&gt;R(A,B,C)&lt;/code&gt;，那么 τ&lt;sub&gt;C&lt;/sub&gt;( R ) 就把&lt;code&gt;R&lt;/code&gt;中的元组按照属性&lt;code&gt;C&lt;/code&gt;的值排序。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;关系代数小结&#34;&gt;关系代数小结&lt;/h3&gt;
-&lt;p&gt;上面的知识有些枯燥，但非常容易理解，因为我们经常使用关系数据库，已经接受了这些概念。掌握了一些关系代数的知识，在阅读&lt;code&gt;TiDB&lt;/code&gt;源码时，当看到&lt;code&gt;selection&lt;/code&gt;、&lt;code&gt;projection&lt;/code&gt; 这些术语就能一下想到它们对应的关系代数运算符。&lt;/p&gt;
+&lt;h3 id=&#34;关系代数小结&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e7%b3%bb%e4%bb%a3%e6%95%b0%e5%b0%8f%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关系代数小结
+&lt;/h3&gt;&lt;p&gt;上面的知识有些枯燥，但非常容易理解，因为我们经常使用关系数据库，已经接受了这些概念。掌握了一些关系代数的知识，在阅读&lt;code&gt;TiDB&lt;/code&gt;源码时，当看到&lt;code&gt;selection&lt;/code&gt;、&lt;code&gt;projection&lt;/code&gt; 这些术语就能一下想到它们对应的关系代数运算符。&lt;/p&gt;
 &lt;p&gt;这里只介绍了关系代数最基本的概念，如果想完整学习，建议参考斯坦福大学大学的课程&lt;a class=&#34;link&#34; href=&#34;http://infolab.stanford.edu/~ullman/fcdb.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CS145: A First Course in Database Systems&lt;/a&gt;，对应的教材有中文版&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/3923575/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《数据库系统基础教程》&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;其实我们在查询时提交给数据库的就是&lt;strong&gt;关系代数表达式&lt;/strong&gt;，它是关系运算符的组合，数据库会根据一些&lt;strong&gt;代数定律&lt;/strong&gt;对最初的表达式做等价变换，得出一个最优的&lt;strong&gt;等价表达式&lt;/strong&gt;（equivalent expression），即可以更快的被计算出结果的表达式。这个过程就是&lt;strong&gt;逻辑查询计划优化&lt;/strong&gt;，后面我会简单的介绍相关概念。&lt;/p&gt;
-&lt;h2 id=&#34;sql-的诞生&#34;&gt;SQL 的诞生&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;SQL&lt;/strong&gt;(Structured Query Language) 结构化查询语言，是关系数据库的标准语言。&lt;/p&gt;
+&lt;h2 id=&#34;sql-的诞生&#34;&gt;
+    &lt;a href=&#34;#sql-%e7%9a%84%e8%af%9e%e7%94%9f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SQL 的诞生
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;SQL&lt;/strong&gt;(Structured Query Language) 结构化查询语言，是关系数据库的标准语言。&lt;/p&gt;
 &lt;p&gt;在1970年Codd博士提出了关系模型之后，由于&lt;strong&gt;关系代数&lt;/strong&gt;或者&lt;strong&gt;关系&lt;/strong&gt;都太数学了，难以被普通用户接受。IBM在研制关系数据库管理系统原型&lt;code&gt;System R&lt;/code&gt;的过程中，决定摈弃数学语言，以自然语言为方向，结果诞生了结构化英语查询语言（&lt;code&gt;Structured English Query Language&lt;/code&gt;，&lt;code&gt;SEQUEL&lt;/code&gt;），后来更名为&lt;strong&gt;SQL&lt;/strong&gt;。&lt;code&gt;System R&lt;/code&gt; 因此获得1988年度ACM“软件系统奖”。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;SQL&lt;/strong&gt;是声明式查询语言，你只需要指定想要获得什么样的数据，而无须了解如何实现这个目标。&lt;strong&gt;SQL&lt;/strong&gt;具体是如何执行的，取决于数据库系统的&lt;strong&gt;查询处理器&lt;/strong&gt;，它来决定哪些索引和哪些连接方法可以使用，以及以什么样的顺序执行查询的各个部分。&lt;strong&gt;SQL&lt;/strong&gt;隐藏了数据库引擎的实现细节，因此用户可以在不修改查询语句的情况下，享受到数据库性能优化带来的好处。&lt;/p&gt;
 &lt;p&gt;下面我们来看看数据库的查询处理器。&lt;/p&gt;
-&lt;h2 id=&#34;关系数据库的查询处理器&#34;&gt;关系数据库的查询处理器&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;SQL&lt;/strong&gt;是在很高层次上表达查询，那么数据库的&lt;strong&gt;查询处理器&lt;/strong&gt;必须提供查询被如何执行的大量细节。下面我从概念上介绍查询处理器的处理流程，实际的数据库实现要复杂的多，特别是像 &lt;code&gt;TiDB&lt;/code&gt; 这样的分布式数据库。如果想比较系统的了解数据库的实现技术，同样推荐斯坦福大学计算机科学专业的课程 &lt;a class=&#34;link&#34; href=&#34;http://infolab.stanford.edu/~ullman/dbsi.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;关系数据库的查询处理器&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e7%b3%bb%e6%95%b0%e6%8d%ae%e5%ba%93%e7%9a%84%e6%9f%a5%e8%af%a2%e5%a4%84%e7%90%86%e5%99%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关系数据库的查询处理器
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;SQL&lt;/strong&gt;是在很高层次上表达查询，那么数据库的&lt;strong&gt;查询处理器&lt;/strong&gt;必须提供查询被如何执行的大量细节。下面我从概念上介绍查询处理器的处理流程，实际的数据库实现要复杂的多，特别是像 &lt;code&gt;TiDB&lt;/code&gt; 这样的分布式数据库。如果想比较系统的了解数据库的实现技术，同样推荐斯坦福大学计算机科学专业的课程 &lt;a class=&#34;link&#34; href=&#34;http://infolab.stanford.edu/~ullman/dbsi.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CS245: Database System Implementation&lt;/a&gt;。上面提到的&lt;a class=&#34;link&#34; href=&#34;http://infolab.stanford.edu/~ullman/fcdb.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CS145&lt;/a&gt;是&lt;a class=&#34;link&#34; href=&#34;http://infolab.stanford.edu/~ullman/dbsi.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CS245&lt;/a&gt;的预修课。国内很少有讲数据库内部实现的书，这门课的教材值得阅读。当然最好的学习方法是理论联系实践，多去读 &lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -1653,8 +1763,10 @@
 &lt;li&gt;使用&lt;strong&gt;关系代数&lt;/strong&gt;中的多个&lt;strong&gt;代数定律&lt;/strong&gt;改进初始的&lt;strong&gt;代数表达式树&lt;/strong&gt;。利用一些&lt;strong&gt;代数定律&lt;/strong&gt;，可以把&lt;strong&gt;代数表达式树&lt;/strong&gt;转换成一个&lt;strong&gt;等价&lt;/strong&gt;的表达式树，后者预期可以生成更有效的&lt;strong&gt;物理查询计划&lt;/strong&gt;。这一步进行了查询重写，可以称为&lt;strong&gt;逻辑查询计划优化&lt;/strong&gt;。&lt;/li&gt;
 &lt;li&gt;为&lt;strong&gt;逻辑查询计划&lt;/strong&gt;的每一个操作符选择实现算法，并确定这些操作符的执行顺序，&lt;strong&gt;逻辑查询计划&lt;/strong&gt;被转化为&lt;strong&gt;物理查询计划&lt;/strong&gt;。&lt;strong&gt;物理查询计划&lt;/strong&gt;指明了要执行的操作，操作的执行顺序，执行每步所用的算法，获取数据的方式，以及数据从一个操作传递给另一个操作的方式。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;查询示例&#34;&gt;查询示例&lt;/h3&gt;
-&lt;p&gt;本文准备以一个简单的例子来介绍查询处理的流程，下面是查询涉及的两张表：&lt;/p&gt;
+&lt;h3 id=&#34;查询示例&#34;&gt;
+    &lt;a href=&#34;#%e6%9f%a5%e8%af%a2%e7%a4%ba%e4%be%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    查询示例
+&lt;/h3&gt;&lt;p&gt;本文准备以一个简单的例子来介绍查询处理的流程，下面是查询涉及的两张表：&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;employees&lt;/strong&gt;&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -1744,8 +1856,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      salary &amp;gt; 7000;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;sql-语法分析&#34;&gt;SQL 语法分析&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;SQL Parser&lt;/code&gt;的功能是把SQL语句按照SQL语法规则进行解析，将文本转换成&lt;strong&gt;抽象语法树&lt;/strong&gt;（AST）。具体的实现可以参考这篇文章&lt;a class=&#34;link&#34; href=&#34;https://github.com/mz1999/Apusic-db-team/blob/master/docs/sql-parser.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h3 id=&#34;sql-语法分析&#34;&gt;
+    &lt;a href=&#34;#sql-%e8%af%ad%e6%b3%95%e5%88%86%e6%9e%90&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SQL 语法分析
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;SQL Parser&lt;/code&gt;的功能是把SQL语句按照SQL语法规则进行解析，将文本转换成&lt;strong&gt;抽象语法树&lt;/strong&gt;（AST）。具体的实现可以参考这篇文章&lt;a class=&#34;link&#34; href=&#34;https://github.com/mz1999/Apusic-db-team/blob/master/docs/sql-parser.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《TiDB SQL Parser 的实现》&lt;/a&gt;。 示例SQL解析完成后得到下面的语法树：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011707079.png&#34;
 	
@@ -1755,8 +1869,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;生成逻辑查询计划&#34;&gt;生成逻辑查询计划&lt;/h3&gt;
-&lt;p&gt;现在将上一步生成的语法树转换成&lt;strong&gt;关系代数表达式树&lt;/strong&gt;，也就是&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。对于示例SQL的抽象语法树转换过程如下：&lt;/p&gt;
+&lt;h3 id=&#34;生成逻辑查询计划&#34;&gt;
+    &lt;a href=&#34;#%e7%94%9f%e6%88%90%e9%80%bb%e8%be%91%e6%9f%a5%e8%af%a2%e8%ae%a1%e5%88%92&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    生成逻辑查询计划
+&lt;/h3&gt;&lt;p&gt;现在将上一步生成的语法树转换成&lt;strong&gt;关系代数表达式树&lt;/strong&gt;，也就是&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。对于示例SQL的抽象语法树转换过程如下：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;&amp;lt;FromList&amp;gt;&lt;/code&gt; 中涉及的关系&lt;code&gt;employees&lt;/code&gt;和&lt;code&gt;salaries&lt;/code&gt;做笛卡尔积运算&lt;/li&gt;
 &lt;li&gt;选择（selection）运算 σ&lt;sub&gt;C&lt;/sub&gt;，其中&lt;code&gt;C&lt;/code&gt;被替换成&lt;code&gt;&amp;lt;Condition&amp;gt;&lt;/code&gt;表达式，即&lt;code&gt;employees.emp_no = salaries.emp_no AND salary &amp;gt; 7000&lt;/code&gt;&lt;/li&gt;
@@ -1773,8 +1889,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;逻辑查询计划的改进&#34;&gt;逻辑查询计划的改进&lt;/h3&gt;
-&lt;p&gt;当我们把查询语句转换成关系代数表达式时，得到了一个初始的&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。现在我们可以使用关系代数中的多个&lt;strong&gt;代数定律&lt;/strong&gt;改进&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;逻辑查询计划的改进&#34;&gt;
+    &lt;a href=&#34;#%e9%80%bb%e8%be%91%e6%9f%a5%e8%af%a2%e8%ae%a1%e5%88%92%e7%9a%84%e6%94%b9%e8%bf%9b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    逻辑查询计划的改进
+&lt;/h3&gt;&lt;p&gt;当我们把查询语句转换成关系代数表达式时，得到了一个初始的&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。现在我们可以使用关系代数中的多个&lt;strong&gt;代数定律&lt;/strong&gt;改进&lt;strong&gt;逻辑查询计划&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;这里仅仅列出一小部分这样的&lt;strong&gt;代数定律&lt;/strong&gt;，它们可以将一个表达式树转换成一个&lt;strong&gt;等价&lt;/strong&gt;的表达式树。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;交换律和结合律&lt;/li&gt;
@@ -1820,10 +1938,14 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;物理查询计划的生成&#34;&gt;物理查询计划的生成&lt;/h3&gt;
-&lt;p&gt;这一步我们需要把&lt;strong&gt;逻辑查询计划&lt;/strong&gt;转换成&lt;strong&gt;物理查询计划&lt;/strong&gt;。通常由逻辑计划可以得到多个物理计划，我们需要对每个物理计划进行评估，选择具有最小估计代价的物理查询计划。&lt;/p&gt;
-&lt;h4 id=&#34;基于代价的物理计划选择&#34;&gt;基于代价的物理计划选择&lt;/h4&gt;
-&lt;p&gt;在从逻辑计划构建物理计划的时候，因为可能得到多个物理计划，我们需要通过估计物理计划执行的代价来确定最优选择。&lt;/p&gt;
+&lt;h3 id=&#34;物理查询计划的生成&#34;&gt;
+    &lt;a href=&#34;#%e7%89%a9%e7%90%86%e6%9f%a5%e8%af%a2%e8%ae%a1%e5%88%92%e7%9a%84%e7%94%9f%e6%88%90&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    物理查询计划的生成
+&lt;/h3&gt;&lt;p&gt;这一步我们需要把&lt;strong&gt;逻辑查询计划&lt;/strong&gt;转换成&lt;strong&gt;物理查询计划&lt;/strong&gt;。通常由逻辑计划可以得到多个物理计划，我们需要对每个物理计划进行评估，选择具有最小估计代价的物理查询计划。&lt;/p&gt;
+&lt;h4 id=&#34;基于代价的物理计划选择&#34;&gt;
+    &lt;a href=&#34;#%e5%9f%ba%e4%ba%8e%e4%bb%a3%e4%bb%b7%e7%9a%84%e7%89%a9%e7%90%86%e8%ae%a1%e5%88%92%e9%80%89%e6%8b%a9&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    基于代价的物理计划选择
+&lt;/h4&gt;&lt;p&gt;在从逻辑计划构建物理计划的时候，因为可能得到多个物理计划，我们需要通过估计物理计划执行的代价来确定最优选择。&lt;/p&gt;
 &lt;p&gt;如何计算这个代价呢？我们可以用物理计划每一步的任务执行时发生的磁盘I/O数、网络吞吐量、占用的内存空间大小等近似估算。&lt;/p&gt;
 &lt;p&gt;这些资源的访问和占用，又是由什么决定的呢？可能包括的决定因素有：&lt;/p&gt;
 &lt;ul&gt;
@@ -1834,8 +1956,10 @@
 &lt;/ul&gt;
 &lt;p&gt;数据库会收集统计这些信息，用来估算具体任务的代价。&lt;/p&gt;
 &lt;p&gt;逻辑查询计划在转换成物理计划的时候，每一步的转换都会面临多种情况的选择，最容易想到的是使用穷举法，估算每一种情况的代价，最后确定最优的物理计划。但使用穷举法的话，很可能估算本身的代价变得非常大，实践中可以采用&lt;strong&gt;动态规划&lt;/strong&gt;（dynamic programming）等算法。&lt;/p&gt;
-&lt;h4 id=&#34;枚举物理查询计划&#34;&gt;枚举物理查询计划&lt;/h4&gt;
-&lt;p&gt;以上一步输出的逻辑查询计划为例，看看在枚举物理查询计划时需要做出哪些选择。&lt;/p&gt;
+&lt;h4 id=&#34;枚举物理查询计划&#34;&gt;
+    &lt;a href=&#34;#%e6%9e%9a%e4%b8%be%e7%89%a9%e7%90%86%e6%9f%a5%e8%af%a2%e8%ae%a1%e5%88%92&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    枚举物理查询计划
+&lt;/h4&gt;&lt;p&gt;以上一步输出的逻辑查询计划为例，看看在枚举物理查询计划时需要做出哪些选择。&lt;/p&gt;
 &lt;p&gt;首先，逻辑查询计划的每个结点转换成什么样的物理运算符会遇到多种选择。我们从逻辑查询计划树自底往上来看：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;逻辑计划的叶子结点&lt;/li&gt;
@@ -1884,8 +2008,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;写在最后&#34;&gt;写在最后&lt;/h2&gt;
-&lt;p&gt;本文把关系数据库查询处理涉及的基础知识进行了梳理，希望对你理解 &lt;code&gt;TiDB&lt;/code&gt; 的代码能有所帮助。&lt;/p&gt;
+&lt;h2 id=&#34;写在最后&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%9c%a8%e6%9c%80%e5%90%8e&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写在最后
+&lt;/h2&gt;&lt;p&gt;本文把关系数据库查询处理涉及的基础知识进行了梳理，希望对你理解 &lt;code&gt;TiDB&lt;/code&gt; 的代码能有所帮助。&lt;/p&gt;
 &lt;p&gt;数据库是一个非常迷人的领域，它有很强的理论基础，同时又涉及大量的工程实践，可以说是最复杂的系统软件之一。我相信能开发数据库是很多程序员的梦想。梦想还是要有的，让我们一起努力吧！&lt;/p&gt;
 </description>
         </item>
@@ -1895,8 +2021,10 @@
         <pubDate>Tue, 05 Jun 2018 14:44:59 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E5%85%B3%E4%BA%8Emysql-xa%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</guid>
-        <description>&lt;h2 id=&#34;为什么xa事务建议用serializable隔离级别&#34;&gt;为什么XA事务建议用SERIALIZABLE隔离级别&lt;/h2&gt;
-&lt;p&gt;在MySQL最新的官方文档中，关于&lt;a class=&#34;link&#34; href=&#34;https://dev.mysql.com/doc/refman/8.0/en/xa.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <description>&lt;h2 id=&#34;为什么xa事务建议用serializable隔离级别&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%ba%e4%bb%80%e4%b9%88xa%e4%ba%8b%e5%8a%a1%e5%bb%ba%e8%ae%ae%e7%94%a8serializable%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    为什么XA事务建议用SERIALIZABLE隔离级别
+&lt;/h2&gt;&lt;p&gt;在MySQL最新的官方文档中，关于&lt;a class=&#34;link&#34; href=&#34;https://dev.mysql.com/doc/refman/8.0/en/xa.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XA Transactions&lt;/a&gt;的介绍有这么一段描述：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;As with nondistributed transactions, &lt;code&gt;SERIALIZABLE&lt;/code&gt; may be preferred if your applications are sensitive to read phenomena. &lt;code&gt;REPEATABLE READ&lt;/code&gt; may not be sufficient for distributed transactions.&lt;/p&gt;
@@ -1915,8 +2043,10 @@
 &lt;p&gt;如果某个并发事务调度机制可以让具有依赖关系的事务构成一个有向无环图(DAG)，那么这个调度就是可串行化的调度。由于每个后端DB都在使用serializable隔离级别，所以每个后端DB上面并发执行的事务分支构成的依赖关系图一定是DAG。&lt;/p&gt;
 &lt;p&gt;只要所有连接都是用serializable隔离级别，那么TDSQL XA执行的事务仍然可以达到可串行化隔离级别。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&#34;serializable性能差有更好的实现方式吗&#34;&gt;SERIALIZABLE性能差，有更好的实现方式吗&lt;/h2&gt;
-&lt;p&gt;如果分布式事务想实现&lt;code&gt;read-committed&lt;/code&gt;以上的隔离级别，又不想使用&lt;code&gt;SERIALIZABLE&lt;/code&gt;，有什么更好的方式吗？&lt;/p&gt;
+&lt;h2 id=&#34;serializable性能差有更好的实现方式吗&#34;&gt;
+    &lt;a href=&#34;#serializable%e6%80%a7%e8%83%bd%e5%b7%ae%e6%9c%89%e6%9b%b4%e5%a5%bd%e7%9a%84%e5%ae%9e%e7%8e%b0%e6%96%b9%e5%bc%8f%e5%90%97&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    SERIALIZABLE性能差，有更好的实现方式吗
+&lt;/h2&gt;&lt;p&gt;如果分布式事务想实现&lt;code&gt;read-committed&lt;/code&gt;以上的隔离级别，又不想使用&lt;code&gt;SERIALIZABLE&lt;/code&gt;，有什么更好的方式吗？&lt;/p&gt;
 &lt;p&gt;当然有，想想看&lt;code&gt;TiDB&lt;/code&gt;是怎么做的，底层&lt;code&gt;TiKV&lt;/code&gt;是一个整体，有全局的MVCC，所以能够做到分布式事务的Snapshot隔离级别。&lt;/p&gt;
 &lt;p&gt;PostgreSQL社区中，有&lt;a class=&#34;link&#34; href=&#34;http://postgresxc.wikia.com/wiki/Postgres-XC_Wiki&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Postgres-XC&lt;/a&gt;和&lt;a class=&#34;link&#34; href=&#34;https://www.postgres-xl.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -1926,8 +2056,10 @@
 &lt;blockquote&gt;
 &lt;p&gt;由于MySQL innodb使用MVCC做select（除了serializable和for update/lock in share mode子句），还需要将这个全局事务id给予innodb做事务id，同时，还需要TDSQL XA集群的多个set的innodb 共享各自的本地事务状态给所有其他innodb（这也是PGXL 所做的），&lt;strong&gt;任何一个innodb的本地事务的启动，prepare，commit，abort都需要通知给所有其他innodb实例。只有这样做，集群中的每个innodb实例才能够建立全局完全有一致的、当前集群中正在处理的所有事务的状态，以便做多版本并发控制。&lt;/strong&gt; 这本身都会造成极大的性能开销，并且导致set之间的严重依赖，降低系统可靠性。这些都是我们要极力避免的。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&#34;结论&#34;&gt;结论&lt;/h2&gt;
-&lt;p&gt;根据上面的分析，如果使用MySQL 的 XA分布式事务，最安全的方式还是按照官方建议，使用&lt;code&gt;SERIALIZABLE&lt;/code&gt;隔离级别。&lt;/p&gt;
+&lt;h2 id=&#34;结论&#34;&gt;
+    &lt;a href=&#34;#%e7%bb%93%e8%ae%ba&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    结论
+&lt;/h2&gt;&lt;p&gt;根据上面的分析，如果使用MySQL 的 XA分布式事务，最安全的方式还是按照官方建议，使用&lt;code&gt;SERIALIZABLE&lt;/code&gt;隔离级别。&lt;/p&gt;
 &lt;p&gt;如果想基于MySQL做改造，实现全局MVCC，从而实现分布式事务的Snapshot隔离级别，目前还没有看到MySQL社区有这类项目，相信实现难度比较大。&lt;/p&gt;
 </description>
         </item>
@@ -2319,8 +2451,10 @@
     &gt;yacc&lt;/a&gt;的Golang版，所以要想看懂语法规则定义文件&lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb/blob/master/parser/parser.y&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;parser.y&lt;/a&gt;，了解解析器是如何工作的，先要对&lt;a class=&#34;link&#34; href=&#34;http://dinosaur.compilertools.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Lex &amp;amp; Yacc&lt;/a&gt;有些了解。&lt;/p&gt;
-&lt;h2 id=&#34;lex--yacc-介绍&#34;&gt;Lex &amp;amp; Yacc 介绍&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://dinosaur.compilertools.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;lex--yacc-介绍&#34;&gt;
+    &lt;a href=&#34;#lex--yacc-%e4%bb%8b%e7%bb%8d&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Lex &amp;amp; Yacc 介绍
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://dinosaur.compilertools.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Lex &amp;amp; Yacc&lt;/a&gt; 是用来生成词法分析器和语法分析器的工具，它们的出现简化了编译器的编写。&lt;code&gt;Lex &amp;amp; Yacc&lt;/code&gt; 分别是由贝尔实验室的&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Mike_Lesk&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Mike Lesk&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Stephen_C._Johnson&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Stephen C. Johnson&lt;/a&gt;在1975年发布。对于Java程序员来说，更熟悉的是&lt;a class=&#34;link&#34; href=&#34;http://www.antlr.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2592,8 +2726,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;上面是一个语法规则定义的片段，我们可以看到，每个规则关联的动作不再是求值，而是调用相应的函数，该函数会返回抽象语法树的节点类型 &lt;code&gt;nodeType&lt;/code&gt;，然后将这个节点压回堆栈，解析完成时，我们就得到了一颗由 &lt;code&gt;nodeType&lt;/code&gt; 构成的抽象语法树。对这个语法树进行遍历访问，可以生成机器代码，也可以解释执行。&lt;/p&gt;
 &lt;p&gt;至此，我们大致了解了&lt;code&gt;Lex &amp;amp; Yacc&lt;/code&gt;的原理。其实还有非常多的细节，例如如何消除语法的歧义，但我们的目的是读懂TiDB的代码，掌握这些概念已经够用了。&lt;/p&gt;
-&lt;h2 id=&#34;goyacc-简介&#34;&gt;goyacc 简介&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/cznic/goyacc&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;goyacc-简介&#34;&gt;
+    &lt;a href=&#34;#goyacc-%e7%ae%80%e4%bb%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    goyacc 简介
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/cznic/goyacc&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;goyacc&lt;/a&gt; 是golang版的 &lt;code&gt;Yacc&lt;/code&gt;。和 &lt;code&gt;Yacc&lt;/code&gt;的功能一样，&lt;code&gt;goyacc&lt;/code&gt; 根据输入的语法规则文件，生成该语法规则的go语言版解析器。&lt;code&gt;goyacc&lt;/code&gt; 生成的解析器 &lt;code&gt;yyParse&lt;/code&gt; 要求词法分析器符合下面的接口：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -2694,8 +2830,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;另外&lt;code&gt;lexer&lt;/code&gt; 使用了&lt;code&gt;字典树&lt;/code&gt;技术进行 &lt;code&gt;token&lt;/code&gt; 识别，具体的实现代码在&lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb/blob/master/parser/misc.go&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;parser/misc.go&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&#34;tidb-sql-parser的实现&#34;&gt;TiDB SQL Parser的实现&lt;/h2&gt;
-&lt;p&gt;终于到了正题。有了上面的背景知识，对TiDB 的 &lt;code&gt;SQL Parser&lt;/code&gt; 模块会相对容易理解一些。先看SQL语法规则文件&lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb/blob/master/parser/parser.y&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;tidb-sql-parser的实现&#34;&gt;
+    &lt;a href=&#34;#tidb-sql-parser%e7%9a%84%e5%ae%9e%e7%8e%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    TiDB SQL Parser的实现
+&lt;/h2&gt;&lt;p&gt;终于到了正题。有了上面的背景知识，对TiDB 的 &lt;code&gt;SQL Parser&lt;/code&gt; 模块会相对容易理解一些。先看SQL语法规则文件&lt;a class=&#34;link&#34; href=&#34;https://github.com/pingcap/tidb/blob/master/parser/parser.y&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;parser.y&lt;/a&gt;，&lt;code&gt;goyacc&lt;/code&gt; 就是根据这个文件生成SQL语法解析器的。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;parser.y&lt;/code&gt; 有6500多行，第一次打开可能会被吓到，其实这个文件仍然符合我们上面介绍过的结构：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;

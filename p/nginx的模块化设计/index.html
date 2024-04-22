@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。 模块数据结构 ngx_module_t 结构 Nginx 的模块化架构'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。 # 模块数据结构 # ngx_module_t 结构 Nginx 的模块化">
 <title>Nginx的模块化设计</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/nginx%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Nginx的模块化设计'>
-<meta property='og:description' content='高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。 模块数据结构 ngx_module_t 结构 Nginx 的模块化架构'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Nginx的模块化设计">
+<meta property='og:description' content="高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。 # 模块数据结构 # ngx_module_t 结构 Nginx 的模块化">
 <meta property='og:url' content='https://mazhen.tech/p/nginx%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='nginx' /><meta property='article:published_time' content='2022-11-23T15:06:21&#43;08:00'/><meta property='article:modified_time' content='2022-11-23T15:06:21&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Nginx的模块化设计">
-<meta name="twitter:description" content="高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。 模块数据结构 ngx_module_t 结构 Nginx 的模块化架构">
+<meta name="twitter:description" content="高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。 # 模块数据结构 # ngx_module_t 结构 Nginx 的模块化">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -461,9 +464,13 @@
     
     
     <p>高度模块化的设计是 Nginx 的架构基础。Nginx主框架中只提供了少量的核心代码，大量强大的功能是在各模块中实现的。</p>
-<h2 id="模块数据结构">模块数据结构</h2>
-<h3 id="ngx_module_t-结构">ngx_module_t 结构</h3>
-<p>Nginx 的模块化架构最基本的数据结构为 <code>ngx_module_t</code>，所有的模块都遵循着同样的接口设计规范。</p>
+<h2 id="模块数据结构">
+    <a href="#%e6%a8%a1%e5%9d%97%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" class="header-anchor">#</a>
+    模块数据结构
+</h2><h3 id="ngx_module_t-结构">
+    <a href="#ngx_module_t-%e7%bb%93%e6%9e%84" class="header-anchor">#</a>
+    ngx_module_t 结构
+</h3><p>Nginx 的模块化架构最基本的数据结构为 <code>ngx_module_t</code>，所有的模块都遵循着同样的接口设计规范。</p>
 <p><code>ngx_module_t</code> 是 <code>ngx_module_s</code> 的别名，定义在 <code>src/core/ngx_core.h</code> 中：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -535,8 +542,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>ngx_module_t</code>定义了<code>init_master</code>，<code>init_module</code>，<code>init_process</code>，<code>init_thread</code>，<code>exit_thread</code>，<code>exit_process</code>，<code>exit_master</code> 这7个回调方法，分别在初始化 master、初始化模块、初始化 worker 进程、初始化线程、退出线程、退出 worker 进程、退出 master 时被调用。事实上，<code>init_master</code>、<code>init_thread</code>、<code>exit_thread</code> 这3个方法目前都没有使用。</p>
-<h3 id="ngx_command_t-结构">ngx_command_t 结构</h3>
-<p><code>ngx_command_t</code> 类型的 <code>commands</code> 数组指定了模块处理配置项的方法，在解析时配置文件会查找该表。<code>ngx_command_t</code> 是 <code>ngx_command_s</code>的别名，定义在 <code>src/core/ngx_core.h</code> 中：</p>
+<h3 id="ngx_command_t-结构">
+    <a href="#ngx_command_t-%e7%bb%93%e6%9e%84" class="header-anchor">#</a>
+    ngx_command_t 结构
+</h3><p><code>ngx_command_t</code> 类型的 <code>commands</code> 数组指定了模块处理配置项的方法，在解析时配置文件会查找该表。<code>ngx_command_t</code> 是 <code>ngx_command_s</code>的别名，定义在 <code>src/core/ngx_core.h</code> 中：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -580,8 +589,10 @@
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="模块类型">模块类型</h2>
-<p>Nginx 模块共有6种类型，由 <code>ngx_module_t-&gt;type</code> 字段表示。类型常量分别定义在：</p>
+</div><h2 id="模块类型">
+    <a href="#%e6%a8%a1%e5%9d%97%e7%b1%bb%e5%9e%8b" class="header-anchor">#</a>
+    模块类型
+</h2><p>Nginx 模块共有6种类型，由 <code>ngx_module_t-&gt;type</code> 字段表示。类型常量分别定义在：</p>
 <ul>
 <li>src/core/ngx_conf_file.h</li>
 </ul>
@@ -768,8 +779,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>事件模块、mail模块和HTTP模块类似，它们都在核心模块中各有1个模块作为自己的“代言人”，并在同类模块中有1个作为核心业务与管理功能的模块。</p>
-<h2 id="模块初始化">模块初始化</h2>
-<p>在Nginx的编译阶段执行 <code>configure</code> 后，会在 <code>objs</code> 目录下生成 <code>nginx_modules.c</code> 源文件。这个源文件中有两个很重要的全局变量 <code>ngx_modules</code> 和 <code>ngx_module_names</code>，前者保存了 Nginx 将要使用的全部模块，后者则记录了这些模块的名称。</p>
+<h2 id="模块初始化">
+    <a href="#%e6%a8%a1%e5%9d%97%e5%88%9d%e5%a7%8b%e5%8c%96" class="header-anchor">#</a>
+    模块初始化
+</h2><p>在Nginx的编译阶段执行 <code>configure</code> 后，会在 <code>objs</code> 目录下生成 <code>nginx_modules.c</code> 源文件。这个源文件中有两个很重要的全局变量 <code>ngx_modules</code> 和 <code>ngx_module_names</code>，前者保存了 Nginx 将要使用的全部模块，后者则记录了这些模块的名称。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -818,8 +831,10 @@
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="main函数入口">main函数入口</h3>
-<p>main函数入口定义在 <code>src/core/nginx.c</code> 文件中。</p>
+</div><h3 id="main函数入口">
+    <a href="#main%e5%87%bd%e6%95%b0%e5%85%a5%e5%8f%a3" class="header-anchor">#</a>
+    main函数入口
+</h3><p>main函数入口定义在 <code>src/core/nginx.c</code> 文件中。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -852,8 +867,10 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="预初始化">预初始化</h3>
-<p><code>ngx_preinit_module</code> 负责初始化 <code>ngx_modules</code> 数组所有模块的 <code>index</code> 和 <code>name</code>，计算<code>ngx_max_module</code>和 <code>ngx_modules_n</code>。</p>
+</div><h3 id="预初始化">
+    <a href="#%e9%a2%84%e5%88%9d%e5%a7%8b%e5%8c%96" class="header-anchor">#</a>
+    预初始化
+</h3><p><code>ngx_preinit_module</code> 负责初始化 <code>ngx_modules</code> 数组所有模块的 <code>index</code> 和 <code>name</code>，计算<code>ngx_max_module</code>和 <code>ngx_modules_n</code>。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -878,8 +895,10 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="ngx_cycle_t-结构体">ngx_cycle_t 结构体</h3>
-<p><code>ngx_cycle_t</code> 是 Nginx 框架最核心的一个结构体，其存储在系统运行过程中的所有信息，包括配置文件信息、模块信息、客户端连接、读写事件处理函数等信息。Nginx 围绕着<code>ngx_cycle_t</code> (<code>src/core/ngx_cycle.h</code>) 来控制进程的运行。</p>
+</div><h3 id="ngx_cycle_t-结构体">
+    <a href="#ngx_cycle_t-%e7%bb%93%e6%9e%84%e4%bd%93" class="header-anchor">#</a>
+    ngx_cycle_t 结构体
+</h3><p><code>ngx_cycle_t</code> 是 Nginx 框架最核心的一个结构体，其存储在系统运行过程中的所有信息，包括配置文件信息、模块信息、客户端连接、读写事件处理函数等信息。Nginx 围绕着<code>ngx_cycle_t</code> (<code>src/core/ngx_cycle.h</code>) 来控制进程的运行。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -999,8 +1018,10 @@
 	
 	
 ></p>
-<h3 id="ngx_init_cycle">ngx_init_cycle</h3>
-<p>模块的初始化是在 main 中调用函数 <code>ngx_init_cycle</code> 完成的：</p>
+<h3 id="ngx_init_cycle">
+    <a href="#ngx_init_cycle" class="header-anchor">#</a>
+    ngx_init_cycle
+</h3><p>模块的初始化是在 main 中调用函数 <code>ngx_init_cycle</code> 完成的：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1038,8 +1059,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>函数 <code>ngx_init_cycle</code> 定义在 <code>src/ngx_cycle.c</code> 文件中。</p>
-<h3 id="创建核心模块配置解析上下文">创建核心模块配置解析上下文</h3>
-<div class="highlight"><div class="chroma">
+<h3 id="创建核心模块配置解析上下文">
+    <a href="#%e5%88%9b%e5%bb%ba%e6%a0%b8%e5%bf%83%e6%a8%a1%e5%9d%97%e9%85%8d%e7%bd%ae%e8%a7%a3%e6%9e%90%e4%b8%8a%e4%b8%8b%e6%96%87" class="header-anchor">#</a>
+    创建核心模块配置解析上下文
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -1097,8 +1120,10 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="配置文件解析">配置文件解析</h3>
-<div class="highlight"><div class="chroma">
+</div><h3 id="配置文件解析">
+    <a href="#%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6%e8%a7%a3%e6%9e%90" class="header-anchor">#</a>
+    配置文件解析
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -1158,8 +1183,10 @@
 	
 	
 ></p>
-<h3 id="初始化核心模块的配置">初始化核心模块的配置</h3>
-<div class="highlight"><div class="chroma">
+<h3 id="初始化核心模块的配置">
+    <a href="#%e5%88%9d%e5%a7%8b%e5%8c%96%e6%a0%b8%e5%bf%83%e6%a8%a1%e5%9d%97%e7%9a%84%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    初始化核心模块的配置
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -1215,8 +1242,10 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="初始化各个模块">初始化各个模块</h3>
-<div class="highlight"><div class="chroma">
+</div><h3 id="初始化各个模块">
+    <a href="#%e5%88%9d%e5%a7%8b%e5%8c%96%e5%90%84%e4%b8%aa%e6%a8%a1%e5%9d%97" class="header-anchor">#</a>
+    初始化各个模块
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -1445,8 +1474,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

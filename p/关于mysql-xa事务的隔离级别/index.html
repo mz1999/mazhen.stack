@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As with'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As">
 <title>关于MySQL XA事务的隔离级别</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%85%B3%E4%BA%8Emysql-xa%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='关于MySQL XA事务的隔离级别'>
-<meta property='og:description' content='为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As with'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="关于MySQL XA事务的隔离级别">
+<meta property='og:description' content="# 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%85%B3%E4%BA%8Emysql-xa%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='db' /><meta property='article:published_time' content='2018-06-05T14:44:59&#43;08:00'/><meta property='article:modified_time' content='2018-06-05T14:44:59&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="关于MySQL XA事务的隔离级别">
-<meta name="twitter:description" content="为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As with">
+<meta name="twitter:description" content="# 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -444,8 +447,10 @@
     <section class="article-content">
     
     
-    <h2 id="为什么xa事务建议用serializable隔离级别">为什么XA事务建议用SERIALIZABLE隔离级别</h2>
-<p>在MySQL最新的官方文档中，关于<a class="link" href="https://dev.mysql.com/doc/refman/8.0/en/xa.html"  target="_blank" rel="noopener"
+    <h2 id="为什么xa事务建议用serializable隔离级别">
+    <a href="#%e4%b8%ba%e4%bb%80%e4%b9%88xa%e4%ba%8b%e5%8a%a1%e5%bb%ba%e8%ae%ae%e7%94%a8serializable%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab" class="header-anchor">#</a>
+    为什么XA事务建议用SERIALIZABLE隔离级别
+</h2><p>在MySQL最新的官方文档中，关于<a class="link" href="https://dev.mysql.com/doc/refman/8.0/en/xa.html"  target="_blank" rel="noopener"
     >XA Transactions</a>的介绍有这么一段描述：</p>
 <blockquote>
 <p>As with nondistributed transactions, <code>SERIALIZABLE</code> may be preferred if your applications are sensitive to read phenomena. <code>REPEATABLE READ</code> may not be sufficient for distributed transactions.</p>
@@ -464,8 +469,10 @@
 <p>如果某个并发事务调度机制可以让具有依赖关系的事务构成一个有向无环图(DAG)，那么这个调度就是可串行化的调度。由于每个后端DB都在使用serializable隔离级别，所以每个后端DB上面并发执行的事务分支构成的依赖关系图一定是DAG。</p>
 <p>只要所有连接都是用serializable隔离级别，那么TDSQL XA执行的事务仍然可以达到可串行化隔离级别。</p>
 </blockquote>
-<h2 id="serializable性能差有更好的实现方式吗">SERIALIZABLE性能差，有更好的实现方式吗</h2>
-<p>如果分布式事务想实现<code>read-committed</code>以上的隔离级别，又不想使用<code>SERIALIZABLE</code>，有什么更好的方式吗？</p>
+<h2 id="serializable性能差有更好的实现方式吗">
+    <a href="#serializable%e6%80%a7%e8%83%bd%e5%b7%ae%e6%9c%89%e6%9b%b4%e5%a5%bd%e7%9a%84%e5%ae%9e%e7%8e%b0%e6%96%b9%e5%bc%8f%e5%90%97" class="header-anchor">#</a>
+    SERIALIZABLE性能差，有更好的实现方式吗
+</h2><p>如果分布式事务想实现<code>read-committed</code>以上的隔离级别，又不想使用<code>SERIALIZABLE</code>，有什么更好的方式吗？</p>
 <p>当然有，想想看<code>TiDB</code>是怎么做的，底层<code>TiKV</code>是一个整体，有全局的MVCC，所以能够做到分布式事务的Snapshot隔离级别。</p>
 <p>PostgreSQL社区中，有<a class="link" href="http://postgresxc.wikia.com/wiki/Postgres-XC_Wiki"  target="_blank" rel="noopener"
     >Postgres-XC</a>和<a class="link" href="https://www.postgres-xl.org/"  target="_blank" rel="noopener"
@@ -475,8 +482,10 @@
 <blockquote>
 <p>由于MySQL innodb使用MVCC做select（除了serializable和for update/lock in share mode子句），还需要将这个全局事务id给予innodb做事务id，同时，还需要TDSQL XA集群的多个set的innodb 共享各自的本地事务状态给所有其他innodb（这也是PGXL 所做的），<strong>任何一个innodb的本地事务的启动，prepare，commit，abort都需要通知给所有其他innodb实例。只有这样做，集群中的每个innodb实例才能够建立全局完全有一致的、当前集群中正在处理的所有事务的状态，以便做多版本并发控制。</strong> 这本身都会造成极大的性能开销，并且导致set之间的严重依赖，降低系统可靠性。这些都是我们要极力避免的。</p>
 </blockquote>
-<h2 id="结论">结论</h2>
-<p>根据上面的分析，如果使用MySQL 的 XA分布式事务，最安全的方式还是按照官方建议，使用<code>SERIALIZABLE</code>隔离级别。</p>
+<h2 id="结论">
+    <a href="#%e7%bb%93%e8%ae%ba" class="header-anchor">#</a>
+    结论
+</h2><p>根据上面的分析，如果使用MySQL 的 XA分布式事务，最安全的方式还是按照官方建议，使用<code>SERIALIZABLE</code>隔离级别。</p>
 <p>如果想基于MySQL做改造，实现全局MVCC，从而实现分布式事务的Snapshot隔离级别，目前还没有看到MySQL社区有这类项目，相信实现难度比较大。</p>
 
 </section>
@@ -646,8 +655,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

@@ -26,8 +26,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;基本工作流程&#34;&gt;基本工作流程&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;基本工作流程&#34;&gt;
+    &lt;a href=&#34;#%e5%9f%ba%e6%9c%ac%e5%b7%a5%e4%bd%9c%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    基本工作流程
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;从远程clone respository&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -132,8 +134,10 @@
 &lt;/ul&gt;
 &lt;p&gt;已经完成merged的 &lt;code&gt;pull requests&lt;/code&gt; 关联的分支可以在GitHub删除，详细的操作步骤参见GitHub文档 &lt;a class=&#34;link&#34; href=&#34;https://help.github.com/articles/deleting-and-restoring-branches-in-a-pull-request/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Deleting and restoring branches in a pull request&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&#34;冲突处理&#34;&gt;冲突处理&lt;/h2&gt;
-&lt;p&gt;上面的流程中，在保持分支和最新代码同步时，最有可能产生冲突。&lt;/p&gt;
+&lt;h2 id=&#34;冲突处理&#34;&gt;
+    &lt;a href=&#34;#%e5%86%b2%e7%aa%81%e5%a4%84%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    冲突处理
+&lt;/h2&gt;&lt;p&gt;上面的流程中，在保持分支和最新代码同步时，最有可能产生冲突。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;rebase&lt;/code&gt;提示冲突，会列出冲突文件，执行下列步骤：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;手工解决冲突&lt;/li&gt;

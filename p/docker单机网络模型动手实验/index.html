@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的资'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的">
 <title>Docker单机网络模型动手实验</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Docker单机网络模型动手实验'>
-<meta property='og:description' content='容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的资'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Docker单机网络模型动手实验">
+<meta property='og:description' content="# 容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的">
 <meta property='og:url' content='https://mazhen.tech/p/docker%E5%8D%95%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%8A%A8%E6%89%8B%E5%AE%9E%E9%AA%8C/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2018-10-26T21:40:03&#43;08:00'/><meta property='article:modified_time' content='2018-10-26T21:40:03&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Docker单机网络模型动手实验">
-<meta name="twitter:description" content="容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的资">
+<meta name="twitter:description" content="# 容器的本质 容器的本质就是一个进程，只不过对它进行了Linux Namesapce隔离，让它看不到外面的世界，用Cgroups限制了它能使用的">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -459,8 +462,10 @@
     <section class="article-content">
     
     
-    <h2 id="容器的本质">容器的本质</h2>
-<p>容器的本质就是一个进程，只不过对它进行了<code>Linux Namesapce</code>隔离，让它看不到外面的世界，用<code>Cgroups</code>限制了它能使用的资源，同时利用系统调用<code>pivot_root</code>或<code>chroot</code>切换了进程的根目录，把容器镜像挂载为根文件系统<code>rootfs</code>。<code>rootfs</code>中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。<code>rootfs</code>打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。</p>
+    <h2 id="容器的本质">
+    <a href="#%e5%ae%b9%e5%99%a8%e7%9a%84%e6%9c%ac%e8%b4%a8" class="header-anchor">#</a>
+    容器的本质
+</h2><p>容器的本质就是一个进程，只不过对它进行了<code>Linux Namesapce</code>隔离，让它看不到外面的世界，用<code>Cgroups</code>限制了它能使用的资源，同时利用系统调用<code>pivot_root</code>或<code>chroot</code>切换了进程的根目录，把容器镜像挂载为根文件系统<code>rootfs</code>。<code>rootfs</code>中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。<code>rootfs</code>打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112142723.png"
 	
 	
@@ -487,8 +492,10 @@
 <li><a class="link" href="https://coolshell.cn/articles/17200.html"  target="_blank" rel="noopener"
     >DOCKER基础技术：DEVICEMAPPER</a></li>
 </ul>
-<h2 id="容器网络">容器网络</h2>
-<p>如何让容器之间互相连接保持网络通畅，Docker有多种网络模型。对于单机上运行的多个容器，可以使用缺省的<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
+<h2 id="容器网络">
+    <a href="#%e5%ae%b9%e5%99%a8%e7%bd%91%e7%bb%9c" class="header-anchor">#</a>
+    容器网络
+</h2><p>如何让容器之间互相连接保持网络通畅，Docker有多种网络模型。对于单机上运行的多个容器，可以使用缺省的<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
     >bridge网络驱动</a>。而容器的跨主机通信，一种常用的方式是利用<code>Overlay 网络</code>，基于物理网络的虚拟化网络来实现。</p>
 <p>本文会在单机上实验展示<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
     >bridge网络模型</a>，揭示其背后的实现原理。<a class="link" href="/docker-overlay-networks" >下一篇文章</a>会演示容器如何利用<code>Overlay 网络</code>进行跨主机通信。</p>
@@ -504,13 +511,19 @@
 	
 ></p>
 <p>在开始动手实验之前，先简单介绍一下<code>bridge网络模型</code>会用到的Linux虚拟化网络技术。</p>
-<h3 id="veth-pairs">Veth Pairs</h3>
-<p><code>Veth</code>是成对出现的两张虚拟网卡，从一端发送的数据包，总会在另一端接收到。利用<code>Veth</code>的特性，我们可以将一端的虚拟网卡&quot;放入&quot;容器内，另一端接入虚拟交换机。这样，接入同一个虚拟交换机的容器之间就实现了网络互通。</p>
-<h3 id="linux-bridge">Linux Bridge</h3>
-<p>交换机是工作在数据链路层的网络设备，它转发的是二层网络包。最简单的转发策略是将到达交换机输入端口的报文，广播到所有的输出端口。当然更好的策略是在转发过程中进行学习，记录交换机端口和MAC地址的映射关系，这样在下次转发时就能够根据报文中的MAC地址，发送到对应的输出端口。</p>
+<h3 id="veth-pairs">
+    <a href="#veth-pairs" class="header-anchor">#</a>
+    Veth Pairs
+</h3><p><code>Veth</code>是成对出现的两张虚拟网卡，从一端发送的数据包，总会在另一端接收到。利用<code>Veth</code>的特性，我们可以将一端的虚拟网卡&quot;放入&quot;容器内，另一端接入虚拟交换机。这样，接入同一个虚拟交换机的容器之间就实现了网络互通。</p>
+<h3 id="linux-bridge">
+    <a href="#linux-bridge" class="header-anchor">#</a>
+    Linux Bridge
+</h3><p>交换机是工作在数据链路层的网络设备，它转发的是二层网络包。最简单的转发策略是将到达交换机输入端口的报文，广播到所有的输出端口。当然更好的策略是在转发过程中进行学习，记录交换机端口和MAC地址的映射关系，这样在下次转发时就能够根据报文中的MAC地址，发送到对应的输出端口。</p>
 <p>我们可以认为<code>Linux bridge</code>就是虚拟交换机，连接在同一个<code>bridge</code>上的容器组成局域网，不同的<code>bridge</code>之间网络是隔离的。 <code>docker network create [NETWORK NAME]</code>实际上就是创建出虚拟交换机。</p>
-<h3 id="iptables">iptables</h3>
-<p>容器需要能够访问外部世界，同时也可以暴露服务让外界访问，这时就要用到<code>iptables</code>。另外，不同<code>bridge</code>之间的隔离也会用到<code>iptables</code>。</p>
+<h3 id="iptables">
+    <a href="#iptables" class="header-anchor">#</a>
+    iptables
+</h3><p>容器需要能够访问外部世界，同时也可以暴露服务让外界访问，这时就要用到<code>iptables</code>。另外，不同<code>bridge</code>之间的隔离也会用到<code>iptables</code>。</p>
 <p>我们说的<code>iptables</code>包含了用户态的配置工具(<code>/sbin/iptables</code>)和内核<code>netfilter</code>模块，通过使用<code>iptables</code>命令对内核的<code>netfilter</code>模块做规则配置。</p>
 <p><code>netfilter</code>允许在网络数据包处理流程的各个阶段插入hook函数，可以根据预先定义的规则对数据包进行修改、过滤或传送。</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112144668.png"
@@ -552,10 +565,14 @@
 ></p>
 <p>可以看到，<code>filter</code>表中包含三个<code>链</code>，每个<code>链</code>中定义了多条规则。由于<code>filter</code>是缺省表，上面的命令可以简化为：<code>sudo iptables -L</code>，即不通过<code>-t</code>指定表时，操作的就是<code>filter</code>表。</p>
 <p>在容器化网络场景，我们经常用到的是在<code>nat</code>表中设置<code>SNAT</code>和<code>DNAT</code>。源地址转换是发生在数据包离开机器被发送之前，因此<code>SNAT</code>只能设置在<code>POSTROUTIONG</code>阶段。<code>DNAT</code>是对目标地址的转换，需要在路由选择前完成，因此可以设置在<code>PREROUTING</code>和<code>OUTPUT</code>阶段。</p>
-<h2 id="动手实验">动手实验</h2>
-<p>有了前面的背景知识，我们就可以开始动手实验了。因为涉及到很多系统级设置，建议在一个“干净”的虚拟机内折腾，以免干扰到工作环境。我使用的实验环境是<code>Ubuntu 18.04.1 LTS</code>，不需要安装<code>docker</code>，我们使用系统命令模拟出容器网络环境。</p>
-<h3 id="场景一容器间的网络互通">场景一：容器间的网络互通</h3>
-<ul>
+<h2 id="动手实验">
+    <a href="#%e5%8a%a8%e6%89%8b%e5%ae%9e%e9%aa%8c" class="header-anchor">#</a>
+    动手实验
+</h2><p>有了前面的背景知识，我们就可以开始动手实验了。因为涉及到很多系统级设置，建议在一个“干净”的虚拟机内折腾，以免干扰到工作环境。我使用的实验环境是<code>Ubuntu 18.04.1 LTS</code>，不需要安装<code>docker</code>，我们使用系统命令模拟出容器网络环境。</p>
+<h3 id="场景一容器间的网络互通">
+    <a href="#%e5%9c%ba%e6%99%af%e4%b8%80%e5%ae%b9%e5%99%a8%e9%97%b4%e7%9a%84%e7%bd%91%e7%bb%9c%e4%ba%92%e9%80%9a" class="header-anchor">#</a>
+    场景一：容器间的网络互通
+</h3><ul>
 <li><strong>创建“容器”</strong></li>
 </ul>
 <p>从前面的背景知识了解到，容器的本质是 <code>Namespace + Cgroups + rootfs</code>。因此本实验我们可以仅仅创建出<code>Namespace</code>网络隔离环境来模拟容器行为：</p>
@@ -819,8 +836,10 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo ip netns exec docker1 ping -c 3 172.18.0.2
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="场景二从宿主机访问容器内网络">场景二：从宿主机访问“容器”内网络</h3>
-<p>在“容器”<code>docker0</code>内启动服务，监听80端口：</p>
+</div><h3 id="场景二从宿主机访问容器内网络">
+    <a href="#%e5%9c%ba%e6%99%af%e4%ba%8c%e4%bb%8e%e5%ae%bf%e4%b8%bb%e6%9c%ba%e8%ae%bf%e9%97%ae%e5%ae%b9%e5%99%a8%e5%86%85%e7%bd%91%e7%bb%9c" class="header-anchor">#</a>
+    场景二：从宿主机访问“容器”内网络
+</h3><p>在“容器”<code>docker0</code>内启动服务，监听80端口：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -838,8 +857,10 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">telnet 172.18.0.2 80
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="场景三从容器内访问外网">场景三：从“容器”内访问外网</h3>
-<ul>
+</div><h3 id="场景三从容器内访问外网">
+    <a href="#%e5%9c%ba%e6%99%af%e4%b8%89%e4%bb%8e%e5%ae%b9%e5%99%a8%e5%86%85%e8%ae%bf%e9%97%ae%e5%a4%96%e7%bd%91" class="header-anchor">#</a>
+    场景三：从“容器”内访问外网
+</h3><ul>
 <li><strong>配置内核参数，允许IP forwarding</strong></li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -944,8 +965,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>我们确认在“容器”内是可以访问外部网络的。</p>
-<h3 id="场景四从外部访问容器内暴露的服务">场景四：从外部访问“容器”内暴露的服务</h3>
-<ul>
+<h3 id="场景四从外部访问容器内暴露的服务">
+    <a href="#%e5%9c%ba%e6%99%af%e5%9b%9b%e4%bb%8e%e5%a4%96%e9%83%a8%e8%ae%bf%e9%97%ae%e5%ae%b9%e5%99%a8%e5%86%85%e6%9a%b4%e9%9c%b2%e7%9a%84%e6%9c%8d%e5%8a%a1" class="header-anchor">#</a>
+    场景四：从外部访问“容器”内暴露的服务
+</h3><ul>
 <li><strong>配置iptables的DNAT规则</strong></li>
 </ul>
 <p>当外部通过宿主机的IP和端口访问容器内启动的服务时，在数据包进入<code>PREROUTING</code>阶段就要进行目的地址转换，将宿主机IP转换为容器IP。同样，系统会为我们自动增加一个隐式的反向规则，数据包在离开宿主机时自动做反向转换。</p>
@@ -980,8 +1003,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>确认可以访问到容器内启动的服务。</p>
-<h3 id="测试环境恢复">测试环境恢复</h3>
-<p>删除虚拟网络设备</p>
+<h3 id="测试环境恢复">
+    <a href="#%e6%b5%8b%e8%af%95%e7%8e%af%e5%a2%83%e6%81%a2%e5%a4%8d" class="header-anchor">#</a>
+    测试环境恢复
+</h3><p>删除虚拟网络设备</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -997,8 +1022,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>iptablers</code>和<code>Namesapce</code>的配置在机器重启后被清除。</p>
-<h2 id="总结">总结</h2>
-<p>本文我们在介绍了<code>veth</code>、<code>Linux bridge</code>、<code>iptables</code>等概念后，亲自动手模拟出了<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>本文我们在介绍了<code>veth</code>、<code>Linux bridge</code>、<code>iptables</code>等概念后，亲自动手模拟出了<a class="link" href="https://docs.docker.com/network/bridge/"  target="_blank" rel="noopener"
     >docker bridge网络模型</a>，并测试了几种场景的网络互通。实际上<code>docker network</code> 就是使用了上述技术，帮我们创建和维护网络。通过动手实验，相信你对docker bridge网络理解的更加深入。</p>
 <p>下一篇我将动手实验容器如何<a class="link" href="/docker-overlay-networks" >利用<code>Overlay 网络</code>进行跨主机通信</a>。</p>
 
@@ -1173,8 +1200,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

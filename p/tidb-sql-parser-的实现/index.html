@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='PingCAP发布了TiDB的源码阅读系列文章，让我们可以比较系统的去学习了解TiDB的内部实现。最近的一篇《SQL 的一生》，从整体上讲解了'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PingCAP发布了TiDB的源码阅读系列文章，让我们可以比较系统的去学习了解TiDB的内部实现。最近的一篇《SQL 的一生》，从整体上讲解了">
 <title>TiDB SQL Parser 的实现</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/tidb-sql-parser-%E7%9A%84%E5%AE%9E%E7%8E%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='TiDB SQL Parser 的实现'>
-<meta property='og:description' content='PingCAP发布了TiDB的源码阅读系列文章，让我们可以比较系统的去学习了解TiDB的内部实现。最近的一篇《SQL 的一生》，从整体上讲解了'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="TiDB SQL Parser 的实现">
+<meta property='og:description' content="PingCAP发布了TiDB的源码阅读系列文章，让我们可以比较系统的去学习了解TiDB的内部实现。最近的一篇《SQL 的一生》，从整体上讲解了">
 <meta property='og:url' content='https://mazhen.tech/p/tidb-sql-parser-%E7%9A%84%E5%AE%9E%E7%8E%B0/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='db' /><meta property='article:published_time' content='2018-05-09T14:34:58&#43;08:00'/><meta property='article:modified_time' content='2018-05-09T14:34:58&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -483,8 +486,10 @@
     >yacc</a>的Golang版，所以要想看懂语法规则定义文件<a class="link" href="https://github.com/pingcap/tidb/blob/master/parser/parser.y"  target="_blank" rel="noopener"
     >parser.y</a>，了解解析器是如何工作的，先要对<a class="link" href="http://dinosaur.compilertools.net/"  target="_blank" rel="noopener"
     >Lex &amp; Yacc</a>有些了解。</p>
-<h2 id="lex--yacc-介绍">Lex &amp; Yacc 介绍</h2>
-<p><a class="link" href="http://dinosaur.compilertools.net/"  target="_blank" rel="noopener"
+<h2 id="lex--yacc-介绍">
+    <a href="#lex--yacc-%e4%bb%8b%e7%bb%8d" class="header-anchor">#</a>
+    Lex &amp; Yacc 介绍
+</h2><p><a class="link" href="http://dinosaur.compilertools.net/"  target="_blank" rel="noopener"
     >Lex &amp; Yacc</a> 是用来生成词法分析器和语法分析器的工具，它们的出现简化了编译器的编写。<code>Lex &amp; Yacc</code> 分别是由贝尔实验室的<a class="link" href="https://en.wikipedia.org/wiki/Mike_Lesk"  target="_blank" rel="noopener"
     >Mike Lesk</a> 和 <a class="link" href="https://en.wikipedia.org/wiki/Stephen_C._Johnson"  target="_blank" rel="noopener"
     >Stephen C. Johnson</a>在1975年发布。对于Java程序员来说，更熟悉的是<a class="link" href="http://www.antlr.org/"  target="_blank" rel="noopener"
@@ -756,8 +761,10 @@
 </div>
 </div><p>上面是一个语法规则定义的片段，我们可以看到，每个规则关联的动作不再是求值，而是调用相应的函数，该函数会返回抽象语法树的节点类型 <code>nodeType</code>，然后将这个节点压回堆栈，解析完成时，我们就得到了一颗由 <code>nodeType</code> 构成的抽象语法树。对这个语法树进行遍历访问，可以生成机器代码，也可以解释执行。</p>
 <p>至此，我们大致了解了<code>Lex &amp; Yacc</code>的原理。其实还有非常多的细节，例如如何消除语法的歧义，但我们的目的是读懂TiDB的代码，掌握这些概念已经够用了。</p>
-<h2 id="goyacc-简介">goyacc 简介</h2>
-<p><a class="link" href="https://github.com/cznic/goyacc"  target="_blank" rel="noopener"
+<h2 id="goyacc-简介">
+    <a href="#goyacc-%e7%ae%80%e4%bb%8b" class="header-anchor">#</a>
+    goyacc 简介
+</h2><p><a class="link" href="https://github.com/cznic/goyacc"  target="_blank" rel="noopener"
     >goyacc</a> 是golang版的 <code>Yacc</code>。和 <code>Yacc</code>的功能一样，<code>goyacc</code> 根据输入的语法规则文件，生成该语法规则的go语言版解析器。<code>goyacc</code> 生成的解析器 <code>yyParse</code> 要求词法分析器符合下面的接口：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -858,8 +865,10 @@
 </div>
 </div><p>另外<code>lexer</code> 使用了<code>字典树</code>技术进行 <code>token</code> 识别，具体的实现代码在<a class="link" href="https://github.com/pingcap/tidb/blob/master/parser/misc.go"  target="_blank" rel="noopener"
     >parser/misc.go</a></p>
-<h2 id="tidb-sql-parser的实现">TiDB SQL Parser的实现</h2>
-<p>终于到了正题。有了上面的背景知识，对TiDB 的 <code>SQL Parser</code> 模块会相对容易理解一些。先看SQL语法规则文件<a class="link" href="https://github.com/pingcap/tidb/blob/master/parser/parser.y"  target="_blank" rel="noopener"
+<h2 id="tidb-sql-parser的实现">
+    <a href="#tidb-sql-parser%e7%9a%84%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    TiDB SQL Parser的实现
+</h2><p>终于到了正题。有了上面的背景知识，对TiDB 的 <code>SQL Parser</code> 模块会相对容易理解一些。先看SQL语法规则文件<a class="link" href="https://github.com/pingcap/tidb/blob/master/parser/parser.y"  target="_blank" rel="noopener"
     >parser.y</a>，<code>goyacc</code> 就是根据这个文件生成SQL语法解析器的。</p>
 <p><code>parser.y</code> 有6500多行，第一次打开可能会被吓到，其实这个文件仍然符合我们上面介绍过的结构：</p>
 <div class="highlight"><div class="chroma">
@@ -1619,8 +1628,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

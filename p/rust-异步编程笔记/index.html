@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Future trait Rust 异步编程最核心的是 Future trait： 1 2 3 4 5 6 7 8 pub trait Future { type Output; fn poll(self: Pin&amp;lt;&amp;amp;mut Self&amp;gt;, cx: &amp;amp;mut Context&amp;lt;&amp;#39;_&amp;gt;) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt;; } pub enum Poll&amp;lt;T&amp;gt; { Ready(T), Pending, } Future 代表一个异步计算，它会产生一个值。通过'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# Future trait Rust 异步编程最核心的是 Future trait： 1 2 3 4 5 6 7 8 pub trait Future { type Output; fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;&#39;_&gt;) -&gt; Poll&lt;Self::Output&gt;; } pub enum Poll&lt;T&gt; { Ready(T), Pending, } Future 代表一个异步计算，它会产生一个值。通">
 <title>Rust 异步编程笔记</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/rust-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Rust 异步编程笔记'>
-<meta property='og:description' content='Future trait Rust 异步编程最核心的是 Future trait： 1 2 3 4 5 6 7 8 pub trait Future { type Output; fn poll(self: Pin&amp;lt;&amp;amp;mut Self&amp;gt;, cx: &amp;amp;mut Context&amp;lt;&amp;#39;_&amp;gt;) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt;; } pub enum Poll&amp;lt;T&amp;gt; { Ready(T), Pending, } Future 代表一个异步计算，它会产生一个值。通过'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Rust 异步编程笔记">
+<meta property='og:description' content="# Future trait Rust 异步编程最核心的是 Future trait： 1 2 3 4 5 6 7 8 pub trait Future { type Output; fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;&#39;_&gt;) -&gt; Poll&lt;Self::Output&gt;; } pub enum Poll&lt;T&gt; { Ready(T), Pending, } Future 代表一个异步计算，它会产生一个值。通">
 <meta property='og:url' content='https://mazhen.tech/p/rust-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='rust' /><meta property='article:published_time' content='2022-09-24T16:48:29&#43;08:00'/><meta property='article:modified_time' content='2022-09-24T16:48:29&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Rust 异步编程笔记">
-<meta name="twitter:description" content="Future trait Rust 异步编程最核心的是 Future trait： 1 2 3 4 5 6 7 8 pub trait Future { type Output; fn poll(self: Pin&amp;lt;&amp;amp;mut Self&amp;gt;, cx: &amp;amp;mut Context&amp;lt;&amp;#39;_&amp;gt;) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt;; } pub enum Poll&amp;lt;T&amp;gt; { Ready(T), Pending, } Future 代表一个异步计算，它会产生一个值。通过">
+<meta name="twitter:description" content="# Future trait Rust 异步编程最核心的是 Future trait： 1 2 3 4 5 6 7 8 pub trait Future { type Output; fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;&#39;_&gt;) -&gt; Poll&lt;Self::Output&gt;; } pub enum Poll&lt;T&gt; { Ready(T), Pending, } Future 代表一个异步计算，它会产生一个值。通">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -447,8 +450,10 @@
     <section class="article-content">
     
     
-    <h2 id="future-trait">Future trait</h2>
-<p>Rust 异步编程最核心的是 <a class="link" href="https://doc.rust-lang.org/std/future/trait.Future.html"  target="_blank" rel="noopener"
+    <h2 id="future-trait">
+    <a href="#future-trait" class="header-anchor">#</a>
+    Future trait
+</h2><p>Rust 异步编程最核心的是 <a class="link" href="https://doc.rust-lang.org/std/future/trait.Future.html"  target="_blank" rel="noopener"
     >Future</a> trait：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -473,8 +478,10 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>Future</code> 代表一个异步计算，它会产生一个值。通过调用 <code>poll</code> 方法来推进 <code>Future</code> 的运行，如果 <code>Future</code> 完成了，它将返回 <code>Poll::Ready(result)</code>，我们拿到运算结果。如果 <code>Future</code> 还不能完成，可能是因为需要等待其他资源，它返回 <code>Poll::Pending</code>。等条件具备，如资源已经准备好，这个 <code>Future</code> 将被唤醒，再次进入 <code>poll</code>，直到计算完成获得结果。</p>
-<h2 id="asyncawait">async/.await</h2>
-<p>如果产生一个 <code>Future</code> 呢，使用 <code>async</code> 是产生 <code>Future</code> 最方便的方法。使用 <code>async</code> 有两种方式：<code>async fn</code> 和 <code>async blocks</code>。每种方法都返回一个实现了<code>Future</code> trait 的匿名结构：</p>
+<h2 id="asyncawait">
+    <a href="#asyncawait" class="header-anchor">#</a>
+    async/.await
+</h2><p>如果产生一个 <code>Future</code> 呢，使用 <code>async</code> 是产生 <code>Future</code> 最方便的方法。使用 <code>async</code> 有两种方式：<code>async fn</code> 和 <code>async blocks</code>。每种方法都返回一个实现了<code>Future</code> trait 的匿名结构：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -622,8 +629,10 @@
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="pin">Pin</h2>
-<p><code>Future</code> 被每个 <code>await</code> 分成多段，执行到 <code>await</code> 可能因为资源没准备好而让出 CPU 暂停执行，随后该 <code>future</code> 可能被调度到其他线程接着执行。所以 <code>future</code> 结构中需要保存跨await的数据，形成了自引用结构。</p>
+</div><h2 id="pin">
+    <a href="#pin" class="header-anchor">#</a>
+    Pin
+</h2><p><code>Future</code> 被每个 <code>await</code> 分成多段，执行到 <code>await</code> 可能因为资源没准备好而让出 CPU 暂停执行，随后该 <code>future</code> 可能被调度到其他线程接着执行。所以 <code>future</code> 结构中需要保存跨await的数据，形成了自引用结构。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209201453379.jpg"
 	
 	
@@ -658,8 +667,10 @@
 ></p>
 <p>总之 <code>Pin&lt;&amp;mut T&gt;</code> 不是数据的 owner，也没法获得 <code>&amp;mut T</code>，所以就不能移动 T。</p>
 <p>注意，<code>Pin</code> 拿住的是一个可以解引用成 T 的指针类型 P，而不是直接拿原本的类型 T。Pin 本身是可 move 的，T 被 pin 住，不能 move。</p>
-<h2 id="async-runtime的内部实现">async runtime的内部实现</h2>
-<p>要运行异步函数，必须将最外层的 <code>Future</code> 提交给 executor。 executor 负责调用Future::poll，推动异步计算的前进。</p>
+<h2 id="async-runtime的内部实现">
+    <a href="#async-runtime%e7%9a%84%e5%86%85%e9%83%a8%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    async runtime的内部实现
+</h2><p>要运行异步函数，必须将最外层的 <code>Future</code> 提交给 executor。 executor 负责调用Future::poll，推动异步计算的前进。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209201433572.png"
 	
 	
@@ -750,8 +761,10 @@
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="stream-trait">Stream trait</h2>
-<p>对于 <code>Iterator</code>，可以不断调用其 <code>next()</code> 方法，获得新的值，直到 <code>Iterator</code> 返回 <code>None</code>。<code>Iterator</code> 是阻塞式返回数据的，每次调用 <code>next()</code>，必然独占 CPU 直到得到一个结果，而异步的 <code>Stream</code> 是非阻塞的，在等待的过程中会空出 CPU 做其他事情。</p>
+</div><h2 id="stream-trait">
+    <a href="#stream-trait" class="header-anchor">#</a>
+    Stream trait
+</h2><p>对于 <code>Iterator</code>，可以不断调用其 <code>next()</code> 方法，获得新的值，直到 <code>Iterator</code> 返回 <code>None</code>。<code>Iterator</code> 是阻塞式返回数据的，每次调用 <code>next()</code>，必然独占 CPU 直到得到一个结果，而异步的 <code>Stream</code> 是非阻塞的，在等待的过程中会空出 CPU 做其他事情。</p>
 <p><code>Stream::poll_next()</code> 方法和 <code>Future::poll()</code> 类似, 除了它可以被重复调用，以便从 <code>Stream</code> 中接收多个值。然而，<code>poll_next()</code> 调用起来不方便，我们需要自己处理 Poll 状态。也就是说，<code>await</code> 语法糖只能应用在 Future 上，没法使用 <code>stream.await</code> 。所以，我们要想办法用 <code>Future</code> 包装 <code>Stream</code>，在 <code>Future::poll()</code> 中调用 <code>Stream::poll_next()</code>，这样就可以使用 await。 <a class="link" href="https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html"  target="_blank" rel="noopener"
     >StreamExt</a> 提供了 <code>next()</code> 方法，返回一个实现了 <code>Future trait</code> 的 <code>Next</code> 结构，这样，我们就可以直接通过 <code>stream.next().await</code> 来获取下一个值了。看一下 <code>next()</code> 方法以及 <code>Next</code> 结构的实现。</p>
 <div class="highlight"><div class="chroma">
@@ -860,8 +873,10 @@
 </div>
 </div><p><code>Stream</code> 可以是 unpin 的，<code>Future</code> 也可以是 unpin 的，如果他们内部包含了其他 <code>!Unpin</code> 的 <code>Stream</code> 或 <code>Future</code>，只需要把他们用 pin 包装，外面的 <code>Stream</code> 和 <code>Future</code> 就可以是 unpin 的。</p>
 <p>一般我们使用的 <code>Stream</code> 都是 unpin 的，如果不是，就用 pin 把它变成 unpin 的。为啥我们用的都是 unpin 的？因为能 move 的 Stream 更加灵活，可以作为参数和返回值。</p>
-<h2 id="asyncread-和-asyncwrite">AsyncRead 和 AsyncWrite</h2>
-<p>所有同步的 Read / Write / Seek trait，前面加一个 Async，就构成了对应的异步 IO 接口。</p>
+<h2 id="asyncread-和-asyncwrite">
+    <a href="#asyncread-%e5%92%8c-asyncwrite" class="header-anchor">#</a>
+    AsyncRead 和 AsyncWrite
+</h2><p>所有同步的 Read / Write / Seek trait，前面加一个 Async，就构成了对应的异步 IO 接口。</p>
 <p>AsyncRead / AsyncWrite 的方法会返回一个实现了 <code>Future</code> 的 <code>struct</code>，这样我们才能使用 await ，将 future 提交到 async runtime，触发 future 的执行。例如 <code>AsyncReadExt::read_to_end()</code>方法，返回 <code>ReadToEnd</code> 结构，而 <code>ReadToEnd</code> 实现了 Future：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1111,8 +1126,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

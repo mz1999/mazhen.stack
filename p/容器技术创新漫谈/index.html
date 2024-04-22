@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Kubernetes在2017年赢得了容器编排之战，使得基于容器&#43;Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
 <title>容器技术创新漫谈</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='容器技术创新漫谈'>
-<meta property='og:description' content='Kubernetes在2017年赢得了容器编排之战，使得基于容器&#43;Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="容器技术创新漫谈">
+<meta property='og:description' content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2018-12-16T22:03:21&#43;08:00'/><meta property='article:modified_time' content='2018-12-16T22:03:21&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="容器技术创新漫谈">
-<meta name="twitter:description" content="Kubernetes在2017年赢得了容器编排之战，使得基于容器&#43;Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
+<meta name="twitter:description" content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -461,8 +464,10 @@
     >Firecracker</a>，<code>Google</code>在今年5月份开源的基于用户态操作系统内核的 <a class="link" href="https://github.com/google/gvisor"  target="_blank" rel="noopener"
     >gVisor</a> 容器，还有更早开源的虚拟化容器项目 <a class="link" href="https://katacontainers.io/"  target="_blank" rel="noopener"
     >KataContainers</a>，可谓百花齐放。一般的开发者可能认为容器就等于<code>Docker</code>，没想到容器领域还在发生着这么多创新。我在了解这些项目时，发现如果没有一些背景知识，很难get到它们的创新点。我试着通过这篇文章进行一次背景知识的梳理。让我们先从最基本的问题开始：操作系统是怎么工作的？</p>
-<h2 id="操作系统的工作方式">操作系统的工作方式</h2>
-<p>我们不去讨论操作系统的标准定义，而是想想操作系统的本质是什么，它是怎么为应用提供服务的呢？</p>
+<h2 id="操作系统的工作方式">
+    <a href="#%e6%93%8d%e4%bd%9c%e7%b3%bb%e7%bb%9f%e7%9a%84%e5%b7%a5%e4%bd%9c%e6%96%b9%e5%bc%8f" class="header-anchor">#</a>
+    操作系统的工作方式
+</h2><p>我们不去讨论操作系统的标准定义，而是想想操作系统的本质是什么，它是怎么为应用提供服务的呢？</p>
 <p>其实操作系统很“懒”，它不是一直运行着主动干活，而是躺在那儿等着被中断“唤醒”，然后根据中断它的事件类型做下一步处理：是不是有键盘敲击、网络数据包到达，还是时间片到了该考虑进程切换，或者是有应用向内核发出了服务请求。内核处理完唤醒它的事件，会将控制权返还给应用程序，然后等着再次被中断“唤醒”。内核就是这样由中断驱动，控制着CPU、内存等硬件资源，为应用程序提供服务。</p>
 <p>”唤醒“操作系统内核的事件主要分为三类：</p>
 <ul>
@@ -470,8 +475,10 @@
 <li><strong>异常</strong>：当前正在执行的进程，由于非法指令或者其他原因导致执行失败而产生的异常事情处理请求，典型的如缺页异常；</li>
 <li><strong>系统调用</strong>：应用程序主动向操作系统内核发出的服务请求。系统调用的本质其实也是中断，相对于硬件设备的中断，这种中断被称为<code>软中断</code>。</li>
 </ul>
-<h3 id="cpu的特权等级">CPU的特权等级</h3>
-<p>内核代码常驻在内存中，被每个进程映射到它的<strong>逻辑地址空间</strong>：</p>
+<h3 id="cpu的特权等级">
+    <a href="#cpu%e7%9a%84%e7%89%b9%e6%9d%83%e7%ad%89%e7%ba%a7" class="header-anchor">#</a>
+    CPU的特权等级
+</h3><p>内核代码常驻在内存中，被每个进程映射到它的<strong>逻辑地址空间</strong>：</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112206004.png"
 	
 	
@@ -497,8 +504,10 @@
 	
 ></p>
 <p><code>Intel</code> 的 <code>CPU</code> 提供了4种特权级别， <code>Linux</code> 只使用了 <code>Ring0</code> 和 <code>Ring3</code> 两个级别。<code>Ring 0</code> 拥有最多的特权，它可以直接和CPU、内存等物理硬件交互。 <code>Ring 0</code> 被称为<code>内核态</code>，操作系统内核正是运行在<code>Ring 0</code>。<code>Ring 3</code>被称为<code>用户态</code>，应用程序运行在<code>用户态</code>。</p>
-<h3 id="系统调用">系统调用</h3>
-<p>在<code>用户态</code>禁止直接访问<code>内核态</code>，也就是说不同通过普通的函数调用方式调用内核代码，而必须使用<strong>系统调用</strong>陷入（<code>trap</code>）内核，完成从<code>用户态</code>到<code>内核态</code>的切换。内核首先检查进程是否允许执行想要的操作，然后代表进程执行所需的操作，完成后再返回到<code>用户态</code>。</p>
+<h3 id="系统调用">
+    <a href="#%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8" class="header-anchor">#</a>
+    系统调用
+</h3><p>在<code>用户态</code>禁止直接访问<code>内核态</code>，也就是说不同通过普通的函数调用方式调用内核代码，而必须使用<strong>系统调用</strong>陷入（<code>trap</code>）内核，完成从<code>用户态</code>到<code>内核态</code>的切换。内核首先检查进程是否允许执行想要的操作，然后代表进程执行所需的操作，完成后再返回到<code>用户态</code>。</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112207187.png"
 	
 	
@@ -516,16 +525,20 @@
 <li>运行于内核空间，处于<code>进程上下文</code>，即代表某个特定的进程执行</li>
 <li>运行于内核空间，处于<code>中断上下文</code>，与任何进程无关，处理某个特定的中断</li>
 </ul>
-<h3 id="优化系统调用">优化系统调用</h3>
-<p>从上面的讨论可以看出，由于<code>系统调用</code>会经过<code>用户态</code>到<code>内核态</code>的切换，开销要比普通函数调用大很多，因此在进行系统级编程时，减少<code>用户态</code>与<code>内核态</code>之间的切换是一个很重要的优化方法。</p>
+<h3 id="优化系统调用">
+    <a href="#%e4%bc%98%e5%8c%96%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8" class="header-anchor">#</a>
+    优化系统调用
+</h3><p>从上面的讨论可以看出，由于<code>系统调用</code>会经过<code>用户态</code>到<code>内核态</code>的切换，开销要比普通函数调用大很多，因此在进行系统级编程时，减少<code>用户态</code>与<code>内核态</code>之间的切换是一个很重要的优化方法。</p>
 <p>例如同样是实现 <code>Overlay网络</code>，使用 <code>VXLAN</code> 完全在内核态完成封装和解封装，要比把数据包从内核态通过虚拟设备<code>TUN</code>传入用户态再进行处理要高效很多。</p>
 <p>对应的也可以从另外一个方向进行优化：使用 <a class="link" href="https://www.dpdk.org/"  target="_blank" rel="noopener"
     >DPDK</a> 跳过内核网络协议栈，数据从网卡直接到达用户态，在用户态处理数据包，也就是说网络协议栈完全运行在用户态，同样避免了<code>用户态</code>和<code>内核态</code>的切换。像腾讯开源的 <a class="link" href="https://github.com/f-stack/f-stack"  target="_blank" rel="noopener"
     >F-Stack</a>就是一个基于<a class="link" href="https://www.dpdk.org/"  target="_blank" rel="noopener"
     >DPDK</a>运行在用户空间的TCP/IP协议栈。</p>
 <p>了解了操作系统内核的基本工作方式，我们再看下一个话题：<strong>虚拟化</strong>。</p>
-<h2 id="虚拟化技术">虚拟化技术</h2>
-<p>为了更高效灵活的使用硬件资源，同时能够实现服务间的安全隔离，我们需要虚拟化技术。运行虚拟化软件（<a class="link" href="https://en.wikipedia.org/wiki/Hypervisor"  target="_blank" rel="noopener"
+<h2 id="虚拟化技术">
+    <a href="#%e8%99%9a%e6%8b%9f%e5%8c%96%e6%8a%80%e6%9c%af" class="header-anchor">#</a>
+    虚拟化技术
+</h2><p>为了更高效灵活的使用硬件资源，同时能够实现服务间的安全隔离，我们需要虚拟化技术。运行虚拟化软件（<a class="link" href="https://en.wikipedia.org/wiki/Hypervisor"  target="_blank" rel="noopener"
     >Hypervisor</a>或者叫<code>VMM</code>，virtual machine monitor）的物理设施我们称之为<code>Host</code>，安装在<code>Hypervisor</code>之上的虚拟机称为<code>Guest</code>。</p>
 <p>根据<code>Hypervisor</code>在系统中的位置，可以将它归类为<code>type-1</code>或<code>type-2</code>型。如果<code>hypervisor</code>直接运行在硬件之上，它通常被认为是<code>Type-1</code>型。如果<code>hypervisor</code>作为一个单独的层运行在操作系统之上，它将被认为是<code>Type 2</code>型。</p>
 <p><code>Type-1</code>型<code>Hypervisor</code>的概念图：</p>
@@ -550,8 +563,10 @@
 	
 	
 ></p>
-<h3 id="kvm--qemu">KVM &amp; QEMU</h3>
-<p>实际上<code>Type-1</code>和<code>Type-2</code>并没有严格的区分，像最常见的虚拟化软件 <a class="link" href="https://www.linux-kvm.org/"  target="_blank" rel="noopener"
+<h3 id="kvm--qemu">
+    <a href="#kvm--qemu" class="header-anchor">#</a>
+    KVM &amp; QEMU
+</h3><p>实际上<code>Type-1</code>和<code>Type-2</code>并没有严格的区分，像最常见的虚拟化软件 <a class="link" href="https://www.linux-kvm.org/"  target="_blank" rel="noopener"
     >KVM</a>（Kernel-based Virtual Machine）是一个<code>Linux</code>内核模块，加载<code>KVM</code>后<code>Linux</code>内核就转换成了<code>Type-1 hypervisor</code>。同时，<code>Linux</code>还是一个通用的操作系统，也可以认为<code>KVM</code>是运行在<code>Linux</code>之上的<code>Type-2 hypervisor</code>。</p>
 <p>为了在<code>Host</code>上创建出虚拟机，仅仅有<code>KVM</code>是不够的。对于 <code>I/O</code> 的仿真，<code>KVM</code> 还需要 <a class="link" href="https://www.qemu.org/"  target="_blank" rel="noopener"
     >QEMU</a>的配合。<code>QEMU</code> 是一个运行在用户空间程序，它可以仿真处理器和一系列的物理设备：磁盘、网络、<code>VGA</code>、<code>PCI</code>、<code>USB</code>、串口/并口等等，基于<code>QEMU</code>可以构造出一个完整的虚拟PC。</p>
@@ -574,8 +589,10 @@
 <li><strong>VM Level</strong>: 用于处理和特定<code>VM</code>相关工作的 API，<code>vCPU</code> 就是通过这个级别的API创建出来的；</li>
 <li><strong>vCPU Level</strong>: 这是最细粒度的API，用于和特定<code>vCPU</code>的交互。<code>QEMU</code>会为每个<code>vCPU</code>分配一个专门的线程。</li>
 </ul>
-<h3 id="cpu-虚拟化技术-vt-x">CPU 虚拟化技术 VT-x</h3>
-<p><code>KVM</code>和<code>QEMU</code>配合完美，但和<code>CPU</code>的特权级别在一起就遇到了麻烦。我们知道，<code>hypervisor</code>需要管理宿主机的<code>CPU</code>、内存、<code>I/O</code>设备等资源，因此它需要运行在<code>ring 0</code>级别才能执行这些高特权操作。然而运行在<code>VM</code>中的操作系统希望得到访问所有资源的权限，它并不知道自己运行在虚拟机中。因为同一时间只有一个内核可以运行在<code>ring 0</code>，<code>Guest OS</code>不得不被“挤”到了<code>ring 1</code>，这一级别不能满足内核的需求。怎么解决？</p>
+<h3 id="cpu-虚拟化技术-vt-x">
+    <a href="#cpu-%e8%99%9a%e6%8b%9f%e5%8c%96%e6%8a%80%e6%9c%af-vt-x" class="header-anchor">#</a>
+    CPU 虚拟化技术 VT-x
+</h3><p><code>KVM</code>和<code>QEMU</code>配合完美，但和<code>CPU</code>的特权级别在一起就遇到了麻烦。我们知道，<code>hypervisor</code>需要管理宿主机的<code>CPU</code>、内存、<code>I/O</code>设备等资源，因此它需要运行在<code>ring 0</code>级别才能执行这些高特权操作。然而运行在<code>VM</code>中的操作系统希望得到访问所有资源的权限，它并不知道自己运行在虚拟机中。因为同一时间只有一个内核可以运行在<code>ring 0</code>，<code>Guest OS</code>不得不被“挤”到了<code>ring 1</code>，这一级别不能满足内核的需求。怎么解决？</p>
 <p>虽然我们可以使用软件的方式进行模拟，让<code>hypervisor</code>拦截应用发往<code>ring 0</code>的系统调用，再转发给<code>Guest OS</code>，但这么做会产生额外的性能损耗，而且方案复杂难以维护。<code>Intel</code>和<code>AMD</code>认识到了虚拟化的重要性，各自独立创建了<code>X86</code>架构的扩展指令集，分别称为 <code>VT-x</code> and <code>AMD-V</code>，从<code>CPU</code>层面支持虚拟化。</p>
 <p>以<code>Intel</code> CPU为例，<code>VT-x</code>不仅增加了虚拟化相关的指令集，还将CPU的指令划分会两种模式：<code>root</code> 和 <code>non-root</code>。<code>hypervisor</code>运行在 <code>root</code> 模式，而<code>VM</code>运行在<code>non-root</code>模式。指令在<code>non-root</code>模式的运行速度和<code>root</code>模式几乎一样，除了不能执行一些涉及CPU全局状态切换的指令。</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112210555.png"
@@ -597,8 +614,10 @@
 </ul>
 <p>这样，<code>VT-x/KVM/QEMU</code> 构成了今天应用最广泛的虚拟化技术栈。</p>
 <p>有了上面的铺垫，终于要谈到容器技术了。</p>
-<h2 id="容器的本质">容器的本质</h2>
-<p>虽然虚拟化技术在灵活高效的使用硬件资源方面前进了一大步，但人们还觉得远远不够。特别是在机器使用量巨大的互联网公司。因为虚拟机一旦创建，为它分配的资源就相对固定，缺乏弹性，很难再提高机器的利用率。而且创建、销毁虚拟机也是相对“重”的操作。这时候容器技术出现了。我们知道，容器依赖的底层技术，<code>Linux Namesapce</code>和<code>Cgroups</code>都是最早由Google开发，提交进Linux内核的。</p>
+<h2 id="容器的本质">
+    <a href="#%e5%ae%b9%e5%99%a8%e7%9a%84%e6%9c%ac%e8%b4%a8" class="header-anchor">#</a>
+    容器的本质
+</h2><p>虽然虚拟化技术在灵活高效的使用硬件资源方面前进了一大步，但人们还觉得远远不够。特别是在机器使用量巨大的互联网公司。因为虚拟机一旦创建，为它分配的资源就相对固定，缺乏弹性，很难再提高机器的利用率。而且创建、销毁虚拟机也是相对“重”的操作。这时候容器技术出现了。我们知道，容器依赖的底层技术，<code>Linux Namesapce</code>和<code>Cgroups</code>都是最早由Google开发，提交进Linux内核的。</p>
 <p><strong>容器</strong>的本质就是一个进程，只不过对它进行了<code>Linux Namesapce</code>隔离，让它“看”不到外面的世界，用<code>Cgroups</code>限制了它能使用的资源，同时利用系统调用<code>pivot_root</code>或<code>chroot</code>切换了进程的根目录，把容器镜像挂载为根文件系统<code>rootfs</code>。<code>rootfs</code>中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。<code>rootfs</code>打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112142723.png"
 	
@@ -613,8 +632,10 @@
 <p>从上图可以看出，容器和虚拟机的最大区别就是，每个虚拟机都有独立的操作系统内核<code>Guest OS</code>，而容器只是一种特殊的进程，它们共享同一个操作系统内核。</p>
 <p>看清了容器的本质，很多问题就容易理解。例如我们执行 <code>docker exec</code> 命令能够进入运行中的容器，好像登录进独立的虚拟机一样。实际上这只不过是利用系统调用<code>setns</code>，让当前进程进入到容器进程的<code>Namesapce</code>中，它就能“看到”容器内部的情况了。</p>
 <p>由于容器就是进程，它的创建、销毁非常轻量，对资源的使用控制更加灵活，因此让<code>Kubernetes</code>这种容器编排和资源调度工具可以大显身手，通过合理的搭配，极大的提高了整个集群的资源利用率。</p>
-<h2 id="虚拟化容器技术">虚拟化容器技术</h2>
-<p>前面提到，运行在一个宿主机上的所有容器共享同一个操作系统内核，这种隔离级别存在着很大的潜在安全风险。因此在公有云的多租户场景下，还是需要先用虚拟机进行租户强隔离，然后用户在虚拟机上再使用容器+<code>Kubernetes</code>部署应用。</p>
+<h2 id="虚拟化容器技术">
+    <a href="#%e8%99%9a%e6%8b%9f%e5%8c%96%e5%ae%b9%e5%99%a8%e6%8a%80%e6%9c%af" class="header-anchor">#</a>
+    虚拟化容器技术
+</h2><p>前面提到，运行在一个宿主机上的所有容器共享同一个操作系统内核，这种隔离级别存在着很大的潜在安全风险。因此在公有云的多租户场景下，还是需要先用虚拟机进行租户强隔离，然后用户在虚拟机上再使用容器+<code>Kubernetes</code>部署应用。</p>
 <p>然而在<code>Serverless</code>的场景下，传统的先建虚拟机再创建容器的方式，在灵活性、执行效率方面难以满足需求。随着<code>Serverless</code>、<code>FaaS</code>（Function-as-a-Service）的兴起，各公有云厂商都将安全性容器作为了创新焦点。</p>
 <p>一个很自然能想到的方案，是结合虚拟机的强隔离安全性+容器的轻量灵活性，这就是虚拟化容器项目 <a class="link" href="https://katacontainers.io/"  target="_blank" rel="noopener"
     >KataContainers</a>。</p>
@@ -652,8 +673,10 @@
 <blockquote>
 <p>&hellip;</p>
 </blockquote>
-<h2 id="gvisor">gVisor</h2>
-<p>Google 开源的<a class="link" href="https://github.com/google/gvisor"  target="_blank" rel="noopener"
+<h2 id="gvisor">
+    <a href="#gvisor" class="header-anchor">#</a>
+    gVisor
+</h2><p>Google 开源的<a class="link" href="https://github.com/google/gvisor"  target="_blank" rel="noopener"
     >gVisor</a>为了实现安全容器另辟蹊径，它用 Go 实现了一个运行在用户态的操作系统内核，作为容器运行的<code>Guest Kernel</code>，每个容器都依赖独立的操作系统内核，实现了容器间安全隔离的目的。</p>
 <p><img src="https://cdn.mazhen.tech/images/202207112213958.png"
 	
@@ -873,8 +896,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

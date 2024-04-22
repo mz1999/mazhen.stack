@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas">
 <title>Glassfish 启动流程</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Glassfish 启动流程'>
-<meta property='og:description' content='asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Glassfish 启动流程">
+<meta property='og:description' content="asadmin 是 GlassFish 的命令行工具，它提供了一系列子命令，使用 asadmin 可以让你完成 Glassfish 的所有管理任务。 使用 asadmin 的子命令 start-domain 可以启动 GlassFish。下面将描述 Glas">
 <meta property='og:url' content='https://mazhen.tech/p/glassfish-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='glassfish' /><meta property='article:published_time' content='2023-07-21T15:32:57&#43;08:00'/><meta property='article:modified_time' content='2023-07-21T15:32:57&#43;08:00'/>
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -454,8 +457,10 @@
     >GlassFish</a> 的命令行工具，它提供了一系列子命令，使用 <code>asadmin</code> 可以让你完成 <code>Glassfish</code> 的所有管理任务。</p>
 <p>使用 <code>asadmin</code> 的子命令 <a class="link" href="https://glassfish.org/docs/latest/reference-manual.html#start-domain"  target="_blank" rel="noopener"
     >start-domain</a> 可以启动 <code>GlassFish</code>。下面将描述 <code>GlassFish</code>启动过程的主要流程。先从 <code>asadmin</code> 命令的执行开始。</p>
-<h2 id="asadmin-执行流程">asadmin 执行流程</h2>
-<p><code>asadmin</code> 命令的入口是  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java"  target="_blank" rel="noopener"
+<h2 id="asadmin-执行流程">
+    <a href="#asadmin-%e6%89%a7%e8%a1%8c%e6%b5%81%e7%a8%8b" class="header-anchor">#</a>
+    asadmin 执行流程
+</h2><p><code>asadmin</code> 命令的入口是  <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java"  target="_blank" rel="noopener"
     >org.glassfish.admin.cli.AsadminMain</a>， 包含在 <code>${AS_INSTALL_LIB}/client/appserver-cli.jar</code>包中。</p>
 <p><code>AsadminMain</code> 执行的主要流程如下：</p>
 <p><img src="https://cdn.mazhen.tech/images/202307191450899.png"
@@ -512,8 +517,10 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>下面分析 <code>GlassFish</code> 主进程的启动流程。</p>
-<h2 id="主进程启动流程">主进程启动流程</h2>
-<p><code>GlassFish</code> 主进程的入口是 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
+<h2 id="主进程启动流程">
+    <a href="#%e4%b8%bb%e8%bf%9b%e7%a8%8b%e5%90%af%e5%8a%a8%e6%b5%81%e7%a8%8b" class="header-anchor">#</a>
+    主进程启动流程
+</h2><p><code>GlassFish</code> 主进程的入口是 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java"  target="_blank" rel="noopener"
     >com.sun.enterprise.glassfish.bootstrap.ASMain</a> 的 <code>main</code>方法，启动过程的主要流程如下：</p>
 <p><img src="https://cdn.mazhen.tech/images/202307210950607.png"
 	
@@ -535,8 +542,10 @@
     >GlassFish</a> 实例</li>
 <li>调用 <code>GlassFish.start()</code> 启动 <code>Glassfish</code> 实例</li>
 </ol>
-<h3 id="创建-glassfishruntime">创建 GlassFishRuntime</h3>
-<p>创建 <code>GlassFishRuntime</code> 的主要步骤包括：</p>
+<h3 id="创建-glassfishruntime">
+    <a href="#%e5%88%9b%e5%bb%ba-glassfishruntime" class="header-anchor">#</a>
+    创建 GlassFishRuntime
+</h3><p>创建 <code>GlassFishRuntime</code> 的主要步骤包括：</p>
 <ol>
 <li>创建 <a class="link" href="https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java"  target="_blank" rel="noopener"
     >RuntimeBuilder</a></li>
@@ -574,8 +583,10 @@
     >ModulesRegistry</a> 是 HK2 的关键组件，HK2 中的 modules 都注册在这里。在 OSGi 环境下，ModulesRegistry 的具体实现类是 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java"  target="_blank" rel="noopener"
     >OSGiModulesRegistryImpl</a>，它会从所有 bundle Jar 的 <code>META-INF/hk2-locator</code> 目录中查找并注册该 bundle 包含的 HK2 modules。</p>
 <p><code>ModulesRegistry</code> 和 <code>HK2Main</code> 都会注册为 OSGi 的 service。</p>
-<h3 id="创建-glassfish-实例">创建 GlassFish 实例</h3>
-<p>通过<code>GlassFishRuntime.newGlassFish()</code> 创建出 GlassFish 实例，这个过程主要做了两件事：</p>
+<h3 id="创建-glassfish-实例">
+    <a href="#%e5%88%9b%e5%bb%ba-glassfish-%e5%ae%9e%e4%be%8b" class="header-anchor">#</a>
+    创建 GlassFish 实例
+</h3><p>通过<code>GlassFishRuntime.newGlassFish()</code> 创建出 GlassFish 实例，这个过程主要做了两件事：</p>
 <ol>
 <li>创建出 HK2 的 <a class="link" href="https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java"  target="_blank" rel="noopener"
     >ServiceLocator</a></li>
@@ -590,8 +601,10 @@
 <p><code>ServiceLocator</code> 是 HK2 service 的注册表，它提供了一系列获取 HK2 service 的方法。</p>
 <p>HK2 Module 和 Service 的关系可以看作是容器和内容的关系。Module（容器）包含了一组 Service（内容），并且负责将这些 Service 注册到 <code>ServiceLocator</code> 中。当一个 Module 被初始化时，它的所有 Service 都会被注册到 <code>ServiceLocator</code> 中，然后这些 Service 就可以被其他 Service 查找和使用。</p>
 <p>最后将 <code>AppServerStartup</code> 和 <code>ServiceLocator</code> 作为构造函数的参数，创建出 <code>GlassFish</code> 实例。</p>
-<h3 id="启动-glassfish-实例">启动 Glassfish 实例</h3>
-<p>使用 <code>GlassFish.start()</code> 启动 <code>Glassfish</code> 实例。其中最关键的步骤是调用 <code>AppServerStartup.start()</code>，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。</p>
+<h3 id="启动-glassfish-实例">
+    <a href="#%e5%90%af%e5%8a%a8-glassfish-%e5%ae%9e%e4%be%8b" class="header-anchor">#</a>
+    启动 Glassfish 实例
+</h3><p>使用 <code>GlassFish.start()</code> 启动 <code>Glassfish</code> 实例。其中最关键的步骤是调用 <code>AppServerStartup.start()</code>，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。</p>
 <p><code>AppServerStartup.start()</code> 运行完成，所有 service 启动，Glassfish 完成启动并运行。</p>
 
 </section>
@@ -763,8 +776,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

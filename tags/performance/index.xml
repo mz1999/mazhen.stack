@@ -12,8 +12,10 @@
         <pubDate>Mon, 23 Mar 2020 11:01:58 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;性能分析工具的分类&lt;/h2&gt;
-&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
+        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;
+    &lt;a href=&#34;#%e6%80%a7%e8%83%bd%e5%88%86%e6%9e%90%e5%b7%a5%e5%85%b7%e7%9a%84%e5%88%86%e7%b1%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    性能分析工具的分类
+&lt;/h2&gt;&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;Counters&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
@@ -82,8 +84,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;本文主要讨论如何使用&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BPF&lt;/code&gt;进行&lt;code&gt;CPU Profiling&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;perf&#34;&gt;perf&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;perf&#34;&gt;
+    &lt;a href=&#34;#perf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;tools/perf&lt;/a&gt;目录下。&lt;/p&gt;
 &lt;p&gt;随后&lt;code&gt;perf&lt;/code&gt;进行了各种增强，增加了&lt;code&gt;tracing&lt;/code&gt;、&lt;code&gt;profiling&lt;/code&gt;等能力，可用于性能瓶颈的查找和热点代码的定位。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf&lt;/code&gt;是一个面向事件（event-oriented）的性能剖析工具，因此它也被称为&lt;code&gt;Linux perf events (LPE)&lt;/code&gt;，或&lt;code&gt;perf_events&lt;/code&gt;。&lt;/p&gt;
@@ -105,8 +109,10 @@
 &lt;/ul&gt;
 &lt;p&gt;内核依赖的硬件，比如说&lt;code&gt;CPU&lt;/code&gt;，一般会内置一些性能统计方面的寄存器（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hardware_performance_counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Hardware Performance Counter&lt;/a&gt;），通过软件读取这些特殊寄存器里的信息，我们也可以得到很多直接关于硬件的信息。&lt;code&gt;perf&lt;/code&gt;最初就是用来监测&lt;code&gt;CPU&lt;/code&gt;的性能监控单元（performance monitoring unit, PMU）的。&lt;/p&gt;
-&lt;h3 id=&#34;perf-events分类&#34;&gt;perf Events分类&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
+&lt;h3 id=&#34;perf-events分类&#34;&gt;
+    &lt;a href=&#34;#perf-events%e5%88%86%e7%b1%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf Events分类
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241110166.png&#34;
 	
 	
@@ -193,8 +199,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;perf的使用&lt;/h3&gt;
-&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;
+    &lt;a href=&#34;#perf%e7%9a%84%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf的使用
+&lt;/h3&gt;&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -325,8 +333,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;后面我们会介绍&lt;strong&gt;火焰图&lt;/strong&gt;，以可视化的方式展示&lt;code&gt;stack traces&lt;/code&gt;，比&lt;code&gt;perf report&lt;/code&gt;更加直观。&lt;/p&gt;
-&lt;h2 id=&#34;bpf&#34;&gt;BPF&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;bpf&#34;&gt;
+    &lt;a href=&#34;#bpf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BPF
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;用于改进网络数据包捕获的性能&lt;/a&gt;。&lt;code&gt;BPF&lt;/code&gt;是在内核级别进行过滤，不必将每个数据包拷贝到用户空间，从而提高了数据包过滤的性能。&lt;code&gt;tcpdump&lt;/code&gt;使用的就是&lt;code&gt;BPF&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241113910.png&#34;
 	
@@ -374,8 +384,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;已经内置在Linux内核中，因此你无需再安装任何新的内核组件，就可以在生产环境中使用BPF。&lt;/p&gt;
-&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;BCC和bpftrace&lt;/h2&gt;
-&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;
+    &lt;a href=&#34;#bcc%e5%92%8cbpftrace&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BCC和bpftrace
+&lt;/h2&gt;&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241116502.png&#34;
 	
 	
@@ -396,8 +408,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;iovisor/bpftrace&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;bcc的安装&#34;&gt;BCC的安装&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;bcc的安装&#34;&gt;
+    &lt;a href=&#34;#bcc%e7%9a%84%e5%ae%89%e8%a3%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BCC的安装
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;安装文档&lt;/a&gt;。以&lt;code&gt;Ubuntu 18.04 LTS&lt;/code&gt;为例，建议从源码build安装：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;安装build依赖&lt;/li&gt;
@@ -539,8 +553,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;off-CPU&lt;/code&gt;分析是对&lt;code&gt;on-CPU&lt;/code&gt;的补充，让我们知道线程所有的时间花费，更全面的了解程序的运行情况。&lt;/p&gt;
 &lt;p&gt;后面会介绍&lt;code&gt;profile&lt;/code&gt;，&lt;code&gt;offcputime&lt;/code&gt;如何生成火焰图进行可视化分析。&lt;/p&gt;
-&lt;h3 id=&#34;bpftrace的安装&#34;&gt;bpftrace的安装&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;bpftrace的安装&#34;&gt;
+    &lt;a href=&#34;#bpftrace%e7%9a%84%e5%ae%89%e8%a3%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    bpftrace的安装
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;bpftrace&lt;/a&gt; 建议运行在Linux 4.9 kernel或更高版本。根据&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;安装文档&lt;/a&gt;的说明，是因为&lt;code&gt;kprobes&lt;/code&gt;、&lt;code&gt;uprobes&lt;/code&gt;、&lt;code&gt;tracepoints&lt;/code&gt;等主要特性是在&lt;code&gt;4.x&lt;/code&gt;以上加入内核的：&lt;/p&gt;
 &lt;blockquote&gt;
@@ -649,14 +665,18 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;关于&lt;code&gt;bpftrace&lt;/code&gt;脚本编写不在本文的讨论范围，感兴趣的可以参考&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;reference_guide&lt;/a&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;火焰图&#34;&gt;火焰图&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;火焰图&#34;&gt;
+    &lt;a href=&#34;#%e7%81%ab%e7%84%b0%e5%9b%be&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    火焰图
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;火焰图&lt;/a&gt;是&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Brendan Gregg&lt;/a&gt;发明的将&lt;code&gt;stack traces&lt;/code&gt;可视化展示的方法。火焰图把时间和空间两个维度上的信息融合在一张图上，将频繁执行的代码路径以可视化的形式，非常直观的展现了出来。&lt;/p&gt;
 &lt;p&gt;火焰图可以用于可视化来自任何&lt;code&gt;profiler&lt;/code&gt;工具的记录的&lt;code&gt;stack traces&lt;/code&gt;信息，除了用来&lt;code&gt;CPU profiling&lt;/code&gt;，还适用于&lt;code&gt;off-CPU&lt;/code&gt;，&lt;code&gt;page faults&lt;/code&gt;等多种场景的分析。本文只讨论 &lt;code&gt;on-CPU&lt;/code&gt; 和 &lt;code&gt;off-CPU&lt;/code&gt; 火焰图的生成。&lt;/p&gt;
 &lt;p&gt;要理解火焰图，先从理解&lt;code&gt;Stack Trace&lt;/code&gt;开始。&lt;/p&gt;
-&lt;h3 id=&#34;stack-trace&#34;&gt;Stack Trace&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
+&lt;h3 id=&#34;stack-trace&#34;&gt;
+    &lt;a href=&#34;#stack-trace&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Stack Trace
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -669,8 +689,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;Profiling Stack Traces&lt;/h3&gt;
-&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;
+    &lt;a href=&#34;#profiling-stack-traces&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Profiling Stack Traces
+&lt;/h3&gt;&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
 &lt;p&gt;考虑下面的示例，我们用perf定时采样收集了多个&lt;code&gt;Stack Trace&lt;/code&gt;，然后将相同的&lt;code&gt;Stack Trace&lt;/code&gt;归纳合并，统计出次数：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -707,8 +729,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看到，总共收集了10个样本，其中代码路径&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_c&lt;/code&gt;有7次，该路径上的&lt;code&gt;func_c&lt;/code&gt;在CPU上运行。 &lt;code&gt;func_a-&amp;gt;func_b&lt;/code&gt;进行了两次采样，&lt;code&gt;func_b&lt;/code&gt;在CPU上运行。&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_d-&amp;gt;func_e&lt;/code&gt;一次采样，&lt;code&gt;func_e&lt;/code&gt;在CPU上运行。&lt;/p&gt;
-&lt;h3 id=&#34;火焰图-1&#34;&gt;火焰图&lt;/h3&gt;
-&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
+&lt;h3 id=&#34;火焰图-1&#34;&gt;
+    &lt;a href=&#34;#%e7%81%ab%e7%84%b0%e5%9b%be-1&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    火焰图
+&lt;/h3&gt;&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241117302.png&#34;
 	
 	
@@ -738,8 +762,10 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/brendangregg/FlameGraph.git
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;Java CPU Profiling&lt;/h2&gt;
-&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;
+    &lt;a href=&#34;#java-cpu-profiling&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java CPU Profiling
+&lt;/h2&gt;&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BCC profile&lt;/code&gt;的优点是它很高效，在内核上下文中对堆栈进行计数，并能完整显示用户态和内核态的CPU使用，能看到native libraries（例如libc），JVM（libjvm），Java方法和内核中花费的时间。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241118729.png&#34;
 	
@@ -765,8 +791,10 @@
     &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，同样能够获得mixed-mode火焰图。同时，此方法不需要启用帧指针，所以不用加上&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt;参数。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;下面我们就分别演示这两种方式。&lt;/p&gt;
-&lt;h3 id=&#34;perf-map-agent&#34;&gt;perf-map-agent&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
+&lt;h3 id=&#34;perf-map-agent&#34;&gt;
+    &lt;a href=&#34;#perf-map-agent&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf-map-agent
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
 &lt;p&gt;首先下载并编译&lt;code&gt;perf-map-agent&lt;/code&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -782,8 +810,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;make&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;配合&lt;code&gt;perf&lt;/code&gt;使用&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e5%90%88perf%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配合&lt;code&gt;perf&lt;/code&gt;使用
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf-java-flames&lt;/a&gt;脚本，可以一步生成火焰图。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf-java-flames&lt;/code&gt;接收&lt;code&gt;perf record&lt;/code&gt;命令参数，它会调用&lt;code&gt;perf&lt;/code&gt;进行采样，然后使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;FlameGraph&lt;/a&gt;生成火焰图，一步完成，非常方便。&lt;/p&gt;
@@ -838,8 +868,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo perf report --stdio
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;配合&lt;code&gt;bcc profile&lt;/code&gt;使用&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e5%90%88bcc-profile%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配合&lt;code&gt;bcc profile&lt;/code&gt;使用
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;jmaps&lt;/a&gt;脚本，它会调用&lt;code&gt;perf-map-agent&lt;/code&gt;为当前运行的所有Java进程生成符号表。&lt;/p&gt;
 &lt;p&gt;首先为&lt;code&gt;jmaps&lt;/code&gt;脚本设置好&lt;code&gt;JAVA_HOME&lt;/code&gt;和&lt;code&gt;perf-map-agent&lt;/code&gt;的正确位置：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -957,8 +989,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;./&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;flamegraph&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pl&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;--&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;io&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;--&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;countname&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offcpu01&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;txt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offcpu01&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;svg&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;async-profiler&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;
+    &lt;a href=&#34;#async-profiler&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async-profiler
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;async-profiler&lt;/a&gt;将&lt;code&gt;perf&lt;/code&gt;的堆栈追踪和JDK提供的&lt;a class=&#34;link&#34; href=&#34;http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，做到同时采样Java栈与Native栈，因此也就可以同时分析Java代码和Native代码中存在的性能热点。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AsyncGetCallTrace&lt;/code&gt;是JDK内部提供的一个函数，它的原型如下：&lt;/p&gt;
@@ -997,8 +1031,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看出，该函数直接通过&lt;code&gt;ucontext&lt;/code&gt;就能获取到完整的Java调用栈。&lt;/p&gt;
-&lt;h4 id=&#34;async-profiler的使用&#34;&gt;async-profiler的使用&lt;/h4&gt;
-&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
+&lt;h4 id=&#34;async-profiler的使用&#34;&gt;
+    &lt;a href=&#34;#async-profiler%e7%9a%84%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async-profiler的使用
+&lt;/h4&gt;&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
 &lt;p&gt;从Linux 4.6开始，从&lt;code&gt;non-root&lt;/code&gt;进程使用&lt;code&gt;perf&lt;/code&gt;捕获内核的&lt;code&gt;call stacks&lt;/code&gt;，需要设置如下两个内核参数：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -1029,8 +1065,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
-&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;
+    &lt;a href=&#34;#%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    总结
+&lt;/h2&gt;&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;使用工具采集样本&lt;/li&gt;
 &lt;li&gt;使用&lt;code&gt;FlameGraph&lt;/code&gt;项目提供的脚本，将采集的样本归纳合并，统计出&lt;code&gt;Stack Trace&lt;/code&gt;出现的频率&lt;/li&gt;
@@ -1042,8 +1080,10 @@
 &lt;li&gt;&lt;code&gt;async-profiler&lt;/code&gt;（内部会使用到&lt;code&gt;perf&lt;/code&gt;）&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如果只是对Java进程做&lt;code&gt;on-CPU&lt;/code&gt;分析，&lt;code&gt;async-profiler&lt;/code&gt;更加方便好用。如果需要更全面的了解Java进程的运行情况，例如分析系统锁的开销，阻塞的 I/O 操作，以及进程调度器（&lt;code&gt;scheduler&lt;/code&gt;）的工作，那么还是需要使用功能更强大的&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;bcc&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;
+    &lt;a href=&#34;#%e5%8f%82%e8%80%83%e8%b5%84%e6%96%99&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    参考资料
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/perf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf Examples&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/ebpf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -1065,8 +1105,10 @@
         <guid>https://mazhen.tech/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
         <description>&lt;p&gt;在Linux上做网络应用的性能优化时，一般都会对TCP相关的内核参数进行调节，特别是和缓冲、队列有关的参数。网上搜到的文章会告诉你需要修改哪些参数，但我们经常是知其然而不知其所以然，每次照抄过来后，可能很快就忘记或混淆了它们的含义。本文尝试总结TCP队列缓冲相关的内核参数，从协议栈的角度梳理它们，希望可以更容易的理解和记忆。注意，本文内容均来源于参考文档，没有去读相关的内核源码做验证，不能保证内容严谨正确。作为Java程序员没读过内核源码是硬伤。&lt;/p&gt;
 &lt;p&gt;下面我以server端为视角，从&lt;strong&gt;连接建立&lt;/strong&gt;、&lt;strong&gt;数据包接收&lt;/strong&gt;和&lt;strong&gt;数据包发送&lt;/strong&gt;这3条路径对参数进行归类梳理。&lt;/p&gt;
-&lt;h3 id=&#34;一连接建立&#34;&gt;一、连接建立&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011113863.png&#34;
+&lt;h3 id=&#34;一连接建立&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%80%e8%bf%9e%e6%8e%a5%e5%bb%ba%e7%ab%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    一、连接建立
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011113863.png&#34;
 	
 	
 	
@@ -1098,8 +1140,10 @@
 &lt;/ul&gt;
 &lt;p&gt;如果我们设置的&lt;code&gt;backlog&lt;/code&gt;大于&lt;code&gt;net.core.somaxconn&lt;/code&gt;，&lt;code&gt;accept&lt;/code&gt;队列的长度将被设置为&lt;code&gt;net.core.somaxconn&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;另外，为了应对&lt;code&gt;SYN flooding&lt;/code&gt;（即客户端只发送SYN包发起握手而不回应ACK完成连接建立，填满server端的半连接队列，让它无法处理正常的握手请求），Linux实现了一种称为&lt;code&gt;SYN cookie&lt;/code&gt;的机制，通过&lt;code&gt;net.ipv4.tcp_syncookies&lt;/code&gt;控制，设置为1表示开启。简单说&lt;code&gt;SYN cookie&lt;/code&gt;就是将连接信息编码在&lt;code&gt;ISN&lt;/code&gt;(initial sequence number)中返回给客户端，这时server不需要将半连接保存在队列中，而是利用客户端随后发来的ACK带回的&lt;code&gt;ISN&lt;/code&gt;还原连接信息，以完成连接的建立，避免了半连接队列被攻击&lt;code&gt;SYN&lt;/code&gt;包填满。对于一去不复返的客户端握手，不理它就是了。&lt;/p&gt;
-&lt;h3 id=&#34;二数据包的接收&#34;&gt;二、数据包的接收&lt;/h3&gt;
-&lt;p&gt;先看看接收数据包经过的路径：&lt;/p&gt;
+&lt;h3 id=&#34;二数据包的接收&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8c%e6%95%b0%e6%8d%ae%e5%8c%85%e7%9a%84%e6%8e%a5%e6%94%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    二、数据包的接收
+&lt;/h3&gt;&lt;p&gt;先看看接收数据包经过的路径：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011113357.png&#34;
 	
 	
@@ -1255,8 +1299,10 @@ echo &amp;quot;80&amp;quot; &amp;gt; /proc/irq/106/smp_affinity
 &lt;p&gt;Buffer / 2&lt;sup&gt;tcp_adv_win_scale&lt;/sup&gt;&lt;/p&gt;
 &lt;p&gt;如果&lt;code&gt;net.ipv4.tcp_adv_win_scale&lt;/code&gt;的值为1，则二分之一的缓冲空间用来做额外开销，如果为2的话，则四分之一缓冲空间用来做额外开销。因此&lt;code&gt;recv buffer&lt;/code&gt;的最佳值应该设置为：&lt;/p&gt;
 &lt;p&gt;BDP / (1 – 1 / 2&lt;sup&gt;tcp_adv_win_scale&lt;/sup&gt;)&lt;/p&gt;
-&lt;h3 id=&#34;三数据包的发送&#34;&gt;三、数据包的发送&lt;/h3&gt;
-&lt;p&gt;发送数据包经过的路径：&lt;/p&gt;
+&lt;h3 id=&#34;三数据包的发送&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%89%e6%95%b0%e6%8d%ae%e5%8c%85%e7%9a%84%e5%8f%91%e9%80%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    三、数据包的发送
+&lt;/h3&gt;&lt;p&gt;发送数据包经过的路径：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202207011117967.png&#34;
 	
 	

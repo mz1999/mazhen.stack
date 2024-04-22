@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='读写流程 Ledger 的元数据信息保存在zookeeper中。 写入流程 当写入发生时，首先 entry 被写入一个 journal 文件。journal 是一个 write-ahead log（WAL），它帮'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 读写流程 Ledger 的元数据信息保存在zookeeper中。 # 写入流程 当写入发生时，首先 entry 被写入一个 journal 文件。journal 是一个 write-ahead log（WAL），">
 <title>BookKeeper实现分析</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='BookKeeper实现分析'>
-<meta property='og:description' content='读写流程 Ledger 的元数据信息保存在zookeeper中。 写入流程 当写入发生时，首先 entry 被写入一个 journal 文件。journal 是一个 write-ahead log（WAL），它帮'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="BookKeeper实现分析">
+<meta property='og:description' content="# 读写流程 Ledger 的元数据信息保存在zookeeper中。 # 写入流程 当写入发生时，首先 entry 被写入一个 journal 文件。journal 是一个 write-ahead log（WAL），">
 <meta property='og:url' content='https://mazhen.tech/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='pulsar' /><meta property='article:published_time' content='2022-09-17T16:42:59&#43;08:00'/><meta property='article:modified_time' content='2022-09-17T16:42:59&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="BookKeeper实现分析">
-<meta name="twitter:description" content="读写流程 Ledger 的元数据信息保存在zookeeper中。 写入流程 当写入发生时，首先 entry 被写入一个 journal 文件。journal 是一个 write-ahead log（WAL），它帮">
+<meta name="twitter:description" content="# 读写流程 Ledger 的元数据信息保存在zookeeper中。 # 写入流程 当写入发生时，首先 entry 被写入一个 journal 文件。journal 是一个 write-ahead log（WAL），">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -456,8 +459,10 @@
     <section class="article-content">
     
     
-    <h2 id="读写流程">读写流程</h2>
-<p><code>Ledger</code> 的元数据信息保存在zookeeper中。</p>
+    <h2 id="读写流程">
+    <a href="#%e8%af%bb%e5%86%99%e6%b5%81%e7%a8%8b" class="header-anchor">#</a>
+    读写流程
+</h2><p><code>Ledger</code> 的元数据信息保存在zookeeper中。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209101559715.png"
 	
 	
@@ -468,8 +473,10 @@
 	
 	
 ></p>
-<h3 id="写入流程">写入流程</h3>
-<p>当写入发生时，首先 <code>entry</code> 被写入一个 <code>journal</code> 文件。<code>journal</code> 是一个 <code>write-ahead log</code>（<code>WAL</code>），它帮助 BookKeeper 在发生故障时避免数据丢失。这与关系型数据库实现数据持久化的机制相同。</p>
+<h3 id="写入流程">
+    <a href="#%e5%86%99%e5%85%a5%e6%b5%81%e7%a8%8b" class="header-anchor">#</a>
+    写入流程
+</h3><p>当写入发生时，首先 <code>entry</code> 被写入一个 <code>journal</code> 文件。<code>journal</code> 是一个 <code>write-ahead log</code>（<code>WAL</code>），它帮助 BookKeeper 在发生故障时避免数据丢失。这与关系型数据库实现数据持久化的机制相同。</p>
 <p>同时 <code>entry</code> 会被加入到 <code>write cache</code> 中。<code>write cache</code> 中累积的 <code>entry</code> 会定期排序，异步刷盘到 <code>entry log</code> 文件中。同一个 <code>ledger</code> 的 <code>entry</code> 排序后会被放在一起，这样有利于提高读取的性能。</p>
 <p><code>write cache</code> 中的 <code>entry</code> 也将被写入 <code>RocksDB</code>， <code>RocksDB</code> 记录了每个 <code>entry</code> 在 <code>entry log</code> 文件中的位置，是 <code>(ledgerId, entryId)</code> 到 <code>(entry log file, offset)</code> 的映射，即可以通过<code>(ledgerId, entryId)</code>，在 <code>entry log</code> 文件中定位到 entry。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209101601220.png"
@@ -482,10 +489,14 @@
 	
 	
 ></p>
-<h3 id="读取流程">读取流程</h3>
-<p>读取时会首先查看 <code>write cache</code> ，因为 <code>write cache</code> 中有最新的 entry。如果 <code>write cache</code> 中没有，那么接着查看 <code>read cache</code>。如果 <code>read cache</code> 中还是没有，那么就通过 <code>(ledgerId, entryId)</code> 在 <code>RocksDB</code> 中查找到该 <code>entry</code> 所在的 <code>entry log</code> 文件及偏移量，然后从 <code>entry log</code> 文件中读取该 <code>entry</code> ，并更新到 <code>read cache</code> 中，以便后续请求能在 <code>read cache</code> 中命中。两层缓存让绝大多数的读取通常是从内存获取。</p>
-<h3 id="读写隔离">读写隔离</h3>
-<p><img src="https://cdn.mazhen.tech/images/202209101852204.png"
+<h3 id="读取流程">
+    <a href="#%e8%af%bb%e5%8f%96%e6%b5%81%e7%a8%8b" class="header-anchor">#</a>
+    读取流程
+</h3><p>读取时会首先查看 <code>write cache</code> ，因为 <code>write cache</code> 中有最新的 entry。如果 <code>write cache</code> 中没有，那么接着查看 <code>read cache</code>。如果 <code>read cache</code> 中还是没有，那么就通过 <code>(ledgerId, entryId)</code> 在 <code>RocksDB</code> 中查找到该 <code>entry</code> 所在的 <code>entry log</code> 文件及偏移量，然后从 <code>entry log</code> 文件中读取该 <code>entry</code> ，并更新到 <code>read cache</code> 中，以便后续请求能在 <code>read cache</code> 中命中。两层缓存让绝大多数的读取通常是从内存获取。</p>
+<h3 id="读写隔离">
+    <a href="#%e8%af%bb%e5%86%99%e9%9a%94%e7%a6%bb" class="header-anchor">#</a>
+    读写隔离
+</h3><p><img src="https://cdn.mazhen.tech/images/202209101852204.png"
 	
 	
 	
@@ -495,8 +506,10 @@
 	
 	
 > BookKeeper 中的写入都是顺序写入 <code>journal</code> 文件，该文件可以存储在专用磁盘上，可以获得更大的吞吐量。<code>write cache</code> 中的 <code>entry</code> 会异步批量写入 <code>entry log</code> 文件和 <code>RocksDB</code>，通常配置在另外一块磁盘。因此，一个磁盘用于同步写入（ <code>journal</code> 文件），另一个磁盘用于异步优化写入，以及所有的读取。</p>
-<h2 id="数据一致性">数据一致性</h2>
-<p>Bookie 操作基本都是在客户端完成和实现的，比如副本复制、读写 entry 等操作。这些有助于确保 BookKeeper 的一致性。</p>
+<h2 id="数据一致性">
+    <a href="#%e6%95%b0%e6%8d%ae%e4%b8%80%e8%87%b4%e6%80%a7" class="header-anchor">#</a>
+    数据一致性
+</h2><p>Bookie 操作基本都是在客户端完成和实现的，比如副本复制、读写 entry 等操作。这些有助于确保 BookKeeper 的一致性。</p>
 <p>客户端在创建 ledger 时，会出现 Ensemble、Write Quorum 和 Ack Quorum 这些数据指标。</p>
 <ul>
 <li>
@@ -521,8 +534,10 @@
 	
 > （5,3,2) 代表了对于一个 ledger ，会挑 5 台 bookie 去存储所有的 entry。所以当 entry 0 生成时，可以根据hash模型计算出应该放置到哪台 bookie。比如 E0 对应 B1，B2，B3，那 E1 就对应 B2，B3，B4，以此类推。</p>
 <p>虽然总体是需要 5 台 bookie，但是每条 entry 只会占用 3 台 bookie 去存放，并只需等待其中的 2 台 bookie 给出应答即可。</p>
-<h3 id="lastaddconfirm">LastAddConfirm</h3>
-<p>LAC（LastAddConfirm）是由 LAP（LastAddPush） 延伸而来是根据客户端进行维护并发布的最后一条 entry id，从 0 开始递增。所以 LAC 是由应答确认回来的最后一条 entry id 构成，如下图右侧显示。 <img src="https://cdn.mazhen.tech/images/202209101850540.png"
+<h3 id="lastaddconfirm">
+    <a href="#lastaddconfirm" class="header-anchor">#</a>
+    LastAddConfirm
+</h3><p>LAC（LastAddConfirm）是由 LAP（LastAddPush） 延伸而来是根据客户端进行维护并发布的最后一条 entry id，从 0 开始递增。所以 LAC 是由应答确认回来的最后一条 entry id 构成，如下图右侧显示。 <img src="https://cdn.mazhen.tech/images/202209101850540.png"
 	
 	
 	
@@ -541,8 +556,10 @@
 	
 	
 ></p>
-<h3 id="ensemble-change">Ensemble change</h3>
-<p>当其中的某个 bookie 挂掉时，客户端会进行一个 ensemble change 的操作，用新的 bookie 替换挂掉的旧 bookie。比如 当bookie 4 挂掉时，可以使用 bookie 6 进行替换。 <img src="https://cdn.mazhen.tech/images/202209101857539.png"
+<h3 id="ensemble-change">
+    <a href="#ensemble-change" class="header-anchor">#</a>
+    Ensemble change
+</h3><p>当其中的某个 bookie 挂掉时，客户端会进行一个 ensemble change 的操作，用新的 bookie 替换挂掉的旧 bookie。比如 当bookie 4 挂掉时，可以使用 bookie 6 进行替换。 <img src="https://cdn.mazhen.tech/images/202209101857539.png"
 	
 	
 	
@@ -562,8 +579,10 @@
 	
 	
 ></p>
-<h3 id="bookie-fencing">Bookie Fencing</h3>
-<p>BookKeeper 有一个极其重要的功能，叫做 <strong>fencing</strong>。<strong>fencing</strong> 功能让 BookKeeper 保证只有一个写入者（Pulsar broker）可以写入一个 ledger。</p>
+<h3 id="bookie-fencing">
+    <a href="#bookie-fencing" class="header-anchor">#</a>
+    Bookie Fencing
+</h3><p>BookKeeper 有一个极其重要的功能，叫做 <strong>fencing</strong>。<strong>fencing</strong> 功能让 BookKeeper 保证只有一个写入者（Pulsar broker）可以写入一个 ledger。</p>
 <p>Broker（B1）挂掉，Broker（B2）接管 B1 上topic X的流程：</p>
 <ol>
 <li>
@@ -588,8 +607,10 @@
 <p>整个失效恢复的过程，是没有回头复用 ledger 的。因为复用意味着所有元素都处于相同状态且都同意后才能继续去读写，这个是很难控制的。</p>
 <p>我们从主从复制方式进行切入，将其定义为物理文件。数据从主复制到从，由于复制过程的速度差异，为了保证所有的一致性，需要做一些「删除/清空类」的操作。但是这个过程中一旦包含覆盖的操作，就会在过程中更改文件状态，容易出现 bug。</p>
 <p>BookKeeper 在运行的过程中，不是一个物理文件，而是逻辑上的序。同时在失效恢复过程中，没有进行任何的复用，使得数据恢复变得简单又清晰。其次它在整个修复过程中，没有去额外动用 ledger X 的数据。</p>
-<h2 id="自动恢复">自动恢复</h2>
-<p>当一个 bookie 失败时，这个 bookie 上所有 ledger 的 fragments 都将被复制到其他节点，以确保每个 ledger 的复制系数（Write quorum）得到保证。</p>
+<h2 id="自动恢复">
+    <a href="#%e8%87%aa%e5%8a%a8%e6%81%a2%e5%a4%8d" class="header-anchor">#</a>
+    自动恢复
+</h2><p>当一个 bookie 失败时，这个 bookie 上所有 ledger 的 fragments 都将被复制到其他节点，以确保每个 ledger 的复制系数（Write quorum）得到保证。</p>
 <p>recovery 不是 BookKeeper 复制协议的一部分，而是在 BookKeeper 外部运行，作为一种异步修复机制使用。</p>
 <p>有两种类型的recovery：手动或自动。</p>
 <p>自动恢复进程 AutoRecoveryMain 可以在独立的服务器上运行，也可以和bookie跑在一起。其中一个自动恢复进程被选为审核员，然后进行如下操作：</p>
@@ -774,8 +795,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

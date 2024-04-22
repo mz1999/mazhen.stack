@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Tomcat系统架构图 从架构图可以看出，顶层组件Server代表一个Tomcat Server实例，一个Server中有一个或者多个Servi'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# Tomcat系统架构图 从架构图可以看出，顶层组件Server代表一个Tomcat Server实例，一个Server中有一个或者多个Serv">
 <title>Tomcat系统架构简介</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/tomcat%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E7%AE%80%E4%BB%8B/'>
 
-<link rel="stylesheet" href="/scss/style.min.8191399262444ab68b72a18c97392f5349be20a1615d77445be51e974c144cff.css"><meta property='og:title' content='Tomcat系统架构简介'>
-<meta property='og:description' content='Tomcat系统架构图 从架构图可以看出，顶层组件Server代表一个Tomcat Server实例，一个Server中有一个或者多个Servi'>
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Tomcat系统架构简介">
+<meta property='og:description' content="# Tomcat系统架构图 从架构图可以看出，顶层组件Server代表一个Tomcat Server实例，一个Server中有一个或者多个Serv">
 <meta property='og:url' content='https://mazhen.tech/p/tomcat%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E7%AE%80%E4%BB%8B/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:published_time' content='2019-11-21T17:22:56&#43;08:00'/><meta property='article:modified_time' content='2019-11-21T17:22:56&#43;08:00'/>
 <meta name="twitter:site" content="@mazhen">
     <meta name="twitter:creator" content="@mazhen"><meta name="twitter:title" content="Tomcat系统架构简介">
-<meta name="twitter:description" content="Tomcat系统架构图 从架构图可以看出，顶层组件Server代表一个Tomcat Server实例，一个Server中有一个或者多个Servi">
+<meta name="twitter:description" content="# Tomcat系统架构图 从架构图可以看出，顶层组件Server代表一个Tomcat Server实例，一个Server中有一个或者多个Serv">
     <link rel="shortcut icon" href="/favicon.png" />
 
   
@@ -95,7 +95,7 @@
             <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
             <h2 class="site-description">Stay hungry. Stay foolish.</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
@@ -291,10 +291,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -305,19 +306,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://mazhen.tech/" selected>中文</option>
-                        
-                            <option value="https://mazhen.tech/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -325,7 +327,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -333,10 +335,11 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
 
@@ -444,8 +447,10 @@
     <section class="article-content">
     
     
-    <h2 id="tomcat系统架构图">Tomcat系统架构图</h2>
-<p><img src="https://cdn.mazhen.tech/images/202209231726759.png"
+    <h2 id="tomcat系统架构图">
+    <a href="#tomcat%e7%b3%bb%e7%bb%9f%e6%9e%b6%e6%9e%84%e5%9b%be" class="header-anchor">#</a>
+    Tomcat系统架构图
+</h2><p><img src="https://cdn.mazhen.tech/images/202209231726759.png"
 	
 	
 	
@@ -486,8 +491,10 @@
 </span></span><span class="line"><span class="cl">&lt;/Server&gt;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="connector"><code>Connector</code></h2>
-<p>我们再仔细看一下<code>Connector</code>的内部实现。</p>
+</div><h2 id="connector">
+    <a href="#connector" class="header-anchor">#</a>
+    <code>Connector</code>
+</h2><p>我们再仔细看一下<code>Connector</code>的内部实现。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209231726558.png"
 	
 	
@@ -546,8 +553,10 @@
 	
 	
 ></p>
-<h2 id="protocolhandler"><code>ProtocolHandler</code></h2>
-<p>Tomcat允许一个<code>Engine</code>对接多个<code>Connector</code>，每个<code>Connector</code>可以使用不同的 I/O 模型，实现不同的应用层协议解析。<code>Connector</code>屏蔽了 I/O 模型和协议的区别，传递给<code>Engine</code>的是标准的<code>ServletRequest</code>/<code>ServletResponse</code>对象。</p>
+<h2 id="protocolhandler">
+    <a href="#protocolhandler" class="header-anchor">#</a>
+    <code>ProtocolHandler</code>
+</h2><p>Tomcat允许一个<code>Engine</code>对接多个<code>Connector</code>，每个<code>Connector</code>可以使用不同的 I/O 模型，实现不同的应用层协议解析。<code>Connector</code>屏蔽了 I/O 模型和协议的区别，传递给<code>Engine</code>的是标准的<code>ServletRequest</code>/<code>ServletResponse</code>对象。</p>
 <p>由于 I/O 模型和应用层协议解析可以自由组合，Tomcat使用<code>ProtocolHandler</code>实现这种组合。各种组合都有相应的具体实现类。比如：Http11NioProtocol 和 AjpNio2Protocol。</p>
 <p><img src="https://cdn.mazhen.tech/images/202209231728723.png"
 	
@@ -728,8 +737,8 @@
     <section class="powerby">
         
             <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 

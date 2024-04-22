@@ -38,8 +38,10 @@
     &gt;GlassFish&lt;/a&gt; , which provides a series of subcommands. Using &lt;code&gt;asadmin&lt;/code&gt;, you can complete all management tasks of &lt;code&gt;GlassFish&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The subcommand &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#start-domain&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;start-domain&lt;/a&gt; of &lt;code&gt;asadmin&lt;/code&gt; can start &lt;code&gt;GlassFish&lt;/code&gt;. The following will describe the main process of &lt;code&gt;GlassFish&lt;/code&gt; startup, starting from the execution of the &lt;code&gt;asadmin&lt;/code&gt; command.&lt;/p&gt;
-&lt;h2 id=&#34;asadmin-execution-process&#34;&gt;asadmin Execution Process&lt;/h2&gt;
-&lt;p&gt;The entry point of the &lt;code&gt;asadmin&lt;/code&gt; command is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;asadmin-execution-process&#34;&gt;
+    &lt;a href=&#34;#asadmin-execution-process&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    asadmin Execution Process
+&lt;/h2&gt;&lt;p&gt;The entry point of the &lt;code&gt;asadmin&lt;/code&gt; command is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;org.glassfish.admin.cli.AsadminMain&lt;/a&gt;, which is included in the &lt;code&gt;${AS_INSTALL_LIB}/client/appserver-cli.jar&lt;/code&gt; package.&lt;/p&gt;
 &lt;p&gt;The main process of &lt;code&gt;AsadminMain&lt;/code&gt; execution is as follows:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/mz1999/material/master/images/202307211620151.png&#34;
@@ -96,8 +98,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Next, we analyze the startup process of the &lt;code&gt;GlassFish&lt;/code&gt; main process.&lt;/p&gt;
-&lt;h2 id=&#34;main-process-startup-process&#34;&gt;Main Process Startup Process&lt;/h2&gt;
-&lt;p&gt;The entry point of the &lt;code&gt;GlassFish&lt;/code&gt; main process is the &lt;code&gt;main&lt;/code&gt; method of  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;main-process-startup-process&#34;&gt;
+    &lt;a href=&#34;#main-process-startup-process&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Main Process Startup Process
+&lt;/h2&gt;&lt;p&gt;The entry point of the &lt;code&gt;GlassFish&lt;/code&gt; main process is the &lt;code&gt;main&lt;/code&gt; method of  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt; , and the main process of the startup process is as follows:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/mz1999/material/master/images/202307211631595.png&#34;
 	
@@ -119,8 +123,10 @@
     &gt;GlassFishRuntime&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Start the &lt;code&gt;Glassfish&lt;/code&gt; instance by calling &lt;code&gt;GlassFish.start()&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;creating-glassfishruntime&#34;&gt;Creating GlassFishRuntime&lt;/h3&gt;
-&lt;p&gt;The main steps to create &lt;code&gt;GlassFishRuntime&lt;/code&gt; include:&lt;/p&gt;
+&lt;h3 id=&#34;creating-glassfishruntime&#34;&gt;
+    &lt;a href=&#34;#creating-glassfishruntime&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Creating GlassFishRuntime
+&lt;/h3&gt;&lt;p&gt;The main steps to create &lt;code&gt;GlassFishRuntime&lt;/code&gt; include:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Create &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
@@ -156,8 +162,10 @@
     &gt;ModulesRegistry&lt;/a&gt; is a key component of HK2. All modules in HK2 are registered here. In the OSGi environment, the specific implementation class of &lt;code&gt;ModulesRegistry&lt;/code&gt; is  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;OSGiModulesRegistryImpl&lt;/a&gt;, which will find and register the HK2 modules contained in the &lt;code&gt;META-INF/hk2-locator&lt;/code&gt; directory of all bundle Jars.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;ModulesRegistry&lt;/code&gt; and &lt;code&gt;HK2Main&lt;/code&gt; will be registered as OSGi&amp;rsquo;s service.&lt;/p&gt;
-&lt;h3 id=&#34;creating-glassfish-instance&#34;&gt;Creating GlassFish Instance&lt;/h3&gt;
-&lt;p&gt;Create a GlassFish instance through &lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt;. This process mainly does two things:&lt;/p&gt;
+&lt;h3 id=&#34;creating-glassfish-instance&#34;&gt;
+    &lt;a href=&#34;#creating-glassfish-instance&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Creating GlassFish Instance
+&lt;/h3&gt;&lt;p&gt;Create a GlassFish instance through &lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt;. This process mainly does two things:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Create HK2&amp;rsquo;s &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
@@ -172,8 +180,10 @@
 &lt;p&gt;&lt;code&gt;ServiceLocator&lt;/code&gt; is the registry of HK2 services, which provides a series of methods to get HK2 service.&lt;/p&gt;
 &lt;p&gt;The relationship between HK2 &lt;code&gt;Module&lt;/code&gt; and &lt;code&gt;Service&lt;/code&gt; can be regarded as the relationship between container and content. &lt;code&gt;Module&lt;/code&gt; (container) contains a group of &lt;code&gt;Service&lt;/code&gt; (content) and is responsible for registering these Services in &lt;code&gt;ServiceLocator&lt;/code&gt;. When a &lt;code&gt;Module&lt;/code&gt; is initialized, all its Services will be registered in &lt;code&gt;ServiceLocator&lt;/code&gt;, and then these Services can be found and used by other Services.&lt;/p&gt;
 &lt;p&gt;Finally, create a GlassFish instance with &lt;code&gt;AppServerStartup&lt;/code&gt; and &lt;code&gt;ServiceLocator&lt;/code&gt; as the parameters of the constructor.&lt;/p&gt;
-&lt;h3 id=&#34;starting-glassfish-instance&#34;&gt;Starting GlassFish Instance&lt;/h3&gt;
-&lt;p&gt;Use &lt;code&gt;GlassFish.start()&lt;/code&gt; to start the &lt;code&gt;Glassfish&lt;/code&gt; instance. The most critical step is to call &lt;code&gt;AppServerStartup.start()&lt;/code&gt;, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.&lt;/p&gt;
+&lt;h3 id=&#34;starting-glassfish-instance&#34;&gt;
+    &lt;a href=&#34;#starting-glassfish-instance&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Starting GlassFish Instance
+&lt;/h3&gt;&lt;p&gt;Use &lt;code&gt;GlassFish.start()&lt;/code&gt; to start the &lt;code&gt;Glassfish&lt;/code&gt; instance. The most critical step is to call &lt;code&gt;AppServerStartup.start()&lt;/code&gt;, which starts the HK2 service in stages. The service of HK2 can specify the startup level, the lower the level, the earlier the startup.&lt;/p&gt;
 &lt;p&gt;After &lt;code&gt;AppServerStartup.start()&lt;/code&gt; runs, all services start, and Glassfish completes startup and runs.&lt;/p&gt;
 </description>
         </item>
@@ -188,8 +198,10 @@
     &gt;GlassFish&lt;/a&gt; 的命令行工具，它提供了一系列子命令，使用 &lt;code&gt;asadmin&lt;/code&gt; 可以让你完成 &lt;code&gt;Glassfish&lt;/code&gt; 的所有管理任务。&lt;/p&gt;
 &lt;p&gt;使用 &lt;code&gt;asadmin&lt;/code&gt; 的子命令 &lt;a class=&#34;link&#34; href=&#34;https://glassfish.org/docs/latest/reference-manual.html#start-domain&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;start-domain&lt;/a&gt; 可以启动 &lt;code&gt;GlassFish&lt;/code&gt;。下面将描述 &lt;code&gt;GlassFish&lt;/code&gt;启动过程的主要流程。先从 &lt;code&gt;asadmin&lt;/code&gt; 命令的执行开始。&lt;/p&gt;
-&lt;h2 id=&#34;asadmin-执行流程&#34;&gt;asadmin 执行流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;asadmin&lt;/code&gt; 命令的入口是  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;asadmin-执行流程&#34;&gt;
+    &lt;a href=&#34;#asadmin-%e6%89%a7%e8%a1%8c%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    asadmin 执行流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;asadmin&lt;/code&gt; 命令的入口是  &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/appserver/admin/cli/src/main/java/org/glassfish/admin/cli/AsadminMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;org.glassfish.admin.cli.AsadminMain&lt;/a&gt;， 包含在 &lt;code&gt;${AS_INSTALL_LIB}/client/appserver-cli.jar&lt;/code&gt;包中。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AsadminMain&lt;/code&gt; 执行的主要流程如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202307191450899.png&#34;
@@ -246,8 +258,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;下面分析 &lt;code&gt;GlassFish&lt;/code&gt; 主进程的启动流程。&lt;/p&gt;
-&lt;h2 id=&#34;主进程启动流程&#34;&gt;主进程启动流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;GlassFish&lt;/code&gt; 主进程的入口是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;主进程启动流程&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%bb%e8%bf%9b%e7%a8%8b%e5%90%af%e5%8a%a8%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    主进程启动流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;GlassFish&lt;/code&gt; 主进程的入口是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/core/bootstrap/src/main/java/com/sun/enterprise/glassfish/bootstrap/ASMain.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;com.sun.enterprise.glassfish.bootstrap.ASMain&lt;/a&gt; 的 &lt;code&gt;main&lt;/code&gt;方法，启动过程的主要流程如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202307210950607.png&#34;
 	
@@ -269,8 +283,10 @@
     &gt;GlassFish&lt;/a&gt; 实例&lt;/li&gt;
 &lt;li&gt;调用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;创建-glassfishruntime&#34;&gt;创建 GlassFishRuntime&lt;/h3&gt;
-&lt;p&gt;创建 &lt;code&gt;GlassFishRuntime&lt;/code&gt; 的主要步骤包括：&lt;/p&gt;
+&lt;h3 id=&#34;创建-glassfishruntime&#34;&gt;
+    &lt;a href=&#34;#%e5%88%9b%e5%bb%ba-glassfishruntime&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    创建 GlassFishRuntime
+&lt;/h3&gt;&lt;p&gt;创建 &lt;code&gt;GlassFishRuntime&lt;/code&gt; 的主要步骤包括：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;创建 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish/blob/master/nucleus/common/simple-glassfish-api/src/main/java/org/glassfish/embeddable/spi/RuntimeBuilder.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;RuntimeBuilder&lt;/a&gt;&lt;/li&gt;
@@ -308,8 +324,10 @@
     &gt;ModulesRegistry&lt;/a&gt; 是 HK2 的关键组件，HK2 中的 modules 都注册在这里。在 OSGi 环境下，ModulesRegistry 的具体实现类是 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/osgi/adapter/src/main/java/org/jvnet/hk2/osgiadapter/OSGiModulesRegistryImpl.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;OSGiModulesRegistryImpl&lt;/a&gt;，它会从所有 bundle Jar 的 &lt;code&gt;META-INF/hk2-locator&lt;/code&gt; 目录中查找并注册该 bundle 包含的 HK2 modules。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;ModulesRegistry&lt;/code&gt; 和 &lt;code&gt;HK2Main&lt;/code&gt; 都会注册为 OSGi 的 service。&lt;/p&gt;
-&lt;h3 id=&#34;创建-glassfish-实例&#34;&gt;创建 GlassFish 实例&lt;/h3&gt;
-&lt;p&gt;通过&lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt; 创建出 GlassFish 实例，这个过程主要做了两件事：&lt;/p&gt;
+&lt;h3 id=&#34;创建-glassfish-实例&#34;&gt;
+    &lt;a href=&#34;#%e5%88%9b%e5%bb%ba-glassfish-%e5%ae%9e%e4%be%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    创建 GlassFish 实例
+&lt;/h3&gt;&lt;p&gt;通过&lt;code&gt;GlassFishRuntime.newGlassFish()&lt;/code&gt; 创建出 GlassFish 实例，这个过程主要做了两件事：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;创建出 HK2 的 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/glassfish-hk2/blob/master/hk2-api/src/main/java/org/glassfish/hk2/api/ServiceLocator.java&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;ServiceLocator&lt;/a&gt;&lt;/li&gt;
@@ -324,8 +342,10 @@
 &lt;p&gt;&lt;code&gt;ServiceLocator&lt;/code&gt; 是 HK2 service 的注册表，它提供了一系列获取 HK2 service 的方法。&lt;/p&gt;
 &lt;p&gt;HK2 Module 和 Service 的关系可以看作是容器和内容的关系。Module（容器）包含了一组 Service（内容），并且负责将这些 Service 注册到 &lt;code&gt;ServiceLocator&lt;/code&gt; 中。当一个 Module 被初始化时，它的所有 Service 都会被注册到 &lt;code&gt;ServiceLocator&lt;/code&gt; 中，然后这些 Service 就可以被其他 Service 查找和使用。&lt;/p&gt;
 &lt;p&gt;最后将 &lt;code&gt;AppServerStartup&lt;/code&gt; 和 &lt;code&gt;ServiceLocator&lt;/code&gt; 作为构造函数的参数，创建出 &lt;code&gt;GlassFish&lt;/code&gt; 实例。&lt;/p&gt;
-&lt;h3 id=&#34;启动-glassfish-实例&#34;&gt;启动 Glassfish 实例&lt;/h3&gt;
-&lt;p&gt;使用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例。其中最关键的步骤是调用 &lt;code&gt;AppServerStartup.start()&lt;/code&gt;，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。&lt;/p&gt;
+&lt;h3 id=&#34;启动-glassfish-实例&#34;&gt;
+    &lt;a href=&#34;#%e5%90%af%e5%8a%a8-glassfish-%e5%ae%9e%e4%be%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    启动 Glassfish 实例
+&lt;/h3&gt;&lt;p&gt;使用 &lt;code&gt;GlassFish.start()&lt;/code&gt; 启动 &lt;code&gt;Glassfish&lt;/code&gt; 实例。其中最关键的步骤是调用 &lt;code&gt;AppServerStartup.start()&lt;/code&gt;，分级启动 HK2 的 service。HK2 的 service 可以指定启动级别，级别越低，越先启动。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AppServerStartup.start()&lt;/code&gt; 运行完成，所有 service 启动，Glassfish 完成启动并运行。&lt;/p&gt;
 </description>
         </item>
@@ -335,8 +355,10 @@
         <pubDate>Tue, 11 Jul 2023 17:26:22 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/</guid>
-        <description>&lt;h2 id=&#34;获得源代码&#34;&gt;获得源代码&lt;/h2&gt;
-&lt;p&gt;首先从 Github 获取 OpenJDK的源代码&lt;/p&gt;
+        <description>&lt;h2 id=&#34;获得源代码&#34;&gt;
+    &lt;a href=&#34;#%e8%8e%b7%e5%be%97%e6%ba%90%e4%bb%a3%e7%a0%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    获得源代码
+&lt;/h2&gt;&lt;p&gt;首先从 Github 获取 OpenJDK的源代码&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -345,8 +367,10 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ git clone https://github.com/openjdk/jdk.git
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;安装必要的软件&#34;&gt;安装必要的软件&lt;/h2&gt;
-&lt;ul&gt;
+&lt;/div&gt;&lt;h2 id=&#34;安装必要的软件&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%89%e8%a3%85%e5%bf%85%e8%a6%81%e7%9a%84%e8%bd%af%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    安装必要的软件
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;Xcode
 &lt;ul&gt;
 &lt;li&gt;App Store 中获取&lt;/li&gt;
@@ -376,8 +400,10 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;配置构建&#34;&gt;配置构建&lt;/h2&gt;
-&lt;p&gt;通过运行 &lt;code&gt;bash configure&lt;/code&gt; 命令来完成配置构建。这个脚本将检查你的系统，确保所有必要的依赖项都已经满足。如果一切顺利，该脚本将汇总build的配置、将使用的工具，以及 build 将使用的硬件资源：&lt;/p&gt;
+&lt;h2 id=&#34;配置构建&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e7%bd%ae%e6%9e%84%e5%bb%ba&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配置构建
+&lt;/h2&gt;&lt;p&gt;通过运行 &lt;code&gt;bash configure&lt;/code&gt; 命令来完成配置构建。这个脚本将检查你的系统，确保所有必要的依赖项都已经满足。如果一切顺利，该脚本将汇总build的配置、将使用的工具，以及 build 将使用的硬件资源：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -424,8 +450,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Memory&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;limit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;   &lt;span class=&#34;mi&#34;&gt;16384&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MB&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;构建-openjdk&#34;&gt;构建 OpenJDK&lt;/h2&gt;
-&lt;p&gt;一旦配置完成，你就可以开始构建 JDK 了。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;构建-openjdk&#34;&gt;
+    &lt;a href=&#34;#%e6%9e%84%e5%bb%ba-openjdk&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    构建 OpenJDK
+&lt;/h2&gt;&lt;p&gt;一旦配置完成，你就可以开始构建 JDK 了。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -435,8 +463,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;这个命令将开始构建过程，在完成后生成一个 JDK 的 image。&lt;/p&gt;
-&lt;h2 id=&#34;验证构建&#34;&gt;验证构建&lt;/h2&gt;
-&lt;p&gt;新构建的 JDK 在 &lt;code&gt;./build/*/images/jdk&lt;/code&gt;目录下，运行命令查看JDK版本&lt;/p&gt;
+&lt;h2 id=&#34;验证构建&#34;&gt;
+    &lt;a href=&#34;#%e9%aa%8c%e8%af%81%e6%9e%84%e5%bb%ba&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    验证构建
+&lt;/h2&gt;&lt;p&gt;新构建的 JDK 在 &lt;code&gt;./build/*/images/jdk&lt;/code&gt;目录下，运行命令查看JDK版本&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -451,8 +481,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;OpenJDK 64-Bit Server VM &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;build 22-internal-adhoc.mazhen.jdk, mixed mode, sharing&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;在vs-code中调试-openjdk&#34;&gt;在VS code中调试 OpenJDK&lt;/h2&gt;
-&lt;p&gt;首先在 VS code 中安装 &lt;a class=&#34;link&#34; href=&#34;https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h2 id=&#34;在vs-code中调试-openjdk&#34;&gt;
+    &lt;a href=&#34;#%e5%9c%a8vs-code%e4%b8%ad%e8%b0%83%e8%af%95-openjdk&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    在VS code中调试 OpenJDK
+&lt;/h2&gt;&lt;p&gt;首先在 VS code 中安装 &lt;a class=&#34;link&#34; href=&#34;https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;C++ extension for VS Code&lt;/a&gt;。在 VS cod 中配置C++ 开发环境可以参考这篇文档 &lt;a class=&#34;link&#34; href=&#34;https://code.visualstudio.com/docs/cpp/config-clang-mac&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Using Clang in Visual Studio Code&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;使用 VS code 打开 OpenJDK的源代码，在恰当的位置设置好断点，点击右上角三角运行图标，选择“&lt;strong&gt;Debug C/C++ file&lt;/strong&gt;”：&lt;/p&gt;
@@ -593,8 +625,10 @@
         <guid>https://mazhen.tech/p/java-ee%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/</guid>
         <description>&lt;p&gt;在计算机科学中，&lt;strong&gt;事务处理&lt;/strong&gt;（&lt;strong&gt;transaction processing&lt;/strong&gt; ）是将信息处理划分为独立的、不可分割的操作，称为&lt;strong&gt;事务&lt;/strong&gt;（&lt;strong&gt;Transaction&lt;/strong&gt;）。每个事务必须作为一个完整的执行单元，要么整个事务成功（提交），要么失败（中止，回滚），它永远不能只是部分完成。使用事务可以简化应用程序的错误处理，因为它不需要担心部分失败，系统（通常是数据库或某些现代文件系统）的完整性始终处于已知的、一致的状态。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;事务处理&lt;/strong&gt;是一项关键技术，可以应用于多个问题领域——企业架构、电子商务解决方案、金融系统和许多其他领域。事务的一个很好的例子就是，资金从一家银行的账户转移到另一家银行的账户。资金转移涉及在一个账户上扣款，并在另一个账户上增加相同的金额。使用事务可以确保不会出现由于其中一项操作失败，而导致资金丢失或产生的不一致状态。&lt;/p&gt;
-&lt;h2 id=&#34;事务处理简史&#34;&gt;事务处理简史&lt;/h2&gt;
-&lt;p&gt;现代事务处理技术是在20世纪60年代开始的大型机计算背景下发展起来的，在许多方面，我们今天使用的技术是对这些模型的改进和调整。第一个&lt;strong&gt;事务处理系统&lt;/strong&gt;（&lt;strong&gt;Transaction processing system&lt;/strong&gt;）是著名的 SABRE 航空预订系统，由IBM和美国航空公司在20世纪50年代末和60年代初开发。以今天的标准来看，SABRE 相当粗糙： ACID 事务语义完全是由应用程序实现的。IBM 很快就意识到这种技术可以应用于其他行业，由此产生了&lt;strong&gt;CICS&lt;/strong&gt;（Customer Information Control System）产品，它最初是完全用汇编语言编写，并没有使用现代意义上的数据库，而是依赖于扁平文件和其他低级数据结构，但 CICS 已经实现了基本的事务处理功能。&lt;/p&gt;
+&lt;h2 id=&#34;事务处理简史&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e5%a4%84%e7%90%86%e7%ae%80%e5%8f%b2&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务处理简史
+&lt;/h2&gt;&lt;p&gt;现代事务处理技术是在20世纪60年代开始的大型机计算背景下发展起来的，在许多方面，我们今天使用的技术是对这些模型的改进和调整。第一个&lt;strong&gt;事务处理系统&lt;/strong&gt;（&lt;strong&gt;Transaction processing system&lt;/strong&gt;）是著名的 SABRE 航空预订系统，由IBM和美国航空公司在20世纪50年代末和60年代初开发。以今天的标准来看，SABRE 相当粗糙： ACID 事务语义完全是由应用程序实现的。IBM 很快就意识到这种技术可以应用于其他行业，由此产生了&lt;strong&gt;CICS&lt;/strong&gt;（Customer Information Control System）产品，它最初是完全用汇编语言编写，并没有使用现代意义上的数据库，而是依赖于扁平文件和其他低级数据结构，但 CICS 已经实现了基本的事务处理功能。&lt;/p&gt;
 &lt;p&gt;1970年 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Edgar_F._Codd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Edgar F. Codd&lt;/a&gt; 发表了一篇名为&lt;a class=&#34;link&#34; href=&#34;https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《A Relational Model of Data for Large Shared Data Banks》&lt;/a&gt;的论文，首次提出了关系模型的概念，这一模型为后来的关系数据库管理系统（RDBMS）奠定了基础。随后关系数据库管理系统开始兴起，IBM 的 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/IBM_System_R&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -609,30 +643,44 @@
     &gt;CORBA Object Transaction Service (OTS) &lt;/a&gt; 是一个定义在 &lt;a class=&#34;link&#34; href=&#34;https://www.omg.org/spec/CORBA&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CORBA（Common Object Request Broker Architecture）&lt;/a&gt; 规范中的分布式事务服务。&lt;strong&gt;OTS&lt;/strong&gt; 将分布式事务处理模型（DTP）扩展到了对象领域，它提供了一种在分布式对象系统中进行事务处理的方法。&lt;strong&gt;OTS&lt;/strong&gt; 定义了一组标准的接口和协议，允许 CORBA 对象参与分布式事务。&lt;/p&gt;
 &lt;p&gt;Java EE 应用服务器是在 X/Open DTP 模型和 CORBA OTS 的基础上发展出来的事务处理监视器，&lt;strong&gt;TP Monitor&lt;/strong&gt; 开始融入 Java EE应用服务器，提供更丰富的中间件服务和组件化的应用程序模型。&lt;strong&gt;TP Monitor&lt;/strong&gt; 本质上是一个具有事务感知功能的&lt;strong&gt;应用服务器&lt;/strong&gt;，事实上，&lt;strong&gt;Java EE 应用服务器&lt;/strong&gt;中的许多功能都源于TP Monitor。同样地，许多现代的 TP Monitor 是带有事务服务核心的 Java EE 应用服务器。&lt;/p&gt;
-&lt;h2 id=&#34;事务概念基础&#34;&gt;事务概念基础&lt;/h2&gt;
-&lt;p&gt;本章我们简要地回顾一些事务处理的基本概念，它们塑造了中间件对事务的支持。&lt;/p&gt;
-&lt;h3 id=&#34;acid-属性&#34;&gt;ACID 属性&lt;/h3&gt;
-&lt;p&gt;事务提供的安全保障通常用缩写&lt;strong&gt;ACID&lt;/strong&gt;来描述，它代表原子性（&lt;strong&gt;atomicity&lt;/strong&gt;）、一致性（&lt;strong&gt;consistency&lt;/strong&gt;）、隔离性（&lt;strong&gt;Isolation&lt;/strong&gt;）和持久性（&lt;strong&gt;Durability&lt;/strong&gt;）。事务是一个&lt;strong&gt;原子&lt;/strong&gt;（&lt;strong&gt;Atomicity&lt;/strong&gt;）工作单元，它将系统从一个&lt;strong&gt;一致&lt;/strong&gt;（&lt;strong&gt;Consistency&lt;/strong&gt;）的状态转换为另一个一致状态，执行时不受其他同时执行的事务的干扰（&lt;strong&gt;isolation&lt;/strong&gt;），并且一旦提交，就不能因系统故障而撤消(&lt;strong&gt;Durability&lt;/strong&gt;)。ACID 是1983年由 Theo Härder 和Andreas Reuter 在论文&lt;a class=&#34;link&#34; href=&#34;https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.2812&amp;amp;rep=rep1&amp;amp;type=pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;事务概念基础&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e6%a6%82%e5%bf%b5%e5%9f%ba%e7%a1%80&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务概念基础
+&lt;/h2&gt;&lt;p&gt;本章我们简要地回顾一些事务处理的基本概念，它们塑造了中间件对事务的支持。&lt;/p&gt;
+&lt;h3 id=&#34;acid-属性&#34;&gt;
+    &lt;a href=&#34;#acid-%e5%b1%9e%e6%80%a7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    ACID 属性
+&lt;/h3&gt;&lt;p&gt;事务提供的安全保障通常用缩写&lt;strong&gt;ACID&lt;/strong&gt;来描述，它代表原子性（&lt;strong&gt;atomicity&lt;/strong&gt;）、一致性（&lt;strong&gt;consistency&lt;/strong&gt;）、隔离性（&lt;strong&gt;Isolation&lt;/strong&gt;）和持久性（&lt;strong&gt;Durability&lt;/strong&gt;）。事务是一个&lt;strong&gt;原子&lt;/strong&gt;（&lt;strong&gt;Atomicity&lt;/strong&gt;）工作单元，它将系统从一个&lt;strong&gt;一致&lt;/strong&gt;（&lt;strong&gt;Consistency&lt;/strong&gt;）的状态转换为另一个一致状态，执行时不受其他同时执行的事务的干扰（&lt;strong&gt;isolation&lt;/strong&gt;），并且一旦提交，就不能因系统故障而撤消(&lt;strong&gt;Durability&lt;/strong&gt;)。ACID 是1983年由 Theo Härder 和Andreas Reuter 在论文&lt;a class=&#34;link&#34; href=&#34;https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.2812&amp;amp;rep=rep1&amp;amp;type=pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;《 Principles of Transaction-Oriented Database Recovery》&lt;/a&gt;中首次提出。&lt;/p&gt;
 &lt;p&gt;下面我们更详细地研究一下ACID属性，这将让我们更深入的理解事务。&lt;/p&gt;
-&lt;h4 id=&#34;atomicity&#34;&gt;Atomicity&lt;/h4&gt;
-&lt;p&gt;Atomicity 这个术语在不同的领域有着类似但又不相同的含义。例如在多线程编程领域，如果一个线程执行了一个&lt;strong&gt;原子&lt;/strong&gt;操作，这意味着另一个线程不可能看到这个操作的半成品。系统只能处于操作前或操作后的状态，而不能介于两者之间。&lt;/p&gt;
+&lt;h4 id=&#34;atomicity&#34;&gt;
+    &lt;a href=&#34;#atomicity&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Atomicity
+&lt;/h4&gt;&lt;p&gt;Atomicity 这个术语在不同的领域有着类似但又不相同的含义。例如在多线程编程领域，如果一个线程执行了一个&lt;strong&gt;原子&lt;/strong&gt;操作，这意味着另一个线程不可能看到这个操作的半成品。系统只能处于操作前或操作后的状态，而不能介于两者之间。&lt;/p&gt;
 &lt;p&gt;在 ACID 的背景下，Atomicity 不是关于并发性的，它并没有描述当多个进程试图同时访问相同的数据时会发生什么，因为关于并发访问的场景是在隔离性（Isolation）中描述的。&lt;/p&gt;
 &lt;p&gt;ACID 原子性描述的是，如果一个客户想要进行多次写入，但在处理部分写操作后出现故障的情况。这些故障可能是进程崩溃、网络连接中断、磁盘已满等。如果将这些写操作组合到一个事务中，由于故障无法完成事务提交，那么该事务将被中止，并且数据库必须撤消之前的任何写操作。&lt;/p&gt;
 &lt;p&gt;在没有 Atomicity 保证的情况下，如果在进行多次修改的过程中发生错误，就很难知道哪些修改已经生效，哪些没有生效。Atomicity 简化了这个问题：如果事务被中止，应用程序可以确定它没有改变任何东西。&lt;/p&gt;
 &lt;p&gt;所以 Atomicity 的本质是，&lt;strong&gt;在出错时中止事务，并丢弃该事务对数据的所有修改&lt;/strong&gt;。&lt;/p&gt;
-&lt;h4 id=&#34;consistency&#34;&gt;Consistency&lt;/h4&gt;
-&lt;p&gt;事务应该确保系统从一个一致性状态转换到另一个一致性状态。在事务开始和结束时，系统的完整性约束必须得到满足。&lt;/p&gt;
+&lt;h4 id=&#34;consistency&#34;&gt;
+    &lt;a href=&#34;#consistency&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Consistency
+&lt;/h4&gt;&lt;p&gt;事务应该确保系统从一个一致性状态转换到另一个一致性状态。在事务开始和结束时，系统的完整性约束必须得到满足。&lt;/p&gt;
 &lt;p&gt;我们所说的一致性，有些是通过数据库的完整性约束来保证的，例如使用主键作为员工编号，那么由数据库来保证所有主键都是唯一的。&lt;/p&gt;
 &lt;p&gt;但在很多情况下，一致性都是有具体业务含义的，应用程序定义了什么状态是有效或无效的，例如每个部门的支出必须小于或等于该部门的预算，这种一致性只能由应用程序来保证。&lt;/p&gt;
 &lt;p&gt;原子性、隔离性和持久性是数据库的属性，而一致性是应用程序的属性。维护事务的一致性是应用程序和数据库的共同责任，应用程序是依靠数据库的原子性和隔离性来实现一致性。&lt;/p&gt;
-&lt;h4 id=&#34;isolation&#34;&gt;Isolation&lt;/h4&gt;
-&lt;p&gt;如果多个用户同时读写数据库相同的记录，就会遇到并发问题。Isolation 意味着同时执行的事务是相互隔离的，事务的执行不会受到其他并发事务的影响，每个事务都可以假装它是整个数据库中唯一运行的事务。&lt;/p&gt;
-&lt;h4 id=&#34;durability&#34;&gt;Durability&lt;/h4&gt;
-&lt;p&gt;持久性是指一旦事务成功提交，它所写入的任何数据都不会丢失，即使出现硬件故障或数据库崩溃。改变系统持久状态的唯一方法是提交一个事务。&lt;/p&gt;
+&lt;h4 id=&#34;isolation&#34;&gt;
+    &lt;a href=&#34;#isolation&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Isolation
+&lt;/h4&gt;&lt;p&gt;如果多个用户同时读写数据库相同的记录，就会遇到并发问题。Isolation 意味着同时执行的事务是相互隔离的，事务的执行不会受到其他并发事务的影响，每个事务都可以假装它是整个数据库中唯一运行的事务。&lt;/p&gt;
+&lt;h4 id=&#34;durability&#34;&gt;
+    &lt;a href=&#34;#durability&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Durability
+&lt;/h4&gt;&lt;p&gt;持久性是指一旦事务成功提交，它所写入的任何数据都不会丢失，即使出现硬件故障或数据库崩溃。改变系统持久状态的唯一方法是提交一个事务。&lt;/p&gt;
 &lt;p&gt;对于单节点数据库，持久性通常意味着数据已写入硬盘或 SSD 等非易失性存储中。数据库一般都会使用&lt;strong&gt;WAL&lt;/strong&gt;（write-ahead log）技术，在向持久化存储写入未提交的变更之前，先向日志中写入相应的事务日志记录，并确保事务日志记录在事务提交之前被持久化。当遇到故障重启系统时，数据库可以通过重新执行所有已提交事务的日志记录，撤消所有中止事务的日志记录，让数据库恢复到一致性状态。&lt;/p&gt;
-&lt;h3 id=&#34;隔离级别&#34;&gt;隔离级别&lt;/h3&gt;
-&lt;p&gt;隔离性（Isolation）是事务 ACID 四个属性之一，它确保多个并发事务在操作数据库时，彼此之间不会互相干扰，从而保证数据的一致性。&lt;/p&gt;
+&lt;h3 id=&#34;隔离级别&#34;&gt;
+    &lt;a href=&#34;#%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    隔离级别
+&lt;/h3&gt;&lt;p&gt;隔离性（Isolation）是事务 ACID 四个属性之一，它确保多个并发事务在操作数据库时，彼此之间不会互相干扰，从而保证数据的一致性。&lt;/p&gt;
 &lt;p&gt;当一个事务读取被另一个事务同时修改的数据，或者两个事务试图同时修改相同的数据时，会出现并发性问题。数据库通过提供&lt;strong&gt;事务隔离&lt;/strong&gt;向应用开发人员隐藏了并发性问题的复杂性。&lt;/p&gt;
 &lt;p&gt;隔离级别（Isolation Level）定义了不同的隔离性强度，以在性能和数据一致性之间取得平衡。可串行化（serializable）的隔离意味着数据库保证事务具有与串行运行相同的效果，即事务一个接着一个的运行，没有任何并发。然而在实践中，可串行化（serializable）的隔离有一定的性能成本，因此使用较弱的隔离级别是很常见的。根据SQL标准，隔离级别分为四个等级，从低到高分别为：&lt;/p&gt;
 &lt;ul&gt;
@@ -655,10 +703,14 @@
 &lt;li&gt;&lt;strong&gt;快照隔离&lt;/strong&gt;通过为每个事务提供一个数据快照来实现，在一个事务执行过程中，它只能看到和操作事务开始时的数据快照，而不会受到其他并发事务的影响。快照隔离的实现通常依赖于多版本并发控制（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/w/index.php?title=Multiversion_concurrency_control&amp;amp;useskin=vector&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;MVCC，Multi-Version Concurrency Control&lt;/a&gt;）技术。快照隔离能够解决脏读、不可重复读和幻读问题，但它会导致写偏斜（Write Skew），即两个或多个事务同时读取相同的数据，然后基于读取到的数据做出独立的修改，最终导致数据不一致的状态。因此，快照隔离比可串行化的保证要弱。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;分布式事务&#34;&gt;分布式事务&lt;/h3&gt;
-&lt;p&gt;随着计算机网络的发展，分布式计算变得越来越普遍。这导致了分布式事务处理的需求，即在多个独立的数据库或资源管理器上执行的事务。分布式事务处理具有更高的复杂性，需要协调和管理跨越不同系统的事务。这样的事务处理通常需要遵循分布式事务处理的规范和算法，如两阶段提交协议。&lt;/p&gt;
-&lt;h3 id=&#34;两阶段提交&#34;&gt;两阶段提交&lt;/h3&gt;
-&lt;p&gt;为了使分布式事务的操作表现得像一个原子单元，参与的分布式资源必须根据事务的结果全部提交或全部放弃。两阶段提交（2PC，Two-Phase Commit）协议是一种用于分布式事务处理的原子性协议，它通过在所有事务参与者之间进行协调和同步，以确保分布式事务的原子性得以维护。&lt;/p&gt;
+&lt;h3 id=&#34;分布式事务&#34;&gt;
+    &lt;a href=&#34;#%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    分布式事务
+&lt;/h3&gt;&lt;p&gt;随着计算机网络的发展，分布式计算变得越来越普遍。这导致了分布式事务处理的需求，即在多个独立的数据库或资源管理器上执行的事务。分布式事务处理具有更高的复杂性，需要协调和管理跨越不同系统的事务。这样的事务处理通常需要遵循分布式事务处理的规范和算法，如两阶段提交协议。&lt;/p&gt;
+&lt;h3 id=&#34;两阶段提交&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%a4%e9%98%b6%e6%ae%b5%e6%8f%90%e4%ba%a4&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    两阶段提交
+&lt;/h3&gt;&lt;p&gt;为了使分布式事务的操作表现得像一个原子单元，参与的分布式资源必须根据事务的结果全部提交或全部放弃。两阶段提交（2PC，Two-Phase Commit）协议是一种用于分布式事务处理的原子性协议，它通过在所有事务参与者之间进行协调和同步，以确保分布式事务的原子性得以维护。&lt;/p&gt;
 &lt;p&gt;两阶段提交协议引入了一个新的组件：协调器 &lt;em&gt;coordinator&lt;/em&gt;，也被称为&lt;em&gt;transaction manager&lt;/em&gt;。coordinator 通常和应用进程在同一个进程中，例如 Java EE应用服务器中 &lt;em&gt;transaction manager&lt;/em&gt;，但它也可以是一个单独的程序或服务。&lt;/p&gt;
 &lt;p&gt;两阶段提交协议包括两个阶段：提交请求阶段（Prepare Phase）和提交阶段（Commit Phase）。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304171538027.png&#34;
@@ -691,8 +743,10 @@
 &lt;/ol&gt;
 &lt;p&gt;两阶段提交协议的目标是确保分布式事务中的所有参与者要么都提交事务，要么都中止事务，从而满足原子性要求。&lt;/p&gt;
 &lt;p&gt;两阶段提交协议也有一些局限性，例如性能开销、同步延迟和单点故障风险。&lt;/p&gt;
-&lt;h4 id=&#34;coordinator-故障&#34;&gt;coordinator 故障&lt;/h4&gt;
-&lt;p&gt;如果任何一个Prepare请求失败或超时，coordinator 将中止交易；如果任何一个 commit 或 abort 请求失败，coordinator 将无限期地重试它们。如果 coordinator 失败了会怎么样呢？&lt;/p&gt;
+&lt;h4 id=&#34;coordinator-故障&#34;&gt;
+    &lt;a href=&#34;#coordinator-%e6%95%85%e9%9a%9c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    coordinator 故障
+&lt;/h4&gt;&lt;p&gt;如果任何一个Prepare请求失败或超时，coordinator 将中止交易；如果任何一个 commit 或 abort 请求失败，coordinator 将无限期地重试它们。如果 coordinator 失败了会怎么样呢？&lt;/p&gt;
 &lt;p&gt;如果 coordinator 在发送 Prepare 请求之前就失败了，参与者可以安全地中止事务。但是，一旦参与者收到Prepare 请求并投了 &amp;ldquo;yes&amp;rdquo;，参与者不能再单方面中止，必须等待 coordinator 的回复，以确定事务是被 commit 还是被 abort。如果 coordinator 在这时崩溃或发生网络故障，事务处于 &lt;em&gt;in doubt&lt;/em&gt; 状态，参与者除了等待之外什么也做不了。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304171703938.png&#34;
 	
@@ -704,20 +758,26 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h4 id=&#34;单点故障风险&#34;&gt;单点故障风险&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;两阶段提交协议&lt;/code&gt;的问题是，一旦事务参与者完成投票，它必须等待 coordinator 给出指示，提交或放弃。如果这时coordinator 挂了，事务参与者除了等待什么也做不了，事务处于未决状态。coordinator 成为了整个系统的&lt;strong&gt;单点故障&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;单点故障风险&#34;&gt;
+    &lt;a href=&#34;#%e5%8d%95%e7%82%b9%e6%95%85%e9%9a%9c%e9%a3%8e%e9%99%a9&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    单点故障风险
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;两阶段提交协议&lt;/code&gt;的问题是，一旦事务参与者完成投票，它必须等待 coordinator 给出指示，提交或放弃。如果这时coordinator 挂了，事务参与者除了等待什么也做不了，事务处于未决状态。coordinator 成为了整个系统的&lt;strong&gt;单点故障&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;coordinator 在向参与者发送提交或中止请求之前，必须将事务的最终结果写入到磁盘上的事务日志中。当coordinator 从故障中恢复时，它通过事务日志来确定所有未决状态事务的处理。所以从本质上看，&lt;code&gt;两阶段提交协议&lt;/code&gt;为了达到一致性，实际上是退化到由 coordinator 单节点来实现 atomic commit。&lt;/p&gt;
 &lt;p&gt;因为&lt;code&gt;两阶段提交协议&lt;/code&gt;会在等待 coordinator 恢复的过程中处于阻塞状态，所以它被称为&lt;code&gt;阻塞原子提交&lt;/code&gt;（&lt;em&gt;blocking&lt;/em&gt; atomic commit）协议。&lt;/p&gt;
-&lt;h4 id=&#34;coordinator-的故障恢复&#34;&gt;coordinator 的故障恢复&lt;/h4&gt;
-&lt;p&gt;如果 coordinator 发生故障，如何进行故障恢复呢？有三种解决方法：&lt;/p&gt;
+&lt;h4 id=&#34;coordinator-的故障恢复&#34;&gt;
+    &lt;a href=&#34;#coordinator-%e7%9a%84%e6%95%85%e9%9a%9c%e6%81%a2%e5%a4%8d&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    coordinator 的故障恢复
+&lt;/h4&gt;&lt;p&gt;如果 coordinator 发生故障，如何进行故障恢复呢？有三种解决方法：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;等待 coordinator 恢复，并接受在此期间系统将被阻塞的事实。&lt;/li&gt;
 &lt;li&gt;由人工选择一个新的 coordinator 节点，进行手动故障切换。&lt;/li&gt;
 &lt;li&gt;使用一个算法来自动选择一个新的 coordinator。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;后两种解决方法的前提是，事务日志必须安全可靠的存储，不能因为 coordinator 的任何故障而被损坏。&lt;/p&gt;
-&lt;h4 id=&#34;启发式决策&#34;&gt;启发式决策&lt;/h4&gt;
-&lt;p&gt;为了保证原子性，&lt;code&gt;两阶段提交协议&lt;/code&gt;必须是阻塞的。这意味着，即使存在故障恢复机制，参与者也可能长时间内被阻塞，但一些应用可能无法容忍这种长时间的阻塞。更糟的情况是，如果事务日志丢失或损坏， 即使 coordinator 恢复了也不能决定事务的最终结果。 未决的事务不会自动解决，它们会驻留在数据库中，持有锁并阻塞其他事务。这时即使重启数据库也不能解决问题，因为数据库必须在重新启动时保留对未决事务的锁定，否则将可能违反两阶段提交的原子性保证。&lt;/p&gt;
+&lt;h4 id=&#34;启发式决策&#34;&gt;
+    &lt;a href=&#34;#%e5%90%af%e5%8f%91%e5%bc%8f%e5%86%b3%e7%ad%96&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    启发式决策
+&lt;/h4&gt;&lt;p&gt;为了保证原子性，&lt;code&gt;两阶段提交协议&lt;/code&gt;必须是阻塞的。这意味着，即使存在故障恢复机制，参与者也可能长时间内被阻塞，但一些应用可能无法容忍这种长时间的阻塞。更糟的情况是，如果事务日志丢失或损坏， 即使 coordinator 恢复了也不能决定事务的最终结果。 未决的事务不会自动解决，它们会驻留在数据库中，持有锁并阻塞其他事务。这时即使重启数据库也不能解决问题，因为数据库必须在重新启动时保留对未决事务的锁定，否则将可能违反两阶段提交的原子性保证。&lt;/p&gt;
 &lt;p&gt;为了打破两阶段提交的阻塞性，事务参与者在没有 coordinator 的明确指示下，独立决定中止或提交一个未决事务，这就是&lt;strong&gt;启发式决策&lt;/strong&gt;（heuristic decision）。&lt;/p&gt;
 &lt;p&gt;启发式决策可能导致数据不一致，因为事务参与者在没有 coordinator 指示的情况下独立决定事务的命运。这可能导致某些参与者提交事务，而另一些参与者中止事务。事实上，启发式决策违反了两阶段提交协议的承诺，因此，做出启发式决策只是用于摆脱灾难性的情况，而不是常规使用。&lt;/p&gt;
 &lt;p&gt;JTA 定义了几种与启发式决策有关异常。&lt;/p&gt;
@@ -726,10 +786,14 @@
 &lt;li&gt;&lt;strong&gt;javax.transaction.HeuristicRollbackException&lt;/strong&gt; coordinator 要求事务参与者提交，但事务参与者此前已经做出了回滚的启发式决策。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;javax.transaction.HeuristicMixedException&lt;/strong&gt; 是最糟糕的启发式异常。抛出它表示事务的一部分已提交，而其他部分被回滚。当一些事务参与者进行启发式提交，而其他事务参与者进行启发式回滚时，coordinator会抛出此异常。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;事务模式&#34;&gt;事务模式&lt;/h3&gt;
-&lt;p&gt;事务模型（Transaction Models）是指在事务处理系统中使用的一组原则和方法，用于定义事务的结构、范围、行为和执行方式。不同的事务模型反映了不同的设计和实现方法，以满足特定的应用需求。以下是三种常见的事务模型。&lt;/p&gt;
-&lt;h4 id=&#34;扁平事务模型&#34;&gt;扁平事务模型&lt;/h4&gt;
-&lt;p&gt;扁平事务模型（&lt;strong&gt;Flat Transaction Model&lt;/strong&gt;）是最简单和最常见的事务模型，其中每个事务都是独立的，并且没有任何嵌套或链接关系。扁平事务模型规定在任何给定时间只有一个事务在其他事务中处于活动状态。&lt;/p&gt;
+&lt;h3 id=&#34;事务模式&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%bc%8f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务模式
+&lt;/h3&gt;&lt;p&gt;事务模型（Transaction Models）是指在事务处理系统中使用的一组原则和方法，用于定义事务的结构、范围、行为和执行方式。不同的事务模型反映了不同的设计和实现方法，以满足特定的应用需求。以下是三种常见的事务模型。&lt;/p&gt;
+&lt;h4 id=&#34;扁平事务模型&#34;&gt;
+    &lt;a href=&#34;#%e6%89%81%e5%b9%b3%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    扁平事务模型
+&lt;/h4&gt;&lt;p&gt;扁平事务模型（&lt;strong&gt;Flat Transaction Model&lt;/strong&gt;）是最简单和最常见的事务模型，其中每个事务都是独立的，并且没有任何嵌套或链接关系。扁平事务模型规定在任何给定时间只有一个事务在其他事务中处于活动状态。&lt;/p&gt;
 &lt;p&gt;我们是否可以在一个事务中同时开始另一个事务？有两种方法可以做到这一点：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -740,18 +804,26 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;扁平事务模型广泛应用于各种数据库系统和应用程序。应用服务器必须支持扁平事务模型。&lt;/p&gt;
-&lt;h4 id=&#34;链式事务模型&#34;&gt;链式事务模型&lt;/h4&gt;
-&lt;p&gt;在链式事务模型（&lt;strong&gt;Chained Transaction Model&lt;/strong&gt;）中，多个事务可以相互链接，使得一个事务的结束与下一个事务的开始紧密相连。当一个事务提交或回滚时，立即启动另一个事务，而不需要显式地发出BEGIN TRANSACTION命令。链式事务模型有助于提高事务处理的效率，尤其是在需要频繁执行事务的应用场景中。&lt;/p&gt;
-&lt;h4 id=&#34;嵌套事务模型&#34;&gt;嵌套事务模型&lt;/h4&gt;
-&lt;p&gt;在嵌套事务模型（&lt;strong&gt;Nested Transaction Model&lt;/strong&gt;）中，事务可以嵌套在其他事务之内，形成一个层次结构。这意味着一个事务可以包含一个或多个子事务，子事务又可以包含它们自己的子事务。一个嵌套的子事务可以单独提交或中止。因此，复杂的事务可以被分解成更容易管理的子事务。子交易可以提交或回滚，而不需要整个交易提交或回滚。&lt;/p&gt;
+&lt;h4 id=&#34;链式事务模型&#34;&gt;
+    &lt;a href=&#34;#%e9%93%be%e5%bc%8f%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    链式事务模型
+&lt;/h4&gt;&lt;p&gt;在链式事务模型（&lt;strong&gt;Chained Transaction Model&lt;/strong&gt;）中，多个事务可以相互链接，使得一个事务的结束与下一个事务的开始紧密相连。当一个事务提交或回滚时，立即启动另一个事务，而不需要显式地发出BEGIN TRANSACTION命令。链式事务模型有助于提高事务处理的效率，尤其是在需要频繁执行事务的应用场景中。&lt;/p&gt;
+&lt;h4 id=&#34;嵌套事务模型&#34;&gt;
+    &lt;a href=&#34;#%e5%b5%8c%e5%a5%97%e4%ba%8b%e5%8a%a1%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    嵌套事务模型
+&lt;/h4&gt;&lt;p&gt;在嵌套事务模型（&lt;strong&gt;Nested Transaction Model&lt;/strong&gt;）中，事务可以嵌套在其他事务之内，形成一个层次结构。这意味着一个事务可以包含一个或多个子事务，子事务又可以包含它们自己的子事务。一个嵌套的子事务可以单独提交或中止。因此，复杂的事务可以被分解成更容易管理的子事务。子交易可以提交或回滚，而不需要整个交易提交或回滚。&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;JTA（Java Transaction API ）&lt;/a&gt;规范不要求支持嵌套事务模型。大多数 JTA 实现只支持扁平事务模型。&lt;/p&gt;
-&lt;h2 id=&#34;分布式事务处理模型&#34;&gt;分布式事务处理模型&lt;/h2&gt;
-&lt;p&gt;分布式事务是一个涉及到由多个分布式应用程序执行的操作，以及可能涉及多个分布式数据库的事务。在分布式环境中保证事务遵守 ACID 原则是很困难的，需要协调和管理跨越不同系统的事务。对于复杂、异构的分布式系统来说，应用程序必须遵守同一个标准来协调事务工作，以进行分布式事务处理（&lt;strong&gt;DTP&lt;/strong&gt;，&lt;em&gt;distributed transaction processing&lt;/em&gt; ）。其中一个 DTP 标准是由 &lt;a class=&#34;link&#34; href=&#34;https://www.opengroup.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;分布式事务处理模型&#34;&gt;
+    &lt;a href=&#34;#%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1%e5%a4%84%e7%90%86%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    分布式事务处理模型
+&lt;/h2&gt;&lt;p&gt;分布式事务是一个涉及到由多个分布式应用程序执行的操作，以及可能涉及多个分布式数据库的事务。在分布式环境中保证事务遵守 ACID 原则是很困难的，需要协调和管理跨越不同系统的事务。对于复杂、异构的分布式系统来说，应用程序必须遵守同一个标准来协调事务工作，以进行分布式事务处理（&lt;strong&gt;DTP&lt;/strong&gt;，&lt;em&gt;distributed transaction processing&lt;/em&gt; ）。其中一个 DTP 标准是由 &lt;a class=&#34;link&#34; href=&#34;https://www.opengroup.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Open Group&lt;/a&gt; 开发的 &lt;a class=&#34;link&#34; href=&#34;https://pubs.opengroup.org/onlinepubs/9294999599/toc.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;X/Open DTP&lt;/a&gt;。Java EE 中的全局事务处理使用的就是 &lt;strong&gt;X/Open DTP&lt;/strong&gt; 模型。&lt;strong&gt;在企业 Java 应用的世界中，X/Open DTP 是事务处理的基石。&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;xopen-dtp&#34;&gt;X/Open DTP&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/X/Open&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;xopen-dtp&#34;&gt;
+    &lt;a href=&#34;#xopen-dtp&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    X/Open DTP
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/X/Open&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;X/Open&lt;/a&gt; 是一家成立于1984年的非营利性质的技术联盟，其目标是制定开放系统标准，以便于实现操作系统、数据库、网络和分布式计算等领域的互操作性。1996 年，X/Open 与 &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Open_Software_Foundation&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Open Software Foundation&lt;/a&gt;合并，组成 &lt;a class=&#34;link&#34; href=&#34;https://www.opengroup.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;The Open Group&lt;/a&gt;。&lt;/p&gt;
@@ -775,8 +847,10 @@
     &gt;TxRPC&lt;/a&gt;、&lt;a class=&#34;link&#34; href=&#34;https://pubs.opengroup.org/onlinepubs/009649399/toc.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XATMI&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://pubs.opengroup.org/onlinepubs/009658099/toc.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;CPI-C&lt;/a&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;xopen-xa&#34;&gt;X/Open XA&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;xopen-xa&#34;&gt;
+    &lt;a href=&#34;#xopen-xa&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    X/Open XA
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;X/Open XA规范&lt;/a&gt;定义了&lt;strong&gt;事务管理器&lt;/strong&gt;（Transaction Manager）与&lt;strong&gt;资源管理器&lt;/strong&gt;（Resource Manager）之间的协作机制，以便在分布式环境中实现两阶段提交2PC协议。X/Open XA规范主要包括以下几个组成部分：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -790,8 +864,10 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;遵循X/Open XA规范的事务管理器和资源管理器可以跨平台、跨系统地协同工作，实现分布式事务处理的互操作性。&lt;/p&gt;
-&lt;h2 id=&#34;java-transaction-api-jta&#34;&gt;Java Transaction API (JTA)&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;java-transaction-api-jta&#34;&gt;
+    &lt;a href=&#34;#java-transaction-api-jta&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java Transaction API (JTA)
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://jcp.org/en/jsr/detail?id=907&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Java Transaction API (JTA)&lt;/a&gt; 是Java平台上的一个事务处理规范，它为 Java 应用程序提供了一组统一的事务处理接口。JTA 是 Java EE 规范的一部分，旨在简化分布式事务处理。JTA 遵循 X/Open DTP模型，将事务管理器和资源管理器的接口抽象为 Java 接口。&lt;/p&gt;
 &lt;p&gt;JTA 规定了事务管理器和分布式事务系统中涉及的各方之间的 Java 接口：应用程序、资源管理器和应用服务器。&lt;/p&gt;
 &lt;p&gt;JTA包由两部分组成：&lt;/p&gt;
@@ -813,8 +889,10 @@
 &lt;p&gt;JTA 组件被定义在 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/package-summary.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;javax.transaction&lt;/a&gt;和 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/package-summary.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;javax.transaction.xa&lt;/a&gt; 两个包内。其中 &lt;strong&gt;javax.transaction.xa&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;jta-事务管理接口&#34;&gt;JTA 事务管理接口&lt;/h3&gt;
-&lt;p&gt;JTA 支持事务管理服务的标准接口，应用服务器主要通过 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/TransactionManager.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;jta-事务管理接口&#34;&gt;
+    &lt;a href=&#34;#jta-%e4%ba%8b%e5%8a%a1%e7%ae%a1%e7%90%86%e6%8e%a5%e5%8f%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTA 事务管理接口
+&lt;/h3&gt;&lt;p&gt;JTA 支持事务管理服务的标准接口，应用服务器主要通过 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/TransactionManager.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;TransactionManager&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/Transaction.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Transaction&lt;/a&gt; 接口来访问这些服务。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304200945512.png&#34;
@@ -832,8 +910,10 @@
 &lt;p&gt;&lt;strong&gt;Transaction&lt;/strong&gt;接口表示具体的事务实例。&lt;strong&gt;Transaction&lt;/strong&gt;由&lt;strong&gt;TransactionManager&lt;/strong&gt;创建，提供了一些与事务相关的方法，如commit()，rollback()和getStatus()等。可以使用 setRollbackOnly() 调用告诉&lt;strong&gt;Transaction&lt;/strong&gt;对象仅允许回滚。&lt;strong&gt;enlistResource&lt;/strong&gt; 方法用于将 &lt;strong&gt;XAResource&lt;/strong&gt; 对象添加到事务上下文中，&lt;strong&gt;delistResource&lt;/strong&gt;方法用于将 &lt;strong&gt;XAResource&lt;/strong&gt;对象从事务上下文中移除。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Synchronization&lt;/strong&gt;接口用于在事务完成时接收回调通知。调用 &lt;strong&gt;Transaction.registerSynchronization()&lt;/strong&gt; 可以将&lt;strong&gt;Synchronization&lt;/strong&gt;注册到与当前线程关联的事务中。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt; 接口定义了一组静态常量，表示事务的状态。&lt;/p&gt;
-&lt;h3 id=&#34;jta-应用接口&#34;&gt;JTA 应用接口&lt;/h3&gt;
-&lt;p&gt;JTA 的应用接口是 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/UserTransaction.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;jta-应用接口&#34;&gt;
+    &lt;a href=&#34;#jta-%e5%ba%94%e7%94%a8%e6%8e%a5%e5%8f%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTA 应用接口
+&lt;/h3&gt;&lt;p&gt;JTA 的应用接口是 &lt;a class=&#34;link&#34; href=&#34;https://javaee.github.io/javaee-spec/javadocs/javax/transaction/UserTransaction.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;UserTransaction&lt;/a&gt; ，被应用程序用来控制事务边界。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201015744.png&#34;
 	
@@ -849,8 +929,10 @@
 &lt;p&gt;&lt;strong&gt;UserTransaction.commit()&lt;/strong&gt; 提交与当前线程关联的事务。&lt;strong&gt;UserTransaction.rollback()&lt;/strong&gt; 回滚与当前线程关联的事务。通过调用&lt;strong&gt;UserTransaction.setRollbackOnly()&lt;/strong&gt;，设置与当前线程相关的事务只能被回滚。&lt;/p&gt;
 &lt;p&gt;通过调用&lt;strong&gt;UserTransaction.setTransactionTimeout()&lt;strong&gt;可以设置与事务相关的超时，超时的单位是秒。事务状态&lt;/strong&gt;Status&lt;/strong&gt;可以通过 &lt;strong&gt;UserTransaction.getStatus()&lt;/strong&gt; 获得。&lt;/p&gt;
 &lt;p&gt;EJB 可以依赖声明式和容器管理事务。但是如果希望 EJB 以编程方式管理自己的事务，就可以利用&lt;strong&gt;UserTransaction&lt;/strong&gt;接口。Servlets 和 JSP 也可以利用 &lt;strong&gt;UserTransaction&lt;/strong&gt; 接口来划分事务。&lt;strong&gt;UserTransaction&lt;/strong&gt; 可以从JNDI查询中获得，或者直接从 EJB 容器环境中获得。&lt;/p&gt;
-&lt;h3 id=&#34;jta-和-xopen-xa&#34;&gt;JTA 和 X/Open XA&lt;/h3&gt;
-&lt;p&gt;X/Open 制定的 &lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;jta-和-xopen-xa&#34;&gt;
+    &lt;a href=&#34;#jta-%e5%92%8c-xopen-xa&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTA 和 X/Open XA
+&lt;/h3&gt;&lt;p&gt;X/Open 制定的 &lt;a class=&#34;link&#34; href=&#34;https://publications.opengroup.org/standards/dist-computing/c193&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XA 规范&lt;/a&gt; 定义了分布式资源管理器的接口，被 X/Open DTP 模型中的分布式事务管理器访问。JTA 使用 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/XAResource.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XAResource&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/Xid.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Xid&lt;/a&gt; 接口封装 XA。&lt;strong&gt;TransactionManager&lt;/strong&gt; 使用 &lt;strong&gt;XAResource&lt;/strong&gt; 接口来管理资源间的分布式事务。&lt;/p&gt;
@@ -869,11 +951,15 @@
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://docs.oracle.com/en/java/javase/17/docs/api/java.transaction.xa/javax/transaction/xa/XAResource.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;XAResource&lt;/a&gt; 接口是事务管理器和资源管理器之间标准 X/Open 接口的 Java 映射。资源管理器的资源适配器必须实现 &lt;strong&gt;XAResource&lt;/strong&gt; 接口，使资源能够参与进分布式事务。一个资源管理器的例子是关系数据库，对应的资源适配器就是 JDBC 接口。&lt;/p&gt;
 &lt;p&gt;**XAResource.start()**方法用于将分布式事务与资源关联。**XAResource.end()**将资源与事务分离。&lt;strong&gt;XAResource&lt;/strong&gt;还提供了提交、准备提交、回滚、恢复和遗忘分布式事务的方法。事务超时也可以从XAResource中设置和获取。&lt;/p&gt;
-&lt;h2 id=&#34;java-transaction-service-jts&#34;&gt;Java Transaction Service (JTS)&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;CORBA Object Transaction Service (OTS)&lt;/strong&gt; 将分布式事务处理模型（DTP）扩展到了对象领域，它提供了一种在分布式对象系统中进行事务处理的方法。&lt;strong&gt;OTS&lt;/strong&gt; 定义了一组标准的接口和协议，允许 CORBA 对象参与分布式事务。&lt;strong&gt;Java Transaction Service (JTS)&lt;/strong&gt; 是 &lt;strong&gt;OTS&lt;/strong&gt; 的 Java 映射， &lt;strong&gt;JTA&lt;/strong&gt; 推荐使用 &lt;strong&gt;JTS&lt;/strong&gt; 作为其底层事务系统的实现。&lt;/p&gt;
+&lt;h2 id=&#34;java-transaction-service-jts&#34;&gt;
+    &lt;a href=&#34;#java-transaction-service-jts&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java Transaction Service (JTS)
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;CORBA Object Transaction Service (OTS)&lt;/strong&gt; 将分布式事务处理模型（DTP）扩展到了对象领域，它提供了一种在分布式对象系统中进行事务处理的方法。&lt;strong&gt;OTS&lt;/strong&gt; 定义了一组标准的接口和协议，允许 CORBA 对象参与分布式事务。&lt;strong&gt;Java Transaction Service (JTS)&lt;/strong&gt; 是 &lt;strong&gt;OTS&lt;/strong&gt; 的 Java 映射， &lt;strong&gt;JTA&lt;/strong&gt; 推荐使用 &lt;strong&gt;JTS&lt;/strong&gt; 作为其底层事务系统的实现。&lt;/p&gt;
 &lt;p&gt;从事务管理器的角度来看，JTA 接口是以 high-level 的形式出现，而 JTS 是事务管理器内部使用的 low-level 接口。&lt;strong&gt;应用服务器间的事务互操作性是通过底层使用  JTS 实现获得的。&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;corba&#34;&gt;CORBA&lt;/h3&gt;
-&lt;p&gt;由 &lt;a class=&#34;link&#34; href=&#34;https://www.omg.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;corba&#34;&gt;
+    &lt;a href=&#34;#corba&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    CORBA
+&lt;/h3&gt;&lt;p&gt;由 &lt;a class=&#34;link&#34; href=&#34;https://www.omg.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Object Management Group（OMG）&lt;/a&gt;定义的通用对象请求代理架构（Common Object Request Broker Architecture，CORBA）是一个由包括IBM、BEA和惠普在内的工业联盟制定的标准，它促进了可互操作应用程序的构建，这些应用程序基于分布式对象的概念。&lt;/p&gt;
 &lt;p&gt;CORBA 使用一个标准的通信模型，在这个模型上，用不同的语言组合实现的客户和服务器，以及在不同的硬件和操作系统平台上运行的客户和服务器可以进行交互。CORBA 体系结构主要包含以下几个部分：&lt;/p&gt;
 &lt;ul&gt;
@@ -882,8 +968,10 @@
 &lt;li&gt;通用设施，应用程序可能需要的其他有用服务。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;CORBA 比 Java EE 的出现早了十年，并且不受限于单一的实现语言。在 Java EE 出现之前，CORBA 是企业应用程序的标准开发平台。 EJB 采用的底层分布式对象通信协议是由 CORBA 定义的。EJB 使用 CORBA 通信协议将它们的服务暴露给客户，也可以使用 CORBA 通信协议与其他 EJB 和基于 CORBA 的服务器环境通信。一些 CORBA 服务，如 CORBA 命名服务、CORBA 事务和 CORBA 安全，被 Java EE 标准所接受，作为创建可互操作的 EJB 服务的手段。&lt;/p&gt;
-&lt;h3 id=&#34;orb&#34;&gt;ORB&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;ORB&lt;/strong&gt;是 CORBA 的核心组件，负责在客户端和服务端之间传递请求和响应。ORB的主要功能包括：&lt;/p&gt;
+&lt;h3 id=&#34;orb&#34;&gt;
+    &lt;a href=&#34;#orb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    ORB
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;ORB&lt;/strong&gt;是 CORBA 的核心组件，负责在客户端和服务端之间传递请求和响应。ORB的主要功能包括：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;为客户端提供透明访问：客户端可以像调用本地对象一样调用远程对象，而不用关心底层通信和数据交换的细节。&lt;/li&gt;
 &lt;li&gt;定位和激活服务对象：ORB负责在分布式系统中查找和激活服务对象，以便客户端能够与它们进行通信。&lt;/li&gt;
@@ -891,12 +979,16 @@
 &lt;li&gt;系统间通信：ORB处理不同系统间的通信，包括连接管理、错误处理和安全性。&lt;/li&gt;
 &lt;li&gt;跨平台和跨语言：通过 IDL，ORB 可以实现不同编程语言之间的对象互操作。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;giop-和-iiop&#34;&gt;GIOP 和 IIOP&lt;/h3&gt;
-&lt;p&gt;GIOP 是一种通用的协议，用于定义分布式系统中不同 ORB之间的通信。GIOP 指定了在 ORB 之间传递的消息格式和通信规则。IIOP 是一种基于 TCP/IP 协议的 GIOP 实现。&lt;/p&gt;
+&lt;h3 id=&#34;giop-和-iiop&#34;&gt;
+    &lt;a href=&#34;#giop-%e5%92%8c-iiop&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    GIOP 和 IIOP
+&lt;/h3&gt;&lt;p&gt;GIOP 是一种通用的协议，用于定义分布式系统中不同 ORB之间的通信。GIOP 指定了在 ORB 之间传递的消息格式和通信规则。IIOP 是一种基于 TCP/IP 协议的 GIOP 实现。&lt;/p&gt;
 &lt;p&gt;GIOP 将 IDL 数据类型映射成二进制数据流，并通过网络发送。GIOP 使用通用数据表示（Common Data Representation ，CDR）语法来完成这一任务，以有效地在IDL数据类型和二进制数据流之间进行映射。&lt;/p&gt;
 &lt;p&gt;IIOP 将 GIOP 消息数据映射到 TCP/IP 连接行为，以及对输入/输出流的读/写。当一个 CORBA 服务器对象要被分发时，ORB 通过Interoperable Object Reference (IOR) 使网络上唯一识别该对象的信息可用。IOR 包含 CORBA 服务器对象进程的 IP 地址和 TCP 端口。CORBA 客户端利用IOR 建立和CORBA 服务器的连接。&lt;/p&gt;
-&lt;h3 id=&#34;rmiiiop&#34;&gt;RMI/IIOP&lt;/h3&gt;
-&lt;p&gt;Java 远程方法调用（JAVA REMOTE METHOD INVOCATION，RMI）框架是Java的分布式对象通信框架。RMI允许客户端和服务器将对象作为方法参数和返回值通过值或引用来传递。如果在方法参数或返回类型中使用的类的类型对客户端或服务器都是未知的，它可以被动态加载。RMI还为分布式垃圾收集提供了一种方法，以清理不再被任何分布式客户端引用的任何分布式服务器对象。&lt;/p&gt;
+&lt;h3 id=&#34;rmiiiop&#34;&gt;
+    &lt;a href=&#34;#rmiiiop&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    RMI/IIOP
+&lt;/h3&gt;&lt;p&gt;Java 远程方法调用（JAVA REMOTE METHOD INVOCATION，RMI）框架是Java的分布式对象通信框架。RMI允许客户端和服务器将对象作为方法参数和返回值通过值或引用来传递。如果在方法参数或返回类型中使用的类的类型对客户端或服务器都是未知的，它可以被动态加载。RMI还为分布式垃圾收集提供了一种方法，以清理不再被任何分布式客户端引用的任何分布式服务器对象。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201532758.png&#34;
 	
 	
@@ -921,8 +1013,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;JRMP&lt;/strong&gt; 是一个非标准的协议，不能实现与跨语言的 CORBA 对象的通信。与 JRMP 不同，&lt;strong&gt;RMI/IIOP&lt;/strong&gt; 可以在不同平台和编程语言之间进行通信，因为它使用了 CORBA 的 IIOP 协议。RMI/IIOP 使用 IDL 来定义远程对象的接口，这样不同编程语言的客户端都可以调用远程对象。RMI/IIOP 使用 CORBA 的对象传输方式，而不是 Java 序列化，这样可以实现跨平台和跨编程语言的对象传输。&lt;/p&gt;
-&lt;h3 id=&#34;ots&#34;&gt;OTS&lt;/h3&gt;
-&lt;p&gt;OTS 定义了事务服务实现的接口。OTS 的接口基本上可以分为客户端可用的接口和服务器可用的接口。这些接口之间有一些重叠，因为在某些情况下需要同时提供给客户和服务器。&lt;/p&gt;
+&lt;h3 id=&#34;ots&#34;&gt;
+    &lt;a href=&#34;#ots&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    OTS
+&lt;/h3&gt;&lt;p&gt;OTS 定义了事务服务实现的接口。OTS 的接口基本上可以分为客户端可用的接口和服务器可用的接口。这些接口之间有一些重叠，因为在某些情况下需要同时提供给客户和服务器。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201717219.png&#34;
 	
 	
@@ -957,8 +1051,10 @@
 &lt;li&gt;Direct/Explicit 模式，事务使用 &lt;strong&gt;TransactionFactory&lt;/strong&gt; 创建，并使用 &lt;strong&gt;Control&lt;/strong&gt; 对象进行提交或回滚。事务传播是通过向每个 IDL 操作添加参数（例如，事务的控制对象）来完成。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;大多数应用程序的首选 Indirect/Implicit 模式，Direct/Explicit 模式提供了更大的灵活性，但更难管理。&lt;/p&gt;
-&lt;h3 id=&#34;jts&#34;&gt;JTS&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;Java Transaction Service&lt;/strong&gt;（JTS）规范是 &lt;strong&gt;OTS&lt;/strong&gt; 规范的Java语言映射。使用符合 JTS 的实现在理论上允许与其他 JTS 实现的互操作。&lt;/p&gt;
+&lt;h3 id=&#34;jts&#34;&gt;
+    &lt;a href=&#34;#jts&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    JTS
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Java Transaction Service&lt;/strong&gt;（JTS）规范是 &lt;strong&gt;OTS&lt;/strong&gt; 规范的Java语言映射。使用符合 JTS 的实现在理论上允许与其他 JTS 实现的互操作。&lt;/p&gt;
 &lt;p&gt;JTS API 通过规范提供 &lt;a class=&#34;link&#34; href=&#34;https://github.com/eclipse-ee4j/orb/tree/master/omgapi/src/main/idl&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;IDL&lt;/a&gt; 生成，主要的接口在 org.omg.CosTransactions 和 org.omg.CosTSPortability 包中。 Java 应用服务器通过 JTA 接口访问事务管理功能，JTA 通过 JTS 与事务管理的实现进行交互。同样，JTS 可以通过 JTA XA 接口访问资源，也可以访问启用 OTS 的非 XA 资源。JTS 实现可以通过 CORBA OTS 接口进行互操作。JTS 必须支持扁平事务模型。JTS 可以支持嵌套事务模型，但不是必需的。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202304201812890.png&#34;
@@ -984,8 +1080,10 @@
         <guid>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%B4%E5%90%88%E7%AC%AC%E4%B8%89%E6%96%B9%E8%BF%9E%E6%8E%A5%E6%B1%A0/</guid>
         <description>&lt;p&gt;数据库连接池是应用服务器的基本功能，但有时用户因为性能、监控等需求，想使用第三方的连接池。如果只是使用第三方连接池管理数据库连接，那么直接在应用中引入就可以了，但如果用户同时还需要应用服务器的分布式事务和安全服务，就没那么简单了。&lt;/p&gt;
 &lt;p&gt;为了讲清楚，首先需要了解一下 JDBC 基本概念。&lt;/p&gt;
-&lt;h2 id=&#34;connection&#34;&gt;Connection&lt;/h2&gt;
-&lt;p&gt;从 JDBC driver 的角度来看，&lt;strong&gt;Connection&lt;/strong&gt; 表示客户端会话。应用程序可以通过以下两种方式获取连接：&lt;/p&gt;
+&lt;h2 id=&#34;connection&#34;&gt;
+    &lt;a href=&#34;#connection&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Connection
+&lt;/h2&gt;&lt;p&gt;从 JDBC driver 的角度来看，&lt;strong&gt;Connection&lt;/strong&gt; 表示客户端会话。应用程序可以通过以下两种方式获取连接：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;DriverManager&lt;/strong&gt; 最初的JDBC 1.0 API中被引入，当应用程序首次尝试通过指定URL连接到数据源时，&lt;code&gt;DriverManager&lt;/code&gt;将自动加载在 CLASSPATH 中找到的任何 JDBC driver。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;DataSource&lt;/strong&gt; 是在 JDBC 2.0 可选包API中引入的接口。它允许应用程序对底层数据源的细节是透明的。&lt;code&gt;DataSource&lt;/code&gt; 对象的属性被设置为表示特定数据源。当调用其 &lt;code&gt;getConnection&lt;/code&gt;方法时，&lt;code&gt;DataSource&lt;/code&gt; 实例将返回到该数据源的连接。通过简单地更改DataSource对象的属性，可以将应用程序定向到不同的数据源；无需更改应用程序代码。同样，可以更改 &lt;code&gt;DataSource&lt;/code&gt; 实现而不更改使用它的应用程序代码。&lt;/li&gt;
@@ -1009,8 +1107,10 @@
 &lt;p&gt;&lt;strong&gt;DataSource&lt;/strong&gt;、&lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 和 &lt;strong&gt;XADataSource&lt;/strong&gt; 都继承自 &lt;strong&gt;CommonDataSource&lt;/strong&gt;，但&lt;strong&gt;它们之间没有继承关系&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;从 &lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 获得的是 &lt;strong&gt;PooledConnection&lt;/strong&gt;，&lt;strong&gt;PooledConnection&lt;/strong&gt; 并没有继承 &lt;strong&gt;Connection&lt;/strong&gt;，但可以获得&lt;strong&gt;Connection&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;从 &lt;strong&gt;XADataSource&lt;/strong&gt; 获得的是 &lt;strong&gt;XAConnection&lt;/strong&gt;，&lt;strong&gt;XAConnection&lt;/strong&gt; 继承了 &lt;strong&gt;PooledConnection&lt;/strong&gt;，除了能获得 &lt;strong&gt;Connection&lt;/strong&gt;，还可以获得 &lt;strong&gt;XAResource&lt;/strong&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;application-server-datasource&#34;&gt;Application Server DataSource&lt;/h2&gt;
-&lt;p&gt;应用服务器会为其客户端提供了一个 &lt;strong&gt;DataSource&lt;/strong&gt; 接口的实现，并通过 JNDI 暴露给用户。这个 DataSource 包装了 jdbc driver 连接数据库的能力，并在此基础上提供连接池、事务和安全等服务。&lt;/p&gt;
+&lt;h2 id=&#34;application-server-datasource&#34;&gt;
+    &lt;a href=&#34;#application-server-datasource&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Application Server DataSource
+&lt;/h2&gt;&lt;p&gt;应用服务器会为其客户端提供了一个 &lt;strong&gt;DataSource&lt;/strong&gt; 接口的实现，并通过 JNDI 暴露给用户。这个 DataSource 包装了 jdbc driver 连接数据库的能力，并在此基础上提供连接池、事务和安全等服务。&lt;/p&gt;
 &lt;p&gt;在配置应用服务器的 DataSource 时，一般需要指定 Connection 的获取方式：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -1027,8 +1127,10 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;这四种连接获取方式都是 JDBC driver 提供的能力，Driver 和 DataSource 是最基本方式。如果应用服务器的 DataSource 想要具备连接池化、分布式事务等服务，除了自身要实现这些功能以外，还需要底层 driver 提供相应的能力配合。&lt;/p&gt;
-&lt;h3 id=&#34;connectionpooldatasource&#34;&gt;ConnectionPoolDataSource&lt;/h3&gt;
-&lt;p&gt;以连接池为例，JDBC driver 提供了 &lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 的实现，应用服务器使用它来构建和管理连接池。客户端在使用相同的 JNDI 和 DataSource API 的同时获得更好的性能和可扩展性。&lt;/p&gt;
+&lt;h3 id=&#34;connectionpooldatasource&#34;&gt;
+    &lt;a href=&#34;#connectionpooldatasource&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    ConnectionPoolDataSource
+&lt;/h3&gt;&lt;p&gt;以连接池为例，JDBC driver 提供了 &lt;strong&gt;ConnectionPoolDataSource&lt;/strong&gt; 的实现，应用服务器使用它来构建和管理连接池。客户端在使用相同的 JNDI 和 DataSource API 的同时获得更好的性能和可扩展性。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202303101503461.png&#34;
 	
 	
@@ -1053,8 +1155,10 @@
 &lt;p&gt;我们看到，应用程序客户端通过 JNDI 查找一个 DataSource 对象，并请求从 DataSource 获得一个连接。当连接池没有可用连接时，DataSource 的实现从 JDBC driver 的 ConnectionPoolDataSource 中请求一个新的 PooledConnection 。应用服务器的 DataSource 实现会向 PooledConnection 注册一个ConnectionEventListener，随后获得一个新的 Connection 对象。应用客户端在完成操作后调用 &lt;code&gt;Connection.close()&lt;/code&gt;，会生成一个 ConnectionEvent 实例，该实例会返回给应用服务器的数据源实现。在收到连接关闭的通知后，应用服务器可以将连接对象放回连接池中。&lt;/p&gt;
 &lt;p&gt;注意 &lt;strong&gt;ConnectionPoolDataSource 本身不是连接池&lt;/strong&gt;，它是 driver 提供给应用服务器的接口契约，意思是你从 ConnectionPoolDataSource 获得的PooledConnection可以放心的缓存起来，同时连接关闭的时候，driver 会发送事件通知给应用服务器，真正的关闭连接还是放回连接池，由你自己决定。 一般 JDBC driver 提供的 ConnectionPoolDataSource 实现并没有内置连接池功能，需要配合应用服务器或其他第三方连接池一起使用。可以参考  &lt;a class=&#34;link&#34; href=&#34;https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-usagenotes-j2ee-concepts-connection-pooling.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;MySQL Connector &lt;/a&gt;的文档。&lt;/p&gt;
-&lt;h3 id=&#34;xadatasource&#34;&gt;XADataSource&lt;/h3&gt;
-&lt;p&gt;同样，如果想要分布式事务支持，应用服务器的 DataSource  需要依赖 driver 提供的 &lt;strong&gt;XADataSource&lt;/strong&gt; 实现，同时通过 XAResource 和 Transaction Manager 交互。&lt;/p&gt;
+&lt;h3 id=&#34;xadatasource&#34;&gt;
+    &lt;a href=&#34;#xadatasource&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    XADataSource
+&lt;/h3&gt;&lt;p&gt;同样，如果想要分布式事务支持，应用服务器的 DataSource  需要依赖 driver 提供的 &lt;strong&gt;XADataSource&lt;/strong&gt; 实现，同时通过 XAResource 和 Transaction Manager 交互。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202303101754420.png&#34;
 	
 	
@@ -1077,8 +1181,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;直接整合外部连接池&#34;&gt;直接整合外部连接池&lt;/h2&gt;
-&lt;p&gt;如果想在应用服务器中直接整合第三方的连接池实现是比较困难的，下面分析一下原因。&lt;/p&gt;
+&lt;h2 id=&#34;直接整合外部连接池&#34;&gt;
+    &lt;a href=&#34;#%e7%9b%b4%e6%8e%a5%e6%95%b4%e5%90%88%e5%a4%96%e9%83%a8%e8%bf%9e%e6%8e%a5%e6%b1%a0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    直接整合外部连接池
+&lt;/h2&gt;&lt;p&gt;如果想在应用服务器中直接整合第三方的连接池实现是比较困难的，下面分析一下原因。&lt;/p&gt;
 &lt;p&gt;JTA 规范要求连接必须能够同时处理多个事务，这个功能被称为事务多路复用或事务交错。我们看一个例子：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -1132,8 +1238,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;而外部连接池不能感知事务的存在，所以没办法做到事务对连接的独占，因此应用服务器不能简单的直接整合第三方连接池。&lt;/p&gt;
-&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
-&lt;p&gt;如果外部连接池实现了 XADataSource，那么我们可以把它当作普通的  JDBC driver，在配置应用服务器的 DataSource 时使用。需要注意几点：&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;
+    &lt;a href=&#34;#%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    解决方案
+&lt;/h2&gt;&lt;p&gt;如果外部连接池实现了 XADataSource，那么我们可以把它当作普通的  JDBC driver，在配置应用服务器的 DataSource 时使用。需要注意几点：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;为外部连接池配置真正的 JDBC driver 时，要使用 driver的 XADataSource 作为连接的获取方式&lt;/p&gt;
@@ -1156,8 +1264,10 @@
         <pubDate>Sat, 17 Sep 2022 16:42:59 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/bookkeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;读写流程&#34;&gt;读写流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Ledger&lt;/code&gt; 的元数据信息保存在zookeeper中。&lt;/p&gt;
+        <description>&lt;h2 id=&#34;读写流程&#34;&gt;
+    &lt;a href=&#34;#%e8%af%bb%e5%86%99%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    读写流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Ledger&lt;/code&gt; 的元数据信息保存在zookeeper中。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101559715.png&#34;
 	
 	
@@ -1168,8 +1278,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;写入流程&#34;&gt;写入流程&lt;/h3&gt;
-&lt;p&gt;当写入发生时，首先 &lt;code&gt;entry&lt;/code&gt; 被写入一个 &lt;code&gt;journal&lt;/code&gt; 文件。&lt;code&gt;journal&lt;/code&gt; 是一个 &lt;code&gt;write-ahead log&lt;/code&gt;（&lt;code&gt;WAL&lt;/code&gt;），它帮助 BookKeeper 在发生故障时避免数据丢失。这与关系型数据库实现数据持久化的机制相同。&lt;/p&gt;
+&lt;h3 id=&#34;写入流程&#34;&gt;
+    &lt;a href=&#34;#%e5%86%99%e5%85%a5%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    写入流程
+&lt;/h3&gt;&lt;p&gt;当写入发生时，首先 &lt;code&gt;entry&lt;/code&gt; 被写入一个 &lt;code&gt;journal&lt;/code&gt; 文件。&lt;code&gt;journal&lt;/code&gt; 是一个 &lt;code&gt;write-ahead log&lt;/code&gt;（&lt;code&gt;WAL&lt;/code&gt;），它帮助 BookKeeper 在发生故障时避免数据丢失。这与关系型数据库实现数据持久化的机制相同。&lt;/p&gt;
 &lt;p&gt;同时 &lt;code&gt;entry&lt;/code&gt; 会被加入到 &lt;code&gt;write cache&lt;/code&gt; 中。&lt;code&gt;write cache&lt;/code&gt; 中累积的 &lt;code&gt;entry&lt;/code&gt; 会定期排序，异步刷盘到 &lt;code&gt;entry log&lt;/code&gt; 文件中。同一个 &lt;code&gt;ledger&lt;/code&gt; 的 &lt;code&gt;entry&lt;/code&gt; 排序后会被放在一起，这样有利于提高读取的性能。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;write cache&lt;/code&gt; 中的 &lt;code&gt;entry&lt;/code&gt; 也将被写入 &lt;code&gt;RocksDB&lt;/code&gt;， &lt;code&gt;RocksDB&lt;/code&gt; 记录了每个 &lt;code&gt;entry&lt;/code&gt; 在 &lt;code&gt;entry log&lt;/code&gt; 文件中的位置，是 &lt;code&gt;(ledgerId, entryId)&lt;/code&gt; 到 &lt;code&gt;(entry log file, offset)&lt;/code&gt; 的映射，即可以通过&lt;code&gt;(ledgerId, entryId)&lt;/code&gt;，在 &lt;code&gt;entry log&lt;/code&gt; 文件中定位到 entry。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101601220.png&#34;
@@ -1182,10 +1294,14 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;读取流程&#34;&gt;读取流程&lt;/h3&gt;
-&lt;p&gt;读取时会首先查看 &lt;code&gt;write cache&lt;/code&gt; ，因为 &lt;code&gt;write cache&lt;/code&gt; 中有最新的 entry。如果 &lt;code&gt;write cache&lt;/code&gt; 中没有，那么接着查看 &lt;code&gt;read cache&lt;/code&gt;。如果 &lt;code&gt;read cache&lt;/code&gt; 中还是没有，那么就通过 &lt;code&gt;(ledgerId, entryId)&lt;/code&gt; 在 &lt;code&gt;RocksDB&lt;/code&gt; 中查找到该 &lt;code&gt;entry&lt;/code&gt; 所在的 &lt;code&gt;entry log&lt;/code&gt; 文件及偏移量，然后从 &lt;code&gt;entry log&lt;/code&gt; 文件中读取该 &lt;code&gt;entry&lt;/code&gt; ，并更新到 &lt;code&gt;read cache&lt;/code&gt; 中，以便后续请求能在 &lt;code&gt;read cache&lt;/code&gt; 中命中。两层缓存让绝大多数的读取通常是从内存获取。&lt;/p&gt;
-&lt;h3 id=&#34;读写隔离&#34;&gt;读写隔离&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101852204.png&#34;
+&lt;h3 id=&#34;读取流程&#34;&gt;
+    &lt;a href=&#34;#%e8%af%bb%e5%8f%96%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    读取流程
+&lt;/h3&gt;&lt;p&gt;读取时会首先查看 &lt;code&gt;write cache&lt;/code&gt; ，因为 &lt;code&gt;write cache&lt;/code&gt; 中有最新的 entry。如果 &lt;code&gt;write cache&lt;/code&gt; 中没有，那么接着查看 &lt;code&gt;read cache&lt;/code&gt;。如果 &lt;code&gt;read cache&lt;/code&gt; 中还是没有，那么就通过 &lt;code&gt;(ledgerId, entryId)&lt;/code&gt; 在 &lt;code&gt;RocksDB&lt;/code&gt; 中查找到该 &lt;code&gt;entry&lt;/code&gt; 所在的 &lt;code&gt;entry log&lt;/code&gt; 文件及偏移量，然后从 &lt;code&gt;entry log&lt;/code&gt; 文件中读取该 &lt;code&gt;entry&lt;/code&gt; ，并更新到 &lt;code&gt;read cache&lt;/code&gt; 中，以便后续请求能在 &lt;code&gt;read cache&lt;/code&gt; 中命中。两层缓存让绝大多数的读取通常是从内存获取。&lt;/p&gt;
+&lt;h3 id=&#34;读写隔离&#34;&gt;
+    &lt;a href=&#34;#%e8%af%bb%e5%86%99%e9%9a%94%e7%a6%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    读写隔离
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209101852204.png&#34;
 	
 	
 	
@@ -1195,8 +1311,10 @@
 	
 	
 &gt; BookKeeper 中的写入都是顺序写入 &lt;code&gt;journal&lt;/code&gt; 文件，该文件可以存储在专用磁盘上，可以获得更大的吞吐量。&lt;code&gt;write cache&lt;/code&gt; 中的 &lt;code&gt;entry&lt;/code&gt; 会异步批量写入 &lt;code&gt;entry log&lt;/code&gt; 文件和 &lt;code&gt;RocksDB&lt;/code&gt;，通常配置在另外一块磁盘。因此，一个磁盘用于同步写入（ &lt;code&gt;journal&lt;/code&gt; 文件），另一个磁盘用于异步优化写入，以及所有的读取。&lt;/p&gt;
-&lt;h2 id=&#34;数据一致性&#34;&gt;数据一致性&lt;/h2&gt;
-&lt;p&gt;Bookie 操作基本都是在客户端完成和实现的，比如副本复制、读写 entry 等操作。这些有助于确保 BookKeeper 的一致性。&lt;/p&gt;
+&lt;h2 id=&#34;数据一致性&#34;&gt;
+    &lt;a href=&#34;#%e6%95%b0%e6%8d%ae%e4%b8%80%e8%87%b4%e6%80%a7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    数据一致性
+&lt;/h2&gt;&lt;p&gt;Bookie 操作基本都是在客户端完成和实现的，比如副本复制、读写 entry 等操作。这些有助于确保 BookKeeper 的一致性。&lt;/p&gt;
 &lt;p&gt;客户端在创建 ledger 时，会出现 Ensemble、Write Quorum 和 Ack Quorum 这些数据指标。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -1221,8 +1339,10 @@
 	
 &gt; （5,3,2) 代表了对于一个 ledger ，会挑 5 台 bookie 去存储所有的 entry。所以当 entry 0 生成时，可以根据hash模型计算出应该放置到哪台 bookie。比如 E0 对应 B1，B2，B3，那 E1 就对应 B2，B3，B4，以此类推。&lt;/p&gt;
 &lt;p&gt;虽然总体是需要 5 台 bookie，但是每条 entry 只会占用 3 台 bookie 去存放，并只需等待其中的 2 台 bookie 给出应答即可。&lt;/p&gt;
-&lt;h3 id=&#34;lastaddconfirm&#34;&gt;LastAddConfirm&lt;/h3&gt;
-&lt;p&gt;LAC（LastAddConfirm）是由 LAP（LastAddPush） 延伸而来是根据客户端进行维护并发布的最后一条 entry id，从 0 开始递增。所以 LAC 是由应答确认回来的最后一条 entry id 构成，如下图右侧显示。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101850540.png&#34;
+&lt;h3 id=&#34;lastaddconfirm&#34;&gt;
+    &lt;a href=&#34;#lastaddconfirm&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    LastAddConfirm
+&lt;/h3&gt;&lt;p&gt;LAC（LastAddConfirm）是由 LAP（LastAddPush） 延伸而来是根据客户端进行维护并发布的最后一条 entry id，从 0 开始递增。所以 LAC 是由应答确认回来的最后一条 entry id 构成，如下图右侧显示。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101850540.png&#34;
 	
 	
 	
@@ -1241,8 +1361,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;ensemble-change&#34;&gt;Ensemble change&lt;/h3&gt;
-&lt;p&gt;当其中的某个 bookie 挂掉时，客户端会进行一个 ensemble change 的操作，用新的 bookie 替换挂掉的旧 bookie。比如 当bookie 4 挂掉时，可以使用 bookie 6 进行替换。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101857539.png&#34;
+&lt;h3 id=&#34;ensemble-change&#34;&gt;
+    &lt;a href=&#34;#ensemble-change&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Ensemble change
+&lt;/h3&gt;&lt;p&gt;当其中的某个 bookie 挂掉时，客户端会进行一个 ensemble change 的操作，用新的 bookie 替换挂掉的旧 bookie。比如 当bookie 4 挂掉时，可以使用 bookie 6 进行替换。 &lt;img src=&#34;https://cdn.mazhen.tech/images/202209101857539.png&#34;
 	
 	
 	
@@ -1262,8 +1384,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;bookie-fencing&#34;&gt;Bookie Fencing&lt;/h3&gt;
-&lt;p&gt;BookKeeper 有一个极其重要的功能，叫做 &lt;strong&gt;fencing&lt;/strong&gt;。&lt;strong&gt;fencing&lt;/strong&gt; 功能让 BookKeeper 保证只有一个写入者（Pulsar broker）可以写入一个 ledger。&lt;/p&gt;
+&lt;h3 id=&#34;bookie-fencing&#34;&gt;
+    &lt;a href=&#34;#bookie-fencing&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Bookie Fencing
+&lt;/h3&gt;&lt;p&gt;BookKeeper 有一个极其重要的功能，叫做 &lt;strong&gt;fencing&lt;/strong&gt;。&lt;strong&gt;fencing&lt;/strong&gt; 功能让 BookKeeper 保证只有一个写入者（Pulsar broker）可以写入一个 ledger。&lt;/p&gt;
 &lt;p&gt;Broker（B1）挂掉，Broker（B2）接管 B1 上topic X的流程：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
@@ -1288,8 +1412,10 @@
 &lt;p&gt;整个失效恢复的过程，是没有回头复用 ledger 的。因为复用意味着所有元素都处于相同状态且都同意后才能继续去读写，这个是很难控制的。&lt;/p&gt;
 &lt;p&gt;我们从主从复制方式进行切入，将其定义为物理文件。数据从主复制到从，由于复制过程的速度差异，为了保证所有的一致性，需要做一些「删除/清空类」的操作。但是这个过程中一旦包含覆盖的操作，就会在过程中更改文件状态，容易出现 bug。&lt;/p&gt;
 &lt;p&gt;BookKeeper 在运行的过程中，不是一个物理文件，而是逻辑上的序。同时在失效恢复过程中，没有进行任何的复用，使得数据恢复变得简单又清晰。其次它在整个修复过程中，没有去额外动用 ledger X 的数据。&lt;/p&gt;
-&lt;h2 id=&#34;自动恢复&#34;&gt;自动恢复&lt;/h2&gt;
-&lt;p&gt;当一个 bookie 失败时，这个 bookie 上所有 ledger 的 fragments 都将被复制到其他节点，以确保每个 ledger 的复制系数（Write quorum）得到保证。&lt;/p&gt;
+&lt;h2 id=&#34;自动恢复&#34;&gt;
+    &lt;a href=&#34;#%e8%87%aa%e5%8a%a8%e6%81%a2%e5%a4%8d&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    自动恢复
+&lt;/h2&gt;&lt;p&gt;当一个 bookie 失败时，这个 bookie 上所有 ledger 的 fragments 都将被复制到其他节点，以确保每个 ledger 的复制系数（Write quorum）得到保证。&lt;/p&gt;
 &lt;p&gt;recovery 不是 BookKeeper 复制协议的一部分，而是在 BookKeeper 外部运行，作为一种异步修复机制使用。&lt;/p&gt;
 &lt;p&gt;有两种类型的recovery：手动或自动。&lt;/p&gt;
 &lt;p&gt;自动恢复进程 AutoRecoveryMain 可以在独立的服务器上运行，也可以和bookie跑在一起。其中一个自动恢复进程被选为审核员，然后进行如下操作：&lt;/p&gt;
@@ -1344,8 +1470,10 @@
 &lt;li&gt;&lt;strong&gt;storage-service&lt;/strong&gt;：&lt;code&gt;StorageService&lt;/code&gt;的具体实现&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;business-service&lt;/strong&gt;：用户访问入口&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2 id=&#34;事务上下文的传播&#34;&gt;事务上下文的传播&lt;/h2&gt;
-&lt;p&gt;在项目主工程的pom文件中引入&lt;code&gt;Atomikos&lt;/code&gt;依赖，注意要包括&lt;code&gt;transactions-remoting&lt;/code&gt;，正是它才能让事务上下文在&lt;code&gt;RPC&lt;/code&gt;调用时传递。&lt;/p&gt;
+&lt;h2 id=&#34;事务上下文的传播&#34;&gt;
+    &lt;a href=&#34;#%e4%ba%8b%e5%8a%a1%e4%b8%8a%e4%b8%8b%e6%96%87%e7%9a%84%e4%bc%a0%e6%92%ad&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    事务上下文的传播
+&lt;/h2&gt;&lt;p&gt;在项目主工程的pom文件中引入&lt;code&gt;Atomikos&lt;/code&gt;依赖，注意要包括&lt;code&gt;transactions-remoting&lt;/code&gt;，正是它才能让事务上下文在&lt;code&gt;RPC&lt;/code&gt;调用时传递。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -1556,8 +1684,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;两阶段提交过程&#34;&gt;两阶段提交过程&lt;/h2&gt;
-&lt;p&gt;在处理&lt;code&gt;RPC&lt;/code&gt;调用的响应时，&lt;code&gt;Atomikos&lt;/code&gt;会将参与到全局事务的远程节点注册为&lt;code&gt;Participants&lt;/code&gt;(&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-api/src/main/java/com/atomikos/icatch/Extent.java#L64&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h2 id=&#34;两阶段提交过程&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%a4%e9%98%b6%e6%ae%b5%e6%8f%90%e4%ba%a4%e8%bf%87%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    两阶段提交过程
+&lt;/h2&gt;&lt;p&gt;在处理&lt;code&gt;RPC&lt;/code&gt;调用的响应时，&lt;code&gt;Atomikos&lt;/code&gt;会将参与到全局事务的远程节点注册为&lt;code&gt;Participants&lt;/code&gt;(&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions-api/src/main/java/com/atomikos/icatch/Extent.java#L64&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Extent.addRemoteParticipants&lt;/a&gt;)，在事务提交时，所有的&lt;code&gt;Participants&lt;/code&gt;都会&lt;a class=&#34;link&#34; href=&#34;https://github.com/atomikos/transactions-essentials/blob/4332faaf7de551e126ab60c6151e66cee2b854ed/public/transactions/src/main/java/com/atomikos/icatch/imp/CoordinatorImp.java#L673&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;参与到两阶段提交&lt;/a&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -1639,8 +1769,10 @@
         <pubDate>Tue, 21 Apr 2020 11:25:09 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81%E5%92%8Cseata%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;应用服务器的分布式事务支持&#34;&gt;应用服务器的分布式事务支持&lt;/h2&gt;
-&lt;p&gt;我们先看一下分布式事务的需求是如何产生的，以及应用服务器是如何支持分布式事务管理的。&lt;/p&gt;
+        <description>&lt;h2 id=&#34;应用服务器的分布式事务支持&#34;&gt;
+    &lt;a href=&#34;#%e5%ba%94%e7%94%a8%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%9a%84%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1%e6%94%af%e6%8c%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    应用服务器的分布式事务支持
+&lt;/h2&gt;&lt;p&gt;我们先看一下分布式事务的需求是如何产生的，以及应用服务器是如何支持分布式事务管理的。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;单体应用&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -1684,8 +1816,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;这就是应用因拆分而遇到分布式事务的问题，以及应用服务器是如何解决这个问题的。&lt;/p&gt;
-&lt;h2 id=&#34;分布式事务中间件&#34;&gt;分布式事务中间件&lt;/h2&gt;
-&lt;p&gt;微服务时代，没人再使用沉重的&lt;code&gt;EJB&lt;/code&gt;，都是将&lt;code&gt;Spring Bean&lt;/code&gt;直接暴露为远程服务。完成一个业务请求需要跨越多个微服务，同样需要面对分布式事务的问题。这时就需要引入&lt;strong&gt;分布式事务中间件&lt;/strong&gt;。我们以蚂蚁金服开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/seata/seata&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;分布式事务中间件&#34;&gt;
+    &lt;a href=&#34;#%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1%e4%b8%ad%e9%97%b4%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    分布式事务中间件
+&lt;/h2&gt;&lt;p&gt;微服务时代，没人再使用沉重的&lt;code&gt;EJB&lt;/code&gt;，都是将&lt;code&gt;Spring Bean&lt;/code&gt;直接暴露为远程服务。完成一个业务请求需要跨越多个微服务，同样需要面对分布式事务的问题。这时就需要引入&lt;strong&gt;分布式事务中间件&lt;/strong&gt;。我们以蚂蚁金服开源的&lt;a class=&#34;link&#34; href=&#34;https://github.com/seata/seata&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Seata&lt;/a&gt;为例，看看它是怎么解决微服务场景下的分布式事务问题。&lt;/p&gt;
 &lt;p&gt;将上一小节跑在应用服务器上的业务，使用微服务 + &lt;code&gt;Seata&lt;/code&gt;的重构后，部署架构如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241128875.png&#34;
@@ -1700,8 +1834,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;上图中黄色方框（&lt;code&gt;RM&lt;/code&gt;，&lt;code&gt;TM&lt;/code&gt;，&lt;code&gt;TC&lt;/code&gt;）是&lt;code&gt;Seata&lt;/code&gt;的核心组件，它们配合完成对微服务的分布式事务支持。可以看出，和应用服务器的&lt;code&gt;EJB&lt;/code&gt;方案架构上类似，只是多了一个独立运行的&lt;code&gt;TC&lt;/code&gt;组件。&lt;/p&gt;
 &lt;p&gt;我们再看看&lt;code&gt;Seata&lt;/code&gt;各组件的具体作用。&lt;/p&gt;
-&lt;h3 id=&#34;seata的架构&#34;&gt;&lt;code&gt;Seata&lt;/code&gt;的架构&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129681.png&#34;
+&lt;h3 id=&#34;seata的架构&#34;&gt;
+    &lt;a href=&#34;#seata%e7%9a%84%e6%9e%b6%e6%9e%84&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;Seata&lt;/code&gt;的架构
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129681.png&#34;
 	
 	
 	
@@ -1717,8 +1853,10 @@
 &lt;li&gt;&lt;strong&gt;Transaction Manager (TM)&lt;/strong&gt;： 控制全局事务的边界，负责开启一个全局事务，并最终发起全局提交或全局回滚的决议。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Resource Manager (RM)&lt;/strong&gt;： 控制分支事务，负责分支注册、状态汇报，并接收事务协调器的指令，驱动分支（本地）事务的提交和回滚。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;seata-vs-应用服务器&#34;&gt;&lt;code&gt;Seata&lt;/code&gt; vs. 应用服务器&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器的分布式事务支持主要有以下四个差异：&lt;/p&gt;
+&lt;h2 id=&#34;seata-vs-应用服务器&#34;&gt;
+    &lt;a href=&#34;#seata-vs-%e5%ba%94%e7%94%a8%e6%9c%8d%e5%8a%a1%e5%99%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;Seata&lt;/code&gt; vs. 应用服务器
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器的分布式事务支持主要有以下四个差异：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器都可以实现&lt;strong&gt;业务无侵入&lt;/strong&gt;分布式事务支持。但应用服务器的&lt;code&gt;XA&lt;/code&gt;方案实现的是&lt;strong&gt;实时一致性&lt;/strong&gt;，而&lt;code&gt;Seata&lt;/code&gt;的&lt;code&gt;AT 模式&lt;/code&gt;实现的是&lt;strong&gt;最终一致性&lt;/strong&gt;。&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Seata&lt;/code&gt;引入了独立运行的&lt;code&gt;Transaction Coordinator&lt;/code&gt;，维护全局事务的运行状态。而应用服务器的访问入口节点承担了维护全局事务状态的职责。&lt;/li&gt;
@@ -1730,8 +1868,10 @@
     &gt;sofa-rpc&lt;/a&gt;等多种&lt;code&gt;RPC&lt;/code&gt;框架。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;&lt;code&gt;Seata&lt;/code&gt;和应用服务器都支持在分布式场景下的全局事务，都可以做到对业务无侵入。&lt;code&gt;Seata&lt;/code&gt;实现的是&lt;strong&gt;最终一致性&lt;/strong&gt;，因此性能比应用服务器的&lt;code&gt;XA&lt;/code&gt;方案好很多，具备海量并发处理能力，这也是互联网公司选择它的原因。由于&lt;code&gt;Seata&lt;/code&gt;不依赖数据库的&lt;strong&gt;XA driver&lt;/strong&gt;，只使用数据库的本地事务，就完成了对分布式事务的支持，相当于承担了部分数据库的职责，因此&lt;code&gt;Seata&lt;/code&gt;的实现难度要比应用服务器的&lt;code&gt;JTA&lt;/code&gt;大。&lt;/p&gt;
-&lt;h2 id=&#34;应用服务器进入微服务时代&#34;&gt;应用服务器进入微服务时代&lt;/h2&gt;
-&lt;p&gt;那么应用服务器的分布式事务支持在微服务时代还有用吗？或者说我们应该怎样改进，才能让应用服务器进入微服务时代？&lt;/p&gt;
+&lt;h2 id=&#34;应用服务器进入微服务时代&#34;&gt;
+    &lt;a href=&#34;#%e5%ba%94%e7%94%a8%e6%9c%8d%e5%8a%a1%e5%99%a8%e8%bf%9b%e5%85%a5%e5%be%ae%e6%9c%8d%e5%8a%a1%e6%97%b6%e4%bb%a3&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    应用服务器进入微服务时代
+&lt;/h2&gt;&lt;p&gt;那么应用服务器的分布式事务支持在微服务时代还有用吗？或者说我们应该怎样改进，才能让应用服务器进入微服务时代？&lt;/p&gt;
 &lt;p&gt;首先我们要看到&lt;code&gt;JTA/XA&lt;/code&gt;的优势：支持数据的实时一致性，对业务开发更加友好。客户对原有的系统进行微服务改造时，如果把业务模型假定成数据最终一致性，客户就不得不做出很大的妥协和变更。特别是有些金融客户对一致性的要求会比较高。&lt;/p&gt;
 &lt;p&gt;我们可以学习&lt;code&gt;Seata&lt;/code&gt;的架构，抛弃掉沉重的&lt;code&gt;EJB/RMI-IIOP&lt;/code&gt;，让&lt;code&gt;Spring Bean&lt;/code&gt;通过&lt;code&gt;dubbo&lt;/code&gt;等&lt;code&gt;RPC&lt;/code&gt;框架直接对外暴露服务，同时&lt;strong&gt;事务上下文&lt;/strong&gt;可以在&lt;code&gt;RPC&lt;/code&gt;调用时进行传递：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241129392.png&#34;
@@ -1753,8 +1893,10 @@
         <pubDate>Mon, 23 Mar 2020 11:01:58 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8%E7%81%AB%E7%84%B0%E5%9B%BE%E8%BF%9B%E8%A1%8Cjava%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</guid>
-        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;性能分析工具的分类&lt;/h2&gt;
-&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
+        <description>&lt;h2 id=&#34;性能分析工具的分类&#34;&gt;
+    &lt;a href=&#34;#%e6%80%a7%e8%83%bd%e5%88%86%e6%9e%90%e5%b7%a5%e5%85%b7%e7%9a%84%e5%88%86%e7%b1%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    性能分析工具的分类
+&lt;/h2&gt;&lt;p&gt;性能分析的技术和工具可以分为以下几类：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;Counters&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
@@ -1823,8 +1965,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;本文主要讨论如何使用&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BPF&lt;/code&gt;进行&lt;code&gt;CPU Profiling&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;perf&#34;&gt;perf&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;perf&#34;&gt;
+    &lt;a href=&#34;#perf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;perf&lt;/strong&gt;最初是使用&lt;code&gt;Linux&lt;/code&gt;性能计数器子系统的工具，因此&lt;code&gt;perf&lt;/code&gt;开始的名称是&lt;code&gt;Performance Counters for Linux&lt;/code&gt;(PCL)。&lt;code&gt;perf&lt;/code&gt;在Linux&lt;code&gt;2.6.31&lt;/code&gt;合并进内核，位于&lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/tree/master/tools/perf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;tools/perf&lt;/a&gt;目录下。&lt;/p&gt;
 &lt;p&gt;随后&lt;code&gt;perf&lt;/code&gt;进行了各种增强，增加了&lt;code&gt;tracing&lt;/code&gt;、&lt;code&gt;profiling&lt;/code&gt;等能力，可用于性能瓶颈的查找和热点代码的定位。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf&lt;/code&gt;是一个面向事件（event-oriented）的性能剖析工具，因此它也被称为&lt;code&gt;Linux perf events (LPE)&lt;/code&gt;，或&lt;code&gt;perf_events&lt;/code&gt;。&lt;/p&gt;
@@ -1846,8 +1990,10 @@
 &lt;/ul&gt;
 &lt;p&gt;内核依赖的硬件，比如说&lt;code&gt;CPU&lt;/code&gt;，一般会内置一些性能统计方面的寄存器（&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Hardware_performance_counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Hardware Performance Counter&lt;/a&gt;），通过软件读取这些特殊寄存器里的信息，我们也可以得到很多直接关于硬件的信息。&lt;code&gt;perf&lt;/code&gt;最初就是用来监测&lt;code&gt;CPU&lt;/code&gt;的性能监控单元（performance monitoring unit, PMU）的。&lt;/p&gt;
-&lt;h3 id=&#34;perf-events分类&#34;&gt;perf Events分类&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
+&lt;h3 id=&#34;perf-events分类&#34;&gt;
+    &lt;a href=&#34;#perf-events%e5%88%86%e7%b1%bb&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf Events分类
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;支持多种性能事件：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241110166.png&#34;
 	
 	
@@ -1934,8 +2080,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;perf的使用&lt;/h3&gt;
-&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;perf的使用&#34;&gt;
+    &lt;a href=&#34;#perf%e7%9a%84%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf的使用
+&lt;/h3&gt;&lt;p&gt;如果还没有安装&lt;code&gt;perf&lt;/code&gt;，可以使用&lt;code&gt;apt&lt;/code&gt;或&lt;code&gt;yum&lt;/code&gt;进行安装：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -2066,8 +2214,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;后面我们会介绍&lt;strong&gt;火焰图&lt;/strong&gt;，以可视化的方式展示&lt;code&gt;stack traces&lt;/code&gt;，比&lt;code&gt;perf report&lt;/code&gt;更加直观。&lt;/p&gt;
-&lt;h2 id=&#34;bpf&#34;&gt;BPF&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;bpf&#34;&gt;
+    &lt;a href=&#34;#bpf&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BPF
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;BPF&lt;/strong&gt;是&lt;strong&gt;Berkeley Packet Filter&lt;/strong&gt;的缩写，最初是为BSD开发，第一个版本于1992年发布，&lt;a class=&#34;link&#34; href=&#34;https://www.tcpdump.org/papers/bpf-usenix93.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;用于改进网络数据包捕获的性能&lt;/a&gt;。&lt;code&gt;BPF&lt;/code&gt;是在内核级别进行过滤，不必将每个数据包拷贝到用户空间，从而提高了数据包过滤的性能。&lt;code&gt;tcpdump&lt;/code&gt;使用的就是&lt;code&gt;BPF&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241113910.png&#34;
 	
@@ -2115,8 +2265,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;BPF&lt;/code&gt;已经内置在Linux内核中，因此你无需再安装任何新的内核组件，就可以在生产环境中使用BPF。&lt;/p&gt;
-&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;BCC和bpftrace&lt;/h2&gt;
-&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;bcc和bpftrace&#34;&gt;
+    &lt;a href=&#34;#bcc%e5%92%8cbpftrace&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BCC和bpftrace
+&lt;/h2&gt;&lt;p&gt;直接使用&lt;code&gt;BPF&lt;/code&gt;指令进行编程非常繁琐，因此很有必要提供高级语言前端方便用户使用，于是就出现了&lt;code&gt;BCC&lt;/code&gt;和&lt;code&gt;bpftrace&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241116502.png&#34;
 	
 	
@@ -2137,8 +2289,10 @@
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;iovisor/bpftrace&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;bcc的安装&#34;&gt;BCC的安装&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;bcc的安装&#34;&gt;
+    &lt;a href=&#34;#bcc%e7%9a%84%e5%ae%89%e8%a3%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    BCC的安装
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;BCC&lt;/code&gt;可以参考官方的&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bcc/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;安装文档&lt;/a&gt;。以&lt;code&gt;Ubuntu 18.04 LTS&lt;/code&gt;为例，建议从源码build安装：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;安装build依赖&lt;/li&gt;
@@ -2280,8 +2434,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;off-CPU&lt;/code&gt;分析是对&lt;code&gt;on-CPU&lt;/code&gt;的补充，让我们知道线程所有的时间花费，更全面的了解程序的运行情况。&lt;/p&gt;
 &lt;p&gt;后面会介绍&lt;code&gt;profile&lt;/code&gt;，&lt;code&gt;offcputime&lt;/code&gt;如何生成火焰图进行可视化分析。&lt;/p&gt;
-&lt;h3 id=&#34;bpftrace的安装&#34;&gt;bpftrace的安装&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h3 id=&#34;bpftrace的安装&#34;&gt;
+    &lt;a href=&#34;#bpftrace%e7%9a%84%e5%ae%89%e8%a3%85&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    bpftrace的安装
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;bpftrace&lt;/a&gt; 建议运行在Linux 4.9 kernel或更高版本。根据&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;安装文档&lt;/a&gt;的说明，是因为&lt;code&gt;kprobes&lt;/code&gt;、&lt;code&gt;uprobes&lt;/code&gt;、&lt;code&gt;tracepoints&lt;/code&gt;等主要特性是在&lt;code&gt;4.x&lt;/code&gt;以上加入内核的：&lt;/p&gt;
 &lt;blockquote&gt;
@@ -2390,14 +2546,18 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;关于&lt;code&gt;bpftrace&lt;/code&gt;脚本编写不在本文的讨论范围，感兴趣的可以参考&lt;a class=&#34;link&#34; href=&#34;https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;reference_guide&lt;/a&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;火焰图&#34;&gt;火焰图&lt;/h2&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;h2 id=&#34;火焰图&#34;&gt;
+    &lt;a href=&#34;#%e7%81%ab%e7%84%b0%e5%9b%be&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    火焰图
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/flamegraphs.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;火焰图&lt;/a&gt;是&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Brendan Gregg&lt;/a&gt;发明的将&lt;code&gt;stack traces&lt;/code&gt;可视化展示的方法。火焰图把时间和空间两个维度上的信息融合在一张图上，将频繁执行的代码路径以可视化的形式，非常直观的展现了出来。&lt;/p&gt;
 &lt;p&gt;火焰图可以用于可视化来自任何&lt;code&gt;profiler&lt;/code&gt;工具的记录的&lt;code&gt;stack traces&lt;/code&gt;信息，除了用来&lt;code&gt;CPU profiling&lt;/code&gt;，还适用于&lt;code&gt;off-CPU&lt;/code&gt;，&lt;code&gt;page faults&lt;/code&gt;等多种场景的分析。本文只讨论 &lt;code&gt;on-CPU&lt;/code&gt; 和 &lt;code&gt;off-CPU&lt;/code&gt; 火焰图的生成。&lt;/p&gt;
 &lt;p&gt;要理解火焰图，先从理解&lt;code&gt;Stack Trace&lt;/code&gt;开始。&lt;/p&gt;
-&lt;h3 id=&#34;stack-trace&#34;&gt;Stack Trace&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
+&lt;h3 id=&#34;stack-trace&#34;&gt;
+    &lt;a href=&#34;#stack-trace&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Stack Trace
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;Stack Trace&lt;/code&gt;是程序执行过程中，在特定时间点的函数调用列表。例如，&lt;code&gt;func_a()&lt;/code&gt;调用&lt;code&gt;func_b()&lt;/code&gt;，&lt;code&gt;func_b()&lt;/code&gt;调用&lt;code&gt;func_c()&lt;/code&gt;，此时的&lt;code&gt;Stack Trace&lt;/code&gt;可写为：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -2410,8 +2570,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;func_a
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;Profiling Stack Traces&lt;/h3&gt;
-&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;profiling-stack-traces&#34;&gt;
+    &lt;a href=&#34;#profiling-stack-traces&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Profiling Stack Traces
+&lt;/h3&gt;&lt;p&gt;我们做&lt;code&gt;CPU profiling&lt;/code&gt;时，会使用perf或bcc定时采样&lt;code&gt;Stack Trace&lt;/code&gt;，这样会收集到非常多的&lt;code&gt;Stack Trace&lt;/code&gt;。前面介绍了&lt;code&gt;perf report&lt;/code&gt;会将&lt;code&gt;Stack Trace&lt;/code&gt;样本汇总为调用树，并显示每个路径的百分比。火焰图是怎么展示的呢？&lt;/p&gt;
 &lt;p&gt;考虑下面的示例，我们用perf定时采样收集了多个&lt;code&gt;Stack Trace&lt;/code&gt;，然后将相同的&lt;code&gt;Stack Trace&lt;/code&gt;归纳合并，统计出次数：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -2448,8 +2610,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看到，总共收集了10个样本，其中代码路径&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_c&lt;/code&gt;有7次，该路径上的&lt;code&gt;func_c&lt;/code&gt;在CPU上运行。 &lt;code&gt;func_a-&amp;gt;func_b&lt;/code&gt;进行了两次采样，&lt;code&gt;func_b&lt;/code&gt;在CPU上运行。&lt;code&gt;func_a-&amp;gt;func_b-&amp;gt;func_d-&amp;gt;func_e&lt;/code&gt;一次采样，&lt;code&gt;func_e&lt;/code&gt;在CPU上运行。&lt;/p&gt;
-&lt;h3 id=&#34;火焰图-1&#34;&gt;火焰图&lt;/h3&gt;
-&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
+&lt;h3 id=&#34;火焰图-1&#34;&gt;
+    &lt;a href=&#34;#%e7%81%ab%e7%84%b0%e5%9b%be-1&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    火焰图
+&lt;/h3&gt;&lt;p&gt;根据前面对&lt;code&gt;Stack Trace&lt;/code&gt;的统计信息，可以绘制出如下的火焰图：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241117302.png&#34;
 	
 	
@@ -2479,8 +2643,10 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/brendangregg/FlameGraph.git
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;Java CPU Profiling&lt;/h2&gt;
-&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;java-cpu-profiling&#34;&gt;
+    &lt;a href=&#34;#java-cpu-profiling&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Java CPU Profiling
+&lt;/h2&gt;&lt;p&gt;虽然有很多Java专用的&lt;code&gt;profiler&lt;/code&gt;工具，但这些工具一般只能看到Java方法的执行，缺少了&lt;code&gt;GC&lt;/code&gt;，&lt;code&gt;JVM&lt;/code&gt;的CPU时间消耗，并且有些工具的&lt;code&gt;Method tracing&lt;/code&gt;性能损耗比较大。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;BCC profile&lt;/code&gt;的优点是它很高效，在内核上下文中对堆栈进行计数，并能完整显示用户态和内核态的CPU使用，能看到native libraries（例如libc），JVM（libjvm），Java方法和内核中花费的时间。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209241118729.png&#34;
 	
@@ -2506,8 +2672,10 @@
     &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，同样能够获得mixed-mode火焰图。同时，此方法不需要启用帧指针，所以不用加上&lt;code&gt;-XX:+PreserveFramePointer&lt;/code&gt;参数。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;下面我们就分别演示这两种方式。&lt;/p&gt;
-&lt;h3 id=&#34;perf-map-agent&#34;&gt;perf-map-agent&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
+&lt;h3 id=&#34;perf-map-agent&#34;&gt;
+    &lt;a href=&#34;#perf-map-agent&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    perf-map-agent
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;perf&lt;/code&gt;期望能从&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;中获得在未知内存区域执行的代码的符号表。&lt;code&gt;perf-map-agent&lt;/code&gt;可以为&lt;code&gt;JIT&lt;/code&gt;编译的方法生成&lt;code&gt;/tmp/perf-&amp;lt;pid&amp;gt;.map&lt;/code&gt;文件，以满足&lt;code&gt;perf&lt;/code&gt;的要求。&lt;/p&gt;
 &lt;p&gt;首先下载并编译&lt;code&gt;perf-map-agent&lt;/code&gt;：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -2523,8 +2691,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;make&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;配合&lt;code&gt;perf&lt;/code&gt;使用&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h4 id=&#34;配合perf使用&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e5%90%88perf%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配合&lt;code&gt;perf&lt;/code&gt;使用
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;perf-map-agent&lt;/code&gt;提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/perf-map-agent/blob/master/bin/perf-java-flames&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf-java-flames&lt;/a&gt;脚本，可以一步生成火焰图。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;perf-java-flames&lt;/code&gt;接收&lt;code&gt;perf record&lt;/code&gt;命令参数，它会调用&lt;code&gt;perf&lt;/code&gt;进行采样，然后使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;FlameGraph&lt;/a&gt;生成火焰图，一步完成，非常方便。&lt;/p&gt;
@@ -2579,8 +2749,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo perf report --stdio
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;配合&lt;code&gt;bcc profile&lt;/code&gt;使用&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h4 id=&#34;配合bcc-profile使用&#34;&gt;
+    &lt;a href=&#34;#%e9%85%8d%e5%90%88bcc-profile%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    配合&lt;code&gt;bcc profile&lt;/code&gt;使用
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;FlameGraph&lt;/code&gt;项目提供了&lt;a class=&#34;link&#34; href=&#34;https://github.com/brendangregg/FlameGraph/blob/master/jmaps&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;jmaps&lt;/a&gt;脚本，它会调用&lt;code&gt;perf-map-agent&lt;/code&gt;为当前运行的所有Java进程生成符号表。&lt;/p&gt;
 &lt;p&gt;首先为&lt;code&gt;jmaps&lt;/code&gt;脚本设置好&lt;code&gt;JAVA_HOME&lt;/code&gt;和&lt;code&gt;perf-map-agent&lt;/code&gt;的正确位置：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -2698,8 +2870,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;./&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;flamegraph&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pl&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;--&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;io&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;--&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;countname&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offcpu01&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;txt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offcpu01&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;svg&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;async-profiler&lt;/h3&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h3 id=&#34;async-profiler&#34;&gt;
+    &lt;a href=&#34;#async-profiler&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async-profiler
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jvm-profiling-tools/async-profiler&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;async-profiler&lt;/a&gt;将&lt;code&gt;perf&lt;/code&gt;的堆栈追踪和JDK提供的&lt;a class=&#34;link&#34; href=&#34;http://psy-lob-saw.blogspot.com/2016/06/the-pros-and-cons-of-agct.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;AsyncGetCallTrace&lt;/a&gt;结合了起来，做到同时采样Java栈与Native栈，因此也就可以同时分析Java代码和Native代码中存在的性能热点。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;AsyncGetCallTrace&lt;/code&gt;是JDK内部提供的一个函数，它的原型如下：&lt;/p&gt;
@@ -2738,8 +2912,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;可以看出，该函数直接通过&lt;code&gt;ucontext&lt;/code&gt;就能获取到完整的Java调用栈。&lt;/p&gt;
-&lt;h4 id=&#34;async-profiler的使用&#34;&gt;async-profiler的使用&lt;/h4&gt;
-&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
+&lt;h4 id=&#34;async-profiler的使用&#34;&gt;
+    &lt;a href=&#34;#async-profiler%e7%9a%84%e4%bd%bf%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    async-profiler的使用
+&lt;/h4&gt;&lt;p&gt;下载并解压好&lt;code&gt;async-profiler&lt;/code&gt;安装包。&lt;/p&gt;
 &lt;p&gt;从Linux 4.6开始，从&lt;code&gt;non-root&lt;/code&gt;进程使用&lt;code&gt;perf&lt;/code&gt;捕获内核的&lt;code&gt;call stacks&lt;/code&gt;，需要设置如下两个内核参数：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -2770,8 +2946,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
-&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;
+    &lt;a href=&#34;#%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    总结
+&lt;/h2&gt;&lt;p&gt;为Java生成&lt;code&gt;CPU profiling&lt;/code&gt;火焰图，基本的流程都是：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;使用工具采集样本&lt;/li&gt;
 &lt;li&gt;使用&lt;code&gt;FlameGraph&lt;/code&gt;项目提供的脚本，将采集的样本归纳合并，统计出&lt;code&gt;Stack Trace&lt;/code&gt;出现的频率&lt;/li&gt;
@@ -2783,8 +2961,10 @@
 &lt;li&gt;&lt;code&gt;async-profiler&lt;/code&gt;（内部会使用到&lt;code&gt;perf&lt;/code&gt;）&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如果只是对Java进程做&lt;code&gt;on-CPU&lt;/code&gt;分析，&lt;code&gt;async-profiler&lt;/code&gt;更加方便好用。如果需要更全面的了解Java进程的运行情况，例如分析系统锁的开销，阻塞的 I/O 操作，以及进程调度器（&lt;code&gt;scheduler&lt;/code&gt;）的工作，那么还是需要使用功能更强大的&lt;code&gt;perf&lt;/code&gt;和&lt;code&gt;bcc&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;ul&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;
+    &lt;a href=&#34;#%e5%8f%82%e8%80%83%e8%b5%84%e6%96%99&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    参考资料
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/perf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;perf Examples&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://www.brendangregg.com/ebpf.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2805,8 +2985,10 @@
         
         <guid>https://mazhen.tech/p/tomcat%E7%9A%84nioendpoint%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/</guid>
         <description>&lt;p&gt;在上一篇&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/tomcat-architecture/&#34; &gt;&amp;lt;Tomcat系统架构&amp;gt;&lt;/a&gt;中提到，Tomcat的网络通信层支持多种 I/O 模型。本文将介绍&lt;code&gt;NioEndpoint&lt;/code&gt;，它是直接使用&lt;code&gt;NIO&lt;/code&gt;实现了 I/O 多路复用。&lt;/p&gt;
-&lt;h2 id=&#34;nioendpoint的处理流程&#34;&gt;&lt;code&gt;NioEndpoint&lt;/code&gt;的处理流程&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;NioEndpoint&lt;/code&gt;的处理流程如下：&lt;/p&gt;
+&lt;h2 id=&#34;nioendpoint的处理流程&#34;&gt;
+    &lt;a href=&#34;#nioendpoint%e7%9a%84%e5%a4%84%e7%90%86%e6%b5%81%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;NioEndpoint&lt;/code&gt;的处理流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;NioEndpoint&lt;/code&gt;的处理流程如下：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209231731911.png&#34;
 	
 	
@@ -2831,8 +3013,10 @@
 &lt;p&gt;&lt;code&gt;ConnectionHandler&lt;/code&gt;内部使用一个&lt;code&gt;ConcurrentHashMap&lt;/code&gt;建立了&lt;code&gt;NioSocketWrapper&lt;/code&gt;和&lt;code&gt;Processor&lt;/code&gt;之间的映射。从上一篇&lt;a class=&#34;link&#34; href=&#34;./tomcat-architecture.md&#34; &gt;&amp;lt;Tomcat系统架构&amp;gt;&lt;/a&gt;的介绍我们知道，&lt;code&gt;Processor&lt;/code&gt;负责应用层协议的解析，那么我们需要为每个&lt;code&gt;NioSocketWrapper&lt;/code&gt;创建并关联一个&lt;code&gt;Processor&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;为什么要建立&lt;code&gt;NioSocketWrapper&lt;/code&gt;和&lt;code&gt;Processor&lt;/code&gt;之间的关联呢？因为&lt;code&gt;Processor&lt;/code&gt;在从&lt;code&gt;NioSocketWrapper&lt;/code&gt;中读取字节流进行协议解析时，数据可能并不完整，这时需要释放工作线程，当&lt;code&gt;Poller&lt;/code&gt;再次触发I/O读取事件时，可以根据&lt;code&gt;NioSocketWrapper&lt;/code&gt;找回关联的&lt;code&gt;Processor&lt;/code&gt;，继续进行未完成的协议解析工作。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Processor&lt;/code&gt;解析的结果是生成Tomcat的&lt;code&gt;Request&lt;/code&gt;对象，然后调用&lt;code&gt;Adapter.service(request, response)&lt;/code&gt;方法。&lt;code&gt;Adapter&lt;/code&gt;的职责是将Tomcat的&lt;code&gt;Request&lt;/code&gt;对象转换为标准的&lt;code&gt;ServletRequest&lt;/code&gt;后，传递给&lt;code&gt;Servlet&lt;/code&gt;引擎，最终会调用到用户编写的&lt;code&gt;Servlet.service(ServletRequest, ServletResponse)&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;nioendpoint的线程模型&#34;&gt;&lt;code&gt;NioEndpoint&lt;/code&gt;的线程模型&lt;/h2&gt;
-&lt;p&gt;我们注意到，在Tomcat 9的实现中，&lt;code&gt;Acceptor&lt;/code&gt;和&lt;code&gt;Poller&lt;/code&gt;都只有一个线程，并且不可配置。&lt;code&gt;Poller&lt;/code&gt;检测到的I/O事件会被扔进&lt;code&gt;Executor&lt;/code&gt;线程池中处理，最终&lt;code&gt;Servlet.service&lt;/code&gt;也是在&lt;code&gt;Executor&lt;/code&gt;中执行。这是一种常见的NIO线程模型，将I/O事件的检测和处理分开在不同的线程。&lt;/p&gt;
+&lt;h2 id=&#34;nioendpoint的线程模型&#34;&gt;
+    &lt;a href=&#34;#nioendpoint%e7%9a%84%e7%ba%bf%e7%a8%8b%e6%a8%a1%e5%9e%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;NioEndpoint&lt;/code&gt;的线程模型
+&lt;/h2&gt;&lt;p&gt;我们注意到，在Tomcat 9的实现中，&lt;code&gt;Acceptor&lt;/code&gt;和&lt;code&gt;Poller&lt;/code&gt;都只有一个线程，并且不可配置。&lt;code&gt;Poller&lt;/code&gt;检测到的I/O事件会被扔进&lt;code&gt;Executor&lt;/code&gt;线程池中处理，最终&lt;code&gt;Servlet.service&lt;/code&gt;也是在&lt;code&gt;Executor&lt;/code&gt;中执行。这是一种常见的NIO线程模型，将I/O事件的检测和处理分开在不同的线程。&lt;/p&gt;
 &lt;p&gt;但这种处理方式也有缺点。当&lt;code&gt;Selector&lt;/code&gt;检测到数据就绪事件时，运行&lt;code&gt;Selector&lt;/code&gt;线程的CPU已经在CPU cache中缓存了数据。这时切换到另外一个线程去读，这个读取线程很可能运行在另一个CPU核，此前缓存在CPU cache中的数据就没用了。同时这样频繁的线程切换也增加了系统内核的开销。&lt;/p&gt;
 &lt;p&gt;同样是基于NIO，Jetty使用了不同的线程模型：线程自己产生的I/O事件，由当前线程处理，&amp;ldquo;Eat What You Kill&amp;rdquo;，同时，Jetty可能会新建一个新线程继续检测和处理I/O事件。&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://webtide.com/eat-what-you-kill/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2881,8 +3065,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Channel&lt;/code&gt;注册到&lt;code&gt;EventLoop&lt;/code&gt;，一个&lt;code&gt;EventLoop&lt;/code&gt;能够服务多个&lt;code&gt;Channel&lt;/code&gt;。&lt;code&gt;EventLoop&lt;/code&gt;仅在一个线程上运行，因此所有I/O事件均由同一线程处理。&lt;/p&gt;
-&lt;h2 id=&#34;blocking-write的实现&#34;&gt;&lt;code&gt;blocking&lt;/code&gt; write的实现&lt;/h2&gt;
-&lt;p&gt;当通过&lt;code&gt;Response&lt;/code&gt;向客户端返回数据时，最终会调用&lt;code&gt;NioSocketWrapper.write(boolean block, ByteBuffer from)&lt;/code&gt;或&lt;code&gt;NioSocketWrapper.write(boolean block, byte[] buf, int off, int len)&lt;/code&gt;，将数据写入socket。&lt;/p&gt;
+&lt;h2 id=&#34;blocking-write的实现&#34;&gt;
+    &lt;a href=&#34;#blocking-write%e7%9a%84%e5%ae%9e%e7%8e%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;blocking&lt;/code&gt; write的实现
+&lt;/h2&gt;&lt;p&gt;当通过&lt;code&gt;Response&lt;/code&gt;向客户端返回数据时，最终会调用&lt;code&gt;NioSocketWrapper.write(boolean block, ByteBuffer from)&lt;/code&gt;或&lt;code&gt;NioSocketWrapper.write(boolean block, byte[] buf, int off, int len)&lt;/code&gt;，将数据写入socket。&lt;/p&gt;
 &lt;p&gt;我们注意到&lt;code&gt;write&lt;/code&gt;方法的第一个参数&lt;code&gt;block&lt;/code&gt;，它决定了write是使用&lt;code&gt;blocking&lt;/code&gt;还是&lt;code&gt;non-blocking&lt;/code&gt;方式。比较奇怪，虽然是&lt;code&gt;NioEndpoint&lt;/code&gt;，但write动作也不全是&lt;code&gt;non-blocking&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;一般NIO框架在处理write时都是&lt;code&gt;non-blocking&lt;/code&gt;方式，先尝试&lt;code&gt;SocketChannel.write(ByteBuffer)&lt;/code&gt;，如果&lt;code&gt;buffer.remaining() &amp;gt; 0&lt;/code&gt;，将剩余数据以某种方式缓存，然后把&lt;code&gt;SelectionKey.OP_WRITE&lt;/code&gt;添加到&lt;code&gt;SelectionKey&lt;/code&gt;的&lt;code&gt;interest set&lt;/code&gt;，等待被&lt;code&gt;Selector&lt;/code&gt;触发时再次尝试写出，直到&lt;code&gt;buffer&lt;/code&gt;中没有剩余数据。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;那是什么因素决定了&lt;code&gt;NioSocketWrapper.write&lt;/code&gt;是&lt;code&gt;blocking&lt;/code&gt;还是&lt;code&gt;non-blocking&lt;/code&gt;呢？&lt;/strong&gt;&lt;/p&gt;
@@ -2921,8 +3107,10 @@
         <pubDate>Thu, 21 Nov 2019 17:22:56 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/tomcat%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E7%AE%80%E4%BB%8B/</guid>
-        <description>&lt;h2 id=&#34;tomcat系统架构图&#34;&gt;Tomcat系统架构图&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209231726759.png&#34;
+        <description>&lt;h2 id=&#34;tomcat系统架构图&#34;&gt;
+    &lt;a href=&#34;#tomcat%e7%b3%bb%e7%bb%9f%e6%9e%b6%e6%9e%84%e5%9b%be&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    Tomcat系统架构图
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209231726759.png&#34;
 	
 	
 	
@@ -2963,8 +3151,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;/Server&amp;gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;connector&#34;&gt;&lt;code&gt;Connector&lt;/code&gt;&lt;/h2&gt;
-&lt;p&gt;我们再仔细看一下&lt;code&gt;Connector&lt;/code&gt;的内部实现。&lt;/p&gt;
+&lt;/div&gt;&lt;h2 id=&#34;connector&#34;&gt;
+    &lt;a href=&#34;#connector&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;Connector&lt;/code&gt;
+&lt;/h2&gt;&lt;p&gt;我们再仔细看一下&lt;code&gt;Connector&lt;/code&gt;的内部实现。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209231726558.png&#34;
 	
 	
@@ -3023,8 +3213,10 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;protocolhandler&#34;&gt;&lt;code&gt;ProtocolHandler&lt;/code&gt;&lt;/h2&gt;
-&lt;p&gt;Tomcat允许一个&lt;code&gt;Engine&lt;/code&gt;对接多个&lt;code&gt;Connector&lt;/code&gt;，每个&lt;code&gt;Connector&lt;/code&gt;可以使用不同的 I/O 模型，实现不同的应用层协议解析。&lt;code&gt;Connector&lt;/code&gt;屏蔽了 I/O 模型和协议的区别，传递给&lt;code&gt;Engine&lt;/code&gt;的是标准的&lt;code&gt;ServletRequest&lt;/code&gt;/&lt;code&gt;ServletResponse&lt;/code&gt;对象。&lt;/p&gt;
+&lt;h2 id=&#34;protocolhandler&#34;&gt;
+    &lt;a href=&#34;#protocolhandler&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;ProtocolHandler&lt;/code&gt;
+&lt;/h2&gt;&lt;p&gt;Tomcat允许一个&lt;code&gt;Engine&lt;/code&gt;对接多个&lt;code&gt;Connector&lt;/code&gt;，每个&lt;code&gt;Connector&lt;/code&gt;可以使用不同的 I/O 模型，实现不同的应用层协议解析。&lt;code&gt;Connector&lt;/code&gt;屏蔽了 I/O 模型和协议的区别，传递给&lt;code&gt;Engine&lt;/code&gt;的是标准的&lt;code&gt;ServletRequest&lt;/code&gt;/&lt;code&gt;ServletResponse&lt;/code&gt;对象。&lt;/p&gt;
 &lt;p&gt;由于 I/O 模型和应用层协议解析可以自由组合，Tomcat使用&lt;code&gt;ProtocolHandler&lt;/code&gt;实现这种组合。各种组合都有相应的具体实现类。比如：Http11NioProtocol 和 AjpNio2Protocol。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/images/202209231728723.png&#34;
 	
