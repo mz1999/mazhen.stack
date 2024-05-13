@@ -1626,6 +1626,24 @@
     &gt;嵌入式C语言自我修养&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
+&lt;h2 id=&#34;编程&#34;&gt;
+    &lt;a href=&#34;#%e7%bc%96%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    编程
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/35384099/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;征服C指针&lt;/a&gt; 彻底理解和掌握指针的各种用法和技巧&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/35218533/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;C专家编程&lt;/a&gt; Sun公司编译器和OS核心开发团队成员，对C的历史、语言特性、声明、数组、指针、链接、运行时、内存等问题进行了细致的讲解和深入的分析&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/theokwebb/C-from-Scratch&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;C from Scratch&lt;/a&gt; 一个学习 C 语言的从零开始的路线图，包括推荐的课程、项目和资源，以及进阶到 x86-64 汇编语言和操作系统内部的指导。&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://pythontutor.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Online Compiler, Visual Debugger&lt;/a&gt; 独特的逐步可视化调试工具，强烈推荐！&lt;/li&gt;
+&lt;li&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/column/intro/100100701&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;深入 C 语言和程序运行原理&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;Linux/UNIX%e7%b3%bb%e7%bb%9f%e7%bc%96%e7%a8%8b%e6%89%8b%e5%86%8c&#34; &gt;Linux/UNIX系统编程手册&lt;/a&gt; The Linux Programming Interface: A Linux and UNIX System Programming Handbook&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/25900403/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;UNIX环境高级编程&lt;/a&gt; Advanced Programming in the UNIX Environment&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&#34;linux&#34;&gt;
     &lt;a href=&#34;#linux&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     Linux
@@ -1675,20 +1693,6 @@
     &gt;图解HTTP&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/26941639/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;网络是怎样连接的&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;编程&#34;&gt;
-    &lt;a href=&#34;#%e7%bc%96%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
-    编程
-&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/35218533/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;C专家编程&lt;/a&gt; Expert C Programming: Deep C Secrets&lt;/li&gt;
-&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://pythontutor.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;Online Compiler, Visual Debugger&lt;/a&gt; 独特的逐步可视化调试工具，强烈推荐！&lt;/li&gt;
-&lt;li&gt;极客时间：&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/column/intro/100100701&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;深入 C 语言和程序运行原理&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;Linux/UNIX%e7%b3%bb%e7%bb%9f%e7%bc%96%e7%a8%8b%e6%89%8b%e5%86%8c&#34; &gt;Linux/UNIX系统编程手册&lt;/a&gt; The Linux Programming Interface: A Linux and UNIX System Programming Handbook&lt;/li&gt;
-&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/25900403/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;UNIX环境高级编程&lt;/a&gt; Advanced Programming in the UNIX Environment&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;编译原理&#34;&gt;
     &lt;a href=&#34;#%e7%bc%96%e8%af%91%e5%8e%9f%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
