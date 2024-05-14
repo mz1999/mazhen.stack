@@ -6,7 +6,23 @@
         <description>Recent content in Tags on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Mon, 06 Nov 2023 11:18:06 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 14 May 2024 15:04:43 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Glassfish</title>
+        <link>https://mazhen.tech/tags/glassfish/</link>
+        <pubDate>Tue, 14 May 2024 15:04:43 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/glassfish/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Java</title>
+        <link>https://mazhen.tech/tags/java/</link>
+        <pubDate>Tue, 14 May 2024 15:04:43 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/java/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Kernel</title>
         <link>https://mazhen.tech/tags/kernel/</link>
         <pubDate>Mon, 06 Nov 2023 11:18:06 +0800</pubDate>
@@ -44,22 +60,6 @@
         <pubDate>Wed, 27 Sep 2023 18:30:59 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/db/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Java</title>
-        <link>https://mazhen.tech/tags/java/</link>
-        <pubDate>Wed, 27 Sep 2023 18:30:59 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/java/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Glassfish</title>
-        <link>https://mazhen.tech/tags/glassfish/</link>
-        <pubDate>Fri, 21 Jul 2023 16:48:55 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/glassfish/</guid>
         <description></description>
         </item>
         <item>
