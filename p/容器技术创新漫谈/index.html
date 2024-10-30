@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注的目光都聚焦在Kubernetes上时，容器技术领域在2018年也发生了很多创新，包括amazon最近开源的轻量级虚拟机管理器 Firecracker，Google在今年5月份开源的基于用户态操作系统内核的 gVisor 容器，还有更早开源的虚拟化容器项目 KataContainers，可谓百花齐放。一般的开发者可能认为容器就等于Docker，没想到容器领域还在发生着这么多创新。我在了解这些项目时，发现如果没有一些背景知识，很难get到它们的创新点。我试着通过这篇文章进行一次背景知识的梳理。让我们先从最基本的问题开始：操作系统是怎么工作的？\n">
 <title>容器技术创新漫谈</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="容器技术创新漫谈">
-<meta property='og:description' content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
+<meta property='og:description' content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注的目光都聚焦在Kubernetes上时，容器技术领域在2018年也发生了很多创新，包括amazon最近开源的轻量级虚拟机管理器 Firecracker，Google在今年5月份开源的基于用户态操作系统内核的 gVisor 容器，还有更早开源的虚拟化容器项目 KataContainers，可谓百花齐放。一般的开发者可能认为容器就等于Docker，没想到容器领域还在发生着这么多创新。我在了解这些项目时，发现如果没有一些背景知识，很难get到它们的创新点。我试着通过这篇文章进行一次背景知识的梳理。让我们先从最基本的问题开始：操作系统是怎么工作的？\n">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E6%BC%AB%E8%B0%88/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='networking' /><meta property='article:published_time' content='2018-12-16T22:03:21&#43;08:00'/><meta property='article:modified_time' content='2018-12-16T22:03:21&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="容器技术创新漫谈">
-<meta name="twitter:description" content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注">
+<meta name="twitter:description" content="Kubernetes在2017年赢得了容器编排之战，使得基于容器+Kubernetes来构建PaaS平台成为了云计算的主流方式。在人们把关注的目光都聚焦在Kubernetes上时，容器技术领域在2018年也发生了很多创新，包括amazon最近开源的轻量级虚拟机管理器 Firecracker，Google在今年5月份开源的基于用户态操作系统内核的 gVisor 容器，还有更早开源的虚拟化容器项目 KataContainers，可谓百花齐放。一般的开发者可能认为容器就等于Docker，没想到容器领域还在发生着这么多创新。我在了解这些项目时，发现如果没有一些背景知识，很难get到它们的创新点。我试着通过这篇文章进行一次背景知识的梳理。让我们先从最基本的问题开始：操作系统是怎么工作的？\n">
     <link rel="shortcut icon" href="/favicon.png" />
 
-  
-    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -32,10 +30,6 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
-    
-  
-
-
     </head>
     <body class="
     article-page
@@ -79,7 +73,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -895,7 +889,7 @@
     
     <section class="powerby">
         
-            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
         使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
         主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>

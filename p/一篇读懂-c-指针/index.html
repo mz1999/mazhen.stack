@@ -1,0 +1,2499 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：\n《C 和指针（Pointers on C）》 《征服 C 指针》 《深入理解 C 指针（Understanding and using C pointers）》 Pointers in C: A Hands on Approach &hellip; 同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。\n">
+<title>一篇读懂 C 指针</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="一篇读懂 C 指针">
+<meta property='og:description' content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：\n《C 和指针（Pointers on C）》 《征服 C 指针》 《深入理解 C 指针（Understanding and using C pointers）》 Pointers in C: A Hands on Approach &hellip; 同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。\n">
+<meta property='og:url' content='https://mazhen.tech/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='c' /><meta property='article:tag' content='linux' /><meta property='article:published_time' content='2024-10-30T14:13:24&#43;08:00'/><meta property='article:modified_time' content='2024-10-30T14:13:24&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="一篇读懂 C 指针">
+<meta name="twitter:description" content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：\n《C 和指针（Pointers on C）》 《征服 C 指针》 《深入理解 C 指针（Understanding and using C pointers）》 Pointers in C: A Hands on Approach &hellip; 同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。\n">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#什么是指针">什么是指针</a></li>
+    <li><a href="#为什么-c-的指针很难">为什么 C 的指针很难</a></li>
+    <li><a href="#解读-c-语言的声明">解读 C 语言的声明</a>
+      <ol>
+        <li><a href="#混乱的声明语法">混乱的声明语法</a></li>
+        <li><a href="#c-声明的优先级规则">C 声明的优先级规则</a></li>
+        <li><a href="#关于-const">关于 const</a></li>
+      </ol>
+    </li>
+    <li><a href="#指针和数组">指针和数组</a>
+      <ol>
+        <li><a href="#数组与指针截然不同">数组与指针截然不同</a></li>
+        <li><a href="#什么时候数组与指针相同">什么时候数组与指针相同</a>
+          <ol>
+            <li><a href="#在表达式中">在表达式中</a></li>
+            <li><a href="#函数的形参声明">函数的形参声明</a></li>
+          </ol>
+        </li>
+        <li><a href="#什么时候数组和指针不能混淆">什么时候数组和指针不能混淆</a>
+          <ol>
+            <li><a href="#数组的定义">数组的定义</a></li>
+            <li><a href="#外部数组的声明">外部数组的声明</a></li>
+          </ol>
+        </li>
+        <li><a href="#多维数组">多维数组</a></li>
+        <li><a href="#关于空的下标运算符-">关于空的下标运算符 []</a></li>
+      </ol>
+    </li>
+    <li><a href="#指向函数的指针">指向函数的指针</a></li>
+    <li><a href="#指针的基本用法">指针的基本用法</a>
+      <ol>
+        <li><a href="#从函数返回多个值">从函数返回多个值</a></li>
+        <li><a href="#将数组作为参数传递">将数组作为参数传递</a></li>
+        <li><a href="#多维数组作为参数传递">多维数组作为参数传递</a></li>
+        <li><a href="#动态数组">动态数组</a></li>
+        <li><a href="#动态数组的数组">动态数组的数组</a></li>
+        <li><a href="#动态数组的动态数组">动态数组的动态数组</a>
+          <ol>
+            <li><a href="#命令行参数">命令行参数</a></li>
+          </ol>
+        </li>
+        <li><a href="#通过参数返回指针">通过参数返回指针</a></li>
+        <li><a href="#双指针">双指针</a></li>
+        <li><a href="#纵横可变的二维数组">纵横可变的二维数组</a></li>
+        <li><a href="#数组的动态数组">数组的动态数组</a></li>
+        <li><a href="#通用数据结构">通用数据结构</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/">一篇读懂 C 指针</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-10-30</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 28 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：</p>
+<ul>
+<li><a class="link" href="https://book.douban.com/subject/35216781/"  target="_blank" rel="noopener"
+    >《C 和指针（Pointers on C）》</a></li>
+<li><a class="link" href="https://book.douban.com/subject/35384099/"  target="_blank" rel="noopener"
+    >《征服 C 指针》</a></li>
+<li><a class="link" href="https://book.douban.com/subject/25827246/"  target="_blank" rel="noopener"
+    >《深入理解 C 指针（Understanding and using C pointers）》</a></li>
+<li><a class="link" href="https://www.oreilly.com/library/view/pointers-in-c/9781430259114/"  target="_blank" rel="noopener"
+    >Pointers in C: A Hands on Approach</a></li>
+<li>&hellip;</li>
+</ul>
+<p>同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202409271743463.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Matrix"
+	
+	
+></p>
+<p>本文的主要内容来自《征服 C 指针》和<a class="link" href="https://book.douban.com/subject/35218533/"  target="_blank" rel="noopener"
+    >《C 专家编程》</a>，这不是两本通常意义的 C 语言入门书，没有罗列式的讲解 C 的语法，而是能将知识点融会贯通，带有作者鲜明的个人风格，体现出他们丰富的实践经验。《C 专家编程》的作者 <a class="link" href="https://afu.com/"  target="_blank" rel="noopener"
+    >Peter van der Linden</a> 曾在 Sun 和 Apple 工作，是 Sun 编译器、SunOS kernel 和 Solaris kernel 的核心开发成员。</p>
+<h2 id="什么是指针">
+    <a href="#%e4%bb%80%e4%b9%88%e6%98%af%e6%8c%87%e9%92%88" class="header-anchor">#</a>
+    什么是指针
+</h2><p>指针概念本身并不难，稍有编程经验的人都很容易理解：和 int，double 等类型一样，<strong>指针也是一种类型，它的值是内存地址</strong>。我们用指针来保存其他类型变量的地址。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410140952403.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="pointer"
+	
+	
+></p>
+<p>如上图，变量 <code>num1</code> 的类型是 <code>int</code>，它的值是 5；变量 <code>num_p</code> 的类型是<strong>指向 int 的指针类型</strong>，它的值是<strong>变量 num1 的内存地址</strong>。</p>
+<p>指针变量 <code>num_p</code> 在初始化时不指向任何变量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">num1</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">num2</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">num_p</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以对 <code>int</code> 类型的变量 <code>num1</code> 使用取地址运算符 <code>&amp;</code>，获取变量 <code>num1</code> 的地址，然后赋值给指针变量 <code>num_p</code> ，这时指针 <code>num_p</code> 中的值就是变量 <code>num1</code> 的地址：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">num_p</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">num1</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对指针使用间接运算符 <code>*</code>，表示该指针指向的变量。可以通过指针 <code>num_p</code> 修改变量 <code>num1</code> 的值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// 通过 num_p 输出 num1 的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;*num_p..%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="o">*</span><span class="n">num_p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 通过 num_p 更改 num1 的值 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">*</span><span class="n">num_p</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>补充</strong></p>
+<blockquote>
+<p>变量名本质上是内存地址的别名，只是为了引用地址方便。在编译后生成的机器代码中，变量名被替换为相应的内存地址，变量名本身不会出现在最终的机器代码中。为了调试方便，编译器在生成可执行文件时可以选择保留符号信息（使用 <code>-g</code> 选项）。<a class="link" href="https://en.wikipedia.org/wiki/Debug_symbol"  target="_blank" rel="noopener"
+    >调试符号信息</a>包含了变量名、行号、文件名等信息。</p>
+</blockquote>
+<h2 id="为什么-c-的指针很难">
+    <a href="#%e4%b8%ba%e4%bb%80%e4%b9%88-c-%e7%9a%84%e6%8c%87%e9%92%88%e5%be%88%e9%9a%be" class="header-anchor">#</a>
+    为什么 C 的指针很难
+</h2><p>了解了指针的基本概念，你会觉得：就这，一点也不难呀。实际上，C 语言指针的难点并不是指针概念本身，而是在于下面两个原因：</p>
+<ol>
+<li><strong>指针和 C 语言混乱的声明语法纠缠在一起</strong></li>
+<li><strong>指针和数组的微妙关系</strong></li>
+</ol>
+<p>先看第一个原因，下面这个函数原型声明来自 telnet 程序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span><span class="o">*</span> <span class="k">const</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>初次看到这样的声明让人头大，这到底是什么指针呀！不能简单的用“指针就是地址”来理解这里的指针。</p>
+<p>第二个原因，数组和指针在很多情况下可以“互换”使用。例如声明 int 数组和指针，并将数组赋值给指针：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">array</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">array</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们可以使用指针运算的方式访问数组元素：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="o">*</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>也可以把指针当做数组，使用下标访问数组元素：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>甚至可以对数组变量进行指针运算：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="o">*</span><span class="p">(</span><span class="n">array</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>给人的感觉是，数组和指针完全等价，可以互换使用，但这个说法并不完全正确。</p>
+<p>数组和指针本来就是不同的东西，虽然在很多场景下它们可以互换使用，但有些场景却必须严格区分。对指针和数组的混乱认知，是造成指针难以理解的另一个重要原因。</p>
+<p>因此，我们要攻克 C 语言的指针，只了解指针的基本概念是完全不够的，必须彻底搞懂 C 语言的声明，以及指针和数组的关系。下面我就分别进行介绍。</p>
+<h2 id="解读-c-语言的声明">
+    <a href="#%e8%a7%a3%e8%af%bb-c-%e8%af%ad%e8%a8%80%e7%9a%84%e5%a3%b0%e6%98%8e" class="header-anchor">#</a>
+    解读 C 语言的声明
+</h2><h3 id="混乱的声明语法">
+    <a href="#%e6%b7%b7%e4%b9%b1%e7%9a%84%e5%a3%b0%e6%98%8e%e8%af%ad%e6%b3%95" class="header-anchor">#</a>
+    混乱的声明语法
+</h3><p>C 的声明语法有些奇怪，原因是 C 语言最初的设计哲学：对象的声明形式与它的使用形式尽可能相似。例如声明一个 int 类型的指针数组：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后以 <code>*p[i]</code> 这样的形式使用指针所指向的 int 数据，声明和使用的形式非常相似。然而这并不是一个确定的规则，例如当我们在指针类型上使用下标运算符时：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">array</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对指针的声明和使用形式就完全不同。在引入 <code>volatile</code> 和 <code>const</code> 关键字后，就出现了更大的破绽：这些关键字只能出现在声明中​，并不会出现在使用中，声明和使用完全相同的情况越来越少。看来当初决定让声明和使用形式上相同不是一个好主意。</p>
+<p>回到前面 int 指针数组的声明 <code>int *p[3]</code>，只从声明的表面上看，你不能确定 <code>int *p[3]</code> 是一个 int 类型的指针数组，还是一个指向 int 数组的指针。你必须记住操作符的优先级，下标操作符 <code>[]</code> 的优先级最高，才能确定 <code>p</code> 首先是一个数组，然后它的元素是 <code>int</code> 类型的指针。</p>
+<p>这就是 C 语言声明最大的问题，无法以一种自然方式从左向右解读一个声明。遇到下面这样的声明，即使是经验丰富的 C 程序员也会觉得麻烦：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span> <span class="k">const</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>《C 专家编程》给出了一种方法，让解读复杂声明变得轻松。</p>
+<h3 id="c-声明的优先级规则">
+    <a href="#c-%e5%a3%b0%e6%98%8e%e7%9a%84%e4%bc%98%e5%85%88%e7%ba%a7%e8%a7%84%e5%88%99" class="header-anchor">#</a>
+    C 声明的优先级规则
+</h3><p>我们可以按照下面表格分步拆解声明，将 C 的声明解读为自然语言。</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th></th>
+          <th><strong>C 声明的优先级规则</strong></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>A</strong></td>
+          <td>声明从名称开始，然后按照优先级顺序阅读。</td>
+      </tr>
+      <tr>
+          <td><strong>B</strong></td>
+          <td>优先级从高到低的顺序为：</td>
+      </tr>
+      <tr>
+          <td><strong>B.1</strong></td>
+          <td>声明中被括号括起来部分</td>
+      </tr>
+      <tr>
+          <td><strong>B.2</strong></td>
+          <td>后缀运算符：</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>括号 <code>()</code> 表示函数</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>方括号 <code>[]</code> 表示数组</td>
+      </tr>
+      <tr>
+          <td><strong>B.3</strong></td>
+          <td>前缀运算符：星号表示“指向&hellip;的指针”。</td>
+      </tr>
+      <tr>
+          <td><strong>C</strong></td>
+          <td>如果 <code>const</code> 和/或 <code>volatile</code> 关键字紧邻类型说明符（例如 <code>int</code>、<code>long</code> 等），则它们作用于类型说明符。<br>否则，<code>const</code> 和/或 <code>volatile</code> 关键字作用于其左边的指针星号。</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>现在用上面表格定义的优先级规则，来解读这个原型声明：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span> <span class="k">const</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>应用规则</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>A</strong></td>
+          <td>首先，找到变量名 &ldquo;next&rdquo;，并注意它直接被括号包围</td>
+      </tr>
+      <tr>
+          <td><strong>B.1</strong></td>
+          <td>然后，我们将括号中的内容作为一个整体</td>
+      </tr>
+      <tr>
+          <td><strong>B.3</strong></td>
+          <td>进入括号内，注意到前缀操作符 <code>*</code>，得出“<strong>next 是一个指针，它指向&hellip;</strong>”</td>
+      </tr>
+      <tr>
+          <td><strong>B</strong></td>
+          <td>然后，我们走出括号，可以选择前缀操作符  <code>*</code> 或者后缀操作符 <code>()</code></td>
+      </tr>
+      <tr>
+          <td><strong>B.2</strong></td>
+          <td>规则 B.2 告诉我们优先级较高的是右边的函数括号 <code>()</code>，因此我们得到“<strong>next 是指针，它指向一个函数，这个函数返回&hellip;</strong> ”。</td>
+      </tr>
+      <tr>
+          <td><strong>B.3</strong></td>
+          <td>接着处理前缀星号 <code>*</code>，得出“<strong>这个函数返回一个指针，它指向&hellip;</strong>”</td>
+      </tr>
+      <tr>
+          <td><strong>C</strong></td>
+          <td>最后，将 &ldquo;char * const&rdquo; 解释为“<strong>指向 char 的只读指针</strong>”</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>将所有部分结合在一起可以解读为：</p>
+<p>“<strong>next 是一个指针，它指向一个函数，这个函数返回一个指针，该指针指向另一个指针，它是一个指向 char 的只读指针。</strong>”</p>
+<p>对照上面的优先级规则表格，我们很容易的将复杂的声明，转换为了易于理解的自然语言。</p>
+<p>再试试另外一个例子：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span> <span class="n">c</span><span class="p">[</span><span class="mi">10</span><span class="p">])(</span><span class="kt">int</span> <span class="o">**</span><span class="n">p</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>按照声明的优先级规则解读：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>应用规则</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>A</strong></td>
+          <td>从变量名 <code>c</code> 开始</td>
+      </tr>
+      <tr>
+          <td><strong>B</strong></td>
+          <td>可以选择前缀操作符  <code>*</code> ，或者后缀操作符 <code>[]</code></td>
+      </tr>
+      <tr>
+          <td><strong>B.2</strong></td>
+          <td>选择优先级较高的右边方括号<code>[]</code>，因此我们得到“<strong>c 是一个包含了 10 个元素数组，元素类型是&hellip;</strong>”</td>
+      </tr>
+      <tr>
+          <td><strong>B.3</strong></td>
+          <td>接着处理前缀星号 <code>*</code>，得出“<strong>元素类型是指针，它指向&hellip;</strong>”</td>
+      </tr>
+      <tr>
+          <td><strong>B.1</strong></td>
+          <td>将括号中的内容作为一个整体</td>
+      </tr>
+      <tr>
+          <td><strong>B</strong></td>
+          <td>可以选择前缀操作符  <code>*</code> 或者后缀操作符 <code>()</code></td>
+      </tr>
+      <tr>
+          <td><strong>B.2</strong></td>
+          <td>选择优先级较高的右边函数括号 <code>()</code>，因此我们得到“**&hellip; 是一个函数，这个函数接收的参数是 int **p，返回值是&hellip; **”。</td>
+      </tr>
+      <tr>
+          <td><strong>B.3</strong></td>
+          <td>接着处理前缀星号 <code>*</code>，得出“<strong>返回值是一个指向 char 的指针</strong>”</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>最后将所有部分合在一起：</p>
+<p>“<strong>c 是一个包含了 10 个元素数组，元素类型是指针，它指向是一个函数，这个函数接收的参数是 int **p，返回值是一个指向 char 的指针。</strong>”</p>
+<p>完美！按照这个规则，再复杂的声明都能读懂了。</p>
+<p>我们可以按照上面表格的规则，可以写一个解析程序，将声明翻译文自然语言。其实这样的解析程序已经被写了无数遍，通常被称为 Cdecl（C declaration）。现在还有这样的在线服务 <a class="link" href="https://cdecl.org/"  target="_blank" rel="noopener"
+    >cdecl.org</a>，输入前面的例子 <code>char * const *(*next)();</code>，会得到下面的结果：</p>
+<blockquote>
+<p>declare next as pointer to function returning pointer to const pointer to char</p>
+</blockquote>
+<p>妈妈再也不用担心我看不懂 C 的声明了！</p>
+<h3 id="关于-const">
+    <a href="#%e5%85%b3%e4%ba%8e-const" class="header-anchor">#</a>
+    关于 const
+</h3><p><code>const</code> 并不一定代表常量，它表示被它修饰的对象为“<strong>只读</strong>”。</p>
+<p>涉及指针和 <code>const</code> 的声明有几种可能的顺序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="o">*</span> <span class="n">grape</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">const</span> <span class="o">*</span> <span class="n">grape</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span> <span class="k">const</span> <span class="n">grape_jelly</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>根据优先级规则 C，前面两种情况，<code>const</code> 作用于类型说明符 <code>int</code>，表示<strong>指针所指向的对象为只读</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="o">*</span> <span class="n">grape</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">*</span><span class="n">grape</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>   <span class="c1">// ✘ 不能修改 grape 指向的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">grape</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>    <span class="c1">// ✓ 可以修改指针 grape 自身的地址
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后一种情况，<code>const</code> 作用于左边的指针星号，表示<strong>指针本身是只读的</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="k">const</span> <span class="n">grape_jelly</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">*</span><span class="n">grape_jelly</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span> <span class="c1">// ✓ 可以修改 grape_jelly 指向的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">grape_jelly</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span> <span class="c1">// ✘ 不能修改 grape_jelly 的地址
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果想指针和指针所指向的对象都为只读，可以使用下面的声明：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="o">*</span> <span class="k">const</span> <span class="n">grape</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">const</span> <span class="o">*</span> <span class="k">const</span> <span class="n">grape</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>实际上，<code>const</code> 最常见的使用场景是，当函数的参数为指针时，将指针指向的对象设置为只读。例如 <code>strcpy</code> 的原型声明如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="nf">strcpy</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">dest</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">src</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>const</code> 表明了 <code>strcpy</code> 设计者的意图，<code>src</code> 作为输入，它指向的对象是只读的，不会被 <code>strcpy</code> 修改。</p>
+<p>搞懂了 C 语言的声明，下面再看看指针和数组的关系。</p>
+<h2 id="指针和数组">
+    <a href="#%e6%8c%87%e9%92%88%e5%92%8c%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    指针和数组
+</h2><h3 id="数组与指针截然不同">
+    <a href="#%e6%95%b0%e7%bb%84%e4%b8%8e%e6%8c%87%e9%92%88%e6%88%aa%e7%84%b6%e4%b8%8d%e5%90%8c" class="header-anchor">#</a>
+    数组与指针截然不同
+</h3><p>在 C 语言中，数组和指针是截然不同的两种东西：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410181050430.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="array vs pointer"
+	
+	
+></p>
+<p>数组是相同类型的对象排列而成的集合，而指针的值是地址，表示指向某处。</p>
+<p>但在很多情况下，数组和指针又可以互换使用，这让初学者感到困惑，到底它们什么时候是相同的，什么时候必须严格区分不能混淆？数组和指针这种微妙的关系，是造成指针成为难点的另一个重要原因。</p>
+<p>我们分别从“声明”和“使用”这两种情况考虑：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410181548464.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="array vs. pointer"
+	
+	
+></p>
+<p>数组和指针可以在下面两种情况下互换使用：</p>
+<ol>
+<li>在表达式中使用时</li>
+<li>在声明函数形参时</li>
+</ol>
+<p>其他情况下，两者不能混淆。</p>
+<h3 id="什么时候数组与指针相同">
+    <a href="#%e4%bb%80%e4%b9%88%e6%97%b6%e5%80%99%e6%95%b0%e7%bb%84%e4%b8%8e%e6%8c%87%e9%92%88%e7%9b%b8%e5%90%8c" class="header-anchor">#</a>
+    什么时候数组与指针相同
+</h3><h4 id="在表达式中">
+    <a href="#%e5%9c%a8%e8%a1%a8%e8%be%be%e5%bc%8f%e4%b8%ad" class="header-anchor">#</a>
+    在表达式中
+</h4><p>根据 ANSI C 标准，<strong>在表达式中，数组名会被编译器解释为指向数组第一个元素的指针</strong>。因此，代码可以像这样写：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">array</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">array</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在表达式中，数组名 <code>array</code> 被视为“指向数组第一个元素的指针”，将它赋值给指针 <code>p</code> 后，<code>p</code> 也指向数组的第一个元素。</p>
+<p>要访问数组的第二个元素，可以使用下标运算符 <code>[]</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其实<strong>在表达式中，下标运算符 <code>[]</code> 与数组无关</strong>，它的含义是“从指针指向的地址开始，加上偏移量，取出该位置的值”。编译器会将 <code>array[i]</code> 转换为 <code>*(array + i)</code>，这两种形式是等价的，<strong><code>array[i]</code> 只是 <code>*(array + i)</code> 的简化写法</strong>。例如，以下两种方式都能访问数组的第二个元素：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">*</span><span class="p">(</span><span class="n">array</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>由于在表达式中，数组名 <code>array</code> 相当于指向数组首元素的指针，所以同样可以通过指针 <code>p</code> 来访问数组元素：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="o">*</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因此，可以说<strong>在表达式中，数组和指针是等价的，可以互换使用</strong>。</p>
+<p>另外，下标运算符<code>[]</code> 具备交换性，就像加法操作符一样，可以交换两个操作数的位置，保持意义不变，下面两种形式都是正确的，访问数组的第二个元素：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">1</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="左值">
+    <a href="#%e5%b7%a6%e5%80%bc" class="header-anchor">#</a>
+    左值
+</h5><p>虽然在表达式中，<code>array</code> 确实被解释为指针，但它本身不能被赋值修改。下面的代码会导致错误：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">array</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span> <span class="c1">// expression must be a modifiable lvalue
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>提示的错误信息为：“expression must be a modifiable lvalue”。那么，<strong>lvalue</strong> 是什么意思呢？</p>
+<p>首先，我们来理解错误信息中的“<strong>expression（表达式）</strong>”。<strong>表达式</strong>由运算符和操作数组成，能够通过计算返回一个结果，且可能会产生副作用（如修改变量值）。标识符、常量等属于<strong>基本表达式</strong>，多个表达式通过运算符连接仍然构成表达式。表达式的关键特征是它会产生一个结果。</p>
+<p>相比之下，C 语言中有许多不产生值的语句，比如控制语句和声明语句。而在 Rust 中，几乎所有东西都是表达式，包括控制结构和赋值操作。</p>
+<p>接下来，我们来看看什么是<strong>左值</strong>。变量名在不同上下文中有两种含义：既可以表示<strong>地址</strong>，也可以表示该地址中存储的<strong>内容</strong>。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">array</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这条赋值语句中，<code>p</code> 表示一个内存地址，<code>array</code> 表示存储在该地址中的值。当变量名出现在赋值语句的左边时，它代表一个内存地址，称为<strong>左值</strong>；出现在右边时，它代表内存地址中的内容，称为<strong>右值</strong>。</p>
+<p>编译器在编译时会为每个变量分配地址，这个地址在编译时是已知的，而变量中的值只有在运行时才能确定。因此，<strong>左值</strong>在编译时是已知的，而<strong>右值</strong>要到运行时才可得知。</p>
+<p><strong>左值</strong>可以被修改，意味着它能出现在赋值语句的左边，可以向该位置存入数据。<strong>右值</strong>则不能被修改，不能直接赋值给它：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">i</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>  <span class="c1">// ✓
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="mi">5</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// ✘
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>数组名在表达式中被解释为指针，即表示内存中的位置，但它是<strong>不可修改的左值</strong>。这是因为数组名实际上是一个常量指针，表示数组起始位置的地址，而不是一个可以修改的内存位置。因此，不能对数组名进行赋值操作。不过，虽然数组名本身不可修改，数组的元素却是<strong>左值</strong>，可以通过数组名和索引来访问和修改这些元素。</p>
+<p>最后，回到那个错误信息：“expression must be a modifiable lvalue”，它的意思是，表达式必须是一个可修改的左值。而数组名是<strong>不可修改的左值</strong>，因此会导致编译错误。</p>
+<h5 id="例外情况">
+    <a href="#%e4%be%8b%e5%a4%96%e6%83%85%e5%86%b5" class="header-anchor">#</a>
+    例外情况
+</h5><p>从前面的介绍我们已经知道，在表达式中，数组和指针是等价的，可以互换使用，但该规则有下面三种例外情况。</p>
+<ol>
+<li><strong>当数组名作为 <code>sizeof</code> 运算符的操作数时</strong></li>
+</ol>
+<p>在数组名作为 <code>sizeof</code> 运算符的操作数的情况下，将数组名解读为指针这一规则是无效的，在这种情况下返回的是数组整体的长度。</p>
+<ol start="2">
+<li><strong>当数组名作为 <code>&amp;</code> 运算符的操作数时</strong></li>
+</ol>
+<p>在数组名前加上 <code>&amp;</code> 之后，返回的就是指向数组整体的指针，而不是初始元素指针的指针。</p>
+<p>注意 <code>&amp;array</code> 和 <code>array</code> 的区别。<code>array</code> 表示“指向数组初始元素的指针”，并 <code>&amp;array</code> 表示“指向数组的指针”。实际声明一个指向数组的指针：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">array</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">array_p</span><span class="p">)[</span><span class="mi">3</span><span class="p">];</span> <span class="c1">// array_p 是指向 int 的数组的指针，这个数组有 3 个元素。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">array_p</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">array</span><span class="p">;</span>  <span class="c1">// 在数组前加上&amp;，获取指向数组的指针
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果执行下面这样的赋值，编译器会报出警告。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">array_p</span> <span class="o">=</span> <span class="n">array</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这是因为，“指向 int 的指针”与“指向 int 的数组的指针”是不同的类型。</p>
+<p><code>array</code> 和 <code>&amp;array</code> 指向的是相同的地址。那么它们到底有何不同呢？那就是在使用它们进行指针运算时，结果不同。<code>array + 1</code> 前进 4 个字节（假设 <code>int</code> 类型的长度是 4 个字节），而 <code>array_p + 1</code> 则前进 <code>4 * 3</code> 个字节。</p>
+<ol start="3">
+<li><strong>初始化数组时的字符串字面量</strong></li>
+</ol>
+<p>用双引号括起来的字符串被称为 <strong>字符串字面量（string literal）</strong>。字符串字面量的类型实际上是“<code>char</code> 数组”，因此在表达式中，它会被解读为指向 <code>char</code> 类型的指针。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">str</span> <span class="o">=</span> <span class="s">&#34;abc&#34;</span><span class="p">;</span> <span class="c1">// 将指向&#34;abc&#34;初始元素的指针赋值给 str
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>当用字符串字面量来初始化 <code>char</code> 数组时，编译器会进行特殊处理。它会将字符串字面量视为一个省略了花括号的字符列表。也就是说，编译器会将 <code>&quot;abc&quot;</code> 这样的字符串字面量视为 <code>{ 'a', 'b', 'c', '\0' }</code> 这样的字符数组。以下两种初始化方式是等价的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">str</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;abc&#34;</span><span class="p">;</span> <span class="c1">//等价于下面的形式
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">char</span> <span class="n">str</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="sc">&#39;a&#39;</span><span class="p">,</span> <span class="sc">&#39;b&#39;</span><span class="p">,</span> <span class="sc">&#39;c&#39;</span><span class="p">,</span> <span class="sc">&#39;\0&#39;</span><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>需要注意的是，这种处理方式只在数组初始化时适用，所以以下写法是不合法的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="n">str</span> <span class="o">=</span> <span class="s">&#34;abc&#34;</span><span class="p">;</span> <span class="c1">// 错误：expression must be a modifiable lvalue
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果初始化的不是 <code>char</code> 数组，就不会触发这种特殊处理：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="s">&#34;abc&#34;</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这种情况下，<code>&quot;abc&quot;</code> 是一个 <code>char</code> 数组，因为它出现在表达式中，所以会被解释为指向该数组首元素的指针，进而被赋值给 <code>str</code>。</p>
+<h4 id="函数的形参声明">
+    <a href="#%e5%87%bd%e6%95%b0%e7%9a%84%e5%bd%a2%e5%8f%82%e5%a3%b0%e6%98%8e" class="header-anchor">#</a>
+    函数的形参声明
+</h4><p>在 C 语言中，数组不能被整体操作，也就是说，不能直接将一个数组赋值给另一个数组，或者将数组作为参数传递给其他函数。那么，如果我们想把一个数组传递给函数，该怎么做呢？可以通过传递指向数组首元素的指针来实现。</p>
+<p>在函数形参的声明中，编译器会将数组的形式自动改写为指向数组第一个元素的指针。编译器实际上只会将数组的地址传递给函数，而不是传递整个数组的副本。</p>
+<p>下面几种形参声明方式都是等价的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">a</span><span class="p">)</span> <span class="cm">/* 模式 1 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[])</span> <span class="cm">/* 模式 2 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span> <span class="cm">/* 模式 3 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>模式 2 与模式 3 是模式 1 的语法糖。即使像模式 3 写上元素个数，编译器也会无视。不管选择哪种方法，在函数内部事实上获得的都是一个指针。</p>
+<p>也就是说，<strong>在函数的形参声明中，无法声明一个真正的数组，只能声明指针，即使写成数组的形式，编译器也当做指针对待。</strong></p>
+<p>前面介绍过，在表达式中，数组名会被解读为指向数组初始元素的指针。在调用函数的时候，传递给函数的实参是表达式，因此数组名会被解读为指向数组初始元素的指针。同时，在函数的形参声明中，声明的数组都会被改写为指向数组初始元素的指针。<strong>这两个规则完美的契合，让我们在把数组作为实参传递给函数时，实际上传递的是数组首元素指针的副本，符合了函数的形参声明。在函数内部，可以通过指针访问数组的元素，因为在表达式中，指针和数组是等价的，可以互换使用，<code>a[i]</code> 只是 <code>*(a + i)</code> 的简化写法。</strong></p>
+<h3 id="什么时候数组和指针不能混淆">
+    <a href="#%e4%bb%80%e4%b9%88%e6%97%b6%e5%80%99%e6%95%b0%e7%bb%84%e5%92%8c%e6%8c%87%e9%92%88%e4%b8%8d%e8%83%bd%e6%b7%b7%e6%b7%86" class="header-anchor">#</a>
+    什么时候数组和指针不能混淆
+</h3><p>除了函数形参的声明以外，数组的声明就是数组，指针的声明就是指针，两者不能混淆。</p>
+<h4 id="数组的定义">
+    <a href="#%e6%95%b0%e7%bb%84%e7%9a%84%e5%ae%9a%e4%b9%89" class="header-anchor">#</a>
+    数组的定义
+</h4><p>定义是声明的一种特殊情况，它分配内存空间，并可能提供一个初始值。</p>
+<p>数组定义分配了一块连续的内存空间，而指针定义只分配了存储一个地址的空间。它们在定义时各有其用途，不能混为一谈。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">array</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>  <span class="c1">// 数组定义
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>       <span class="c1">// 指针定义
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的 <code>array</code> 是实际分配了空间的数组，而 <code>ptr</code> 只是一个指针，它可以指向某块内存但本身并不分配任何数据存储空间。</p>
+<h4 id="外部数组的声明">
+    <a href="#%e5%a4%96%e9%83%a8%e6%95%b0%e7%bb%84%e7%9a%84%e5%a3%b0%e6%98%8e" class="header-anchor">#</a>
+    外部数组的声明
+</h4><p>在多个编译单元（如多个 <code>.c</code> 文件）中使用 <code>extern</code> 声明全局变量时，数组和指针必须严格区分。如果在一个文件中定义了一个数组，但在另一个文件中错误地将它声明为指针，程序可能会产生不可预期的错误，甚至崩溃。例如在 file_1.c 中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span> <span class="c1">// 定义了一个数组
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 file_2.c 中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">extern</span> <span class="kt">int</span> <span class="o">*</span><span class="n">a</span><span class="p">;</span> <span class="c1">// 声明为指针
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>file_1.c 定义了数组 a，但在 file_2.c 声明它为指针。即使用链接器将它们结合起来，程序也还是不能运行。因为 file_2.c 把原本是 int 数组的 a 的前 8 个字节解释成了指针，并引用了它指向的内容，这样的程序当然会崩溃。</p>
+<h3 id="多维数组">
+    <a href="#%e5%a4%9a%e7%bb%b4%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    多维数组
+</h3><p>理论上，<strong>多维数组</strong>（Multidimensional Array）和<strong>数组的数组</strong>（Array of Arrays）是完全不同的概念。<strong>多维数组</strong>是一个真正的、在内存中连续存储的矩阵式结构，而<strong>数组的数组</strong>本质上是多个一维数组的嵌套。</p>
+<p>在某些编程语言中（例如 C#），两者之间有着严格的区分。然而，在 C 语言中并不存在真正意义上的“多维数组”。我们看到的类似多维数组的结构，其实是“数组的数组”。例如，以下声明：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>arr</code> 是一个包含 3 个元素的数组，其中每个元素都是一个长度为 4 的一维数组。换句话说，<code>arr</code> 是一个数组，里面的每个元素又是一个数组，形成了二维结构。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410231433061.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="array of array"
+	
+	
+></p>
+<p>那么，<code>arr[i][j]</code> 是如何访问数组元素的呢？</p>
+<p>由于在表达式中，数组名会被解读为指针，因此 <code>arr</code> 被看作是“指向包含 4 个元素的 int 数组的指针”（即 <code>int (*)[4]</code>）。</p>
+<p><code>arr[i]</code> 实际上是 <code>*(arr + i)</code> 的简化形式。表达式 <code>arr + i</code> 代表指针前进了 <code>sizeof(int[4]) * i</code> 个字节的距离。</p>
+<p><code>*(arr + i)</code> 的类型是一个 int 数组，但在表达式中，数组名又会被解读为指针。因此，<code>*(arr + i)</code> 会转换为“指向第 <code>i</code> 行的 int 数组的首元素的指针”。这意味着 <code>(*(arr + i))[j]</code> 实际上等价于 <code>*((*(arr + i)) + j)</code>，也就是对该行的首地址偏移 <code>j</code> 个位置，最后得到的元素内容，类型为 <code>int</code>。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410231547723.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="访问多维数组"
+	
+	
+></p>
+<h3 id="关于空的下标运算符-">
+    <a href="#%e5%85%b3%e4%ba%8e%e7%a9%ba%e7%9a%84%e4%b8%8b%e6%a0%87%e8%bf%90%e7%ae%97%e7%ac%a6-" class="header-anchor">#</a>
+    关于空的下标运算符 []
+</h3><p>前面已经介绍过，当数组作为函数的形参时，可以省略下标运算符 <code>[]</code> 中的元素个数。除此之外，还有几个特殊情况也允许使用空的下标运算符 <code>[]</code>。</p>
+<ul>
+<li><strong>函数形参的声明</strong></li>
+</ul>
+<p>在函数的形参中，只有最外层的数组会被解读为指针。即使在声明中写了元素个数，编译器也会忽略它。</p>
+<ul>
+<li><strong>通过初始化列表确定数组长度的情况</strong></li>
+</ul>
+<p>编译器可以根据初始化列表推导出数组的长度，因此在这种情况下，最外层数组的元素个数可以省略。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">str</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;abc&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">double</span> <span class="n">matrix</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">}};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">color_name</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;red&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;green&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;blue&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">color_name</span><span class="p">[][</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;red&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;green&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;blue&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>使用 <code>extern</code> 声明全局变量</strong></li>
+</ul>
+<p>当全局变量只在一个编译单元（.c 文件）中定义，而在其他代码文件中通过 <code>extern</code> 声明时，最外层数组的元素个数可以省略。因为数组的实际长度要在链接时才能确定，所以在 <code>extern</code> 声明时，省略数组长度是合法的。</p>
+<ul>
+<li><strong>结构体的柔性数组成员</strong></li>
+</ul>
+<p>从 C99 开始，结构体的最后一个成员可以使用柔性数组，即可以用空的 <code>[]</code> 表示其长度。这种数组在实际使用时由运行时的分配情况决定。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">npoints</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Point</span> <span class="n">point</span><span class="p">[];</span> <span class="c1">// 这里没有写元素个数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">Polyline</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="指向函数的指针">
+    <a href="#%e6%8c%87%e5%90%91%e5%87%bd%e6%95%b0%e7%9a%84%e6%8c%87%e9%92%88" class="header-anchor">#</a>
+    指向函数的指针
+</h2><p>在 C 语言中，函数名在表达式中会自动转换为指向该函数的指针，但有两个例外：当它作为地址运算符 <code>&amp;</code> 或 <code>sizeof</code> 的操作数时，函数名保持为函数本身。</p>
+<p>函数调用运算符 <code>()</code> 的操作数实际上并不是函数名本身，而是指向函数的指针。这意味着函数名和指向函数的指针是可以互换使用的。</p>
+<p>一个值得注意的点是，尽管你可以对指向函数的指针使用间接运算符 <code>*</code>，它并不会改变实际的行为。即使将 <code>*</code> 应用于指向函数的指针，它仍会立刻被转换回指向函数的指针。因此，即便你通过多层间接访问函数指针，代码依然能够正常运行。</p>
+<p>例如，以下代码使用了多层间接访问，但它依然等同于直接调用 <code>printf</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="p">(</span><span class="o">**********</span><span class="n">printf</span><span class="p">)(</span><span class="s">&#34;hello, world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这揭示了一个有趣的现象：指向函数的指针在 C 中相当灵活，也使得函数指针的语法有些独特，但其行为仍然遵循 C 语言中表达式的规则。</p>
+<h2 id="指针的基本用法">
+    <a href="#%e6%8c%87%e9%92%88%e7%9a%84%e5%9f%ba%e6%9c%ac%e7%94%a8%e6%b3%95" class="header-anchor">#</a>
+    指针的基本用法
+</h2><p>现在我们已经能解读复杂的 C 声明，并理解了数组和指针之间的微妙关系。你可能会问：为什么一定要使用指针？或者说，指针到底有什么用处？接下来，我们将介绍 C 语言中指针的几个基本用法。要用 C 语言编写实用的程序，指针的使用是不可避免的。</p>
+<h3 id="从函数返回多个值">
+    <a href="#%e4%bb%8e%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e5%a4%9a%e4%b8%aa%e5%80%bc" class="header-anchor">#</a>
+    从函数返回多个值
+</h3><p>C 语言的函数只能返回一个值，我们可以通过使用指针突破这个限制，实现从函数返回多个值的效果。具体做法是将指针作为参数传递给函数，让函数修改指针所指向的对象的值。</p>
+<p>假设我们需要返回的数据的类型为 <code>T</code> ，则参数类型为 <code>T *</code>，即&quot;指向 T 的指针&quot;。下面是一个简单的示例，展示了如何通过指针从函数返回两个整数值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">get_values</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">a</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">b</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">get_values</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%d %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 C 语言中进行函数调用时，参数是作为值传递的，被称为<strong>值传递（call by value）</strong>，也就是说，实参的值会被复制调用方函数到形参中，然后形参就可以像普通的局部变量一样使用了。</p>
+<p>在上面示例中，<code>get_values</code> 的参数的类型是“指向 int 的指针”，调用时仍然是值传递，只不过复制到形参的值，是 <code>a</code> 和 <code>b</code> 的地址。这样，在 <code>get_values</code> 内部就可以通过指针修改 <code>a</code> 和 <code>b</code> 的值了。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410281030989.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="call by value"
+	
+	
+></p>
+<h3 id="将数组作为参数传递">
+    <a href="#%e5%b0%86%e6%95%b0%e7%bb%84%e4%bd%9c%e4%b8%ba%e5%8f%82%e6%95%b0%e4%bc%a0%e9%80%92" class="header-anchor">#</a>
+    将数组作为参数传递
+</h3><p>在 C 语言中其实是不可以将数组作为参数传递的，但是通过传递指向数组初始元素的指针，可以达到与传递数组相同的效果。</p>
+<p>如下面的示例程序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">print_array</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">array</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">array</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">print_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>前面说过，在 C 语言中，参数全部都是通过值传递的，传递给函数的都是它的副本。对于实参是数组的情况也是一样的，只不过传递的是数组首元素指针的副本。</p>
+<p>在 <code>main</code> 中调用 <code>print_array</code> 时，由于函数的实参 <code>array</code> 在表达式中，所以 <code>array</code> 会被解读为指向数组初始元素的指针，然后这个指针的副本会被传递给 <code>print_array</code>。在函数内部，指针可以像数组一样，使用 <code>array[i]</code> 这样的形式访问数组的元素，因为 <code>array[i]</code> 只不过是 <code>*(array + i)</code> 的语法糖。</p>
+<p>另外，<code>print_array</code> 还需要通过参数 <code>size</code> 来接收数组的长度。因为对于 <code>print_array</code> 来说，<code>array</code> 只是一个指针，它无法知道调用方传递的数组的长度。</p>
+<p>回想上一节介绍的，<strong>将指针作为参数传递给函数，在函数内部通过指针修改指向的值，达到从函数返回多个值的效果。当数组作为参数传递给函数时，默认传递的就是指向数组的指针，所以在函数内部通过指针修改的和调用方是同一个数组。</strong></p>
+<h3 id="多维数组作为参数传递">
+    <a href="#%e5%a4%9a%e7%bb%b4%e6%95%b0%e7%bb%84%e4%bd%9c%e4%b8%ba%e5%8f%82%e6%95%b0%e4%bc%a0%e9%80%92" class="header-anchor">#</a>
+    多维数组作为参数传递
+</h3><p>正如前面介绍的那样，当数组被用作函数形参时，数组的声明会自动被解释为指针的声明。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>实际上等价于：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">a</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>即使在声明中显式写上元素个数，比如 <code>void func(int a[10])</code>，编译器仍会忽略数组的大小信息，只会将其视为指向 <code>int</code> 类型的指针。</p>
+<p>那么如果形参是多维数组呢？来看下面的函数声明：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[][</span><span class="mi">4</span><span class="p">])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这里，<code>a</code> 的类型是“<code>int</code> 的数组的数组”，但由于它是函数形参，编译器会将其解读为“指向一个长度为 4 的 <code>int</code> 数组的指针”：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">)[</span><span class="mi">4</span><span class="p">])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这与一维数组的情况类似。即便你在声明中指定了最外层数组的大小，比如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">])</span> <span class="c1">//元素个数 3 会被忽略
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译器同样会忽略外层数组的长度信息，将其视为“指向包含 4 个元素的 <code>int</code> 数组的指针”。</p>
+<p>在多维数组（即“数组的数组”）中，<strong>只有最外层的数组</strong>会被解读为指针。这意味着在函数形参中，除了最左边的一维数组外，<strong>所有内层数组的维度大小必须显式指定</strong>。这是因为在进行地址运算时，编译器需要知道每一维数组的长度，以便正确计算内存中的偏移量。</p>
+<h3 id="动态数组">
+    <a href="#%e5%8a%a8%e6%80%81%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    动态数组
+</h3><p>C 语言中的数组，在编译时必须知道数组的长度。虽然 C99 中引入了变长数组（VLA），但它只能用于自动变量，函数结束后数组自动释放。如果想让数组的生命周期跨域多个函数调用，就需要使用动态内存分配。</p>
+<p>通过 <code>malloc</code> 可以在运行时分配所需大小的数组。例如下面的示例程序，根据用户输入的长度动态分配数组：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">array</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">input</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;请输入数组的大小：&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fgets</span><span class="p">(</span><span class="n">input</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">input</span><span class="p">),</span> <span class="n">stdin</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">sscanf</span><span class="p">(</span><span class="n">input</span><span class="p">,</span> <span class="s">&#34;%d&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">array</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="n">size</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>需要注意的是，使用 <code>malloc</code> 分配的动态数组，程序员必须自己管理数组元素的个数。使用完毕后，需要通过 <code>free</code> 函数释放内存。</p>
+<p>相对比在 Java 中，数组都是分配在堆上的，<code>new int[10];</code>就相当于 C 中的 <code>malloc(10 * sizeof(int));</code>，并且 Java 有垃圾回收机制自动管理内存。</p>
+<h3 id="动态数组的数组">
+    <a href="#%e5%8a%a8%e6%80%81%e6%95%b0%e7%bb%84%e7%9a%84%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    动态数组的数组
+</h3><p>前面介绍过，C 语言中的多维数组其实是“数组的数组”。假设某部门有 10 名员工，我们可以使用一个二维数组来存储每位员工的住址：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">addresses</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">100</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里，addresses 是一个 10x100 的字符数组，其中第一维代表员工人数，第二维代表每个住址的最大长度。由于住址的长度不固定，这种预设的最大长度会导致潜在的内存浪费。因此，使用“动态数组的数组”会是更优的选择。</p>
+<p>如果员工人数固定为 10，可以使用“动态数组的数组”来高效地存储每位员工的住址，每行的存储空间根据实际输入动态分配：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">addresses</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这种情况下，addresses 是一个包含 10 个指针的数组，每个指针都指向一个动态分配的字符数组，用来存储具体的住址。</p>
+<p>完整的示例程序如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">read_addresses</span><span class="p">(</span><span class="kt">char</span> <span class="o">**</span><span class="n">addresses</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;请输入住址：&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fgets</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">stdin</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 去掉换行符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">buffer</span><span class="p">[</span><span class="nf">strcspn</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 动态分配每个住址的内存并复制数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="nf">strlen</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">strcpy</span><span class="p">(</span><span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">*</span><span class="n">addresses</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">read_addresses</span><span class="p">(</span><span class="n">addresses</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">存储的住址:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意到 <code>read_addresses</code> 函数的参数是 <code>char **addresses</code>。我们想传递给 <code>read_addresses</code> 的是一个 <code>char *</code> 数组，即 <code>char *addresses[10]</code>，但在函数形参的声明中，数组都会被改写为指针，因此即使函数声明为 <code>void read_addresses(char *addresses[10])</code>，编译器也会改写为 <code>void read_addresses(char **addresses)</code>。</p>
+<p>动态数组的数组 <code>addresses</code> 的内存布局如下：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410251536928.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="addresses"
+	
+	
+></p>
+<h3 id="动态数组的动态数组">
+    <a href="#%e5%8a%a8%e6%80%81%e6%95%b0%e7%bb%84%e7%9a%84%e5%8a%a8%e6%80%81%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    动态数组的动态数组
+</h3><p>在上一节中，我们使用 <code>char</code> 的动态数组来存储每个员工的住址，但假设员工人数是固定的。如果员工人数不固定，我们就需要使用“动态数组的动态数组”。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">**</span><span class="n">addresses</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>“类型 <code>T</code> 的动态数组”可以通过“指向 <code>T</code> 的指针”来实现。因此，要获取“<code>T</code> 的动态数组的动态数组”，只需使用“指向 <code>T</code> 的指针的指针”。</p>
+<p>下面是一个完整的示例程序，要求用户先输入员工人数，再逐个输入每位员工的住址：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">read_addresses</span><span class="p">(</span><span class="kt">char</span> <span class="o">**</span><span class="n">addresses</span><span class="p">,</span> <span class="kt">int</span> <span class="n">num_employees</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span> <span class="c1">// 假设每个住址不超过 256 个字符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_employees</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;请输入员工的住址：&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fgets</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">stdin</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 去掉换行符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">buffer</span><span class="p">[</span><span class="nf">strcspn</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 动态分配每个住址的内存并复制数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="nf">strlen</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">strcpy</span><span class="p">(</span><span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">num_employees</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;请输入员工人数：&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">num_employees</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">getchar</span><span class="p">();</span> <span class="c1">// 清除换行符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 动态分配用于存储指针的空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span> <span class="o">**</span><span class="n">addresses</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">num_employees</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">read_addresses</span><span class="p">(</span><span class="n">addresses</span><span class="p">,</span> <span class="n">num_employees</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">存储的员工住址:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_employees</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>动态数组的动态数组 <code>addresses</code> 的内存布局如下：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410251559273.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="addresses"
+	
+	
+></p>
+<p>对于上面的示例程序，我们注意到一个细节，用于存储员工住址的 <code>addresses</code>，是在调用 <code>read_addresses</code> 函数之前分配的，我们稍加修改，就可以在 <code>read_addresses</code> 函数内部分配 <code>addresses</code> 的内存：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">read_addresses</span><span class="p">(</span><span class="kt">char</span> <span class="o">***</span><span class="n">addresses</span><span class="p">,</span> <span class="kt">int</span> <span class="n">num_employees</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">addresses</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">num_employees</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span> <span class="c1">// 假设每个住址不超过 256 个字符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_employees</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;请输入员工的住址：&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fgets</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">stdin</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 去掉换行符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">buffer</span><span class="p">[</span><span class="nf">strcspn</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 动态分配每个住址的内存并复制数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">(</span><span class="o">*</span><span class="n">addresses</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="nf">strlen</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">strcpy</span><span class="p">((</span><span class="o">*</span><span class="n">addresses</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">num_employees</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;请输入员工人数：&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">num_employees</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">getchar</span><span class="p">();</span> <span class="c1">// 清除换行符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 动态分配用于存储指针的空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span> <span class="o">**</span><span class="n">addresses</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">read_addresses</span><span class="p">(</span><span class="o">&amp;</span><span class="n">addresses</span><span class="p">,</span> <span class="n">num_employees</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">存储的员工住址:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_employees</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">addresses</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这时 <code>read_addresses</code> 函数的参数变成 <code>char ***addresses</code>。下面是这两种情况的内存布局对比：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410281738300.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="addresses"
+	
+	
+></p>
+<p>C 语言中参数都是通过值传递的。对于第一种情况，<code>addresses</code> 指向的空间在 <code>main</code> 中分配，调用 <code>read_addresses</code> 函数时，传递给 <code>read_addresses</code> 的是 <code>addresses</code> 的副本，它们都指向 <strong>heap</strong> 中同一块内存的指针，因此在 <code>read_addresses</code> 函数内部通过 <code>addresses</code> 对这块空间的修改，在 <code>main</code> 中同样能看到。</p>
+<p>对于第二种情况，动态数组的内存是在 <code>read_addresses</code> 函数中分配，在 <code>main</code> 中调用 <code>read_addresses</code> 函数时，传递给 <code>read_addresses</code> 的是 <code>addresses</code> 指针的副本，即 <code>&amp;addresses</code>，类型为 <code>char ***</code>。在 <code>read_addresses</code> 函数内部通过 <code>*addresses</code> 访问的是 <code>main</code> 中 <code>addresses</code> 变量，不管是为 <code>*addresses</code> 分配内存空间，还是通过 <code>*addresses</code> 修改内存中的值，都是间接修改 <code>main</code> 中 <code>addresses</code> 指向的值。</p>
+<h4 id="命令行参数">
+    <a href="#%e5%91%bd%e4%bb%a4%e8%a1%8c%e5%8f%82%e6%95%b0" class="header-anchor">#</a>
+    命令行参数
+</h4><p>实际上命令行参数就是一个“<code>char</code> 的动态数组的动态数组”。在 <code>main</code> 函数的定义中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>argc</code> 表示命令行参数的个数。</li>
+<li><code>argv</code> 是一个 <code>char *</code> 类型的数组，其中每个元素指向一个命令行参数字符串。</li>
+</ul>
+<p>由于在函数的参数列表中，数组会被视作指针，所以写成下面这样也是一样的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>argv[i]</code> 指向每个命令行参数字符串（长度不固定），而 <code>argv</code> 的大小会随着实际参数数量动态调整。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410281603826.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="argv"
+	
+	
+></p>
+<h3 id="通过参数返回指针">
+    <a href="#%e9%80%9a%e8%bf%87%e5%8f%82%e6%95%b0%e8%bf%94%e5%9b%9e%e6%8c%87%e9%92%88" class="header-anchor">#</a>
+    通过参数返回指针
+</h3><p>前面介绍过，如果想通过参数返回类型 <code>T</code>，则参数类型为 <code>T *</code>，即“指向 <code>T</code> 的指针”。那么如果想通过参数返回“指向 <code>T</code> 的指针”，则参数类型为 <code>T **</code>，即“指向 <code>T</code> 的指针的指针”。</p>
+<p>什么情况下会用到通过参数返回“指向 <code>T</code> 的指针的指针”呢？一种场景是，如果函数需要改变调用者传入的指针本身，使其指向新的内存区域，可以使用“指向 <code>T</code> 的指针的指针”，即（T **）作为参数。</p>
+<p>例如我想实现一个 read_line 函数，通过返回值来表示处理状态，例如正常读取、文件结尾，或因内存不足而失败等情况。由于函数只能有一个返回值，因此需要通过参数返回读取的结果指针。此时，如果我们希望返回的是 <code>char</code> 类型的指针，那么参数的类型就应是“指向 char 的指针的指针”（即 char **）。下面是完整的示例程序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">enum</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">READ_LINE_SUCCESS</span><span class="p">,</span>      <span class="c1">// 正常地读取了一行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">READ_LINE_EOF</span><span class="p">,</span>          <span class="c1">// 读到了文件末尾
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">READ_LINE_OUT_OF_MEMORY</span> <span class="c1">// 因内存不足而失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">ReadLineStatus</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ReadLineStatus</span> <span class="nf">read_line</span><span class="p">(</span><span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">line</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">size_t</span> <span class="n">bufsize</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">size_t</span> <span class="n">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">bufsize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">buffer</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">READ_LINE_OUT_OF_MEMORY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">((</span><span class="n">c</span> <span class="o">=</span> <span class="nf">fgetc</span><span class="p">(</span><span class="n">fp</span><span class="p">))</span> <span class="o">!=</span> <span class="sc">&#39;\n&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">EOF</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">position</span> <span class="o">&gt;=</span> <span class="n">bufsize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">bufsize</span> <span class="o">*=</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">char</span> <span class="o">*</span><span class="n">new_buffer</span> <span class="o">=</span> <span class="nf">realloc</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">bufsize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">new_buffer</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">READ_LINE_OUT_OF_MEMORY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">buffer</span> <span class="o">=</span> <span class="n">new_buffer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">buffer</span><span class="p">[</span><span class="n">position</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="p">)</span><span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">position</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">c</span> <span class="o">==</span> <span class="n">EOF</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">READ_LINE_EOF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">buffer</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">line</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">READ_LINE_SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Please enter a line of text:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">*</span><span class="n">line</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ReadLineStatus</span> <span class="n">status</span> <span class="o">=</span> <span class="nf">read_line</span><span class="p">(</span><span class="n">stdin</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">line</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">READ_LINE_SUCCESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;You entered: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">line</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">READ_LINE_EOF</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;End of file reached.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">READ_LINE_OUT_OF_MEMORY</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Error: Out of memory.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 <code>main</code> 中定义的变量 <code>line</code> 类型为“指向 char 的指针（char *）”， <code>read_line</code> 函数内部需要修改 <code>line</code> 本身，使其指向新分配的内存，因此参数类型应该为“指向 char 的指针的指针（char **）”。下面是运行时的内存布局：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410291108973.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="line"
+	
+	
+></p>
+<h3 id="双指针">
+    <a href="#%e5%8f%8c%e6%8c%87%e9%92%88" class="header-anchor">#</a>
+    双指针
+</h3><p>双指针”并不是一个严格的标准术语，所谓双指针，其实就是指向指针的指针。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202410291422723.jpeg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="double pointer"
+	
+	
+></p>
+<p>从前面的例子可以看到，双指针主要出现在以下两种场景：</p>
+<ul>
+<li>动态数组的动态数组，即在多级数据结构中使用动态内存分配</li>
+<li>通过参数返回指针，需要在函数内部修改指针本身</li>
+</ul>
+<p>双指针的多层间接引用可能让代码显得复杂难懂，但只要理解为什么要这样做，其实并不难。一开始可以在纸上画出堆栈和堆的内存布局，这将有助于你更直观地理解双指针的工作原理。</p>
+<h3 id="纵横可变的二维数组">
+    <a href="#%e7%ba%b5%e6%a8%aa%e5%8f%af%e5%8f%98%e7%9a%84%e4%ba%8c%e7%bb%b4%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    纵横可变的二维数组
+</h3><p>我们知道，在 C 语言中没有真正的二维数组，只有数组的数组。如何我们需要一个二维数组，两个维度都是在运行时才确定，应该如何做？</p>
+<p>前面介绍过“动态数组的数组”和“动态数组的动态数组”，它们的第二维的长度不固定，像锯齿一样，有一个专门的名称叫 <a class="link" href="https://en.wikipedia.org/wiki/Iliffe_vector"  target="_blank" rel="noopener"
+    >Iliffe 向量</a>。</p>
+<p>现在我们想要的是，像标准二维数组那样，第二维的长度一致的“数组的数组”，尝试像下面这样做：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">board</span><span class="p">[</span><span class="n">size</span><span class="p">][</span><span class="n">size</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于 ANSI C 标准，<code>size</code> 必须是一个整型常量表达式，不能运行时再确定。从 C99 开始，<code>size</code> 可以是变量，这称为可变长数组（Variable Length Array，VLA）​，但 <code>board</code> 必须是自动变量，也就是说只在函数内部有效，函数退出后自动释放。如果希望 <code>board</code> 一直保持到程序退出，则需要使用 <code>malloc()</code> 动态内存分配。</p>
+<p>在 C99 中，通过以下写法就可以得到 size×size 的二维数组。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">board</span><span class="p">)[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span> <span class="o">*</span> <span class="n">size</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后就可以通过 <code>board[i]​[j]</code> 访问到数组的各个元素。完整的示例程序如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;board size?&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 分配 size × size 的二维数组 */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="p">(</span><span class="o">*</span><span class="n">board</span><span class="p">)[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span> <span class="o">*</span> <span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 对二维数组赋予适当的值 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">board</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">size</span> <span class="o">+</span> <span class="n">j</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 显示所赋的值 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%2d, &#34;</span><span class="p">,</span> <span class="n">board</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="数组的动态数组">
+    <a href="#%e6%95%b0%e7%bb%84%e7%9a%84%e5%8a%a8%e6%80%81%e6%95%b0%e7%bb%84" class="header-anchor">#</a>
+    数组的动态数组
+</h3><p>假设我们需要实现一个画板来记录用户绘制的折线。如何表示这些点呢？我们可以使用 <code>double[2]</code> 来表示画板上的一个点，其中 <code>double[0]</code> 代表 X 坐标，<code>double[1]</code> 代表 Y 坐标。折线由多个点组成，因此我们需要一个 <code>double[2]</code> 的动态数组，实际上就是一个“数组的动态数组”。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">double</span> <span class="p">(</span><span class="o">*</span><span class="n">polyline</span><span class="p">)[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">polyline</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">npoints</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解读一下声明 <code>double (*polyline)[2]</code>，<code>polyline</code> 是一个指针，指向一个 <code>double[2]</code> 的数组。</p>
+<p>如果我们要获取第 i 个点的坐标，可以通过 <code>polyline[i][0]</code> 和 <code>polyline[i][1]</code> 来访问 X 和 Y 坐标。</p>
+<p>使用 <code>double (*polyline)[2]</code> 表示折线可能不够直观，更好的做法是使用结构体：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">double</span> <span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">double</span> <span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Point</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">npoints</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Point</span> <span class="n">point</span><span class="p">[];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Polyline</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 C99 标准中，引入了“柔性数组成员”（Flexible Array Member, FAM）的特性，这允许结构体的最后一个成员是一个长度可变的数组。上面的结构体 <code>Polyline</code> 就利用了这一特性来定义了一个变长的点数组。</p>
+<p>在给 <code>Polyline</code> 分配内存时，需要如下写法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Polyline</span> <span class="o">*</span><span class="n">polyline</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">polyline</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Polyline</span><span class="p">)</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Point</span><span class="p">)</span> <span class="o">*</span> <span class="n">npoints</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过这种方式，我们可以灵活地管理折线中的点数，使代码在处理动态数组时更具简洁性和可维护性。</p>
+<h3 id="通用数据结构">
+    <a href="#%e9%80%9a%e7%94%a8%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" class="header-anchor">#</a>
+    通用数据结构
+</h3><p>前面介绍的指针基本用法，主要是和数组相关，利用了数组和指针之间的微妙关系。这部分是 C 语言的特有的内容，也是指针的难点所在。</p>
+<p>大多数编程语言都会用指针（引用）来构造链表、树等通用数据结构，C 语言也不例外。但数据结构知识不是 C 语言特有的，也不是造成指针难懂的原因，因此本文不再赘述，感兴趣的读者可以参考相关数据结构方面的书籍。</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>指针的概念本身并不复杂，但让它成为 C 语言中的难点，主要是由于指针与 C 语言复杂的声明语法交织，以及指针与数组之间的微妙关系。</p>
+<p>本文介绍了通过“C 声明优先级规则”表格解析 C 语言声明的方法，现在再复杂的声明对你来说都不是问题。</p>
+<p>接着，本文深入剖析了数组与指针的关系，从声明与使用两个方面进行了阐述。只需记住以下两个场景中，数组和指针可以互换使用：</p>
+<ol>
+<li>在表达式中，数组名会被解释为指向数组第一个元素的指针。因此，<code>array[i]</code> 与 <code>*(array + i)</code> 是等价的，<code>array[i]</code> 只是 <code>*(array + i)</code> 的简化写法。</li>
+<li>在函数形参声明中，数组声明会被自动转换为指向数组首元素的指针。</li>
+</ol>
+<p>除此之外，数组与指针在其他情况下不可混淆。</p>
+<p>此外，本文还介绍了指针的基本用法，包括从函数返回多个值、动态数组、动态数组的数组、动态数组的动态数组，数组的动态数组，纵横可变的二维数组等。这些用法几乎都与数组相关，属于 C 语言特有的内容，也是指针的难点所在。至于指针在链表、树等通用数据结构中的应用，则不属于本文讨论的范围。</p>
+<p>希望读完本文后，你已经“看破”指针，对你来说不再是难点。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c/">C</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入探索 perf CPU Profiling 实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 perf</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/incomplete-list-of-computer-science-learning-resources-for-college-students/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Incomplete List of Computer Science Learning Resources for College Students</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/nginx%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Nginx的模块化设计</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%9C%A8macos%E4%B8%8A%E4%BD%BF%E7%94%A8vscode%E8%B0%83%E8%AF%95nginx/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">在macOS上使用VSCode调试NGINX</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2024 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

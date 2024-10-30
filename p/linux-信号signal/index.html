@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。我们能向进程发送很多类型的信号，其中一些常见的信号 SIGINT 、SIGQUIT、 SIGTERM 和 SIGKILL 都是通知进程退出，但它们有什么区别呢？很多人经常把它们搞混，这篇文章会让你了解 Linux 的信号机制，以及一些常见信号的作用。\n">
 <title>Linux 信号(Signal)</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/linux-%E4%BF%A1%E5%8F%B7signal/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Linux 信号(Signal)">
-<meta property='og:description' content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。">
+<meta property='og:description' content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。我们能向进程发送很多类型的信号，其中一些常见的信号 SIGINT 、SIGQUIT、 SIGTERM 和 SIGKILL 都是通知进程退出，但它们有什么区别呢？很多人经常把它们搞混，这篇文章会让你了解 Linux 的信号机制，以及一些常见信号的作用。\n">
 <meta property='og:url' content='https://mazhen.tech/p/linux-%E4%BF%A1%E5%8F%B7signal/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2022-04-13T16:17:35&#43;08:00'/><meta property='article:modified_time' content='2022-04-13T16:17:35&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="Linux 信号(Signal)">
-<meta name="twitter:description" content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。">
+<meta name="twitter:description" content="我们经常会使用 kill 命令杀掉运行中的进程，对多次杀不死的进程进一步用 kill -9 干掉它。你可能知道这是在用 kill 命令向进程发送信号，优雅或粗暴的让进程退出。我们能向进程发送很多类型的信号，其中一些常见的信号 SIGINT 、SIGQUIT、 SIGTERM 和 SIGKILL 都是通知进程退出，但它们有什么区别呢？很多人经常把它们搞混，这篇文章会让你了解 Linux 的信号机制，以及一些常见信号的作用。\n">
     <link rel="shortcut icon" href="/favicon.png" />
 
-  
-    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -32,10 +30,6 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
-    
-  
-
-
     </head>
     <body class="
     article-page
@@ -79,7 +73,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -653,108 +647,108 @@
     常见信号
 </h2><p>下面的列表列举了一些常见的信号。</p>
 <div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>Singal</th>
-<th>Value</th>
-<th>Action</th>
-<th>comment</th>
-<th>key binding</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>SIGHUP</strong></td>
-<td>1</td>
-<td>Term</td>
-<td>Hangup detected on controlling terminal or death of controlling process</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGINT</strong></td>
-<td>2</td>
-<td>Term</td>
-<td>Interrupt from keyboard</td>
-<td><strong>Ctrl-c</strong></td>
-</tr>
-<tr>
-<td><strong>SIGQUIT</strong></td>
-<td>3</td>
-<td>Core</td>
-<td>Quit from keyboard</td>
-<td><strong>Ctrl-\</strong></td>
-</tr>
-<tr>
-<td><strong>SIGKILL</strong></td>
-<td>9</td>
-<td>Term</td>
-<td>Kill signal</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGSEGV</strong></td>
-<td>11</td>
-<td>Core</td>
-<td>Invalid memory reference</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGPIPE</strong></td>
-<td>13</td>
-<td>Term</td>
-<td>Broken pipe: write to pipe with no readers</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGTERM</strong></td>
-<td>15</td>
-<td>Term</td>
-<td>Termination signal</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGCHLD</strong></td>
-<td>17</td>
-<td>Ign</td>
-<td>Child stopped or terminated</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGCONT</strong></td>
-<td>18</td>
-<td>Cont</td>
-<td>Continue if stopped</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGSTOP</strong></td>
-<td>19</td>
-<td>Stop</td>
-<td>Stop process</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGTSTP</strong></td>
-<td>20</td>
-<td>Stop</td>
-<td>Stop typed at terminal</td>
-<td><strong>Ctrl-z</strong></td>
-</tr>
-<tr>
-<td><strong>SIGTTIN</strong></td>
-<td>21</td>
-<td>Stop</td>
-<td>Terminal input for background process</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SIGTTOU</strong></td>
-<td>22</td>
-<td>Stop</td>
-<td>Terminal output for background process</td>
-<td></td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th>Singal</th>
+          <th>Value</th>
+          <th>Action</th>
+          <th>comment</th>
+          <th>key binding</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>SIGHUP</strong></td>
+          <td>1</td>
+          <td>Term</td>
+          <td>Hangup detected on controlling terminal or death of controlling process</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGINT</strong></td>
+          <td>2</td>
+          <td>Term</td>
+          <td>Interrupt from keyboard</td>
+          <td><strong>Ctrl-c</strong></td>
+      </tr>
+      <tr>
+          <td><strong>SIGQUIT</strong></td>
+          <td>3</td>
+          <td>Core</td>
+          <td>Quit from keyboard</td>
+          <td><strong>Ctrl-\</strong></td>
+      </tr>
+      <tr>
+          <td><strong>SIGKILL</strong></td>
+          <td>9</td>
+          <td>Term</td>
+          <td>Kill signal</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGSEGV</strong></td>
+          <td>11</td>
+          <td>Core</td>
+          <td>Invalid memory reference</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGPIPE</strong></td>
+          <td>13</td>
+          <td>Term</td>
+          <td>Broken pipe: write to pipe with no readers</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGTERM</strong></td>
+          <td>15</td>
+          <td>Term</td>
+          <td>Termination signal</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGCHLD</strong></td>
+          <td>17</td>
+          <td>Ign</td>
+          <td>Child stopped or terminated</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGCONT</strong></td>
+          <td>18</td>
+          <td>Cont</td>
+          <td>Continue if stopped</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGSTOP</strong></td>
+          <td>19</td>
+          <td>Stop</td>
+          <td>Stop process</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGTSTP</strong></td>
+          <td>20</td>
+          <td>Stop</td>
+          <td>Stop typed at terminal</td>
+          <td><strong>Ctrl-z</strong></td>
+      </tr>
+      <tr>
+          <td><strong>SIGTTIN</strong></td>
+          <td>21</td>
+          <td>Stop</td>
+          <td>Terminal input for background process</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>SIGTTOU</strong></td>
+          <td>22</td>
+          <td>Stop</td>
+          <td>Terminal output for background process</td>
+          <td></td>
+      </tr>
+  </tbody>
 </table></div>
 <p>第一列是信号名称，第二列是信号编号。使用 <code>kill</code> 向进程发送信号时，用信号名称和编号都可以，例如：</p>
 <div class="highlight"><div class="chroma">
@@ -869,38 +863,38 @@
 <p><a class="link" href="https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/signals006.html"  target="_blank" rel="noopener"
     >这篇文档</a> 描述了 JVM 对信号的特殊处理：</p>
 <div class="table-wrapper"><table>
-<thead>
-<tr>
-<th style="text-align:left">Signal</th>
-<th style="text-align:left">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left"><code>SIGSEGV</code>, <code>SIGBUS</code>, <code>SIGFPE</code>, <code>SIGPIPE</code>, <code>SIGILL</code></td>
-<td style="text-align:left">These signals are used in the implementation for implicit null check, and so forth.</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>SIGQUIT</code></td>
-<td style="text-align:left">This signal is used to dump Java stack traces to the standard error stream. (Optional)</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>SIGTERM</code>, <code>SIGINT</code>, <code>SIGHUP</code></td>
-<td style="text-align:left">These signals are used to support the shutdown hook mechanism (<code>java.lang.Runtime.addShutdownHook</code>) when the VM is terminated abnormally. (Optional)</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>SIGUSR1</code></td>
-<td style="text-align:left">This signal is used in the implementation of the <code>java.lang.Thread.interrupt</code> method. Not used starting with Oracle Solaris 10 reserved on Linux. (Configurable)</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>SIGUSR2</code></td>
-<td style="text-align:left">This signal is used internally. Not used starting with Oracle Solaris 10 operating system. (Configurable)</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>SIGABRT</code></td>
-<td style="text-align:left">The HotSpot VM does not handle this signal. Instead it calls the <code>abort</code> function after fatal error handling. If an application uses this signal then it should terminate the process to preserve the expected semantics.</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">Signal</th>
+          <th style="text-align: left">Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>SIGSEGV</code>, <code>SIGBUS</code>, <code>SIGFPE</code>, <code>SIGPIPE</code>, <code>SIGILL</code></td>
+          <td style="text-align: left">These signals are used in the implementation for implicit null check, and so forth.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>SIGQUIT</code></td>
+          <td style="text-align: left">This signal is used to dump Java stack traces to the standard error stream. (Optional)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>SIGTERM</code>, <code>SIGINT</code>, <code>SIGHUP</code></td>
+          <td style="text-align: left">These signals are used to support the shutdown hook mechanism (<code>java.lang.Runtime.addShutdownHook</code>) when the VM is terminated abnormally. (Optional)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>SIGUSR1</code></td>
+          <td style="text-align: left">This signal is used in the implementation of the <code>java.lang.Thread.interrupt</code> method. Not used starting with Oracle Solaris 10 reserved on Linux. (Configurable)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>SIGUSR2</code></td>
+          <td style="text-align: left">This signal is used internally. Not used starting with Oracle Solaris 10 operating system. (Configurable)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>SIGABRT</code></td>
+          <td style="text-align: left">The HotSpot VM does not handle this signal. Instead it calls the <code>abort</code> function after fatal error handling. If an application uses this signal then it should terminate the process to preserve the expected semantics.</td>
+      </tr>
+  </tbody>
 </table></div>
 <p>实际上，JVM 是使用 SIGSEGV、SIGBUS、SIGPIPE 等进行代码中的各种 <code>NULL</code> 检查。</p>
 <p>同样，我们在终端上键入 <strong>ctrl-\</strong>，也不会让前台运行的 Java 进程终止并 core dump，而是会将 Java 进程的 stack traces 输出到终端的标准错误流。</p>
@@ -1076,7 +1070,7 @@
     
     <section class="powerby">
         
-            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
         使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
         主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>

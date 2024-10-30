@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,8 +15,11 @@
                 href="https://mazhen.tech/"
                 />
   </url><url>
+    <loc>https://mazhen.tech/tags/c/</loc>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
+  </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,17 +31,14 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/glassfish/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/linux/</loc>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -51,15 +51,21 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/</loc>
+    <lastmod>2024-10-30T14:13:24+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/glassfish/</loc>
+    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/java/</loc>
     <lastmod>2024-05-14T15:04:43+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2024-05-14T15:04:43+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/kernel/</loc>
-    <lastmod>2023-11-06T11:18:06+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/linux/</loc>
     <lastmod>2023-11-06T11:18:06+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</loc>

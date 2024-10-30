@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。两个典型的 ANTI-METHODOLOGIES：\n">
 <title>使用USE Method分析系统性能问题</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8use-method%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="使用USE Method分析系统性能问题">
-<meta property='og:description' content="遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。">
+<meta property='og:description' content="遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。两个典型的 ANTI-METHODOLOGIES：\n">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8use-method%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='performance' /><meta property='article:published_time' content='2014-06-07T10:56:00&#43;08:00'/><meta property='article:modified_time' content='2014-06-07T10:56:00&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="使用USE Method分析系统性能问题">
-<meta name="twitter:description" content="遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。">
+<meta name="twitter:description" content="遇到性能问题怎么分析定位？这个问题太难回答了，各种底层环境、依赖系统、业务场景，怎么可能有统一的答案。于是产生了各种分析性能问题的“流派”。两个典型的 ANTI-METHODOLOGIES：\n">
     <link rel="shortcut icon" href="/favicon.png" />
 
-  
-    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -32,10 +30,6 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
-    
-  
-
-
     </head>
     <body class="
     article-page
@@ -79,7 +73,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -449,55 +443,55 @@
 </ul>
 <p>列出系统中的所有资源，然后逐项检查利用率、等待队列和错误数，就这么简单！下表是一个范例：</p>
 <div class="table-wrapper"><table>
-<thead>
-<tr>
-<th style="text-align:left">resource</th>
-<th style="text-align:right">type</th>
-<th style="text-align:center">metric</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">CPU</td>
-<td style="text-align:right">utilization</td>
-<td style="text-align:center">CPU utilization (either per-CPU or a system-wide average)</td>
-</tr>
-<tr>
-<td style="text-align:left">CPU</td>
-<td style="text-align:right">saturation</td>
-<td style="text-align:center">run-queue length</td>
-</tr>
-<tr>
-<td style="text-align:left">Memory capacity</td>
-<td style="text-align:right">utilization</td>
-<td style="text-align:center">available free memory (system-wide)</td>
-</tr>
-<tr>
-<td style="text-align:left">Memory capacity</td>
-<td style="text-align:right">saturation</td>
-<td style="text-align:center">anonymous paging or thread swapping</td>
-</tr>
-<tr>
-<td style="text-align:left">Network interface</td>
-<td style="text-align:right">utilization</td>
-<td style="text-align:center">RX/TX throughput / max bandwidth Storage</td>
-</tr>
-<tr>
-<td style="text-align:left">Storage device I/O</td>
-<td style="text-align:right">utilization</td>
-<td style="text-align:center">device busy percent</td>
-</tr>
-<tr>
-<td style="text-align:left">Storage device I/O</td>
-<td style="text-align:right">saturation</td>
-<td style="text-align:center">wait queue length</td>
-</tr>
-<tr>
-<td style="text-align:left">Storage device I/O</td>
-<td style="text-align:right">errors</td>
-<td style="text-align:center">device errors (&ldquo;soft&rdquo;, &ldquo;hard&rdquo;, &hellip;)</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">resource</th>
+          <th style="text-align: right">type</th>
+          <th style="text-align: center">metric</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">CPU</td>
+          <td style="text-align: right">utilization</td>
+          <td style="text-align: center">CPU utilization (either per-CPU or a system-wide average)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">CPU</td>
+          <td style="text-align: right">saturation</td>
+          <td style="text-align: center">run-queue length</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Memory capacity</td>
+          <td style="text-align: right">utilization</td>
+          <td style="text-align: center">available free memory (system-wide)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Memory capacity</td>
+          <td style="text-align: right">saturation</td>
+          <td style="text-align: center">anonymous paging or thread swapping</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Network interface</td>
+          <td style="text-align: right">utilization</td>
+          <td style="text-align: center">RX/TX throughput / max bandwidth Storage</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Storage device I/O</td>
+          <td style="text-align: right">utilization</td>
+          <td style="text-align: center">device busy percent</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Storage device I/O</td>
+          <td style="text-align: right">saturation</td>
+          <td style="text-align: center">wait queue length</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Storage device I/O</td>
+          <td style="text-align: right">errors</td>
+          <td style="text-align: center">device errors (&ldquo;soft&rdquo;, &ldquo;hard&rdquo;, &hellip;)</td>
+      </tr>
+  </tbody>
 </table></div>
 <p>对于资源测量数据的解读，作者给了一些建议，例如：资源利用率100%肯定表示该资源是系统瓶颈，70%以上的利用率就要引起足够的重视，一般IO设备利用率高于70%，响应时间将大幅上升。资源等待队列大于0意味着可能存在问题。资源的任何错误计数，都值得仔细调查，特别是当性能变差时，错误计数在上升。</p>
 <p>要使用这个方法，你还需要一份完整的资源列表，一般的系统资源包括：</p>
@@ -583,6 +577,19 @@
             
                 
 <article class="">
+    <a href="/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">一篇读懂 C 指针</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F/">
         
         
@@ -602,19 +609,6 @@
 
         <div class="article-details">
             <h2 class="article-title">深入探索 perf CPU Profiling 实现原理</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">从源码构建 perf</h2>
         </div>
     </a>
 </article>
@@ -682,7 +676,7 @@
     
     <section class="powerby">
         
-            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤ICP备2022085181号-1</a> <br/>
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
         使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
         主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
