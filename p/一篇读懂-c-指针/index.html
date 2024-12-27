@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：\n《C 和指针（Pointers on C）》 《征服 C 指针》 《深入理解 C 指针（Understanding and using C pointers）》 Pointers in C: A Hands on Approach &hellip; 同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了： 《C 和指针（Pointers on C）》 《征服 C 指针">
 <title>一篇读懂 C 指针</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="一篇读懂 C 指针">
-<meta property='og:description' content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：\n《C 和指针（Pointers on C）》 《征服 C 指针》 《深入理解 C 指针（Understanding and using C pointers）》 Pointers in C: A Hands on Approach &hellip; 同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。\n">
+<meta property='og:description' content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了： 《C 和指针（Pointers on C）》 《征服 C 指针">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='c' /><meta property='article:tag' content='linux' /><meta property='article:published_time' content='2024-10-30T14:13:24&#43;08:00'/><meta property='article:modified_time' content='2024-10-30T14:13:24&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="一篇读懂 C 指针">
-<meta name="twitter:description" content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了：\n《C 和指针（Pointers on C）》 《征服 C 指针》 《深入理解 C 指针（Understanding and using C pointers）》 Pointers in C: A Hands on Approach &hellip; 同时，指针也是 C 语言最重要的特性，你不可能在不掌握指针的情况下用好 C。本文试图带你彻底攻克这个难点，让你可以像 Neo 看透 Matrix 一样，看破“指针”。\n">
+<meta name="twitter:description" content="指针是 C 语言公认的难点，要不然也不会有那么多 C 语言的书籍专门将“指针”放在标题中进行强调了： 《C 和指针（Pointers on C）》 《征服 C 指针">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -680,46 +686,46 @@
     C 声明的优先级规则
 </h3><p>我们可以按照下面表格分步拆解声明，将 C 的声明解读为自然语言。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th></th>
-          <th><strong>C 声明的优先级规则</strong></th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>A</strong></td>
-          <td>声明从名称开始，然后按照优先级顺序阅读。</td>
-      </tr>
-      <tr>
-          <td><strong>B</strong></td>
-          <td>优先级从高到低的顺序为：</td>
-      </tr>
-      <tr>
-          <td><strong>B.1</strong></td>
-          <td>声明中被括号括起来部分</td>
-      </tr>
-      <tr>
-          <td><strong>B.2</strong></td>
-          <td>后缀运算符：</td>
-      </tr>
-      <tr>
-          <td></td>
-          <td>括号 <code>()</code> 表示函数</td>
-      </tr>
-      <tr>
-          <td></td>
-          <td>方括号 <code>[]</code> 表示数组</td>
-      </tr>
-      <tr>
-          <td><strong>B.3</strong></td>
-          <td>前缀运算符：星号表示“指向&hellip;的指针”。</td>
-      </tr>
-      <tr>
-          <td><strong>C</strong></td>
-          <td>如果 <code>const</code> 和/或 <code>volatile</code> 关键字紧邻类型说明符（例如 <code>int</code>、<code>long</code> 等），则它们作用于类型说明符。<br>否则，<code>const</code> 和/或 <code>volatile</code> 关键字作用于其左边的指针星号。</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th></th>
+<th><strong>C 声明的优先级规则</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>声明从名称开始，然后按照优先级顺序阅读。</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>优先级从高到低的顺序为：</td>
+</tr>
+<tr>
+<td><strong>B.1</strong></td>
+<td>声明中被括号括起来部分</td>
+</tr>
+<tr>
+<td><strong>B.2</strong></td>
+<td>后缀运算符：</td>
+</tr>
+<tr>
+<td></td>
+<td>括号 <code>()</code> 表示函数</td>
+</tr>
+<tr>
+<td></td>
+<td>方括号 <code>[]</code> 表示数组</td>
+</tr>
+<tr>
+<td><strong>B.3</strong></td>
+<td>前缀运算符：星号表示“指向&hellip;的指针”。</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>如果 <code>const</code> 和/或 <code>volatile</code> 关键字紧邻类型说明符（例如 <code>int</code>、<code>long</code> 等），则它们作用于类型说明符。<br>否则，<code>const</code> 和/或 <code>volatile</code> 关键字作用于其左边的指针星号。</td>
+</tr>
+</tbody>
 </table></div>
 <p>现在用上面表格定义的优先级规则，来解读这个原型声明：</p>
 <div class="highlight"><div class="chroma">
@@ -731,42 +737,42 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>应用规则</th>
-          <th>解释</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>A</strong></td>
-          <td>首先，找到变量名 &ldquo;next&rdquo;，并注意它直接被括号包围</td>
-      </tr>
-      <tr>
-          <td><strong>B.1</strong></td>
-          <td>然后，我们将括号中的内容作为一个整体</td>
-      </tr>
-      <tr>
-          <td><strong>B.3</strong></td>
-          <td>进入括号内，注意到前缀操作符 <code>*</code>，得出“<strong>next 是一个指针，它指向&hellip;</strong>”</td>
-      </tr>
-      <tr>
-          <td><strong>B</strong></td>
-          <td>然后，我们走出括号，可以选择前缀操作符  <code>*</code> 或者后缀操作符 <code>()</code></td>
-      </tr>
-      <tr>
-          <td><strong>B.2</strong></td>
-          <td>规则 B.2 告诉我们优先级较高的是右边的函数括号 <code>()</code>，因此我们得到“<strong>next 是指针，它指向一个函数，这个函数返回&hellip;</strong> ”。</td>
-      </tr>
-      <tr>
-          <td><strong>B.3</strong></td>
-          <td>接着处理前缀星号 <code>*</code>，得出“<strong>这个函数返回一个指针，它指向&hellip;</strong>”</td>
-      </tr>
-      <tr>
-          <td><strong>C</strong></td>
-          <td>最后，将 &ldquo;char * const&rdquo; 解释为“<strong>指向 char 的只读指针</strong>”</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>应用规则</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>首先，找到变量名 &ldquo;next&rdquo;，并注意它直接被括号包围</td>
+</tr>
+<tr>
+<td><strong>B.1</strong></td>
+<td>然后，我们将括号中的内容作为一个整体</td>
+</tr>
+<tr>
+<td><strong>B.3</strong></td>
+<td>进入括号内，注意到前缀操作符 <code>*</code>，得出“<strong>next 是一个指针，它指向&hellip;</strong>”</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>然后，我们走出括号，可以选择前缀操作符  <code>*</code> 或者后缀操作符 <code>()</code></td>
+</tr>
+<tr>
+<td><strong>B.2</strong></td>
+<td>规则 B.2 告诉我们优先级较高的是右边的函数括号 <code>()</code>，因此我们得到“<strong>next 是指针，它指向一个函数，这个函数返回&hellip;</strong> ”。</td>
+</tr>
+<tr>
+<td><strong>B.3</strong></td>
+<td>接着处理前缀星号 <code>*</code>，得出“<strong>这个函数返回一个指针，它指向&hellip;</strong>”</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>最后，将 &ldquo;char * const&rdquo; 解释为“<strong>指向 char 的只读指针</strong>”</td>
+</tr>
+</tbody>
 </table></div>
 <p>将所有部分结合在一起可以解读为：</p>
 <p>“<strong>next 是一个指针，它指向一个函数，这个函数返回一个指针，该指针指向另一个指针，它是一个指向 char 的只读指针。</strong>”</p>
@@ -782,46 +788,46 @@
 </div>
 </div><p>按照声明的优先级规则解读：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>应用规则</th>
-          <th>解释</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>A</strong></td>
-          <td>从变量名 <code>c</code> 开始</td>
-      </tr>
-      <tr>
-          <td><strong>B</strong></td>
-          <td>可以选择前缀操作符  <code>*</code> ，或者后缀操作符 <code>[]</code></td>
-      </tr>
-      <tr>
-          <td><strong>B.2</strong></td>
-          <td>选择优先级较高的右边方括号<code>[]</code>，因此我们得到“<strong>c 是一个包含了 10 个元素数组，元素类型是&hellip;</strong>”</td>
-      </tr>
-      <tr>
-          <td><strong>B.3</strong></td>
-          <td>接着处理前缀星号 <code>*</code>，得出“<strong>元素类型是指针，它指向&hellip;</strong>”</td>
-      </tr>
-      <tr>
-          <td><strong>B.1</strong></td>
-          <td>将括号中的内容作为一个整体</td>
-      </tr>
-      <tr>
-          <td><strong>B</strong></td>
-          <td>可以选择前缀操作符  <code>*</code> 或者后缀操作符 <code>()</code></td>
-      </tr>
-      <tr>
-          <td><strong>B.2</strong></td>
-          <td>选择优先级较高的右边函数括号 <code>()</code>，因此我们得到“**&hellip; 是一个函数，这个函数接收的参数是 int **p，返回值是&hellip; **”。</td>
-      </tr>
-      <tr>
-          <td><strong>B.3</strong></td>
-          <td>接着处理前缀星号 <code>*</code>，得出“<strong>返回值是一个指向 char 的指针</strong>”</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>应用规则</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>从变量名 <code>c</code> 开始</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>可以选择前缀操作符  <code>*</code> ，或者后缀操作符 <code>[]</code></td>
+</tr>
+<tr>
+<td><strong>B.2</strong></td>
+<td>选择优先级较高的右边方括号<code>[]</code>，因此我们得到“<strong>c 是一个包含了 10 个元素数组，元素类型是&hellip;</strong>”</td>
+</tr>
+<tr>
+<td><strong>B.3</strong></td>
+<td>接着处理前缀星号 <code>*</code>，得出“<strong>元素类型是指针，它指向&hellip;</strong>”</td>
+</tr>
+<tr>
+<td><strong>B.1</strong></td>
+<td>将括号中的内容作为一个整体</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>可以选择前缀操作符  <code>*</code> 或者后缀操作符 <code>()</code></td>
+</tr>
+<tr>
+<td><strong>B.2</strong></td>
+<td>选择优先级较高的右边函数括号 <code>()</code>，因此我们得到“**&hellip; 是一个函数，这个函数接收的参数是 int **p，返回值是&hellip; **”。</td>
+</tr>
+<tr>
+<td><strong>B.3</strong></td>
+<td>接着处理前缀星号 <code>*</code>，得出“<strong>返回值是一个指向 char 的指针</strong>”</td>
+</tr>
+</tbody>
 </table></div>
 <p>最后将所有部分合在一起：</p>
 <p>“<strong>c 是一个包含了 10 个元素数组，元素类型是指针，它指向是一个函数，这个函数接收的参数是 int **p，返回值是一个指向 char 的指针。</strong>”</p>
@@ -2266,6 +2272,19 @@
             
                 
 <article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 Linux 内核</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
         
         
@@ -2311,19 +2330,6 @@
 
         <div class="article-details">
             <h2 class="article-title">Nginx的模块化设计</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/%E5%9C%A8macos%E4%B8%8A%E4%BD%BF%E7%94%A8vscode%E8%B0%83%E8%AF%95nginx/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">在macOS上使用VSCode调试NGINX</h2>
         </div>
     </a>
 </article>

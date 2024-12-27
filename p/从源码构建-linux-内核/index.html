@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="对于希望深入了解 Linux 内核的开发者来说，亲自编译和安装内核是一次有趣的实践。在这篇文章中，我将带你从环境准备开始，逐步完成下载内核源代码、配置、">
+<title>从源码构建 Linux 内核</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="从源码构建 Linux 内核">
+<meta property='og:description' content="对于希望深入了解 Linux 内核的开发者来说，亲自编译和安装内核是一次有趣的实践。在这篇文章中，我将带你从环境准备开始，逐步完成下载内核源代码、配置、">
+<meta property='og:url' content='https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='c' /><meta property='article:published_time' content='2024-12-27T14:50:10&#43;08:00'/><meta property='article:modified_time' content='2024-12-27T14:50:10&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="从源码构建 Linux 内核">
+<meta name="twitter:description" content="对于希望深入了解 Linux 内核的开发者来说，亲自编译和安装内核是一次有趣的实践。在这篇文章中，我将带你从环境准备开始，逐步完成下载内核源代码、配置、">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#构建环境准备">构建环境准备</a>
+      <ol>
+        <li><a href="#安装本地工具链和开发工具">安装本地工具链和开发工具</a></li>
+        <li><a href="#安装构建内核需要的依赖">安装构建内核需要的依赖</a></li>
+      </ol>
+    </li>
+    <li><a href="#获取内核源码">获取内核源码</a>
+      <ol>
+        <li><a href="#下载特定版本的内核源码">下载特定版本的内核源码</a></li>
+        <li><a href="#从-git-仓库-clone-源码">从 git 仓库 clone 源码</a></li>
+        <li><a href="#内核源码结构概览">内核源码结构概览</a></li>
+        <li><a href="#关于-maintainers-文件">关于 MAINTAINERS 文件</a></li>
+      </ol>
+    </li>
+    <li><a href="#配置内核">配置内核</a>
+      <ol>
+        <li><a href="#kconfig">Kconfig</a></li>
+        <li><a href="#默认配置">默认配置</a></li>
+        <li><a href="#基于现有发行版的配置">基于现有发行版的配置</a></li>
+        <li><a href="#基于当前加载的内核模块">基于当前加载的内核模块</a></li>
+        <li><a href="#使用图形界面配置">使用图形界面配置</a></li>
+        <li><a href="#使用脚本配置">使用脚本配置</a></li>
+      </ol>
+    </li>
+    <li><a href="#构建内核镜像和内核模块">构建内核镜像和内核模块</a></li>
+    <li><a href="#安装内核模块">安装内核模块</a></li>
+    <li><a href="#安装内核">安装内核</a>
+      <ol>
+        <li><a href="#initramfs-镜像">initramfs 镜像</a></li>
+        <li><a href="#安装内核镜像">安装内核镜像</a></li>
+        <li><a href="#更新-grub-配置">更新 <code>GRUB</code> 配置</a></li>
+      </ol>
+    </li>
+    <li><a href="#定制-grub">定制 GRUB</a></li>
+    <li><a href="#验证新内核的配置">验证新内核的配置</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/">从源码构建 Linux 内核</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-12-27</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 26 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><img src="https://cdn.mazhen.tech/2024/202412271447033.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="title"
+	
+	
+></p>
+<p>对于希望深入了解 Linux 内核的开发者来说，亲自编译和安装内核是一次有趣的实践。在这篇文章中，我将带你从环境准备开始，逐步完成下载内核源代码、配置、编译和构建自定义内核，最终安装并使用它。让我们开始吧。</p>
+<h2 id="构建环境准备">
+    <a href="#%e6%9e%84%e5%bb%ba%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87" class="header-anchor">#</a>
+    构建环境准备
+</h2><p>在准备构建环境之前，我们需要先理解 <strong>native toolchain (本地工具链)</strong> 和 <strong>cross-toolchain (交叉工具链)</strong> 这两个重要的概念。</p>
+<p>工具链 (toolchain) 是编译软件所需的一系列工具集合，包括 <code>make</code> 构建工具、<code>gcc</code> 编译器、标准 GNU C 库 (<code>glibc</code>)、<code>binutils</code> (包含链接器和汇编器)、<code>gdb</code> 调试器等。</p>
+<p><strong>native toolchain (本地工具链)</strong> 指的是运行在特定架构上，用于为<strong>相同架构</strong>编译代码的工具集合，例如在 <code>x86_64</code> 架构的 Linux 系统上，使用系统自带的 <code>gcc</code> 编译出的程序，可以直接本地运行。</p>
+<p><strong>cross-toolchain (交叉工具链)</strong> 则是在一个架构上运行，用于为<strong>另一个不同架构</strong>的系统构建软件的工具链。例如在 <code>x86_64</code> 架构的 Linux 系统上，如果需要为 <code>ARM</code> 架构的设备构建程序，就需要使用一个针对 <code>ARM</code> 架构的 <strong>cross-toolchain</strong>。</p>
+<p>本文将讨论在 <code>x86_64</code> 架构上为本机构建内核的情况，没有涉及交叉编译。在本机为另一个目标平台构建内核在嵌入式开发领域很常见，感兴趣的读者可以参考这篇文档：<a class="link" href="https://www.raspberrypi.com/documentation/computers/linux_kernel.html"  target="_blank" rel="noopener"
+    >如何交叉编译为树莓派构建内核</a>。</p>
+<p>我选择常用的 Linux 发行版 Ubuntu 作为示例进行说明。针对其他发行版，以下步骤和原理基本相同，只是具体的命令可能略有差异。</p>
+<h3 id="安装本地工具链和开发工具">
+    <a href="#%e5%ae%89%e8%a3%85%e6%9c%ac%e5%9c%b0%e5%b7%a5%e5%85%b7%e9%93%be%e5%92%8c%e5%bc%80%e5%8f%91%e5%b7%a5%e5%85%b7" class="header-anchor">#</a>
+    安装本地工具链和开发工具
+</h3><p>执行下面的命令安装构建内核所需本地工具链和开发工具：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install git vim build-essential perl gdb dwarves linux-headers-<span class="k">$(</span>uname -r<span class="k">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中，<code>build-essential</code> 是一个用于构建 Debian 软件包的基础工具集，它包含了编译软件包所需的关键工具和库，例如编译器、构建工具以及开发头文件。我们可以使用 <code>apt-cache depends</code> 命令来查看 <code>build-essential</code> 包所包含的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ apt-cache depends build-essential
+</span></span><span class="line"><span class="cl">build-essential
+</span></span><span class="line"><span class="cl"> <span class="p">|</span>Depends: libc6-dev
+</span></span><span class="line"><span class="cl">  Depends: &lt;libc-dev&gt;
+</span></span><span class="line"><span class="cl">    libc6-dev
+</span></span><span class="line"><span class="cl">  Depends: gcc
+</span></span><span class="line"><span class="cl">  Depends: g++
+</span></span><span class="line"><span class="cl">  Depends: make
+</span></span><span class="line"><span class="cl">    make-guile
+</span></span><span class="line"><span class="cl">  Depends: dpkg-dev
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>dwarves</code> 包包含了一组高级的 DWARF 工具，主要用于处理由编译器插入到 ELF 二进制文件中的 DWARF 调试信息。这些调试信息对于调试内核模块至关重要。</p>
+<p><code>$(uname -r)</code> 命令用于动态获取当前正在运行的内核的版本号。 <code>linux-headers-$(uname -r)</code> 则代表与当前运行的 Linux 内核版本相对应的内核头文件。这些头文件是编译与内核模块相关的软件所必需的。</p>
+<h3 id="安装构建内核需要的依赖">
+    <a href="#%e5%ae%89%e8%a3%85%e6%9e%84%e5%bb%ba%e5%86%85%e6%a0%b8%e9%9c%80%e8%a6%81%e7%9a%84%e4%be%9d%e8%b5%96" class="header-anchor">#</a>
+    安装构建内核需要的依赖
+</h3><p>执行下面的命令安装构建内核需要的依赖包：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo apt install <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	bison flex libncurses5-dev ncurses-dev <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	libelf-dev libssl-dev bc zstd
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>下面详细解释这些软件包的作用：</p>
+<ul>
+<li><strong>bison</strong>：是一个语法分析器生成器。它能将编程语言的语法规则转换为可解析这些规则的程序，即生成语法分析器。从 Linux 4.16 版本开始，构建系统会在构建过程中自动生成解析器，这需要 Bison 2.0 或更高版本。</li>
+<li><strong>flex</strong>：是一个快速的词法分析器生成器。它用于生成对文本进行模式匹配的程序，即生成词法分析器。词法分析器的作用是对输入文本进行扫描，识别出符合特定规则的字符序列。自 Linux 4.16 版本起，构建系统也会在构建过程中自动生成词法分析器，因此需要 Flex 2.5.35 或更高版本。</li>
+<li><strong>ncurses</strong>： (全称 &ldquo;new curses&rdquo;) 是一个编程库，提供应用程序编程接口（API），允许开发者在终端中创建与终端类型无关的基于文本的用户界面（TUI）。简而言之，它是开发“类 GUI”应用程序的软件工具包，这些应用程序在终端模拟器中运行，不依赖图形界面。<code>libncurses5-dev</code> 和 <code>ncurses-dev</code> 这两个软件包都是开发基于 <code>ncurses</code> 的文本用户界面程序的开发包，它们包含了 <code>ncurses</code> 库的头文件和开发文件，用于编译和链接基于 <code>ncurses</code> 的程序。</li>
+<li><strong>libelf-dev</strong>：提供了用于处理 ELF (Executable and Linkable Format，可执行与可链接格式) 文件的开发库。ELF 是一种常见的文件格式，用于可执行文件、目标代码、共享库和核心转储文件。<code>libelf</code> 库使开发者能够以与架构无关的方式读取、修改或创建 ELF 文件，同时处理文件大小和字节序（Endian）等问题。Linux 内核和内核模块都使用 ELF 文件格式，因此在编译和调试内核时，<code>libelf</code> 库是必不可少的。</li>
+<li><strong>libssl-dev</strong>：是 OpenSSL 项目实现 SSL（Secure Sockets Layer）和 TLS（Transport Layer Security）加密协议的开发包。<code>libssl-dev</code> 包含了 OpenSSL 的头文件和开发库，供开发者在程序中使用这些加密协议来进行加密、解密、证书验证、密钥交换等操作。文档指出，从 Linux 内核 v4.3 版本（如果启用模块签名，则从 v3.7 版本开始）及更高版本，需要安装 OpenSSL 开发包。</li>
+<li><strong>bc</strong>：是一种任意精度的数字处理语言。它支持交互式执行语句，常用于执行精确的数学计算。在内核构建过程中，<code>bc</code> 用于在头文件中生成时间常数。</li>
+<li><strong>zstd</strong>：是一种高效的压缩算法工具，具有更好的压缩率和压缩速度。在内核构建过程中，构建成功的未压缩的内核镜像 <code>vmlinux</code> 会使用 ZSTD 算法压缩为 <code>bzImage</code>，这是一种可启动的内核镜像格式。</li>
+</ul>
+<p>可以参考内核文档 <a class="link" href="https://www.kernel.org/doc/html/latest/process/changes.html#minimal-requirements-to-compile-the-kernel"  target="_blank" rel="noopener"
+    >Minimal requirements to compile the Kernel</a>，列出了编译当前版本 Linux 内核所需的最低软件要求。</p>
+<h2 id="获取内核源码">
+    <a href="#%e8%8e%b7%e5%8f%96%e5%86%85%e6%a0%b8%e6%ba%90%e7%a0%81" class="header-anchor">#</a>
+    获取内核源码
+</h2><p>获取 Linux 内核源码主要有两种方式：</p>
+<ol>
+<li>从 <a class="link" href="https://www.kernel.org"  target="_blank" rel="noopener"
+    >www.kernel.org</a> 下载并解压特定版本的内核源码压缩包。</li>
+<li>使用 <code>git clone</code> 命令从 Git 仓库克隆内核源码。</li>
+</ol>
+<h3 id="下载特定版本的内核源码">
+    <a href="#%e4%b8%8b%e8%bd%bd%e7%89%b9%e5%ae%9a%e7%89%88%e6%9c%ac%e7%9a%84%e5%86%85%e6%a0%b8%e6%ba%90%e7%a0%81" class="header-anchor">#</a>
+    下载特定版本的内核源码
+</h3><p>访问 <a class="link" href="https://www.kernel.org"  target="_blank" rel="noopener"
+    >www.kernel.org</a>，该网站首页会展示多个类型的内核源码，包括：</p>
+<ul>
+<li>主线版（<strong>mainline</strong>）， 开发阶段的版本，包含最新的功能和改动。<strong>mainline</strong> 由 <a class="link" href="https://en.wikipedia.org/wiki/Linus_Torvalds"  target="_blank" rel="noopener"
+    >Linus Torvalds</a> 亲自维护。</li>
+<li>稳定版（<strong>stable</strong>），在 <strong>mainline</strong> 的基础上进行修复和测试，更加稳定可靠，适合一般用户使用。</li>
+<li>长期支持版（<strong>longterm</strong>）会长期维护，修复 bug 并保持安全，适合一些有长期支持需求的场景。</li>
+<li><strong>linux-next</strong> 版本用于测试和集成即将进入主线的特性。</li>
+</ul>
+<p>关于这些内核版本的具体说明，可以参考官方文档 <a class="link" href="https://www.kernel.org/releases.html"  target="_blank" rel="noopener"
+    >Active kernel releases</a>，</p>
+<p>这里我们选择当前最新的稳定版 <strong>6.12.6</strong> 为例。点击相应的 <code>tarball</code> 链接下载：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202412231059439.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="kernel.org"
+	
+	
+></p>
+<p>浏览器会将 .tar.xz 格式的压缩文件下载到本地。下载完成后，可以使用 <code>tar</code> 命令解压：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ tar -Jxvf linux-6.12.6.tar.xz
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> linux-6.12.6
+</span></span><span class="line"><span class="cl">$ ls -l
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="从-git-仓库-clone-源码">
+    <a href="#%e4%bb%8e-git-%e4%bb%93%e5%ba%93-clone-%e6%ba%90%e7%a0%81" class="header-anchor">#</a>
+    从 git 仓库 clone 源码
+</h3><p>除了下载压缩包，还可以使用 Git 从内核仓库克隆源码。如前所述，Linux 内核有多个类型的源码仓库。</p>
+<p>如果想获取包含最新功能的 mainline 源码仓库，执行下面的命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个命令会克隆 Linus Torvalds 亲自维护的 Linux 内核 mainline 仓库。</p>
+<p>我们的需求是获取最新稳定版本的源码仓库，则需要 clone 稳定版的源码仓库：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> linux-stable
+</span></span><span class="line"><span class="cl">$ git checkout v6.12.6
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里，我们先克隆稳定版仓库，然后使用 <code>git checkout</code> 命令切换到 <code>v6.12.6</code> 标签。</p>
+<p>克隆完整的 Linux 内核源码通常非常耗时，特别是在网络环境不佳的情况下。为了加快克隆速度，可以使用 <code>depth</code> 参数来限制历史提交的深度，从而减少下载的数据量。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git clone --depth <span class="m">1</span> &lt;...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中 <code>--depth 1</code> 表示只下载最新的提交记录，可以显著减少下载时间。</p>
+<p>如果只是想基于最新稳定版的源码构建内核，那么还是推荐第一种方法，直接从 kernel.org 下载内核源码的压缩包。</p>
+<h3 id="内核源码结构概览">
+    <a href="#%e5%86%85%e6%a0%b8%e6%ba%90%e7%a0%81%e7%bb%93%e6%9e%84%e6%a6%82%e8%a7%88" class="header-anchor">#</a>
+    内核源码结构概览
+</h3><p>内核源码按照子系统和功能，被组织成目录及其子目录，这种结构化的设计使得内核的维护和开发更加高效。下面我们以鸟瞰的方式，对内核源码的整体结构进行一个粗略的认识：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>文件或目录</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>README</td>
+<td>项目的 README 文件，提供了关于内核的简要说明，以及如何访问最新的官方内核文档的链接：https://www.kernel.org/doc/html/latest/。</td>
+</tr>
+<tr>
+<td>COPYING</td>
+<td>内核源代码的许可条款</td>
+</tr>
+<tr>
+<td>MAINTAINERS</td>
+<td>内核子系统的维护者列表，提供了维护者的联系方式，是贡献代码的重要参考。</td>
+</tr>
+<tr>
+<td>Makefile</td>
+<td>内核顶层的 Makefile</td>
+</tr>
+<tr>
+<td>kernel/</td>
+<td>核心子系统，包含了进程和线程的生命周期管理、CPU 任务调度、锁机制、cgroups (控制组)、定时器、中断处理、信号、内核模块机制、tracing (跟踪)、eBPF 等核心功能。</td>
+</tr>
+<tr>
+<td>mm/</td>
+<td>内存管理子系统，负责内核的内存分配、页面管理、交换等功能。</td>
+</tr>
+<tr>
+<td>fs/</td>
+<td>内核虚拟文件系统 (VFS) 和各个具体文件系统的实现，如 ext4, btrfs, overlayfs 等等。</td>
+</tr>
+<tr>
+<td>block/</td>
+<td>块设备 I/O 实现，包含了页面缓存、通用块设备 I/O 层、I/O 调度等，负责管理磁盘和其他块设备的数据读写。</td>
+</tr>
+<tr>
+<td>net/</td>
+<td>网络协议栈的实现，包含了 TCP, UDP, IP 等网络协议的实现。</td>
+</tr>
+<tr>
+<td>ipc/</td>
+<td>进程间通信 (IPC) 子系统，提供了进程间交换数据的机制，例如信号量、共享内存、消息队列等。</td>
+</tr>
+<tr>
+<td>sound/</td>
+<td>音频子系统，提供了对音频设备的支持。</td>
+</tr>
+<tr>
+<td>virt/</td>
+<td>虚拟化子系统，包含了 KVM (Kernel-based Virtual Machine) 的实现，是 Linux 系统支持虚拟化的关键组件。</td>
+</tr>
+<tr>
+<td>Documentation/</td>
+<td>内核官方文档，包含了关于内核各个子系统的详细说明</td>
+</tr>
+<tr>
+<td>LICENSES/</td>
+<td>内核代码遵循的所有许可证。</td>
+</tr>
+<tr>
+<td>arch/</td>
+<td>体系结构相关的代码，例如 <code>arm</code>, <code>x86</code>，<code>riscv</code> 等，包含了特定于不同 CPU 架构的内核实现。</td>
+</tr>
+<tr>
+<td>certs/</td>
+<td>用于生成签名模块的代码，用于确保内核模块的安全性。</td>
+</tr>
+<tr>
+<td>crypto/</td>
+<td>内核实现的加密和解密算法，为内核提供安全加密功能。</td>
+</tr>
+<tr>
+<td>drivers/</td>
+<td>设备驱动程序代码，包含了各种硬件设备的驱动程序，例如显卡、网卡、USB 设备等。</td>
+</tr>
+<tr>
+<td>include/</td>
+<td>架构无关的内核头文件，包含了内核编程所需的各种数据结构和函数声明。特定架构的头文件位于 <code>arch/&lt;cpu&gt;/include/</code> 目录下。</td>
+</tr>
+<tr>
+<td>init/</td>
+<td>内核初始化代码，包含了内核启动时的核心代码。内核主函数 <code>start_kernel()</code> 定义在 <code>init/main.c</code> 中，是内核启动的入口点。</td>
+</tr>
+<tr>
+<td>io_uring/</td>
+<td>io_uring 的实现，是一个高性能的异步 I/O 框架，用于提高 I/O 性能。</td>
+</tr>
+<tr>
+<td>lib/</td>
+<td>类似于用户态应用的共享库 <code>glibc</code>，但这是内核代码所使用的库，提供了一些常用的内核数据结构和辅助函数。</td>
+</tr>
+<tr>
+<td>rust/</td>
+<td>支持 Rust 编程语言的内核基础设施，用于在内核中使用 Rust 语言编写模块。</td>
+</tr>
+<tr>
+<td>samples/</td>
+<td>各种内核特性的示例代码，可以帮助开发者理解和使用内核 API。</td>
+</tr>
+<tr>
+<td>scripts/</td>
+<td>各种有用的脚本，其中一些用于内核构建过程中，例如配置工具、编译脚本等。</td>
+</tr>
+<tr>
+<td>security/</td>
+<td>Linux 安全模块 (LSM) 的实现，包括 SELinux, AppArmor 等，提供了内核安全机制。</td>
+</tr>
+<tr>
+<td>tools/</td>
+<td>用户态工具的源代码，例如 <code>perf</code> 和 eBPF 的用户态工具</td>
+</tr>
+<tr>
+<td>usr/</td>
+<td>用于生成和加载 initramfs 镜像，initramfs 是一个小的文件系统，内核在初始化阶段利用 initramfs 执行用户空间代码。</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="关于-maintainers-文件">
+    <a href="#%e5%85%b3%e4%ba%8e-maintainers-%e6%96%87%e4%bb%b6" class="header-anchor">#</a>
+    关于 MAINTAINERS 文件
+</h3><p>在内核源码的根目录，有一个名为 <a class="link" href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/MAINTAINERS"  target="_blank" rel="noopener"
+    >MAINTAINERS</a> 的重要文件。该文件详细列出了所有内核子系统的维护者，以及他们的联系方式，包括邮件列表、代码仓库位置、网站等信息。</p>
+<p>随着内核的不断发展，源代码行数已经非常庞大，目前估计接近 3000 万行。即使是 Linus Torvalds 本人，也无法完全掌握所有细节。因此，如果想要向内核上游贡献补丁，通常不会直接提交到 mainline。Linus 不可能对每个补丁进行详细的审查和合并。<code>MAINTAINERS</code> 文件是内核贡献者了解内核组织结构、找到对应维护者以及提交补丁的关键入口。</p>
+<p>实际上，大多数内核子系统都有自己独立的源码仓库。补丁的讨论、提交和合并过程通常发生在这些子系统的源码仓库中，由该子系统的维护者负责把关。子系统的维护者会定期将已经合并的补丁向 mainline 提交。Linus 信任这些维护者，通常会直接合并他们提交的补丁。这就是内核社区的“信任链”模式。由此可见，维护者在内核开发中扮演着至关重要的角色，他们是内核质量的守护者，也是社区活跃的重要力量。</p>
+<p>今年 10 月发生了一件引人注目的事件，即<a class="link" href="https://lore.kernel.org/all/2024101835-tiptop-blip-09ed@gregkh/"  target="_blank" rel="noopener"
+    >移除俄罗斯维护者事件</a>。实际上，该事件是将邮件后缀为 <code>ru</code> 的维护者从 <code>MAINTAINERS</code> 文件中移除。我们可以在 mainline 源码仓库中看到当时的提交记录：<a class="link" href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/MAINTAINERS?id=6e90b675cf942e50c70e8394dfb5862975c3b3b2"  target="_blank" rel="noopener"
+    >MAINTAINERS: Remove some entries due to various compliance requirements.</a>。</p>
+<p>关于内核的开发流程，以及如何向上游提交补丁，可以参考内核文档 <a class="link" href="https://www.kernel.org/doc/html/latest/process/development-process.html"  target="_blank" rel="noopener"
+    >A guide to the Kernel Development Process</a>。该文档详细介绍了内核贡献的各个环节，包括代码风格、补丁格式、提交方式等等，是每个想参与内核贡献的开发者必读资料。</p>
+<h2 id="配置内核">
+    <a href="#%e9%85%8d%e7%bd%ae%e5%86%85%e6%a0%b8" class="header-anchor">#</a>
+    配置内核
+</h2><p>配置是构建内核的关键一步。通过配置，我们可以基于统一的源码，构建出适用于服务器、桌面或嵌入式等不同场景的内核。内核的强大之处在于其高度的可定制性，可以根据不同的硬件平台和应用需求进行裁剪和优化。</p>
+<h3 id="kconfig">
+    <a href="#kconfig" class="header-anchor">#</a>
+    Kconfig
+</h3><p>内核的可配置项定义在一系列 <strong>Kconfig</strong> 文件中，每个 <strong>Kconfig</strong>  文件中定义了多个 <code>config</code> 项，表示内核编译选项。这些选项决定了内核最终编译包含哪些功能和特性。通过配置这些选项，可以灵活定制内核以满足不同的需求。</p>
+<p><strong>Kconfig</strong>  文件分布在源码的各个子目录。如前所述，内核源码是按照子系统和功能组织的，因此每个目录下的 <strong>Kconfig</strong> 文件通常定义了该目录所实现功能的相关配置选项。例如，<code>mm/Kconfig</code> 文件定义了与内存管理子系统相关的配置选项，而 <code>drivers/net/ethernet/Kconfig</code> 则定义了以太网驱动相关的配置选项。源码根目录下的 <strong>Kconfig</strong> 文件通过 <code>source</code> 指令引用各个子系统的 <strong>Kconfig</strong> 文件，而各个子系统的 <strong>Kconfig</strong> 文件也会通过 <code>source</code> 引用其子目录中的 <strong>Kconfig</strong> 文件。这种层层引用的方式，使得内核的所有可配置项按照层次结构组织起来，方便管理和维护。</p>
+<p><strong>Kconfig</strong> 文件使用 <a class="link" href="https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html#kconfig-language"  target="_blank" rel="noopener"
+    >Kconfig 语法</a> 来定义配置项的名称、类型、依赖关系等。我们以一个具体的配置项为例，简单了解一下<a class="link" href="https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html#kconfig-language"  target="_blank" rel="noopener"
+    >Kconfig 语法</a>。打开 <code>mm/Kconfig</code>文件，找到配置项 <strong>ZSWAP</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">config</span> <span class="n">ZSWAP</span>
+</span></span><span class="line"><span class="cl">        <span class="ne">bool</span> <span class="s2">&#34;Compressed cache for swap pages&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">depends</span> <span class="n">on</span> <span class="n">SWAP</span>
+</span></span><span class="line"><span class="cl">        <span class="n">select</span> <span class="n">CRYPTO</span>
+</span></span><span class="line"><span class="cl">        <span class="n">select</span> <span class="n">ZPOOL</span>
+</span></span><span class="line"><span class="cl">        <span class="n">help</span> 
+</span></span><span class="line"><span class="cl">          <span class="n">A</span> <span class="n">lightweight</span> <span class="n">compressed</span> <span class="n">cache</span> <span class="k">for</span> <span class="n">swap</span> <span class="n">pages</span><span class="o">.</span>  <span class="n">It</span> <span class="n">takes</span>
+</span></span><span class="line"><span class="cl">          <span class="n">pages</span> <span class="n">that</span> <span class="n">are</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">process</span> <span class="n">of</span> <span class="n">being</span> <span class="n">swapped</span> <span class="n">out</span> <span class="ow">and</span> <span class="n">attempts</span> <span class="n">to</span>
+</span></span><span class="line"><span class="cl">          <span class="n">compress</span> <span class="n">them</span> <span class="n">into</span> <span class="n">a</span> <span class="n">dynamically</span> <span class="n">allocated</span> <span class="n">RAM</span><span class="o">-</span><span class="n">based</span> <span class="n">memory</span> <span class="n">pool</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">          <span class="n">This</span> <span class="n">can</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">significant</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">reduction</span> <span class="n">on</span> <span class="n">swap</span> <span class="n">device</span> <span class="ow">and</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="ow">in</span> <span class="n">the</span> <span class="k">case</span> <span class="n">where</span> <span class="n">decompressing</span> <span class="n">from</span> <span class="n">RAM</span> <span class="n">is</span> <span class="n">faster</span> <span class="n">than</span> <span class="n">swap</span> <span class="n">device</span>
+</span></span><span class="line"><span class="cl">          <span class="n">reads</span><span class="p">,</span> <span class="n">can</span> <span class="n">also</span> <span class="n">improve</span> <span class="n">workload</span> <span class="n">performance</span><span class="o">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>下面的表格解释了配置项 <strong>ZSWAP</strong> 每一行的含义：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>config ZSWAP</td>
+<td>定义了配置项的名称为 <code>ZSWAP</code></td>
+</tr>
+<tr>
+<td>bool &ldquo;Compressed cache for swap pages&rdquo;</td>
+<td>指定配置项为布尔类型</td>
+</tr>
+<tr>
+<td>depends on SWAP</td>
+<td>定义了此配置依赖的配置项，即只有当 <code>SWAP</code> 配置项被启用时， <code>ZSWAP</code> 配置项才会被显示出来并可以被配置。</td>
+</tr>
+<tr>
+<td>select CRYPTO<br/>select ZPOOL</td>
+<td>定义了反向依赖关系，即依赖此配置项的其他配置项</td>
+</tr>
+<tr>
+<td>help</td>
+<td>配置项的帮助信息，描述了 <code>ZSWAP</code> 的功能和使用方法。</td>
+</tr>
+</tbody>
+</table></div>
+<p>内核构建系统可以读取并解析所有 <strong>Kconfig</strong>  文件，并以可视化的方式展示出来。</p>
+<p>对内核的配置过程，本质上就是从所有 <strong>Kconfig</strong> 文件中选择想要设置的配置项，并将最终的配置结果记录在源码根目录下的 <strong>.config</strong> 文件中。</p>
+<p>内核提供了多种配置方式。可以在源码根目录运行 <code>make help</code> 查看配置目标，它们位于 <code>Configuration targets</code> 标题下：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202412241808723.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="kconfig"
+	
+	
+></p>
+<p>接下来，我们会选择其中几个常用的目标进行介绍。</p>
+<h3 id="默认配置">
+    <a href="#%e9%bb%98%e8%ae%a4%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    默认配置
+</h3><p>最新的 Linux 内核源代码已经接近 3000 万行，其配置项之庞大复杂可想而知。我们可以在源码的根目录下执行以下脚本，统计当前内核的可配置项数量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ find . -name <span class="s2">&#34;Kconfig*&#34;</span> -print0 <span class="se">\ </span>     
+</span></span><span class="line"><span class="cl"><span class="p">|</span> xargs -0 grep -P <span class="s1">&#39;^\s*config\s+\w+&#39;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span><span class="p">|</span> wc -l 
+</span></span><span class="line"><span class="cl"><span class="m">20961</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从零开始配置两万多个配置项简直是噩梦。好在内核已经准备了默认配置。在前面列出的配置目标中，有一个 <code>defconfig</code> 目标：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">  defconfig	 - New config with default from ARCH supplied defconfig
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其含义是：基于 CPU 架构提供的默认配置，创建一个新的配置。</p>
+<p>内核为每一种 CPU 架构都提供了一个默认配置，这些配置存放在 <code>arch/&lt;cpu&gt;/configs</code> 目录下。运行 <code>defconfig</code> 目标：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ make defconfig
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/basic/fixdep
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/conf.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/confdata.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/expr.o
+</span></span><span class="line"><span class="cl">  LEX     scripts/kconfig/lexer.lex.c
+</span></span><span class="line"><span class="cl">  YACC    scripts/kconfig/parser.tab.<span class="o">[</span>ch<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/lexer.lex.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/menu.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/parser.tab.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/preprocess.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/symbol.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/util.o
+</span></span><span class="line"><span class="cl">  HOSTLD  scripts/kconfig/conf
+</span></span><span class="line"><span class="cl">*** Default configuration is based on <span class="s1">&#39;x86_64_defconfig&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># configuration written to .config</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，<code>make defconfig</code> 会基于当前 x86_64 架构的默认配置 <code>x86_64_defconfig</code>，生成最终的配置结果 <code>.config</code>。你可以使用 vi 打开 <code>.config</code> 查看详细的配置信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Automatically generated file; DO NOT EDIT.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Linux/x86 6.12.6 Kernel Configuration</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_CC_VERSION_TEXT</span><span class="o">=</span><span class="s2">&#34;gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_CC_IS_GCC</span><span class="o">=</span>y
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_GCC_VERSION</span><span class="o">=</span><span class="m">130300</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_CLANG_VERSION</span><span class="o">=</span><span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_AS_IS_GNU</span><span class="o">=</span>y
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_AS_VERSION</span><span class="o">=</span><span class="m">24200</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_LD_IS_BFD</span><span class="o">=</span>y
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="c1"># CONFIG_KERNEL_BZIP2 is not set</span>
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_NF_LOG_SYSLOG</span><span class="o">=</span>m
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>.config</code> 文件中的每一行都表示一个配置项，有以下几种形式：</p>
+<ul>
+<li><strong><code>CONFIG_NAME=y</code></strong>: 表示该配置项被启用，并直接编译进内核。</li>
+<li><strong><code>CONFIG_NAME=m</code></strong>: 表示该配置项被启用，但会编译为可加载的内核模块。</li>
+<li><strong><code># CONFIG_NAME is not set</code></strong>: 表示该配置项未被启用。</li>
+<li><strong><code>CONFIG_NAME=&quot;text&quot;</code></strong>: 表示该配置项的值是一个文本字符串，通常用于设置内核版本、模块名称等文本信息，例如<code>CONFIG_LOCALVERSION=&quot;-my-kernel&quot;</code>。</li>
+<li><strong><code>CONFIG_NAME=number</code></strong>: 表示该配置项的值是一个数字，通常用于设置内核参数、缓冲区大小等数值信息，例如 <code>CONFIG_NR_CPUS=8</code> 表示 CPU 的核数。</li>
+</ul>
+<p>注意，正如 <code>.config</code> 文件开头所强调的，该文件是自动生成的，切勿手动修改。</p>
+<h3 id="基于现有发行版的配置">
+    <a href="#%e5%9f%ba%e4%ba%8e%e7%8e%b0%e6%9c%89%e5%8f%91%e8%a1%8c%e7%89%88%e7%9a%84%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    基于现有发行版的配置
+</h3><p>另一种简便的配置方法是：基于现有发行版的内核配置。这种配置方式与默认配置一样简单，但通常比直接使用默认配置更好。因为发行版的内核配置通常由专业的工程师进行裁剪和优化，并经过了厂商的充分测试，更能适应实际的应用场景。</p>
+<p>以我当前的构建环境为例，我使用的是 Ubuntu 24 server 版：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ cat /etc/lsb-release        
+</span></span><span class="line"><span class="cl"><span class="nv">DISTRIB_ID</span><span class="o">=</span>Ubuntu
+</span></span><span class="line"><span class="cl"><span class="nv">DISTRIB_RELEASE</span><span class="o">=</span>24.04
+</span></span><span class="line"><span class="cl"><span class="nv">DISTRIB_CODENAME</span><span class="o">=</span>noble
+</span></span><span class="line"><span class="cl"><span class="nv">DISTRIB_DESCRIPTION</span><span class="o">=</span><span class="s2">&#34;Ubuntu 24.04.1 LTS&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在重新配置之前，运行 <code>make mrproper</code> 清理所有构建过程生成的内容，包括已存在的 <code>.config</code> 文件。这确保我们从一个干净的状态开始：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ make mrproper  
+</span></span><span class="line"><span class="cl">  CLEAN   scripts/basic
+</span></span><span class="line"><span class="cl">  CLEAN   scripts/kconfig
+</span></span><span class="line"><span class="cl">  CLEAN   include/config include/generated .config
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后运行 <strong>oldconfig</strong> 目标：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">make oldconfig
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/basic/fixdep
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/conf.o
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># using defaults found in /boot/config-6.8.0-51-generic</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl">.config:965:warning: symbol value <span class="s1">&#39;0&#39;</span> invalid <span class="k">for</span> BASE_SMALL
+</span></span><span class="line"><span class="cl">.config:10817:warning: symbol value <span class="s1">&#39;m&#39;</span> invalid <span class="k">for</span> ANDROID_BINDER_IPC
+</span></span><span class="line"><span class="cl">.config:10818:warning: symbol value <span class="s1">&#39;m&#39;</span> invalid <span class="k">for</span> ANDROID_BINDERFS
+</span></span><span class="line"><span class="cl">*
+</span></span><span class="line"><span class="cl">* Restart config...
+</span></span><span class="line"><span class="cl">*
+</span></span><span class="line"><span class="cl">*
+</span></span><span class="line"><span class="cl">* General setup
+</span></span><span class="line"><span class="cl">*
+</span></span><span class="line"><span class="cl">Compile also drivers which will not load <span class="o">(</span>COMPILE_TEST<span class="o">)</span> <span class="o">[</span>N/y/?<span class="o">]</span> n
+</span></span><span class="line"><span class="cl">Compile the kernel with warnings as errors <span class="o">(</span>WERROR<span class="o">)</span> <span class="o">[</span>N/y/?<span class="o">]</span> n
+</span></span><span class="line"><span class="cl">Local version - append to kernel release <span class="o">(</span>LOCALVERSION<span class="o">)</span> <span class="o">[]</span> 
+</span></span><span class="line"><span class="cl">Automatically append version information to the version string <span class="o">(</span>LOCALVERSION_AUTO<span class="o">)</span> <span class="o">[</span>N/y/?<span class="o">]</span> n
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，<code>make oldconfig</code> 会基于 <code>/boot/config-6.8.0-51-generic</code> 文件进行配置。在安装和升级内核时，内核镜像 <code>vmlinuz-version-EXTRAVERSION</code> 默认存储在 <code>/boot</code> 目录下，同时该内核对应的配置文件也会存放在 <code>/boot</code> 目录。<code>make oldconfig</code> 正是使用了当前运行内核所对应的配置。</p>
+<p>由于正在构建的最新内核可能新增或修改了配置项，与当前内核的配置存在差异，因此接下来需要用户逐条设置必要的配置项。通常情况下，一路回车，接受默认选项即可，最终会生成 <code>.config</code> 文件。</p>
+<p>你可能会觉得，对于差异的配置项，逐条确认默认选项比较繁琐。有没有办法一次性确认使用默认选项呢？当然可以，使用 <strong>olddefconfig</strong> 目标。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ make mrproper 
+</span></span><span class="line"><span class="cl">$ make olddefconfig
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/basic/fixdep
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/conf.o
+</span></span><span class="line"><span class="cl">  HOSTCC  scripts/kconfig/confdata.o
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># using defaults found in /boot/config-6.8.0-51-generic</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl">.config:965:warning: symbol value <span class="s1">&#39;0&#39;</span> invalid <span class="k">for</span> BASE_SMALL
+</span></span><span class="line"><span class="cl">.config:10817:warning: symbol value <span class="s1">&#39;m&#39;</span> invalid <span class="k">for</span> ANDROID_BINDER_IPC
+</span></span><span class="line"><span class="cl">.config:10818:warning: symbol value <span class="s1">&#39;m&#39;</span> invalid <span class="k">for</span> ANDROID_BINDERFS
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># configuration written to .config</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>与 <strong>oldconfig</strong> 类似，<strong>olddefconfig</strong> 也会基于当前内核的配置生成 <code>.config</code> 文件。不同之处在于，使用 <strong>olddefconfig</strong> 时，对于新增的配置项，会直接设置为默认值，无需用户逐个确认。</p>
+<h3 id="基于当前加载的内核模块">
+    <a href="#%e5%9f%ba%e4%ba%8e%e5%bd%93%e5%89%8d%e5%8a%a0%e8%bd%bd%e7%9a%84%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" class="header-anchor">#</a>
+    基于当前加载的内核模块
+</h3><p>基于现有发行版的内核配置生成 <code>.config</code> 文件虽然非常方便，但如果你觉得发行版预置的配置有些臃肿，启用了过多的模块或内置功能，那么你可以考虑使用另一种方式：基于当前加载到内存中的内核模块，来生成自定义的配置。这种配置方式通常比发行版的默认配置更为紧凑，因为它只包含你当前系统实际使用的模块和功能。</p>
+<p><code>lsmod</code> 命令可以列出当前驻留在内存中的所有内核模块。我们可以将 <code>lsmod</code> 命令的输出提供给内核构建系统，让构建系统基于当前系统正在运行的内核模块生成配置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ lsmod &gt; /tmp/lsmod.now
+</span></span><span class="line"><span class="cl">$ make <span class="nv">LSMOD</span><span class="o">=</span>/tmp/lsmod.now localmodconfig
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里，我们将 <code>lsmod</code> 命令的输出保存到一个临时文件 <code>/tmp/lsmod.now</code> 中，然后通过 <strong>LSMOD</strong> 环境变量传递给 Makefile 的 <code>localmodconfig</code> 目标。这样，内核构建系统就能基于内存中实际加载的内核模块，生成最终的配置 <code>.config</code> 文件。</p>
+<p>由于这种配置方式比较常用，内核还提供了类似于 <code>localmodconfig</code> 目标的辅助脚本 <code>scripts/kconfig/streamline_config.pl</code>。该脚本会自动检查系统当前加载的模块，然后基于这些模块生成精简的内核配置。你可以使用以下方式来生成配置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ scripts/kconfig/streamline_config.pl
+</span></span><span class="line"><span class="cl">$ make olddefconfig
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>首先运行脚本 <code>streamline_config.pl</code> 生成 <code>.config</code> 文件，然后再运行 <code>make olddefconfig</code>，为新版本的内核可能新增的配置项设置默认值。</p>
+<h3 id="使用图形界面配置">
+    <a href="#%e4%bd%bf%e7%94%a8%e5%9b%be%e5%bd%a2%e7%95%8c%e9%9d%a2%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    使用图形界面配置
+</h3><p>内核构建系统还提供了图形界面的配置方式。通常，我们会先使用前述的方法生成一个基础配置，然后使用图形界面进行一些微调。在命令行运行 <code>make menuconfig</code>，构建系统会编译并执行 <code>scripts/kconfig/mconf</code> 程序，从而启动一个图形化的配置界面：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202412251521070.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="menuconfig"
+	
+	
+></p>
+<p>让我们简单介绍一下这个界面的元素：</p>
+<ul>
+<li>方括号 <code>[]</code> 表示布尔类型的选项
+<ul>
+<li><code>[*]</code> 表示启用该特性，编译到内核镜像中</li>
+<li><code>[]</code> 表示关闭该特性</li>
+</ul>
+</li>
+<li>尖括号 <code>&lt;&gt;</code> 具有三种状态
+<ul>
+<li><code>&lt;*&gt;</code> 表示启用该特性，编译到内核镜像中</li>
+<li><code>&lt;M&gt;</code> 表示启用该特性，编译为内核模块</li>
+<li><code>&lt;&gt;</code> 表示关闭该特性</li>
+</ul>
+</li>
+<li><code>-*-</code>  表示由于依赖要求，此特性必须被启用</li>
+<li><code>{M|*}</code> 表示由于依赖要求，此特性必须编译到内核镜像中（*），或者编译为内核模块（M）</li>
+<li><code>(...)</code> 表示需要输入字符或数字。在此选项上按下回车键，将弹出一个输入提示框。</li>
+<li><code>&lt;...&gt; ---&gt;</code> 表示子菜单，按下回车键可进入该子菜单。</li>
+</ul>
+<p>在界面上，使用<strong>上、下方向键</strong>在不同的选项之间进行导航，使用<strong>左、右方向键</strong>在屏幕下方的菜单 <code>&lt;Select&gt;</code>、<code>&lt;Exit&gt;</code> 等之间进行导航。在当前选中的选项上，导航到 <code>&lt;Help&gt;</code> 菜单并按下回车键，会显示该配置项的帮助信息：</p>
+<p><img src="https://cdn.mazhen.tech/2024/202412251603485.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="menuconfig"
+	
+	
+></p>
+<p>帮助信息界面会显示当前配置项的名称、类型、依赖关系等，其中还包括了该配置项具体定义在哪个 <code>Kconfig</code> 文件中。这些信息与我们在 <code>Kconfig</code> 文件中看到的内容是一致的。</p>
+<p>在当前高亮的配置项上按<strong>空格键</strong>可以修改其值。</p>
+<p>下面我们尝试使用图形界面设置几个配置项：</p>
+<ol>
+<li><strong>CONFIG_LOCALVERSION</strong></li>
+</ol>
+<p>配置项 <code>CONFIG_LOCALVERSION</code> 的作用是在内核版本号的末尾附加一个自定义的字符串。</p>
+<p>我们先简单了解一下 Linux 内核的版本号命名规则：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">major.minor<span class="o">[</span>.patchlevel<span class="o">][</span>-EXTRAVERSION<span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>major：主版本号</li>
+<li>minor：次版本号，隶属于主版本号</li>
+<li>patchlevel：修订版本号，通常用于修复重大错误和安全问题</li>
+<li>EXTRAVERSION：由内核发行版指定，用于跟踪内部修改</li>
+</ul>
+<p>可以使用 <code>uname -r</code> 命令查看当前内核的版本信息。以我当前的系统为例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ uname -r
+</span></span><span class="line"><span class="cl">6.8.0-51-generic
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中，前面三段 <code>6.8.0</code> 分别为主版本号、次版本号和修订版，最后一部分 <code>-51-generic</code> 是 <code>EXTRAVERSION</code>。</p>
+<p>配置项 <code>CONFIG_LOCALVERSION</code> 的导航路径为 <strong>General setup -&gt; Local version - append to kernel release</strong>。选中该选项并按下回车键，会出现输入提示框，将值修改为你想要设置的内容，例如 <code>-apusic-kernel</code>，可以将公司名称嵌入到版本号中，以标识该内核发行版的厂商。</p>
+<ol start="2">
+<li><strong>CONFIG_IKCONFIG</strong> 和 <strong>CONFIG_IKCONFIG_PROC</strong></li>
+</ol>
+<p>配置项 <code>CONFIG_IKCONFIG</code> 的作用是控制在构建内核时，是否将 <code>.config</code> 文件保存到内核映像中。如果启用此选项，那么可以使用脚本 <code>scripts/extract-ikconfig</code> 从内核镜像文件中提取到所有的配置信息。</p>
+<p>配置项 <code>CONFIG_IKCONFIG_PROC</code> 的作用是，如果启用此选项，则可以通过 <code>/proc/config.gz</code> 访问内核的配置文件。</p>
+<p><code>CONFIG_IKCONFIG</code> 的导航路径为 <strong>General setup -&gt; Kernel .config support</strong>。选中该选项并使用空格键将其值修改为 <code>&lt;*&gt;</code>。这时下方会出现新的选项 <strong>Enable access to .config through /proc/config.gz (NEW)</strong>，再次使用空格键激活此选项。</p>
+<ol start="3">
+<li><strong>CONFIG_HZ_250</strong></li>
+</ol>
+<p>当前内核使用四个不同的配置项，分别代表不同的定时器中断频率：</p>
+<ul>
+<li><strong>CONFIG_HZ_100</strong>：100Hz，即每秒 100 次中断。较低的频率可能更适合服务器、SMP 和 NUMA 系统。服务器通常不需要像桌面计算机那样快速响应用户交互，而是需要高效地处理大量后台任务。</li>
+<li><strong>CONFIG_HZ_250</strong>：250Hz，即每秒 250 次中断。这是一种折衷选择，既能保证服务器性能，又能在 SMP 和 NUMA 系统上表现出良好的交互响应。</li>
+<li><strong>CONFIG_HZ_300</strong>：300Hz，即每秒 300 次中断。与 250Hz 类似，也是一种折衷选择，并且能精确适配 PAL 制和 NTSC 制的帧率，因此非常适合视频和多媒体工作。因为 PAL 制的帧率为 50Hz，NTSC 制的帧率为 60Hz，300Hz 可以被这两种制式的帧率整除，有利于视频播放和同步，减少视频处理过程中的误差和抖动。</li>
+<li><strong>CONFIG_HZ_1000</strong>：1000Hz，即每秒 1000 次中断。这种高频率通常用于需要快速响应用户交互的系统，如桌面计算机。</li>
+</ul>
+<p>首先进入子菜单 <strong>Processor type and features</strong>，找到 <strong>Timer frequency</strong> 选项并按下回车键进入。然后在弹出的选项中选择你想要设置的频率。这里我选择设置为 250Hz。</p>
+<p>完成设置后，使用左右方向键导航到 <code>&lt;Exit&gt;</code>，一路退出，最后选择保存设置。这样，我们就完成了使用图形界面对内核进行配置。</p>
+<h3 id="使用脚本配置">
+    <a href="#%e4%bd%bf%e7%94%a8%e8%84%9a%e6%9c%ac%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    使用脚本配置
+</h3><p>除了使用图形界面进行配置，内核构建系统还提供了一个 Bash 脚本 <code>scripts/config</code>，允许我们以非交互的方式完成配置。这在需要自动化配置，或者需要在脚本中批量设置配置项时非常有用。</p>
+<p>例如，在 Ubuntu 系统上构建内核时，可能会遇到<a class="link" href="https://askubuntu.com/questions/1329538/compiling-kernel-5-11-11-and-later/1329625"  target="_blank" rel="noopener"
+    >证书问题</a>。这时，我们可以使用 <code>scripts/config</code> 脚本，将以下两个配置项设置为空字符串：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">scripts/config --set-str SYSTEM_REVOCATION_KEYS <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">scripts/config --set-str SYSTEM_TRUSTED_KEYS <span class="s2">&#34;&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>scripts/config</code> 脚本提供了多种选项，可以用于设置不同类型的配置值。通过 <code>--set-str</code> 选项，我们可以将配置项的值设置为指定的字符串。除了设置字符串类型的值，<code>scripts/config</code> 还支持其他操作，例如：</p>
+<ul>
+<li><code>--enable &lt;CONFIG_NAME&gt;</code>: 启用一个配置项。</li>
+<li><code>--disable &lt;CONFIG_NAME&gt;</code>: 禁用一个配置项。</li>
+</ul>
+<p>例如前面我们通过图形界面启用的<code>CONFIG_IKCONFIG</code> 和 <code>CONFIG_IKCONFIG_PROC</code> 配置项，等效于使用下面的命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ scripts/config --enable IKCONFIG --enable IKCONFIG_PROC
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>至此，我们已经学习了内核的多种配置方式，接下来就可以开始构建内核了。</p>
+<h2 id="构建内核镜像和内核模块">
+    <a href="#%e6%9e%84%e5%bb%ba%e5%86%85%e6%a0%b8%e9%95%9c%e5%83%8f%e5%92%8c%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" class="header-anchor">#</a>
+    构建内核镜像和内核模块
+</h2><p>Linux 内核采用了递归式的 <code>make</code> 构建方式。在内核源码的根目录下，有一个顶层的 <code>Makefile</code> 文件，该文件会递归地解析嵌入在各个子目录中的 <code>Makefile</code> 文件。通过运行 <code>make help</code> 命令，我们可以查看默认情况下 <code>all</code> 目标会构建哪些内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ make <span class="nb">help</span>
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">Other generic targets:
+</span></span><span class="line"><span class="cl">  all		 - Build all targets marked with <span class="o">[</span>*<span class="o">]</span>
+</span></span><span class="line"><span class="cl">* vmlinux	 - Build the bare kernel
+</span></span><span class="line"><span class="cl">* modules	 - Build all modules
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">Architecture-specific targets <span class="o">(</span>x86<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">* bzImage		- Compressed kernel image <span class="o">(</span>arch/x86/boot/bzImage<span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从输出中可以看到，执行 <code>make all</code> 命令会构建前面标记为 <code>*</code> 的目标，包括：</p>
+<ul>
+<li><strong>vmlinux</strong> 目标：构建出未压缩的内核镜像文件 <strong>vmlinux</strong>。</li>
+<li><strong>modules</strong> 目标：在内核配置中被标记为 <code>M</code> 的选项，都会被构建为内核模块（<code>.ko</code> 文件）。</li>
+<li><strong>bzImage</strong> 目标：构建出被压缩过的内核镜像文件 <strong>bzImage</strong> 。</li>
+</ul>
+<p>在系统启动过程中，真正被使用的是压缩过的内核镜像。引导程序会将它加载到内存中，并在内存中解压，然后引导系统进入内核。<code>vmlinux</code> 是未压缩的内核映像，其中包含了所有内核符号等额外的调试信息，虽然它不会被直接用于系统启动，但在进行内核调试时会用到，所以它仍然非常重要。</p>
+<p>在内核源码的根目录下执行 <code>make</code> 命令，默认会执行 <code>all</code> 目标，即等同于执行 <code>make all</code> 命令，这样就可以构建出内核镜像和内核模块。</p>
+<p>由于 Linux 内核源码库非常庞大，构建内核是一项非常消耗内存和 CPU 资源的任务。为了加快构建速度，<code>make</code> 工具支持多进程并行处理。我们可以使用 <code>-jn</code> 选项，生成多个进程，并行处理构建过程中相互独立的任务。其中，<code>n</code> 表示可以并行生成的任务数量的上限，通常可以根据下面的经验公式确定 <code>n</code> 的值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">n</span> <span class="o">=</span> number-of-CPU-cores * factor<span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>factor</code> 是一个系数，一般选择为 2。</p>
+<p>那么，如何知道当前系统的 CPU 核数呢？可以使用 <code>nproc</code> 命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nproc
+</span></span><span class="line"><span class="cl"><span class="m">12</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>lscpu</code> 命令也可以显示 CPU 核数，并且提供了更详细的 CPU 信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ lscpu
+</span></span><span class="line"><span class="cl">Architecture:             x86_64
+</span></span><span class="line"><span class="cl">  CPU op-mode<span class="o">(</span>s<span class="o">)</span>:         32-bit, 64-bit
+</span></span><span class="line"><span class="cl">  Address sizes:          <span class="m">39</span> bits physical, <span class="m">48</span> bits virtual
+</span></span><span class="line"><span class="cl">  Byte Order:             Little Endian
+</span></span><span class="line"><span class="cl">CPU<span class="o">(</span>s<span class="o">)</span>:                   <span class="m">12</span>
+</span></span><span class="line"><span class="cl">  On-line CPU<span class="o">(</span>s<span class="o">)</span> list:    0-11
+</span></span><span class="line"><span class="cl">....
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我当前系统的 CPU 核数为 12，因此 <code>n</code> 可以设置为 24。使用下面的命令构建内核：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ make -j24
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>构建过程的输出信息非常多，我们可以使用 <code>tee</code> 命令，将标准输出和标准错误信息显示在控制台，并将所有的输出信息保存到 <code>out.log</code> 文件中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ make -j24 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> tee out.log
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果想查看更详细的构建信息，例如 gcc 编译选项，可以使用 <code>V=1</code> 详细模式选项：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ make -j24 <span class="nv">V</span><span class="o">=</span><span class="m">1</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> tee out.log
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>构建内核是一个耗时的过程。如果你想了解整个构建过程具体花费了多少时间，可以使用 <code>time</code> 命令，它会在 <code>make</code> 命令执行完成后显示执行时间：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ <span class="nb">time</span> make -j24 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> tee out.log
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一切准备就绪，让我们开始构建吧！</p>
+<p>如果没有意外，<code>make</code> 命令将成功执行完成，并生成以下关键文件：</p>
+<ul>
+<li>未压缩的内核映像文件 <strong>vmlinux</strong>，位于内核源码根目录下</li>
+<li>符号地址映射文件 <strong>System.map</strong>，位于内核源码根目录下</li>
+<li>压缩的内核映像文件 <strong>bzImage</strong>，位于 <code>arch/&lt;cpu&gt;/boot/</code> 目录下。对于 x86 架构，它的实际位置是 <code>arch/x86/boot/bzImage</code>。</li>
+<li><strong>.ko</strong> 文件，内核配置选项中被标记为 <code>M</code> 的内核模块，它们会散布在内核源码的各个子目录中。</li>
+</ul>
+<p>获得这些构建成果后，下一步就是安装和使用它们了。</p>
+<h2 id="安装内核模块">
+    <a href="#%e5%ae%89%e8%a3%85%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" class="header-anchor">#</a>
+    安装内核模块
+</h2><p>在上一步构建完成后，我们生成了许多内核模块（<code>.ko</code> 文件）。可以使用 <code>find</code> 命令找到这些模块文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ find . -name <span class="s2">&#34;*.ko&#34;</span>
+</span></span><span class="line"><span class="cl">./arch/x86/platform/atom/punit_atom_debug.ko
+</span></span><span class="line"><span class="cl">./arch/x86/crypto/aria-aesni-avx-x86_64.ko
+</span></span><span class="line"><span class="cl">./arch/x86/crypto/sm3-avx-x86_64.ko
+</span></span><span class="line"><span class="cl">./arch/x86/crypto/curve25519-x86_64.ko
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>内核模块以模块化的方式提供内核功能，这使得我们能够根据需要加载或从内核内存中移除特定的功能模块，从而提高内核的灵活性和可维护性。</p>
+<p>构建完成的内核模块需要被安装到指定的位置，这样在系统启动时，才能被正确找到并加载到内核内存中。执行以下命令来安装内核模块：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ sudo make modules_install
+</span></span><span class="line"><span class="cl"><span class="o">[</span>sudo<span class="o">]</span> password <span class="k">for</span> mazhen: 
+</span></span><span class="line"><span class="cl">  SYMLINK /lib/modules/6.12.6-apusic-kernel/build
+</span></span><span class="line"><span class="cl">  INSTALL /lib/modules/6.12.6-apusic-kernel/modules.order
+</span></span><span class="line"><span class="cl">  INSTALL /lib/modules/6.12.6-apusic-kernel/modules.builtin
+</span></span><span class="line"><span class="cl">  INSTALL /lib/modules/6.12.6-apusic-kernel/modules.builtin.modinfo
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从输出中可以看出，内核模块被安装到了 <code>/lib/modules/6.12.6-apusic-kernel</code> 目录下。注意，目录名 <code>6.12.6-apusic-kernel</code> 实际上就是我们构建的内核版本号。在系统中，每个已安装的内核都会在 <code>/lib/modules/</code> 目录下有一个对应的目录，并以内核版本号命名，用于存放对应版本的内核模块。这样，系统在启动时就可以加载正确版本的内核模块。</p>
+<p>安装完内核模块后，下一步就要安装内核本身了。</p>
+<h2 id="安装内核">
+    <a href="#%e5%ae%89%e8%a3%85%e5%86%85%e6%a0%b8" class="header-anchor">#</a>
+    安装内核
+</h2><p>执行以下命令来安装新构建的内核：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo make install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>install</code> 目标实际上完成了以下三项关键任务：</p>
+<ol>
+<li>生成 <code>initramfs</code> (以前称为 <code>initrd</code>) 镜像。</li>
+<li>将内核镜像及相关文件安装到 <code>/boot</code> 目录。</li>
+<li>为新内核镜像配置 <code>GRUB</code> 引导程序。</li>
+</ol>
+<p>下面将分别详细介绍这些步骤。</p>
+<h3 id="initramfs-镜像">
+    <a href="#initramfs-%e9%95%9c%e5%83%8f" class="header-anchor">#</a>
+    initramfs 镜像
+</h3><p><code>install</code> 目标首先会生成 <code>initramfs</code> 镜像。那么，<code>initramfs</code> 是什么，它又有什么作用呢？</p>
+<p><code>initramfs</code> 的全称是 <strong>initial RAM filesystem</strong>，即初始 RAM 文件系统。它是一个使用 <code>cpio</code> 工具创建的归档文件包。<code>tar</code> 工具内部也使用了 <code>cpio</code>，所以可以认为 <code>initramfs</code> 就是一个经过压缩的归档文件包。</p>
+<p>那么，<code>initramfs</code> 包含了什么内容呢？简单来说，<code>initramfs</code> 打包了一个精简版的 root 文件系统，其中包含了在系统初始化阶段需要用到的内核模块、设备驱动和用户态工具。</p>
+<p>为什么需要 <code>initramfs</code> 呢？可以想象一下这个场景：当引导程序加载了内核镜像后，内核开始初始化工作，准备挂载真正的 root 文件系统。这时，内核需要加载文件系统对应的内核模块，但是这些内核模块此时还在磁盘上，在 root 文件系统完成挂载之前，内核还不能访问它们。这就产生了一个“先有鸡还是先有蛋”的问题：为了挂载 root 文件系统，需要从磁盘加载内核模块；而为了能加载内核模块，又需要先挂载 root 文件系统。</p>
+<p><code>initramfs</code> 就是为了解决这个问题而存在的。它包含了系统初始化阶段必须用到的内容。在内核挂载真正的 root 文件系统之前，<code>initramfs</code> 作为临时的 root 文件系统被挂载，为内核提供了一个基本的运行环境，使得内核能够执行一些必要的初始化操作。</p>
+<h3 id="安装内核镜像">
+    <a href="#%e5%ae%89%e8%a3%85%e5%86%85%e6%a0%b8%e9%95%9c%e5%83%8f" class="header-anchor">#</a>
+    安装内核镜像
+</h3><p><code>install</code> 目标在生成 <code>initramfs</code> 镜像后，会将内核镜像及相关文件复制到 <code>/boot</code> 目录，包括以下文件：</p>
+<ul>
+<li><strong>config-6.12.6-apusic-kernel</strong>：内核配置文件。</li>
+<li><strong>System.map-6.12.6-apusic-kernel</strong>：内核符号地址映射文件。</li>
+<li><strong>initrd.img-6.12.6-apusic-kernel</strong>：上一步生成的 <code>initramfs</code> 镜像文件。<code>initrd</code> 是 <code>initramfs</code> 的旧称，现在仍被沿用。</li>
+<li><strong>vmlinuz-6.12.6-apusic-kernel</strong>：<code>arch/x86/boot/bzImage</code> 文件的一个副本，也就是压缩过的内核镜像文件。 <code>vmlinuz</code> 中的 <code>z</code> 表示使用了 gzip 压缩，但实际上现在默认使用的是更优秀的 <code>ZSTD</code> 压缩算法，但文件命名依然保留。这也是为什么在最开始准备构建环境安装依赖时，需要安装 <code>zstd</code> 包。</li>
+</ul>
+<p>另外，Ubuntu 提供了 <code>mkinitramfs</code> 和 <code>unmkinitramfs</code> 脚本，用于打包和解包 <code>initramfs</code> 镜像。我们可以使用 <code>unmkinitramfs</code> 脚本来查看 <code>initramfs</code> 镜像内部的结构：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ <span class="nv">TMPDIR</span><span class="o">=</span><span class="k">$(</span>mktemp -d<span class="k">)</span>
+</span></span><span class="line"><span class="cl">$ unmkinitramfs /boot/initrd.img-6.12.6-apusic-kernel
+</span></span><span class="line"><span class="cl">$ tree <span class="si">${</span><span class="nv">TMPDIR</span><span class="si">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>-- early
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="sb">`</span>-- kernel
+</span></span><span class="line"><span class="cl"><span class="p">|</span>       <span class="sb">`</span>-- x86
+</span></span><span class="line"><span class="cl"><span class="p">|</span>           <span class="sb">`</span>-- microcode
+</span></span><span class="line"><span class="cl"><span class="p">|</span>               <span class="sb">`</span>-- AuthenticAMD.bin
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="sb">`</span>-- main
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- bin -&gt; usr/bin
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- conf
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>-- arch.conf
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>-- conf.d
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>-- initramfs.conf
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="sb">`</span>-- modules
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- cryptroot
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="sb">`</span>-- crypttab
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- etc
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>-- console-setup
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- init
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- lib -&gt; usr/lib
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- lib.usr-is-merged -&gt; usr/lib.usr-is-merged
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>-- usr
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>-- bin
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- <span class="o">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- <span class="o">[[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- acpid
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- arch
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- ascii
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- ash
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- awk
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- base32
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- modules
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- 6.12.6-apusic-kernel
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>-- kernel
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>-- arch
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- x86
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>       <span class="sb">`</span>-- crypto
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>           <span class="p">|</span>-- aegis128-aesni.ko
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>-- drivers
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- acpi
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- nfit
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- nfit.ko
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- platform_profile.ko
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- video.ko
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- ata
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>       <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- acard-ahci.ko
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>-- sbin
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- blkid
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- cache_check -&gt; pdata_tools
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- cryptsetup
+</span></span><span class="line"><span class="cl">    <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>-- dhcpcd
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="m">447</span> directories, <span class="m">1540</span> files
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="更新-grub-配置">
+    <a href="#%e6%9b%b4%e6%96%b0-grub-%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    更新 <code>GRUB</code> 配置
+</h3><p><code>install</code> 目标的最后一步是为新构建的内核镜像配置 <code>GRUB</code> 引导程序。我们可以查看 <code>GRUB</code> 的配置文件 <code>/boot/grub/grub.cfg</code>，会发现它已经被更新，配置了我们最新构建的内核镜像和 <code>initramfs</code> 镜像。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cfg" data-lang="cfg"><span class="line"><span class="cl"><span class="na">...</span>
+</span></span><span class="line"><span class="cl"><span class="na">menuentry &#39;Ubuntu, with Linux 6.12.6-apusic-kernel&#39; --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option &#39;gnulinux-6.12.6-apusic-kernel-advanced-c3b02810-62dc-430b-b030-79c44c7a231f&#39; {</span>
+</span></span><span class="line"><span class="cl">                <span class="na">recordfail</span>
+</span></span><span class="line"><span class="cl">                <span class="na">load_video </span>
+</span></span><span class="line"><span class="cl">                <span class="na">gfxmode $linux_gfx_mode</span>
+</span></span><span class="line"><span class="cl">                <span class="na">insmod gzio</span>
+</span></span><span class="line"><span class="cl">                <span class="na">if [ x$grub_platform</span> <span class="o">=</span> <span class="s">xxen ]; then insmod xzio; insmod lzopio; fi
+</span></span></span><span class="line"><span class="cl"><span class="s">                insmod part_gpt
+</span></span></span><span class="line"><span class="cl"><span class="s">                insmod ext2
+</span></span></span><span class="line"><span class="cl"><span class="s">                search --no-floppy --fs-uuid --set=root c3b02810-62dc-430b-b030-79c44c7a231f
+</span></span></span><span class="line"><span class="cl"><span class="s">                echo    &#39;Loading Linux 6.12.6-apusic-kernel ...&#39;
+</span></span></span><span class="line"><span class="cl"><span class="s">                linux   /boot/vmlinuz-6.12.6-apusic-kernel root=UUID=c3b02810-62dc-430b-b030-79c44c7a231f ro quiet splash quiet splash $vt_handoff
+</span></span></span><span class="line"><span class="cl"><span class="s">                echo    &#39;Loading initial ramdisk ...&#39;
+</span></span></span><span class="line"><span class="cl"><span class="s">                initrd  /boot/initrd.img-6.12.6-apusic-kernel
+</span></span></span><span class="line"><span class="cl"><span class="s">        }</span>
+</span></span><span class="line"><span class="cl"><span class="na">...</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在，重启系统，默认就会使用我们新构建的内核了。</p>
+<h2 id="定制-grub">
+    <a href="#%e5%ae%9a%e5%88%b6-grub" class="header-anchor">#</a>
+    定制 GRUB
+</h2><p><code>GRUB</code> 默认会使用最新构建和安装的内核进行引导。然而，这种默认行为有时可能不符合我们的需求。例如，我们自己构建的内核可能包含实验性的代码和配置，其稳定性可能不如发行版提供的内核。因此，我们可能希望在系统引导阶段看到 <code>GRUB</code> 菜单，以便选择使用哪个内核启动，并将默认启动选项设置为一个稳定的发行版内核。</p>
+<p>定制 <code>GRUB</code> 非常简单，我们只需要以 <code>root</code> 用户身份编辑 <code>GRUB</code> 的主配置文件<code>/etc/default/grub</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">GRUB_DEFAULT</span><span class="o">=</span><span class="s2">&#34;Advanced options for Ubuntu&gt;Ubuntu, with Linux 6.8.0-51-generic&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GRUB_TIMEOUT_STYLE</span><span class="o">=</span>menu
+</span></span><span class="line"><span class="cl"><span class="nv">GRUB_TIMEOUT</span><span class="o">=</span><span class="m">3</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GRUB_DISTRIBUTOR</span><span class="o">=</span><span class="sb">`</span><span class="o">(</span> . /etc/os-release<span class="p">;</span> <span class="nb">echo</span> <span class="si">${</span><span class="nv">NAME</span><span class="k">:-</span><span class="nv">Ubuntu</span><span class="si">}</span> <span class="o">)</span> 2&gt;/dev/null <span class="o">||</span> <span class="nb">echo</span> Ubuntu<span class="sb">`</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&#34;quiet splash&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&#34;quiet splash&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>首先，我们需要设置默认启动选项 <code>GRUB_DEFAULT</code>。<code>GRUB_DEFAULT</code> 的默认值为 <code>0</code>，表示 <code>GRUB</code> 菜单中的第一个启动项。这样的设置会导致 <code>GRUB</code> 总是使用最新安装的内核作为默认选项。为了避免这种情况，我们将 <code>GRUB_DEFAULT</code> 的值设置为一个具体的菜单项，这样就可以固定默认启动选项，即使安装了新内核也不会改变。注意，子菜单之间需要使用 <code>&gt;</code> 连接，并且文本内容要与 <code>GRUB</code> 菜单项严格一致。</p>
+<p><code>GRUB_TIMEOUT_STYLE=menu</code> 设置了在引导阶段显示 <code>GRUB</code> 菜单选项。菜单的超时时间由 <code>GRUB_TIMEOUT</code> 设置，本例中设置为 3 秒。如果在 3 秒内没有用户操作，系统将会使用默认选项引导。</p>
+<p>在编辑并保存 <code>/etc/default/grub</code> 文件后，我们需要以 <code>root</code> 用户身份运行 <code>update-grub</code> 命令，以使修改生效：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo update-grub
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此时，当我们重启系统时，就可以看到 <code>GRUB</code> 菜单。在 <code>Advanced options for Ubuntu</code> 子菜单下，可以选择使用我们新构建的内核 <code>Ubuntu, with Linux 6.12.6-apusic-kernel</code> 进行启动。</p>
+<h2 id="验证新内核的配置">
+    <a href="#%e9%aa%8c%e8%af%81%e6%96%b0%e5%86%85%e6%a0%b8%e7%9a%84%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    验证新内核的配置
+</h2><p>现在，我们已经成功地使用自己构建的内核启动了系统！接下来，让我们检查一下之前在配置内核时设置的配置项是否已经生效。</p>
+<p>首先，我们可以检查内核版本：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ uname -r                          
+</span></span><span class="line"><span class="cl">6.12.6-apusic-kernel
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>没错，正是我们为 <strong>CONFIG_LOCALVERSION</strong> 配置项设置的值。</p>
+<p>启用 <code>CONFIG_IKCONFIG</code> 配置项后，内核会包含自身的配置信息。我们可以使用脚本 <code>scripts/extract-ikconfig</code> 从内核镜像中提取出配置信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ scripts/extract-ikconfig /boot/vmlinuz-6.12.6-apusic-kernel
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Automatically generated file; DO NOT EDIT.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Linux/x86 6.12.6 Kernel Configuration</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_CC_VERSION_TEXT</span><span class="o">=</span><span class="s2">&#34;gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_CC_IS_GCC</span><span class="o">=</span>y
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_GCC_VERSION</span><span class="o">=</span><span class="m">130300</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_CLANG_VERSION</span><span class="o">=</span><span class="m">0</span>
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果启用了 <code>CONFIG_IKCONFIG_PROC</code> 选项，内核配置信息会通过 <code>proc</code> 文件系统的文件 <code>/proc/config.gz</code> 以压缩格式暴露给用户。我们可以使用 <code>gunzip</code> 和 <code>grep</code> 命令来查找配置项 <code>CONFIG_HZ_250</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ gunzip -c /proc/config.gz <span class="p">|</span> grep CONFIG_HZ_250
+</span></span><span class="line"><span class="cl"><span class="nv">CONFIG_HZ_250</span><span class="o">=</span>y
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>输出结果显示 <code>CONFIG_HZ_250=y</code>，说明我们配置的定时器中断频率也已生效。一切都是那么 perfect！</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>从准备构建环境开始，我们了解了如何获取内核源码，掌握了多种配置内核的方法，然后成功地构建并安装了内核，定制了 <code>GRUB</code> 启动选项，最终验证了我们自己构建的内核。希望通过这一系列的实践，你能有所收获。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/c/">C</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">一篇读懂 C 指针</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入探索 perf CPU Profiling 实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 perf</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/incomplete-list-of-computer-science-learning-resources-for-college-students/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Incomplete List of Computer Science Learning Resources for College Students</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/nginx%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Nginx的模块化设计</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2024 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content=" # 获得源代码 首先从 Github 获取 OpenJDK的源代码\n1 $ git clone https://github.com/openjdk/jdk.git # 安装必要的软件 Xcode App Store 中获取 Xcode Command Line Tools 通过 xcode-select --install 命令安装 GNU Autoconf 使用 brew install autoconf 命令安装 freetype 使用 brew install freetype 命令安装 boot JDK 构建 JDK 需要预先存在的JDK，这被称为“boot JDK”。 经验法则是，用于构建 JDK 主版本N的 boot JDK应该是主版本 N-1 的 JDK 建议使用 SDKMAN! 来安装维护 JDK 的多个版本 # 配置构建 通过运行 bash configure 命令来完成配置构建。这个脚本将检查你的系统，确保所有必要的依赖项都已经满足。如果一切顺利，该脚本将汇总build的配置、将使用的工具，以及 build 将使用的硬件资源：\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 获得源代码 首先从 Github 获取 OpenJDK的源代码 1 $ git clone https://github.com/openjdk/jdk.git # 安装必要的软件 Xcode App Store 中获取 Xcode Command Line Tools 通过 xcode-select --install 命令安装 GNU Autoconf 使用 brew install autoconf 命令安装 freetype 使用 brew install">
 <title>在macOS上编译和调试OpenJDK</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="在macOS上编译和调试OpenJDK">
-<meta property='og:description' content=" # 获得源代码 首先从 Github 获取 OpenJDK的源代码\n1 $ git clone https://github.com/openjdk/jdk.git # 安装必要的软件 Xcode App Store 中获取 Xcode Command Line Tools 通过 xcode-select --install 命令安装 GNU Autoconf 使用 brew install autoconf 命令安装 freetype 使用 brew install freetype 命令安装 boot JDK 构建 JDK 需要预先存在的JDK，这被称为“boot JDK”。 经验法则是，用于构建 JDK 主版本N的 boot JDK应该是主版本 N-1 的 JDK 建议使用 SDKMAN! 来安装维护 JDK 的多个版本 # 配置构建 通过运行 bash configure 命令来完成配置构建。这个脚本将检查你的系统，确保所有必要的依赖项都已经满足。如果一切顺利，该脚本将汇总build的配置、将使用的工具，以及 build 将使用的硬件资源：\n">
+<meta property='og:description' content="# 获得源代码 首先从 Github 获取 OpenJDK的源代码 1 $ git clone https://github.com/openjdk/jdk.git # 安装必要的软件 Xcode App Store 中获取 Xcode Command Line Tools 通过 xcode-select --install 命令安装 GNU Autoconf 使用 brew install autoconf 命令安装 freetype 使用 brew install">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%9C%A8macos%E4%B8%8A%E7%BC%96%E8%AF%91%E5%92%8C%E8%B0%83%E8%AF%95openjdk/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='macos' /><meta property='article:tag' content='jdk' /><meta property='article:published_time' content='2023-07-11T17:26:22&#43;08:00'/><meta property='article:modified_time' content='2023-07-11T17:26:22&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="在macOS上编译和调试OpenJDK">
-<meta name="twitter:description" content=" # 获得源代码 首先从 Github 获取 OpenJDK的源代码\n1 $ git clone https://github.com/openjdk/jdk.git # 安装必要的软件 Xcode App Store 中获取 Xcode Command Line Tools 通过 xcode-select --install 命令安装 GNU Autoconf 使用 brew install autoconf 命令安装 freetype 使用 brew install freetype 命令安装 boot JDK 构建 JDK 需要预先存在的JDK，这被称为“boot JDK”。 经验法则是，用于构建 JDK 主版本N的 boot JDK应该是主版本 N-1 的 JDK 建议使用 SDKMAN! 来安装维护 JDK 的多个版本 # 配置构建 通过运行 bash configure 命令来完成配置构建。这个脚本将检查你的系统，确保所有必要的依赖项都已经满足。如果一切顺利，该脚本将汇总build的配置、将使用的工具，以及 build 将使用的硬件资源：\n">
+<meta name="twitter:description" content="# 获得源代码 首先从 Github 获取 OpenJDK的源代码 1 $ git clone https://github.com/openjdk/jdk.git # 安装必要的软件 Xcode App Store 中获取 Xcode Command Line Tools 通过 xcode-select --install 命令安装 GNU Autoconf 使用 brew install autoconf 命令安装 freetype 使用 brew install">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 

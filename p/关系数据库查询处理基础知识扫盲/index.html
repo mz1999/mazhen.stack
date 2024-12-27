@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是：使用代数定律对查询语句的代数表达式树做等价转换，使改进后的代数表达式树预期可以生成更有效的物理查询计划。有了这些基础知识，看代码才能做到知其然知其所以然。本文希望通过梳理关系数据库背后的知识，为读懂 TiDB 查询处理器部分的源码扫清障碍。\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是">
 <title>关系数据库查询处理基础知识扫盲</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%89%AB%E7%9B%B2/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="关系数据库查询处理基础知识扫盲">
-<meta property='og:description' content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是：使用代数定律对查询语句的代数表达式树做等价转换，使改进后的代数表达式树预期可以生成更有效的物理查询计划。有了这些基础知识，看代码才能做到知其然知其所以然。本文希望通过梳理关系数据库背后的知识，为读懂 TiDB 查询处理器部分的源码扫清障碍。\n">
+<meta property='og:description' content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%89%AB%E7%9B%B2/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='db' /><meta property='article:published_time' content='2018-07-01T17:04:31&#43;08:00'/><meta property='article:modified_time' content='2018-07-01T17:04:31&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="关系数据库查询处理基础知识扫盲">
-<meta name="twitter:description" content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是：使用代数定律对查询语句的代数表达式树做等价转换，使改进后的代数表达式树预期可以生成更有效的物理查询计划。有了这些基础知识，看代码才能做到知其然知其所以然。本文希望通过梳理关系数据库背后的知识，为读懂 TiDB 查询处理器部分的源码扫清障碍。\n">
+<meta name="twitter:description" content="当TiDB 源码阅读系列更新到第六篇《Select 语句概览》时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -497,45 +503,45 @@
 </h3><p>关系模型为人们提供了一种描述数据的方法：一个称为<strong>关系</strong>（relation）的二维表。现实世界的实体以及实体间的各种联系都可以用<strong>关系</strong>来表示。我们通过例子来了解关系模型的重要术语：</p>
 <p><strong>雇员表</strong></p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>emp_no</th>
-          <th>name</th>
-          <th>birth_date</th>
-          <th>gender</th>
-          <th>hire_date</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>汤唯</td>
-          <td>1990-06-08</td>
-          <td>女</td>
-          <td>2015-08-01</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>刘亦菲</td>
-          <td>1994-09-10</td>
-          <td>女</td>
-          <td>2017-05-06</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>刘德华</td>
-          <td>1986-04-18</td>
-          <td>男</td>
-          <td>2008-09-01</td>
-      </tr>
-      <tr>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>emp_no</th>
+<th>name</th>
+<th>birth_date</th>
+<th>gender</th>
+<th>hire_date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>汤唯</td>
+<td>1990-06-08</td>
+<td>女</td>
+<td>2015-08-01</td>
+</tr>
+<tr>
+<td>2</td>
+<td>刘亦菲</td>
+<td>1994-09-10</td>
+<td>女</td>
+<td>2017-05-06</td>
+</tr>
+<tr>
+<td>3</td>
+<td>刘德华</td>
+<td>1986-04-18</td>
+<td>男</td>
+<td>2008-09-01</td>
+</tr>
+<tr>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+</tr>
+</tbody>
 </table></div>
 <ul>
 <li><strong>关系（Relation）</strong> ：一个关系对应通常说的一张二维表</li>
@@ -566,105 +572,105 @@
 </ul>
 <p>关系R</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>A</th>
-          <th>B</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>4</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+</tr>
+</tbody>
 </table></div>
 <p>关系S</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>B</th>
-          <th>C</th>
-          <th>D</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>2</td>
-          <td>5</td>
-          <td>6</td>
-      </tr>
-      <tr>
-          <td>4</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-      <tr>
-          <td>9</td>
-          <td>10</td>
-          <td>11</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>4</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+</tr>
+</tbody>
 </table></div>
 <p><code>R × S</code>的结果</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>A</th>
-          <th>R.B</th>
-          <th>S.B</th>
-          <th>C</th>
-          <th>D</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>2</td>
-          <td>5</td>
-          <td>6</td>
-      </tr>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>4</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>9</td>
-          <td>10</td>
-          <td>11</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>4</td>
-          <td>2</td>
-          <td>5</td>
-          <td>6</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>4</td>
-          <td>4</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>4</td>
-          <td>9</td>
-          <td>10</td>
-          <td>11</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>A</th>
+<th>R.B</th>
+<th>S.B</th>
+<th>C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td>2</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+</tr>
+</tbody>
 </table></div>
 <h4 id="专门的关系运算">
     <a href="#%e4%b8%93%e9%97%a8%e7%9a%84%e5%85%b3%e7%b3%bb%e8%bf%90%e7%ae%97" class="header-anchor">#</a>
@@ -687,80 +693,80 @@
 </ol>
 <p>关系R</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>A</th>
-          <th>B</th>
-          <th>C</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>3</td>
-      </tr>
-      <tr>
-          <td>6</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-      <tr>
-          <td>9</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>7</td>
+<td>8</td>
+</tr>
+</tbody>
 </table></div>
 <p>关系S</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>B</th>
-          <th>C</th>
-          <th>D</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>2</td>
-          <td>3</td>
-          <td>4</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>3</td>
-          <td>5</td>
-      </tr>
-      <tr>
-          <td>7</td>
-          <td>8</td>
-          <td>10</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3</td>
+<td>5</td>
+</tr>
+<tr>
+<td>7</td>
+<td>8</td>
+<td>10</td>
+</tr>
+</tbody>
 </table></div>
 <p>R ⋈ <sub> A&lt;D  AND  R.B ≠ S.B</sub> S 的结果是：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>A</th>
-          <th>R.B</th>
-          <th>R.C</th>
-          <th>S.B</th>
-          <th>S.C</th>
-          <th>D</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>3</td>
-          <td>7</td>
-          <td>8</td>
-          <td>10</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>A</th>
+<th>R.B</th>
+<th>R.C</th>
+<th>S.B</th>
+<th>S.C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>7</td>
+<td>8</td>
+<td>10</td>
+</tr>
+</tbody>
 </table></div>
 <p>有两类常用的连接运算：</p>
 <ol>
@@ -769,74 +775,74 @@
 </ol>
 <p>关系R</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>A</th>
-          <th>B</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>4</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+</tr>
+</tbody>
 </table></div>
 <p>关系S</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>B</th>
-          <th>C</th>
-          <th>D</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>2</td>
-          <td>5</td>
-          <td>6</td>
-      </tr>
-      <tr>
-          <td>4</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-      <tr>
-          <td>9</td>
-          <td>10</td>
-          <td>11</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>4</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+</tr>
+</tbody>
 </table></div>
 <p><code>R ⋈ S</code></p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>A</th>
-          <th>B</th>
-          <th>C</th>
-          <th>D</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>5</td>
-          <td>6</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>4</td>
-          <td>7</td>
-          <td>8</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td>7</td>
+<td>8</td>
+</tr>
+</tbody>
 </table></div>
 <p>两个关系R和S在做<strong>自然连接</strong>时，如果一个元组不能和另外关系中的任何一个元组配对的话，这个元组被称为<strong>悬浮元组</strong>（Dangling tuple）。上面的例子中，关系S的第三个元组就是悬浮元组。</p>
 <p>如果把<strong>悬浮元组</strong>也保存在结果关系中，而在其他属性上填<strong>空值</strong>(Null)，就叫做<strong>外连接</strong>（Outer Join）。</p>
@@ -899,77 +905,77 @@
 </h3><p>本文准备以一个简单的例子来介绍查询处理的流程，下面是查询涉及的两张表：</p>
 <p><strong>employees</strong></p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>emp_no</th>
-          <th>name</th>
-          <th>birth_date</th>
-          <th>gender</th>
-          <th>hire_date</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>汤唯</td>
-          <td>1990-06-08</td>
-          <td>女</td>
-          <td>2015-08-01</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>刘亦菲</td>
-          <td>1994-09-10</td>
-          <td>女</td>
-          <td>2017-05-06</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>刘德华</td>
-          <td>1986-04-18</td>
-          <td>男</td>
-          <td>2008-09-01</td>
-      </tr>
-      <tr>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>emp_no</th>
+<th>name</th>
+<th>birth_date</th>
+<th>gender</th>
+<th>hire_date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>汤唯</td>
+<td>1990-06-08</td>
+<td>女</td>
+<td>2015-08-01</td>
+</tr>
+<tr>
+<td>2</td>
+<td>刘亦菲</td>
+<td>1994-09-10</td>
+<td>女</td>
+<td>2017-05-06</td>
+</tr>
+<tr>
+<td>3</td>
+<td>刘德华</td>
+<td>1986-04-18</td>
+<td>男</td>
+<td>2008-09-01</td>
+</tr>
+<tr>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+</tr>
+</tbody>
 </table></div>
 <p><strong>salaries</strong></p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>emp_no</th>
-          <th>salary</th>
-          <th>last_modified</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>8000</td>
-          <td>2018-04-01</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>6000</td>
-          <td>2018-04-01</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>15000</td>
-          <td>2018-04-01</td>
-      </tr>
-      <tr>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-          <td>&hellip;</td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>emp_no</th>
+<th>salary</th>
+<th>last_modified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>8000</td>
+<td>2018-04-01</td>
+</tr>
+<tr>
+<td>2</td>
+<td>6000</td>
+<td>2018-04-01</td>
+</tr>
+<tr>
+<td>3</td>
+<td>15000</td>
+<td>2018-04-01</td>
+</tr>
+<tr>
+<td>&hellip;</td>
+<td>&hellip;</td>
+<td>&hellip;</td>
+</tr>
+</tbody>
 </table></div>
 <p>想要获取工资大于7000的员工姓名列表，SQL语句可以这么写：</p>
 <div class="highlight"><div class="chroma">

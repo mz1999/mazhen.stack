@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="kubectl会使用$HOME/.kube目录下的config文件作为缺省的配置文件。我们可以使用kubectl config view查看配置信息：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 $kubectl config view apiVersion: v1 clusters: - cluster: certificate-authority-data: DATA+OMITTED server: https://172.18.100.90:6443 name: cluster-1 contexts: - context: cluster: cluster-1 user: cluster-1-admin name: cluster-1-admin@cluster-1 current-context: cluster-1-admin@cluster-1 kind: Config preferences: {} users: - name: cluster-1-admin user: client-certificate-data: REDACTED client-key-data: REDACTED 可以看到，配置文件主要包含了clusters，users和contexts三部分信息。context是访问一个kubernetes集群所需要的参数集合。每个context有三个参数：\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="kubectl会使用$HOME/.kube目录下的config文件作为缺省的配置文件。我们可以使用kubectl config view查看配置信息： 1 2">
 <title>使用kubectl管理多集群</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8kubectl%E7%AE%A1%E7%90%86%E5%A4%9A%E9%9B%86%E7%BE%A4/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="使用kubectl管理多集群">
-<meta property='og:description' content="kubectl会使用$HOME/.kube目录下的config文件作为缺省的配置文件。我们可以使用kubectl config view查看配置信息：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 $kubectl config view apiVersion: v1 clusters: - cluster: certificate-authority-data: DATA+OMITTED server: https://172.18.100.90:6443 name: cluster-1 contexts: - context: cluster: cluster-1 user: cluster-1-admin name: cluster-1-admin@cluster-1 current-context: cluster-1-admin@cluster-1 kind: Config preferences: {} users: - name: cluster-1-admin user: client-certificate-data: REDACTED client-key-data: REDACTED 可以看到，配置文件主要包含了clusters，users和contexts三部分信息。context是访问一个kubernetes集群所需要的参数集合。每个context有三个参数：\n">
+<meta property='og:description' content="kubectl会使用$HOME/.kube目录下的config文件作为缺省的配置文件。我们可以使用kubectl config view查看配置信息： 1 2">
 <meta property='og:url' content='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8kubectl%E7%AE%A1%E7%90%86%E5%A4%9A%E9%9B%86%E7%BE%A4/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='kubernetes' /><meta property='article:published_time' content='2019-03-29T09:43:28&#43;08:00'/><meta property='article:modified_time' content='2019-03-29T09:43:28&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="使用kubectl管理多集群">
-<meta name="twitter:description" content="kubectl会使用$HOME/.kube目录下的config文件作为缺省的配置文件。我们可以使用kubectl config view查看配置信息：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 $kubectl config view apiVersion: v1 clusters: - cluster: certificate-authority-data: DATA+OMITTED server: https://172.18.100.90:6443 name: cluster-1 contexts: - context: cluster: cluster-1 user: cluster-1-admin name: cluster-1-admin@cluster-1 current-context: cluster-1-admin@cluster-1 kind: Config preferences: {} users: - name: cluster-1-admin user: client-certificate-data: REDACTED client-key-data: REDACTED 可以看到，配置文件主要包含了clusters，users和contexts三部分信息。context是访问一个kubernetes集群所需要的参数集合。每个context有三个参数：\n">
+<meta name="twitter:description" content="kubectl会使用$HOME/.kube目录下的config文件作为缺省的配置文件。我们可以使用kubectl config view查看配置信息： 1 2">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -724,12 +730,12 @@
             
                 
 <article class="">
-    <a href="/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">一篇读懂 C 指针</h2>
+            <h2 class="article-title">从源码构建 Linux 内核</h2>
         </div>
     </a>
 </article>

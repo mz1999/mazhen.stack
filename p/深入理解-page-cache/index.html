@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释这个现象。实际上 Linux 内核会尽可能的对访问过的文件进行缓存，来弥补磁盘和内存之间巨大的延迟差距。缓存文件内容的内存就是 Page Cache。\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释">
 <title>深入理解 Page Cache</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="深入理解 Page Cache">
-<meta property='og:description' content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释这个现象。实际上 Linux 内核会尽可能的对访问过的文件进行缓存，来弥补磁盘和内存之间巨大的延迟差距。缓存文件内容的内存就是 Page Cache。\n">
+<meta property='og:description' content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释">
 <meta property='og:url' content='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-page-cache/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2022-04-01T16:06:54&#43;08:00'/><meta property='article:modified_time' content='2022-04-01T16:06:54&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="深入理解 Page Cache">
-<meta name="twitter:description" content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释这个现象。实际上 Linux 内核会尽可能的对访问过的文件进行缓存，来弥补磁盘和内存之间巨大的延迟差距。缓存文件内容的内存就是 Page Cache。\n">
+<meta name="twitter:description" content="长时间运行的Linux服务器，通常 free 的内存越来越少，让人觉得 Linux 特别能“吃”内存，甚至有人专门做了个网站 LinuxAteMyRam.com解释">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 

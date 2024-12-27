@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="\n# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：\nperf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子系统 perf_events 提供了性能计数器（hardware performance counters）和性能事件的支持，它以事件驱动型的方式工作，通过收集特定事件（如 CPU 时钟周期，缓存未命中等）来跟踪和分析系统性能。perf_events是在 2009 年合并到 Linux 内核源代码中，成为内核一个新的子系统。\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核">
 <title>深入探索 perf CPU Profiling 实现原理</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="深入探索 perf CPU Profiling 实现原理">
-<meta property='og:description' content="\n# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：\nperf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子系统 perf_events 提供了性能计数器（hardware performance counters）和性能事件的支持，它以事件驱动型的方式工作，通过收集特定事件（如 CPU 时钟周期，缓存未命中等）来跟踪和分析系统性能。perf_events是在 2009 年合并到 Linux 内核源代码中，成为内核一个新的子系统。\n">
+<meta property='og:description' content="# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核">
 <meta property='og:url' content='https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:published_time' content='2023-11-06T11:18:06&#43;08:00'/><meta property='article:modified_time' content='2023-11-06T11:18:06&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="深入探索 perf CPU Profiling 实现原理">
-<meta name="twitter:description" content="\n# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分：\nperf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核子系统 perf_events 提供了性能计数器（hardware performance counters）和性能事件的支持，它以事件驱动型的方式工作，通过收集特定事件（如 CPU 时钟周期，缓存未命中等）来跟踪和分析系统性能。perf_events是在 2009 年合并到 Linux 内核源代码中，成为内核一个新的子系统。\n">
+<meta name="twitter:description" content="# perf 是什么 perf 是由 Linux 官方提供的系统性能分析工具 。我们通常说的 perf 实际上包含两部分： perf 命令，用户空间的应用程序 perf_events ，Linux 内核中的一个子系统 内核">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -1110,202 +1116,202 @@
 <p>×86 系列的 CPU 能处理 20 种不同类型的异常，内核必须为每一种异常都提供一个专门的异常处理程序。我们可以在 <a class="link" href="https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"  target="_blank" rel="noopener"
     >Intel&rsquo;s Software Development Manual: System Programming Guide</a> 中找到对这些异常的完整描述。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>Vector</th>
-          <th>Mnemonic</th>
-          <th>Description</th>
-          <th>Type</th>
-          <th>Error Code</th>
-          <th>Source</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>0</td>
-          <td>#DE</td>
-          <td>Divide Error</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>DIV and IDIV instructions.</td>
-      </tr>
-      <tr>
-          <td>1</td>
-          <td>#DB</td>
-          <td>Debug Exception</td>
-          <td>Fault/ Trap</td>
-          <td>No</td>
-          <td>Instruction, data, and I/O breakpoints; single-step; and others.</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>-</td>
-          <td>NMI Interrupt</td>
-          <td>Interrupt</td>
-          <td>No</td>
-          <td>Nonmaskable external interrupt.</td>
-      </tr>
-      <tr>
-          <td>3</td>
-          <td>#BP</td>
-          <td>Breakpoint</td>
-          <td>Trap</td>
-          <td>No</td>
-          <td>INT3 instruction.</td>
-      </tr>
-      <tr>
-          <td>4</td>
-          <td>#OF</td>
-          <td>Overflow</td>
-          <td>Trap</td>
-          <td>No</td>
-          <td>INTO instruction.</td>
-      </tr>
-      <tr>
-          <td>5</td>
-          <td>#BR</td>
-          <td>BOUND Range  Exceeded</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>BOUND instruction.</td>
-      </tr>
-      <tr>
-          <td>6</td>
-          <td>#UD</td>
-          <td>Invalid Opcode (Undefined Opcode)</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>UD instruction or reserved opcode.</td>
-      </tr>
-      <tr>
-          <td>7</td>
-          <td>#NM</td>
-          <td>Device Not Available (No Math  Coprocessor)</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>Floating-point or WAIT/FWAIT instruction.</td>
-      </tr>
-      <tr>
-          <td>8</td>
-          <td>#DF</td>
-          <td>Double Fault</td>
-          <td>Abort</td>
-          <td>Yes (zero)</td>
-          <td>Any instruction that can generate an  exception, an NMI, or an INTR.</td>
-      </tr>
-      <tr>
-          <td>9</td>
-          <td></td>
-          <td>Coprocessor Segment Overrun (reserved)</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>Floating-point instruction.</td>
-      </tr>
-      <tr>
-          <td>10</td>
-          <td>#TS</td>
-          <td>Invalid TSS</td>
-          <td>Fault</td>
-          <td>Yes</td>
-          <td>Task switch or TSS access.</td>
-      </tr>
-      <tr>
-          <td>11</td>
-          <td>#NP</td>
-          <td>Segment Not Present</td>
-          <td>Fault</td>
-          <td>Yes</td>
-          <td>Loading segment registers or accessing  system segments.</td>
-      </tr>
-      <tr>
-          <td>12</td>
-          <td>#SS</td>
-          <td>Stack-Segment Fault</td>
-          <td>Fault</td>
-          <td>Yes</td>
-          <td>Stack operations and SS register loads.</td>
-      </tr>
-      <tr>
-          <td>13</td>
-          <td>#GP</td>
-          <td>General Protection</td>
-          <td>Fault</td>
-          <td>Yes</td>
-          <td>Any memory reference and other protection checks.</td>
-      </tr>
-      <tr>
-          <td>14</td>
-          <td>#PF</td>
-          <td>Page Fault</td>
-          <td>Fault</td>
-          <td>Yes</td>
-          <td>Any memory reference.</td>
-      </tr>
-      <tr>
-          <td>15</td>
-          <td>—</td>
-          <td>(Intel reserved. Do  not use.)</td>
-          <td></td>
-          <td>No</td>
-          <td></td>
-      </tr>
-      <tr>
-          <td>16</td>
-          <td>#MF</td>
-          <td>x87 FPU Floating-Point Error (Math Fault)</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>x87 FPU  floating-point or WAIT/FWAIT instruction.</td>
-      </tr>
-      <tr>
-          <td>17</td>
-          <td>#AC</td>
-          <td>Alignment Check</td>
-          <td>Fault</td>
-          <td>Yes (Zero)</td>
-          <td>Any data reference in memory.</td>
-      </tr>
-      <tr>
-          <td>18</td>
-          <td>#MC</td>
-          <td>Machine Check</td>
-          <td>Abort</td>
-          <td>No</td>
-          <td>Error codes (if any) and source are model  dependent.</td>
-      </tr>
-      <tr>
-          <td>19</td>
-          <td>#XM</td>
-          <td>SIMD Floating-Point Exception</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>SSE/SSE2/SSE3 floating-point instructions</td>
-      </tr>
-      <tr>
-          <td>20</td>
-          <td>#VE</td>
-          <td>Virtualization Exception</td>
-          <td>Fault</td>
-          <td>No</td>
-          <td>EPT violations</td>
-      </tr>
-      <tr>
-          <td>21</td>
-          <td>#CP</td>
-          <td>Control Protection Exception</td>
-          <td>Fault</td>
-          <td>Yes</td>
-          <td>RET, IRET, RSTORSSP, and SETSSBSY  instructions can generate this exception. When CET indirect branch tracking  is enabled, this exception can be generated due to a missing ENDBRANCH  instruction at target of an indirect call or jump.</td>
-      </tr>
-      <tr>
-          <td>22-31</td>
-          <td>-</td>
-          <td>Intel reserved. Do not use.</td>
-          <td></td>
-          <td></td>
-          <td></td>
-      </tr>
-  </tbody>
+<thead>
+<tr>
+<th>Vector</th>
+<th>Mnemonic</th>
+<th>Description</th>
+<th>Type</th>
+<th>Error Code</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>#DE</td>
+<td>Divide Error</td>
+<td>Fault</td>
+<td>No</td>
+<td>DIV and IDIV instructions.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>#DB</td>
+<td>Debug Exception</td>
+<td>Fault/ Trap</td>
+<td>No</td>
+<td>Instruction, data, and I/O breakpoints; single-step; and others.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>-</td>
+<td>NMI Interrupt</td>
+<td>Interrupt</td>
+<td>No</td>
+<td>Nonmaskable external interrupt.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>#BP</td>
+<td>Breakpoint</td>
+<td>Trap</td>
+<td>No</td>
+<td>INT3 instruction.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>#OF</td>
+<td>Overflow</td>
+<td>Trap</td>
+<td>No</td>
+<td>INTO instruction.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>#BR</td>
+<td>BOUND Range  Exceeded</td>
+<td>Fault</td>
+<td>No</td>
+<td>BOUND instruction.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>#UD</td>
+<td>Invalid Opcode (Undefined Opcode)</td>
+<td>Fault</td>
+<td>No</td>
+<td>UD instruction or reserved opcode.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>#NM</td>
+<td>Device Not Available (No Math  Coprocessor)</td>
+<td>Fault</td>
+<td>No</td>
+<td>Floating-point or WAIT/FWAIT instruction.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>#DF</td>
+<td>Double Fault</td>
+<td>Abort</td>
+<td>Yes (zero)</td>
+<td>Any instruction that can generate an  exception, an NMI, or an INTR.</td>
+</tr>
+<tr>
+<td>9</td>
+<td></td>
+<td>Coprocessor Segment Overrun (reserved)</td>
+<td>Fault</td>
+<td>No</td>
+<td>Floating-point instruction.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>#TS</td>
+<td>Invalid TSS</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Task switch or TSS access.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>#NP</td>
+<td>Segment Not Present</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Loading segment registers or accessing  system segments.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>#SS</td>
+<td>Stack-Segment Fault</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Stack operations and SS register loads.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>#GP</td>
+<td>General Protection</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Any memory reference and other protection checks.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>#PF</td>
+<td>Page Fault</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>Any memory reference.</td>
+</tr>
+<tr>
+<td>15</td>
+<td>—</td>
+<td>(Intel reserved. Do  not use.)</td>
+<td></td>
+<td>No</td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>#MF</td>
+<td>x87 FPU Floating-Point Error (Math Fault)</td>
+<td>Fault</td>
+<td>No</td>
+<td>x87 FPU  floating-point or WAIT/FWAIT instruction.</td>
+</tr>
+<tr>
+<td>17</td>
+<td>#AC</td>
+<td>Alignment Check</td>
+<td>Fault</td>
+<td>Yes (Zero)</td>
+<td>Any data reference in memory.</td>
+</tr>
+<tr>
+<td>18</td>
+<td>#MC</td>
+<td>Machine Check</td>
+<td>Abort</td>
+<td>No</td>
+<td>Error codes (if any) and source are model  dependent.</td>
+</tr>
+<tr>
+<td>19</td>
+<td>#XM</td>
+<td>SIMD Floating-Point Exception</td>
+<td>Fault</td>
+<td>No</td>
+<td>SSE/SSE2/SSE3 floating-point instructions</td>
+</tr>
+<tr>
+<td>20</td>
+<td>#VE</td>
+<td>Virtualization Exception</td>
+<td>Fault</td>
+<td>No</td>
+<td>EPT violations</td>
+</tr>
+<tr>
+<td>21</td>
+<td>#CP</td>
+<td>Control Protection Exception</td>
+<td>Fault</td>
+<td>Yes</td>
+<td>RET, IRET, RSTORSSP, and SETSSBSY  instructions can generate this exception. When CET indirect branch tracking  is enabled, this exception can be generated due to a missing ENDBRANCH  instruction at target of an indirect call or jump.</td>
+</tr>
+<tr>
+<td>22-31</td>
+<td>-</td>
+<td>Intel reserved. Do not use.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
 </table></div>
 <p>下图描述了中断处理的大致流程：</p>
 <p><img src="https://cdn.mazhen.tech/images/202311201727048.png"

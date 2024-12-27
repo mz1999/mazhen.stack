@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content=" # 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述：\nAs with nondistributed transactions, SERIALIZABLE may be preferred if your applications are sensitive to read phenomena. REPEATABLE READ may not be sufficient for distributed transactions.\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As">
 <title>关于MySQL XA事务的隔离级别</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/%E5%85%B3%E4%BA%8Emysql-xa%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="关于MySQL XA事务的隔离级别">
-<meta property='og:description' content=" # 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述：\nAs with nondistributed transactions, SERIALIZABLE may be preferred if your applications are sensitive to read phenomena. REPEATABLE READ may not be sufficient for distributed transactions.\n">
+<meta property='og:description' content="# 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As">
 <meta property='og:url' content='https://mazhen.tech/p/%E5%85%B3%E4%BA%8Emysql-xa%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='db' /><meta property='article:published_time' content='2018-06-05T14:44:59&#43;08:00'/><meta property='article:modified_time' content='2018-06-05T14:44:59&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="关于MySQL XA事务的隔离级别">
-<meta name="twitter:description" content=" # 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述：\nAs with nondistributed transactions, SERIALIZABLE may be preferred if your applications are sensitive to read phenomena. REPEATABLE READ may not be sufficient for distributed transactions.\n">
+<meta name="twitter:description" content="# 为什么XA事务建议用SERIALIZABLE隔离级别 在MySQL最新的官方文档中，关于XA Transactions的介绍有这么一段描述： As">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 

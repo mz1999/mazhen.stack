@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="TiDB源码解读系列的《Insert语句概览》讲解了Insert执行的整体流程，并在最后用一幅图描述了整个流程：\n我按照自己的理解对这幅图扩展了一下，在原先数据结构转换流程的基础上，补充了代码的调用流程，个人感觉更加全面，希望对你阅读代码也有帮助。\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="TiDB源码解读系列的《Insert语句概览》讲解了Insert执行的整体流程，并在最后用一幅图描述了整个流程： 我按照自己的理解对这幅图扩展">
 <title>TiDB Insert 执行流程图</title>
 
 <link rel='canonical' href='https://mazhen.tech/p/tidb-insert-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%9B%BE/'>
 
 <link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="TiDB Insert 执行流程图">
-<meta property='og:description' content="TiDB源码解读系列的《Insert语句概览》讲解了Insert执行的整体流程，并在最后用一幅图描述了整个流程：\n我按照自己的理解对这幅图扩展了一下，在原先数据结构转换流程的基础上，补充了代码的调用流程，个人感觉更加全面，希望对你阅读代码也有帮助。\n">
+<meta property='og:description' content="TiDB源码解读系列的《Insert语句概览》讲解了Insert执行的整体流程，并在最后用一幅图描述了整个流程： 我按照自己的理解对这幅图扩展">
 <meta property='og:url' content='https://mazhen.tech/p/tidb-insert-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%9B%BE/'>
 <meta property='og:site_name' content='mazhen.tech'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='db' /><meta property='article:published_time' content='2018-05-15T14:38:05&#43;08:00'/><meta property='article:modified_time' content='2018-05-15T14:38:05&#43;08:00'/>
 <meta name="twitter:site" content="@rootletmistake">
     <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="TiDB Insert 执行流程图">
-<meta name="twitter:description" content="TiDB源码解读系列的《Insert语句概览》讲解了Insert执行的整体流程，并在最后用一幅图描述了整个流程：\n我按照自己的理解对这幅图扩展了一下，在原先数据结构转换流程的基础上，补充了代码的调用流程，个人感觉更加全面，希望对你阅读代码也有帮助。\n">
+<meta name="twitter:description" content="TiDB源码解读系列的《Insert语句概览》讲解了Insert执行的整体流程，并在最后用一幅图描述了整个流程： 我按照自己的理解对这幅图扩展">
     <link rel="shortcut icon" href="/favicon.png" />
 
+  
+    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
       <script>
         var doNotTrack = false;
@@ -30,6 +32,10 @@
           gtag('config', 'G-LBEVB8TRX2');
         }
       </script>
+    
+  
+
+
     </head>
     <body class="
     article-page
@@ -73,7 +79,7 @@
                     
                     
                         
-                        <img src="/mazhen_hu3332242667577835603.jpg" width="300"
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
