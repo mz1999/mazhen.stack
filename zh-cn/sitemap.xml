@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2024-12-27T14:50:10+08:00</lastmod>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,11 +15,8 @@
                 href="https://mazhen.tech/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/c/</loc>
-    <lastmod>2024-12-27T14:50:10+08:00</lastmod>
-  </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2024-12-27T14:50:10+08:00</lastmod>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -32,13 +29,13 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/tags/linux/</loc>
-    <lastmod>2024-12-27T14:50:10+08:00</lastmod>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2024-12-27T14:50:10+08:00</lastmod>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2024-12-27T14:50:10+08:00</lastmod>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -51,6 +48,15 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/windows/</loc>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E4%B8%BA-powershell-%E9%85%8D%E7%BD%AE-emacs-%E6%A8%A1%E5%BC%8F/</loc>
+    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/c/</loc>
     <lastmod>2024-12-27T14:50:10+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/</loc>

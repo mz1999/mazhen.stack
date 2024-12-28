@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="对于长期在 macOS 或 Linux 终端环境下工作的人来说，Windows 的终端体验可能会显得有些格格不入。尤其是 PowerShell，它的默认交互方式与熟悉的">
+<title>为 PowerShell 配置 Emacs 模式</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%B8%BA-powershell-%E9%85%8D%E7%BD%AE-emacs-%E6%A8%A1%E5%BC%8F/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="为 PowerShell 配置 Emacs 模式">
+<meta property='og:description' content="对于长期在 macOS 或 Linux 终端环境下工作的人来说，Windows 的终端体验可能会显得有些格格不入。尤其是 PowerShell，它的默认交互方式与熟悉的">
+<meta property='og:url' content='https://mazhen.tech/p/%E4%B8%BA-powershell-%E9%85%8D%E7%BD%AE-emacs-%E6%A8%A1%E5%BC%8F/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='windows' /><meta property='article:tag' content='linux' /><meta property='article:published_time' content='2024-12-28T21:24:25&#43;08:00'/><meta property='article:modified_time' content='2024-12-28T21:24:25&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="为 PowerShell 配置 Emacs 模式">
+<meta name="twitter:description" content="对于长期在 macOS 或 Linux 终端环境下工作的人来说，Windows 的终端体验可能会显得有些格格不入。尤其是 PowerShell，它的默认交互方式与熟悉的">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#windows-终端不止-cmdexe-和-powershell">Windows 终端：不止 cmd.exe 和 PowerShell</a></li>
+    <li><a href="#psreadlinepowershell-的交互核心">PSReadLine：PowerShell 的交互核心</a>
+      <ol>
+        <li><a href="#版本与功能">版本与功能</a></li>
+        <li><a href="#升级-powershell-powershell-core">升级 PowerShell (PowerShell Core)</a></li>
+        <li><a href="#psreadline-的升级">PSReadLine 的升级</a></li>
+      </ol>
+    </li>
+    <li><a href="#emacs-模式让-powershell-更顺手">Emacs 模式：让 PowerShell 更顺手</a>
+      <ol>
+        <li><a href="#什么是-powershell-profile">什么是 PowerShell Profile</a></li>
+        <li><a href="#如何在-powershell-profile-中设置-emacs-模式">如何在 PowerShell profile 中设置 Emacs 模式</a></li>
+        <li><a href="#其他-psreadline-配置">其他 PSReadLine 配置</a></li>
+        <li><a href="#常用快捷键">常用快捷键</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%B8%BA-powershell-%E9%85%8D%E7%BD%AE-emacs-%E6%A8%A1%E5%BC%8F/">为 PowerShell 配置 Emacs 模式</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-12-28</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>对于长期在 macOS 或 Linux 终端环境下工作的人来说，Windows 的终端体验可能会显得有些格格不入。尤其是 PowerShell，它的默认交互方式与熟悉的 bash 或 zsh 存在显著差异。本文将从配置 Emacs 模式入手，深入了解 Windows 终端的生态，并逐步打造一个更符合你习惯的 PowerShell 环境。</p>
+<h2 id="windows-终端不止-cmdexe-和-powershell">
+    <a href="#windows-%e7%bb%88%e7%ab%af%e4%b8%8d%e6%ad%a2-cmdexe-%e5%92%8c-powershell" class="header-anchor">#</a>
+    Windows 终端：不止 cmd.exe 和 PowerShell
+</h2><p>在 Windows 中，我们经常会接触到以下几个概念：</p>
+<ul>
+<li><strong>命令提示符 (cmd.exe)：</strong> 这是 Windows 最早的命令行解释器，可以追溯到 DOS 时代。它执行简单的命令，但功能相对有限，交互体验也较为落后。我们可以将其视为 Windows 系统的“元老”，用于执行一些基本的命令操作。</li>
+<li><strong>PowerShell：</strong> 这是一个更加现代和强大的命令行外壳，基于 .NET 框架构建，以对象而非文本处理数据，更适合自动化、脚本编写和系统管理。它可以被视为 Windows 系统的“新贵”，旨在替代 cmd.exe，成为系统管理的主力工具。</li>
+<li><strong>Windows Terminal (Windows 终端)：</strong> 这是一个独立的应用程序，用于承载各种命令行 shell（如 cmd.exe, PowerShell, WSL 等）。它提供了标签页、分屏、自定义主题等高级特性，使得在不同外壳之间切换更加便捷。你可以将它视为一个更强大、更现代的“终端模拟器”，用于统一管理各种命令行环境。</li>
+</ul>
+<p><strong>它们之间的关系：</strong> <strong>Windows Terminal</strong> 是一个终端应用程序，它像一个容器，可以运行 <strong>cmd.exe</strong> 和 <strong>PowerShell</strong> 等命令行 shell。 <strong>cmd.exe</strong> 和 <strong>PowerShell</strong> 是不同的命令行解释器，负责解释用户输入的命令并执行操作。也就是说，<strong>cmd.exe</strong> 和 <strong>PowerShell</strong> 是 <strong>Windows Terminal</strong> 中的两种“引擎”。</p>
+<h2 id="psreadlinepowershell-的交互核心">
+    <a href="#psreadlinepowershell-%e7%9a%84%e4%ba%a4%e4%ba%92%e6%a0%b8%e5%bf%83" class="header-anchor">#</a>
+    PSReadLine：PowerShell 的交互核心
+</h2><p><strong>PSReadLine</strong> 是 PowerShell 的一个核心模块，负责处理终端中的文本输入、历史记录、命令补全、语法高亮等关键功能。它直接影响着你在 PowerShell 中的操作效率和流畅度。如果没有 <strong>PSReadLine</strong>，PowerShell 的交互体验会大打折扣。</p>
+<h3 id="版本与功能">
+    <a href="#%e7%89%88%e6%9c%ac%e4%b8%8e%e5%8a%9f%e8%83%bd" class="header-anchor">#</a>
+    版本与功能
+</h3><p>Windows 11 预装的 Windows PowerShell 5.1 虽然自带 <code>PSReadLine</code> 模块，但其功能较为基础。为了获得更流畅的体验和更强大的功能，例如预测性 IntelliSense 和更强大的多行编辑，强烈建议升级到 <strong>PowerShell 7.2 或更高版本</strong>。</p>
+<h3 id="升级-powershell-powershell-core">
+    <a href="#%e5%8d%87%e7%ba%a7-powershell-powershell-core" class="header-anchor">#</a>
+    升级 PowerShell (PowerShell Core)
+</h3><ol>
+<li><strong>下载：</strong> 从 <a class="link" href="https://github.com/PowerShell/PowerShell/releases"  target="_blank" rel="noopener"
+    >Microsoft 官方 GitHub 仓库</a> 下载最新版本的 PowerShell 安装包，并按照安装向导完成安装。</li>
+<li><strong>配置终端：</strong> 在终端应用程序 Windows Terminal 中，增加一个新的配置文件，将命令行选项设置为你最新安装的 PowerShell 可执行文件路径，例如 <code>&quot;C:\Program Files\PowerShell\7\pwsh.exe&quot;</code>。</li>
+<li><strong>验证版本：</strong> 在 PowerShell 中运行 <code>Get-Module PSReadLine -ListAvailable</code>，检查 PSReadLine 版本。如果没有任何输出或版本低于 2.0，则需要升级，详见下文的 PSReadLine 的升级方法。</li>
+</ol>
+<h3 id="psreadline-的升级">
+    <a href="#psreadline-%e7%9a%84%e5%8d%87%e7%ba%a7" class="header-anchor">#</a>
+    PSReadLine 的升级
+</h3><p>如果你的 PSReadLine 版本过旧，请运行以下命令更新：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Install-Module</span> <span class="n">-Name</span> <span class="n">PSReadLine</span> <span class="n">-Force</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="emacs-模式让-powershell-更顺手">
+    <a href="#emacs-%e6%a8%a1%e5%bc%8f%e8%ae%a9-powershell-%e6%9b%b4%e9%a1%ba%e6%89%8b" class="header-anchor">#</a>
+    Emacs 模式：让 PowerShell 更顺手
+</h2><p>在深入配置 Emacs 模式之前，我们先来了解一下 PowerShell 的 profile 文件。</p>
+<h3 id="什么是-powershell-profile">
+    <a href="#%e4%bb%80%e4%b9%88%e6%98%af-powershell-profile" class="header-anchor">#</a>
+    什么是 PowerShell Profile
+</h3><p>PowerShell profile 相当于 PowerShell 的启动脚本。每次启动 PowerShell 时，它都会自动执行 profile 文件中的命令。这使得你可以自定义 PowerShell 环境，例如设置别名、函数、环境变量，以及在本例中，配置 PSReadLine 的编辑模式等。可以把它看作是 PowerShell 的“初始化文件”。</p>
+<p>PowerShell 支持多个 profile 文件，它们根据不同的作用域加载。最常用的 profile 文件路径通常是 <code>C:\Users\&lt;用户名&gt;\Documents\PowerShell\Microsoft.PowerShell_profile.ps1</code>，它针对当前用户的所有 PowerShell 会话加载。</p>
+<p>理解了 profile 文件的作用后，我们就可以开始配置 Emacs 模式了。</p>
+<h3 id="如何在-powershell-profile-中设置-emacs-模式">
+    <a href="#%e5%a6%82%e4%bd%95%e5%9c%a8-powershell-profile-%e4%b8%ad%e8%ae%be%e7%bd%ae-emacs-%e6%a8%a1%e5%bc%8f" class="header-anchor">#</a>
+    如何在 PowerShell profile 中设置 Emacs 模式
+</h3><ol>
+<li><strong>获取 profile 文件路径</strong> </li>
+</ol>
+<p>在 PowerShell 中运行 <code>$PROFILE</code>，获取 profile 文件路径。通常这个路径类似于<code>C:\Users\&lt;用户名&gt;\Documents\PowerShell\Microsoft.PowerShell_profile.ps1</code>。</p>
+<ol start="2">
+<li><strong>创建配置文件</strong></li>
+</ol>
+<p>在默认情况下，PowerShell 的 <code>$PROFILE</code> 文件可能并不存在。可以使用以下命令检查文件是否存在：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Test-Path</span> <span class="nv">$PROFILE</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果返回 <code>False</code>，说明该文件还没有创建。可以使用以下命令来创建该文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">New-Item</span> <span class="n">-Path</span> <span class="nv">$PROFILE</span> <span class="n">-ItemType</span> <span class="n">File</span> <span class="n">-Force</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li><strong>编辑 profile 文件</strong> </li>
+</ol>
+<p>一旦文件创建完成，您可以使用任意文本编辑器打开并编辑 <code>$PROFILE</code> 文件。例如使用 <code>notepad</code> 打开配置文件：<code>notepad $PROFILE</code></p>
+<ol start="4">
+<li><strong>添加配置</strong></li>
+</ol>
+<p>在配置文件中，添加以下行来启用 Emacs 模式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">set-PSReadLineOption</span> <span class="n">-EditMode</span> <span class="n">Emacs</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这行代码会在每次启动 PowerShell 时自动将编辑模式设置为 Emacs。</p>
+<ol start="5">
+<li><strong>保存并重启 PowerShell</strong></li>
+</ol>
+<p>编辑并保存 <code>$PROFILE</code> 文件后，关闭并重新启动 PowerShell。重新打开后，PowerShell 将自动加载您的配置文件，并启用 Emacs 编辑模式。</p>
+<p>另外，<code>$PROFILE</code> 配置文件可以用于保存各种个性化设置，包括自定义函数、别名、环境变量等。在 PowerShell 7+ 中，PowerShell 使用的 <code>$PROFILE</code> 文件路径会有细微变化，确保在编辑前检查 <code>$PROFILE</code> 的具体路径。</p>
+<h3 id="其他-psreadline-配置">
+    <a href="#%e5%85%b6%e4%bb%96-psreadline-%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    其他 PSReadLine 配置
+</h3><p>在配置了 Emacs 模式后，PSReadLine 还有许多其他有用的配置选项，可以进一步提升你的使用体验。以下是一些常用的配置示例：</p>
+<ul>
+<li><strong>自定义历史记录保存路径：</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Set-PSReadLineOption</span> <span class="n">-HistorySavePath</span> <span class="s2">&#34;path/to/your/history.txt&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过此设置，你可以将 PowerShell 的命令历史记录保存到指定的文件中。</p>
+<ul>
+<li><strong>设置历史记录的最大条数：</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-POWERSHELL" data-lang="POWERSHELL"><span class="line"><span class="cl"><span class="nb">Set-PSReadLineOption</span> <span class="n">-MaximumHistoryCount</span> <span class="mf">1000</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此设置可以限制 PowerShell 保存的历史记录条数，防止历史记录文件过大。</p>
+<ul>
+<li><strong>设置预测命令的来源为历史记录：</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Set-PSReadLineOption</span> <span class="n">-PredictionSource</span> <span class="nb">History
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>设置命令预测的来源，可以使用历史记录或插件。</p>
+<ul>
+<li><strong>查看和自定义快捷键：</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Get-PSReadLineKeyHandler</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用此命令可以查看当前 PSReadLine 定义的快捷键。你还可以自定义快捷键，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Set-PSReadLineKeyHandler</span> <span class="n">-Key</span> <span class="n">Ctrl</span><span class="p">+</span><span class="n">l</span> <span class="n">-Function</span> <span class="n">ClearScreen</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个命令将 Ctrl + L 键绑定到 <code>ClearScreen</code> 函数，实现清屏的功能。</p>
+<h3 id="常用快捷键">
+    <a href="#%e5%b8%b8%e7%94%a8%e5%bf%ab%e6%8d%b7%e9%94%ae" class="header-anchor">#</a>
+    常用快捷键
+</h3><p>掌握一些常用的快捷键可以大大提高在 PowerShell 中的工作效率。以下是一些常用的快捷键：</p>
+<ul>
+<li>
+<p><strong>PowerShell 快捷键：</strong></p>
+<ul>
+<li><code>Ctrl + C</code>: 中断当前正在执行的命令。</li>
+<li><code>Tab</code>: 自动补全命令、路径或变量名。</li>
+<li><code>Ctrl + R</code>: 搜索历史命令。</li>
+<li><code>↑</code> 或 <code>↓</code>: 浏览历史命令。</li>
+<li><code>Ctrl + Shift + T</code>: 在 Windows Terminal 中打开新的 tab</li>
+</ul>
+</li>
+<li>
+<p><strong>Emacs 模式快捷键：</strong></p>
+<ul>
+<li><code>Ctrl + A</code>: 将光标移动到行首。</li>
+<li><code>Ctrl + E</code>: 将光标移动到行尾。</li>
+<li><code>Ctrl + B</code>: 光标左移一个字符。</li>
+<li><code>Ctrl + F</code>: 光标右移一个字符。</li>
+<li><code>Alt + B</code>: 将光标移动到上一个单词的开头。</li>
+<li><code>Alt + F</code>: 将光标移动到下一个单词的开头。</li>
+<li><code>Alt + D</code>: 删除光标后的单词。</li>
+<li><code>Ctrl + K</code>: 删除光标到行尾的所有内容。</li>
+<li><code>Ctrl + U</code>: 删除光标到行首的所有内容。</li>
+</ul>
+</li>
+</ul>
+<p>通过这个设置和快捷键的掌握，您可以在 PowerShell 中体验更接近 Emacs 的编辑体验，并提高命令行的使用效率。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/windows/">Windows</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-linux-%E5%86%85%E6%A0%B8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 Linux 内核</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%B8%80%E7%AF%87%E8%AF%BB%E6%87%82-c-%E6%8C%87%E9%92%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">一篇读懂 C 指针</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入探索 perf CPU Profiling 实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 perf</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/incomplete-list-of-computer-science-learning-resources-for-college-students/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Incomplete List of Computer Science Learning Resources for College Students</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2024 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
