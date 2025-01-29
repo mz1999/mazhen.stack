@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,14 +28,14 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/linux/</loc>
-    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/java/</loc>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2024-12-28T21:24:25+08:00</lastmod>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -48,6 +48,12 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-java-lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F/</loc>
+    <lastmod>2025-01-29T20:03:12+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/linux/</loc>
     <lastmod>2024-12-28T21:24:25+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/windows/</loc>
@@ -66,9 +72,6 @@
     <lastmod>2024-10-30T14:13:24+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/glassfish/</loc>
-    <lastmod>2024-05-14T15:04:43+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/java/</loc>
     <lastmod>2024-05-14T15:04:43+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F/</loc>
