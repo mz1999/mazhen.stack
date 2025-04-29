@@ -253,7 +253,7 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;起始地址-结束地址   权限    偏移量   设备号(主:次)  inode  路径名
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;起始地址-结束地址   权限    偏移量   设备号&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;主:次&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;  inode  路径名
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;如果是&lt;strong&gt;文件映射&lt;/strong&gt;，&lt;strong&gt;设备号&lt;/strong&gt;表示文件所在的设备，&lt;strong&gt;inode&lt;/strong&gt; 表示文件的 &lt;code&gt;inode&lt;/code&gt; 编号，&lt;strong&gt;路径名&lt;/strong&gt;会显示被映射文件的&lt;strong&gt;路径&lt;/strong&gt;。&lt;/p&gt;
@@ -272,14 +272,14 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$cat /proc/10854/maps
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$cat&lt;/span&gt; /proc/10854/maps
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5b565de16000-5b565de17000 rw-p 00003000 103:02 34101432                  /home/mazhen/works/jdk-21.0.6/jdk/bin/java
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5b5683910000-5b5683958000 rw-p 00000000 00:00 0                          [heap]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5b565de16000-5b565de17000 rw-p &lt;span class=&#34;m&#34;&gt;00003000&lt;/span&gt; 103:02 &lt;span class=&#34;m&#34;&gt;34101432&lt;/span&gt;                  /home/mazhen/works/jdk-21.0.6/jdk/bin/java
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5b5683910000-5b5683958000 rw-p &lt;span class=&#34;m&#34;&gt;00000000&lt;/span&gt; 00:00 &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;                          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;heap&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7f95a4000000-7f95a4028000 r--p 00000000 103:02 58869401                  /usr/lib/x86_64-linux-gnu/libc.so.6
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7f95a4000000-7f95a4028000 r--p &lt;span class=&#34;m&#34;&gt;00000000&lt;/span&gt; 103:02 58869401                  /usr/lib/x86_64-linux-gnu/libc.so.6
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7fff8da95000-7fff8dab7000 rw-p 00000000 00:00 0                          [stack]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7fff8da95000-7fff8dab7000 rw-p &lt;span class=&#34;m&#34;&gt;00000000&lt;/span&gt; 00:00 0                          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;stack&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
@@ -319,33 +319,33 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$cat /proc/10854/smaps
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$cat&lt;/span&gt; /proc/10854/smaps
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5b5683910000-5b5683958000 rw-p 00000000 00:00 0                          [heap]
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Size:                288 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;KernelPageSize:        4 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;MMUPageSize:           4 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Rss:                  96 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Pss:                  96 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Pss_Dirty:            96 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Shared_Clean:          0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Shared_Dirty:          0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Private_Clean:         0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Private_Dirty:        96 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Referenced:           96 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Anonymous:            96 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;KSM:                   0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;LazyFree:              0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;AnonHugePages:         0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ShmemPmdMapped:        0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FilePmdMapped:         0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Shared_Hugetlb:        0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Private_Hugetlb:       0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Swap:                  0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SwapPss:               0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Locked:                0 kB
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;THPeligible:           0
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ProtectionKey:         0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5b5683910000-5b5683958000 rw-p &lt;span class=&#34;m&#34;&gt;00000000&lt;/span&gt; 00:00 &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;                          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;heap&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Size:                &lt;span class=&#34;m&#34;&gt;288&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;KernelPageSize:        &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;MMUPageSize:           &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Rss:                  &lt;span class=&#34;m&#34;&gt;96&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Pss:                  &lt;span class=&#34;m&#34;&gt;96&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Pss_Dirty:            &lt;span class=&#34;m&#34;&gt;96&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Shared_Clean:          &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Shared_Dirty:          &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Private_Clean:         &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Private_Dirty:        &lt;span class=&#34;m&#34;&gt;96&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Referenced:           &lt;span class=&#34;m&#34;&gt;96&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Anonymous:            &lt;span class=&#34;m&#34;&gt;96&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;KSM:                   &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;LazyFree:              &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;AnonHugePages:         &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ShmemPmdMapped:        &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FilePmdMapped:         &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Shared_Hugetlb:        &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Private_Hugetlb:       &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Swap:                  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SwapPss:               &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Locked:                &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; kB
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;THPeligible:           &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ProtectionKey:         &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;VmFlags: rd wr mr mw me ac sd 
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
@@ -365,11 +365,11 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /proc/10854/map_files   
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;total 0
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-------- 1 mazhen mazhen 64 Apr 25 06:58 5b565de12000-5b565de13000 -&amp;gt; /home/mazhen/works/jdk-21.0.6/jdk/bin/java
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /proc/10854/map_files   
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;total &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-------- &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 06:58 5b565de12000-5b565de13000 -&amp;gt; /home/mazhen/works/jdk-21.0.6/jdk/bin/java
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-------- 1 mazhen mazhen 64 Apr 25 06:58 7f95a4000000-7f95a4028000 -&amp;gt; /usr/lib/x86_64-linux-gnu/libc.so.6
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-------- &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 06:58 7f95a4000000-7f95a4028000 -&amp;gt; /usr/lib/x86_64-linux-gnu/libc.so.6
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
@@ -395,18 +395,18 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /proc/10854/fd
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /proc/10854/fd
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;l-wx------ 1 mazhen mazhen 64 Apr 25 02:00 2 -&amp;gt; &amp;#39;pipe:[195498]&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;l-wx------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 02:00 &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; -&amp;gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;pipe:[195498]&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-x------ 1 mazhen mazhen 64 Apr 25 02:00 3 -&amp;gt; /home/mazhen/works/jdk-21.0.6/jdk/lib/modules
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-x------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 02:00 &lt;span class=&#34;m&#34;&gt;3&lt;/span&gt; -&amp;gt; /home/mazhen/works/jdk-21.0.6/jdk/lib/modules
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 379 -&amp;gt; &amp;#39;socket:[2629]&amp;#39;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 380 -&amp;gt; &amp;#39;socket:[2636]&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:21 &lt;span class=&#34;m&#34;&gt;379&lt;/span&gt; -&amp;gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;socket:[2629]&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:21 &lt;span class=&#34;m&#34;&gt;380&lt;/span&gt; -&amp;gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;socket:[2636]&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 477 -&amp;gt; &amp;#39;anon_inode:[eventpoll]&amp;#39;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 478 -&amp;gt; &amp;#39;anon_inode:[eventfd]&amp;#39;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-x------ 1 mazhen mazhen 64 Apr 25 07:21 479 -&amp;gt; anon_inode:inotify
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:21 &lt;span class=&#34;m&#34;&gt;477&lt;/span&gt; -&amp;gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;anon_inode:[eventpoll]&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lrwx------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:21 &lt;span class=&#34;m&#34;&gt;478&lt;/span&gt; -&amp;gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;anon_inode:[eventfd]&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lr-x------ &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;64&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:21 &lt;span class=&#34;m&#34;&gt;479&lt;/span&gt; -&amp;gt; anon_inode:inotify
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
@@ -426,17 +426,17 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /proc/10854/fdinfo 
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;total 0
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- 1 mazhen mazhen 0 Apr 25 07:31 0
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- 1 mazhen mazhen 0 Apr 25 07:31 1
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- 1 mazhen mazhen 0 Apr 25 07:31 10
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l /proc/10854/fdinfo 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;total &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:31 &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:31 &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-r--r--r-- &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; mazhen mazhen &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; 07:31 &lt;span class=&#34;m&#34;&gt;10&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ cat /proc/10854/fdinfo/20
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pos:	381
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;flags:	0100000
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mnt_id:	31
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ino:	32775204
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pos:	&lt;span class=&#34;m&#34;&gt;381&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;flags:	&lt;span class=&#34;m&#34;&gt;0100000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mnt_id:	&lt;span class=&#34;m&#34;&gt;31&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ino:	&lt;span class=&#34;m&#34;&gt;32775204&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;code&gt;/proc/$pid/fd&lt;/code&gt;告诉 CRIU 通过哪些描述符编号打开了&lt;strong&gt;哪些&lt;/strong&gt;资源，&lt;code&gt;/proc/$pid/fdinfo&lt;/code&gt;告诉 CRIU 每个已打开描述符的&lt;strong&gt;状态和元数据&lt;/strong&gt;（比如位置和标志）。CRIU 使用来自这两个位置的信息来完整保存进程已打开文件及其状态的情况，以便之后能够准确地恢复它们。&lt;/p&gt;
@@ -446,17 +446,18 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;p&gt;为了保存一个任务（进程/线程）的核心运行状态以便后续恢复，CRIU 主要结合使用了两种方法。&lt;/p&gt;
 &lt;p&gt;使用 &lt;code&gt;ptrace&lt;/code&gt; 系统调用的特定命令（例如&lt;code&gt;PTRACE_GETREGS&lt;/code&gt; 或 &lt;code&gt;PTRACE_GETFPREGS&lt;/code&gt; ）来&lt;strong&gt;直接读取&lt;/strong&gt;任务暂停时的&lt;strong&gt;CPU 寄存器 (registers)&lt;/strong&gt; 内容，包括通用寄存器、指令指针、标志寄存器、浮点寄存器等），以及其他密切相关的底层执行状态信息。&lt;/p&gt;
 &lt;p&gt;通过读取和解析 &lt;code&gt;/proc/$pid/stat&lt;/code&gt; 文件，获取关于任务的&lt;strong&gt;各种状态参数和统计数据&lt;/strong&gt;。&lt;code&gt;/proc/$pid/stat&lt;/code&gt; 以&lt;strong&gt;单行文本&lt;/strong&gt;的形式提供了关于进程的大量&lt;strong&gt;状态信息 (status information)&lt;/strong&gt;，其中的信息由&lt;strong&gt;空格&lt;/strong&gt;分隔，每个字段代表一个特定的进程属性或统计值。下面列出一些最核心和常用的字段：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;- 可执行文件名 (comm)
-- 进程状态 (state)
-- 父进程 ID (ppid)
-- 进程组 ID (pgrp)
-- 会话 ID (session)
-- 调度优先级和 nice 值 (priority, nice)
-- 虚拟内存大小 (vsize)
-- 常驻集大小 (rss)
-- 进程启动时间 (starttime)
-- 等待子进程的 CPU 时间 (cutime, cstime)
-&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;可执行文件名 (comm)&lt;/li&gt;
+&lt;li&gt;进程状态 (state)&lt;/li&gt;
+&lt;li&gt;父进程 ID (ppid)&lt;/li&gt;
+&lt;li&gt;进程组 ID (pgrp)&lt;/li&gt;
+&lt;li&gt;会话 ID (session)&lt;/li&gt;
+&lt;li&gt;调度优先级和 nice 值 (priority, nice)&lt;/li&gt;
+&lt;li&gt;虚拟内存大小 (vsize)&lt;/li&gt;
+&lt;li&gt;常驻集大小 (rss)&lt;/li&gt;
+&lt;li&gt;进程启动时间 (starttime)&lt;/li&gt;
+&lt;li&gt;等待子进程的 CPU 时间 (cutime, cstime)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;ol start=&#34;3&#34;&gt;
 &lt;li&gt;&lt;strong&gt;注入寄生代码（Parasite Code）并转储内存&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
@@ -1305,13 +1306,13 @@ CRIU 通过解析 &lt;code&gt;/proc/$pid/maps&lt;/code&gt; 和 &lt;code&gt;/proc
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ps axfo pid,ppid,command
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ps axfo pid,ppid,command
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  31809   31807  \_ sshd: mazhen [priv]
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  31830   31809      \_ sshd: mazhen@pts/0,pts/1
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  31831   31830          \_ -zsh
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  44224   31831          |   \_ /home/mazhen/21.0.5.crac/lib/criuengine restorewait
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  42035   44224          |       \_ java -XX:CRaCCheckpointTo=cr -jar target/example-jetty-1.0-SNAPSHOT.jar
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;m&#34;&gt;31809&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;31807&lt;/span&gt;  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; sshd: mazhen &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;priv&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;m&#34;&gt;31830&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;31809&lt;/span&gt;      &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; sshd: mazhen@pts/0,pts/1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;m&#34;&gt;31831&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;31830&lt;/span&gt;          &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; -zsh
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;m&#34;&gt;44224&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;31831&lt;/span&gt;          &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;   &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; /home/mazhen/21.0.5.crac/lib/criuengine restorewait
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;m&#34;&gt;42035&lt;/span&gt;   &lt;span class=&#34;m&#34;&gt;44224&lt;/span&gt;          &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt; java -XX:CRaCCheckpointTo&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;cr -jar target/example-jetty-1.0-SNAPSHOT.jar
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;

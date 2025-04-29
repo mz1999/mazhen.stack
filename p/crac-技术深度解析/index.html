@@ -496,7 +496,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 43 分钟
+                    阅读时长: 42 分钟
                 </time>
             </div>
         
@@ -752,7 +752,7 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">起始地址-结束地址   权限    偏移量   设备号(主:次)  inode  路径名
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">起始地址-结束地址   权限    偏移量   设备号<span class="o">(</span>主:次<span class="o">)</span>  inode  路径名
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>如果是<strong>文件映射</strong>，<strong>设备号</strong>表示文件所在的设备，<strong>inode</strong> 表示文件的 <code>inode</code> 编号，<strong>路径名</strong>会显示被映射文件的<strong>路径</strong>。</p>
@@ -771,14 +771,14 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$cat /proc/10854/maps
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">$cat</span> /proc/10854/maps
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">5b565de16000-5b565de17000 rw-p 00003000 103:02 34101432                  /home/mazhen/works/jdk-21.0.6/jdk/bin/java
-</span></span><span class="line"><span class="cl">5b5683910000-5b5683958000 rw-p 00000000 00:00 0                          [heap]
+</span></span><span class="line"><span class="cl">5b565de16000-5b565de17000 rw-p <span class="m">00003000</span> 103:02 <span class="m">34101432</span>                  /home/mazhen/works/jdk-21.0.6/jdk/bin/java
+</span></span><span class="line"><span class="cl">5b5683910000-5b5683958000 rw-p <span class="m">00000000</span> 00:00 <span class="m">0</span>                          <span class="o">[</span>heap<span class="o">]</span>
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">7f95a4000000-7f95a4028000 r--p 00000000 103:02 58869401                  /usr/lib/x86_64-linux-gnu/libc.so.6
+</span></span><span class="line"><span class="cl">7f95a4000000-7f95a4028000 r--p <span class="m">00000000</span> 103:02 58869401                  /usr/lib/x86_64-linux-gnu/libc.so.6
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">7fff8da95000-7fff8dab7000 rw-p 00000000 00:00 0                          [stack]
+</span></span><span class="line"><span class="cl">7fff8da95000-7fff8dab7000 rw-p <span class="m">00000000</span> 00:00 0                          <span class="o">[</span>stack<span class="o">]</span>
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
 </div>
@@ -818,33 +818,33 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span><span class="lnt">29
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$cat /proc/10854/smaps
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">$cat</span> /proc/10854/smaps
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">5b5683910000-5b5683958000 rw-p 00000000 00:00 0                          [heap]
-</span></span><span class="line"><span class="cl">Size:                288 kB
-</span></span><span class="line"><span class="cl">KernelPageSize:        4 kB
-</span></span><span class="line"><span class="cl">MMUPageSize:           4 kB
-</span></span><span class="line"><span class="cl">Rss:                  96 kB
-</span></span><span class="line"><span class="cl">Pss:                  96 kB
-</span></span><span class="line"><span class="cl">Pss_Dirty:            96 kB
-</span></span><span class="line"><span class="cl">Shared_Clean:          0 kB
-</span></span><span class="line"><span class="cl">Shared_Dirty:          0 kB
-</span></span><span class="line"><span class="cl">Private_Clean:         0 kB
-</span></span><span class="line"><span class="cl">Private_Dirty:        96 kB
-</span></span><span class="line"><span class="cl">Referenced:           96 kB
-</span></span><span class="line"><span class="cl">Anonymous:            96 kB
-</span></span><span class="line"><span class="cl">KSM:                   0 kB
-</span></span><span class="line"><span class="cl">LazyFree:              0 kB
-</span></span><span class="line"><span class="cl">AnonHugePages:         0 kB
-</span></span><span class="line"><span class="cl">ShmemPmdMapped:        0 kB
-</span></span><span class="line"><span class="cl">FilePmdMapped:         0 kB
-</span></span><span class="line"><span class="cl">Shared_Hugetlb:        0 kB
-</span></span><span class="line"><span class="cl">Private_Hugetlb:       0 kB
-</span></span><span class="line"><span class="cl">Swap:                  0 kB
-</span></span><span class="line"><span class="cl">SwapPss:               0 kB
-</span></span><span class="line"><span class="cl">Locked:                0 kB
-</span></span><span class="line"><span class="cl">THPeligible:           0
-</span></span><span class="line"><span class="cl">ProtectionKey:         0
+</span></span><span class="line"><span class="cl">5b5683910000-5b5683958000 rw-p <span class="m">00000000</span> 00:00 <span class="m">0</span>                          <span class="o">[</span>heap<span class="o">]</span>
+</span></span><span class="line"><span class="cl">Size:                <span class="m">288</span> kB
+</span></span><span class="line"><span class="cl">KernelPageSize:        <span class="m">4</span> kB
+</span></span><span class="line"><span class="cl">MMUPageSize:           <span class="m">4</span> kB
+</span></span><span class="line"><span class="cl">Rss:                  <span class="m">96</span> kB
+</span></span><span class="line"><span class="cl">Pss:                  <span class="m">96</span> kB
+</span></span><span class="line"><span class="cl">Pss_Dirty:            <span class="m">96</span> kB
+</span></span><span class="line"><span class="cl">Shared_Clean:          <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Shared_Dirty:          <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Private_Clean:         <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Private_Dirty:        <span class="m">96</span> kB
+</span></span><span class="line"><span class="cl">Referenced:           <span class="m">96</span> kB
+</span></span><span class="line"><span class="cl">Anonymous:            <span class="m">96</span> kB
+</span></span><span class="line"><span class="cl">KSM:                   <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">LazyFree:              <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">AnonHugePages:         <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">ShmemPmdMapped:        <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">FilePmdMapped:         <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Shared_Hugetlb:        <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Private_Hugetlb:       <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Swap:                  <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">SwapPss:               <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">Locked:                <span class="m">0</span> kB
+</span></span><span class="line"><span class="cl">THPeligible:           <span class="m">0</span>
+</span></span><span class="line"><span class="cl">ProtectionKey:         <span class="m">0</span>
 </span></span><span class="line"><span class="cl">VmFlags: rd wr mr mw me ac sd 
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
@@ -864,11 +864,11 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span><span class="lnt">6
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ls -l /proc/10854/map_files   
-</span></span><span class="line"><span class="cl">total 0
-</span></span><span class="line"><span class="cl">lr-------- 1 mazhen mazhen 64 Apr 25 06:58 5b565de12000-5b565de13000 -&gt; /home/mazhen/works/jdk-21.0.6/jdk/bin/java
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ls -l /proc/10854/map_files   
+</span></span><span class="line"><span class="cl">total <span class="m">0</span>
+</span></span><span class="line"><span class="cl">lr-------- <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 06:58 5b565de12000-5b565de13000 -&gt; /home/mazhen/works/jdk-21.0.6/jdk/bin/java
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">lr-------- 1 mazhen mazhen 64 Apr 25 06:58 7f95a4000000-7f95a4028000 -&gt; /usr/lib/x86_64-linux-gnu/libc.so.6
+</span></span><span class="line"><span class="cl">lr-------- <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 06:58 7f95a4000000-7f95a4028000 -&gt; /usr/lib/x86_64-linux-gnu/libc.so.6
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
 </div>
@@ -894,18 +894,18 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span><span class="lnt">13
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ls -l /proc/10854/fd
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ls -l /proc/10854/fd
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">l-wx------ 1 mazhen mazhen 64 Apr 25 02:00 2 -&gt; &#39;pipe:[195498]&#39;
+</span></span><span class="line"><span class="cl">l-wx------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 02:00 <span class="m">2</span> -&gt; <span class="s1">&#39;pipe:[195498]&#39;</span>
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">lr-x------ 1 mazhen mazhen 64 Apr 25 02:00 3 -&gt; /home/mazhen/works/jdk-21.0.6/jdk/lib/modules
+</span></span><span class="line"><span class="cl">lr-x------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 02:00 <span class="m">3</span> -&gt; /home/mazhen/works/jdk-21.0.6/jdk/lib/modules
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 379 -&gt; &#39;socket:[2629]&#39;
-</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 380 -&gt; &#39;socket:[2636]&#39;
+</span></span><span class="line"><span class="cl">lrwx------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 07:21 <span class="m">379</span> -&gt; <span class="s1">&#39;socket:[2629]&#39;</span>
+</span></span><span class="line"><span class="cl">lrwx------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 07:21 <span class="m">380</span> -&gt; <span class="s1">&#39;socket:[2636]&#39;</span>
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 477 -&gt; &#39;anon_inode:[eventpoll]&#39;
-</span></span><span class="line"><span class="cl">lrwx------ 1 mazhen mazhen 64 Apr 25 07:21 478 -&gt; &#39;anon_inode:[eventfd]&#39;
-</span></span><span class="line"><span class="cl">lr-x------ 1 mazhen mazhen 64 Apr 25 07:21 479 -&gt; anon_inode:inotify
+</span></span><span class="line"><span class="cl">lrwx------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 07:21 <span class="m">477</span> -&gt; <span class="s1">&#39;anon_inode:[eventpoll]&#39;</span>
+</span></span><span class="line"><span class="cl">lrwx------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 07:21 <span class="m">478</span> -&gt; <span class="s1">&#39;anon_inode:[eventfd]&#39;</span>
+</span></span><span class="line"><span class="cl">lr-x------ <span class="m">1</span> mazhen mazhen <span class="m">64</span> Apr <span class="m">25</span> 07:21 <span class="m">479</span> -&gt; anon_inode:inotify
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
 </div>
@@ -925,17 +925,17 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span><span class="lnt">11
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ls -l /proc/10854/fdinfo 
-</span></span><span class="line"><span class="cl">total 0
-</span></span><span class="line"><span class="cl">-r--r--r-- 1 mazhen mazhen 0 Apr 25 07:31 0
-</span></span><span class="line"><span class="cl">-r--r--r-- 1 mazhen mazhen 0 Apr 25 07:31 1
-</span></span><span class="line"><span class="cl">-r--r--r-- 1 mazhen mazhen 0 Apr 25 07:31 10
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ls -l /proc/10854/fdinfo 
+</span></span><span class="line"><span class="cl">total <span class="m">0</span>
+</span></span><span class="line"><span class="cl">-r--r--r-- <span class="m">1</span> mazhen mazhen <span class="m">0</span> Apr <span class="m">25</span> 07:31 <span class="m">0</span>
+</span></span><span class="line"><span class="cl">-r--r--r-- <span class="m">1</span> mazhen mazhen <span class="m">0</span> Apr <span class="m">25</span> 07:31 <span class="m">1</span>
+</span></span><span class="line"><span class="cl">-r--r--r-- <span class="m">1</span> mazhen mazhen <span class="m">0</span> Apr <span class="m">25</span> 07:31 <span class="m">10</span>
 </span></span><span class="line"><span class="cl">...
 </span></span><span class="line"><span class="cl">$ cat /proc/10854/fdinfo/20
-</span></span><span class="line"><span class="cl">pos:	381
-</span></span><span class="line"><span class="cl">flags:	0100000
-</span></span><span class="line"><span class="cl">mnt_id:	31
-</span></span><span class="line"><span class="cl">ino:	32775204
+</span></span><span class="line"><span class="cl">pos:	<span class="m">381</span>
+</span></span><span class="line"><span class="cl">flags:	<span class="m">0100000</span>
+</span></span><span class="line"><span class="cl">mnt_id:	<span class="m">31</span>
+</span></span><span class="line"><span class="cl">ino:	<span class="m">32775204</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>/proc/$pid/fd</code>告诉 CRIU 通过哪些描述符编号打开了<strong>哪些</strong>资源，<code>/proc/$pid/fdinfo</code>告诉 CRIU 每个已打开描述符的<strong>状态和元数据</strong>（比如位置和标志）。CRIU 使用来自这两个位置的信息来完整保存进程已打开文件及其状态的情况，以便之后能够准确地恢复它们。</p>
@@ -945,17 +945,18 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 <p>为了保存一个任务（进程/线程）的核心运行状态以便后续恢复，CRIU 主要结合使用了两种方法。</p>
 <p>使用 <code>ptrace</code> 系统调用的特定命令（例如<code>PTRACE_GETREGS</code> 或 <code>PTRACE_GETFPREGS</code> ）来<strong>直接读取</strong>任务暂停时的<strong>CPU 寄存器 (registers)</strong> 内容，包括通用寄存器、指令指针、标志寄存器、浮点寄存器等），以及其他密切相关的底层执行状态信息。</p>
 <p>通过读取和解析 <code>/proc/$pid/stat</code> 文件，获取关于任务的<strong>各种状态参数和统计数据</strong>。<code>/proc/$pid/stat</code> 以<strong>单行文本</strong>的形式提供了关于进程的大量<strong>状态信息 (status information)</strong>，其中的信息由<strong>空格</strong>分隔，每个字段代表一个特定的进程属性或统计值。下面列出一些最核心和常用的字段：</p>
-<pre><code>- 可执行文件名 (comm)
-- 进程状态 (state)
-- 父进程 ID (ppid)
-- 进程组 ID (pgrp)
-- 会话 ID (session)
-- 调度优先级和 nice 值 (priority, nice)
-- 虚拟内存大小 (vsize)
-- 常驻集大小 (rss)
-- 进程启动时间 (starttime)
-- 等待子进程的 CPU 时间 (cutime, cstime)
-</code></pre>
+<ul>
+<li>可执行文件名 (comm)</li>
+<li>进程状态 (state)</li>
+<li>父进程 ID (ppid)</li>
+<li>进程组 ID (pgrp)</li>
+<li>会话 ID (session)</li>
+<li>调度优先级和 nice 值 (priority, nice)</li>
+<li>虚拟内存大小 (vsize)</li>
+<li>常驻集大小 (rss)</li>
+<li>进程启动时间 (starttime)</li>
+<li>等待子进程的 CPU 时间 (cutime, cstime)</li>
+</ul>
 <ol start="3">
 <li><strong>注入寄生代码（Parasite Code）并转储内存</strong></li>
 </ol>
@@ -1804,13 +1805,13 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ps axfo pid,ppid,command
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ps axfo pid,ppid,command
 </span></span><span class="line"><span class="cl">...
-</span></span><span class="line"><span class="cl">  31809   31807  \_ sshd: mazhen [priv]
-</span></span><span class="line"><span class="cl">  31830   31809      \_ sshd: mazhen@pts/0,pts/1
-</span></span><span class="line"><span class="cl">  31831   31830          \_ -zsh
-</span></span><span class="line"><span class="cl">  44224   31831          |   \_ /home/mazhen/21.0.5.crac/lib/criuengine restorewait
-</span></span><span class="line"><span class="cl">  42035   44224          |       \_ java -XX:CRaCCheckpointTo=cr -jar target/example-jetty-1.0-SNAPSHOT.jar
+</span></span><span class="line"><span class="cl">  <span class="m">31809</span>   <span class="m">31807</span>  <span class="se">\_</span> sshd: mazhen <span class="o">[</span>priv<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  <span class="m">31830</span>   <span class="m">31809</span>      <span class="se">\_</span> sshd: mazhen@pts/0,pts/1
+</span></span><span class="line"><span class="cl">  <span class="m">31831</span>   <span class="m">31830</span>          <span class="se">\_</span> -zsh
+</span></span><span class="line"><span class="cl">  <span class="m">44224</span>   <span class="m">31831</span>          <span class="p">|</span>   <span class="se">\_</span> /home/mazhen/21.0.5.crac/lib/criuengine restorewait
+</span></span><span class="line"><span class="cl">  <span class="m">42035</span>   <span class="m">44224</span>          <span class="p">|</span>       <span class="se">\_</span> java -XX:CRaCCheckpointTo<span class="o">=</span>cr -jar target/example-jetty-1.0-SNAPSHOT.jar
 </span></span><span class="line"><span class="cl">...
 </span></span></code></pre></td></tr></table>
 </div>
