@@ -961,16 +961,7 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </ol>
 <p>为了获取某些无法从外部直接探测的信息（例如进程凭证、精确的内存布局和内容），CRIU 必须在目标进程的地址空间内部执行特定的代码。这正是通过 <strong>寄生代码 (Parasite Code)</strong> 技术实现的。</p>
 <p><strong>寄生代码</strong>是一段精心构造的小型二进制程序，它以<strong>位置无关可执行文件 (PIE, Position-Independent Executable)</strong> 格式编译。这一特性至关重要，因为它允许 CRIU 将这段代码加载到目标进程地址空间中的<strong>任何可用位置</strong>，而无需担心因硬编码地址引发的冲突。该代码通常包含两部分：一小段依赖于具体处理器架构（如 x86, ARM）的汇编<strong>引导程序 (bootstrap)</strong>，以及一段用 C 语言编写、负责处理命令的通用<strong>核心逻辑 (daemon)</strong>。</p>
-<p><img src="https://cdn.mazhen.tech/2024/202504251748420.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="Parasite Code"
-	
-	
-></p>
+<img src="https://cdn.mazhen.tech/2024/202504251748420.png" alt="Parasite Code" style="zoom:33%;" />
 <p>要在目标进程中运行，<strong>寄生代码</strong>需要自己的内存空间来存放其代码、运行栈以及用于和 CRIU 进行通信的参数区域。由于 CRIU 不能直接操作目标进程的内存分配，它巧妙地利用了 <code>ptrace</code> 机制：</p>
 <ul>
 <li><strong>准备内存空间</strong>
@@ -1067,7 +1058,7 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 <ul>
 <li><strong>内存映射 (Memory):</strong> 使用 <code>mremap()</code> 将之前映射在临时地址的私有匿名内存移动到最终的目标虚拟地址。使用 <code>mmap()</code> 在正确的地址创建文件映射和共享内存映射（可能通过之前准备好的 <code>memfd</code> 文件描述符来实现共享）。此时，完整的、精确的进程内存布局被建立起来。</li>
 <li><strong>定时器 (Timers):</strong> 恢复并启动所有的定时器。因为此时环境已稳定，可以避免定时器过早触发或计时偏差。</li>
-<li><strong>凭证 (Credentials):</strong> 设置进程最终的用户ID、组ID、能力集等。这通常在需要特权的操作（如 <code>fork()</code> 指定PID）完成后，但在彻底放弃特权之前进行。</li>
+<li><strong>凭证 (Credentials):</strong> 设置进程最终的用户 ID、组 ID、能力集等。这通常在需要特权的操作（如 <code>fork()</code> 指定 PID）完成后，但在彻底放弃特权之前进行。</li>
 <li><strong>线程 (Threads):</strong> 在最终的内存布局中，根据保存的状态创建并恢复目标进程的所有其他线程。</li>
 </ul>
 <p>最后，<strong>Restorer Context</strong> 完成所有设置后，它会<strong>精确地恢复目标进程主线程的寄存器状态</strong>（包括最重要的<strong>指令指针 IP/PC</strong>，指向检查点时刻被中断的那条指令），然后将 CPU 的控制权彻底交还给目标进程。至此，目标进程就像从未被打断过一样，从检查点时刻的状态<strong>无缝地继续执行</strong>。</p>
@@ -1081,16 +1072,7 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </h3><p>理解了 CRIU 的强大能力后，一个自然的问题是：既然 CRIU 能够处理打开的文件描述符和网络连接，甚至可以透明地恢复它们，为什么 CRaC 却要求开发者通过 API（<code>jdk.crac.Resource</code>）来手动管理这些外部资源，通常需要在 <code>beforeCheckpoint</code> 中关闭它们，在 <code>afterRestore</code> 中重新建立它们呢？</p>
 <p>对于这个问题，我查阅了 CRaC 所有相关的文档，阅读了 CRaC 原型实现的源码，都没有获得满意的答案。于是在 CRaC 的开发者邮件列表中询问，最终从核心 Committer 的<a class="link" href="https://mail.openjdk.org/pipermail/crac-dev/2025-April/002313.html"  target="_blank" rel="noopener"
     >回复</a>中得到解答。</p>
-<p><img src="https://cdn.mazhen.tech/2024/202504271032455.jpg"
-	
-	
-	
-	loading="lazy"
-	
-		alt="CRaC 邮件列表"
-	
-	
-></p>
+<img src="https://cdn.mazhen.tech/2024/202504271032455.jpg" alt="CRaC 邮件列表" style="zoom: 33%;" />
 <p>根据 CRaC 开发者的阐述，这并非技术上的限制，而是一个深思熟虑的<strong>架构选择 (architectural choice)</strong>。其核心设计理念可以概括为 <strong>协调与适应</strong>。</p>
 <p>CRIU 的主要动机之一是实现运行中容器的透明迁移。在容器迁移场景下，环境（文件系统、网络）通常是被精心管理的。容器运行时（如 Docker、Kubernetes CRI）可以配合 CRIU 工作，确保恢复后，外部环境（比如网络连接的对端、挂载的文件系统）仍然有效或被正确地重新建立，从而对容器内的进程做到“透明”。比如，网络连接恢复时，容器运行时会处理好 IP 地址、路由等问题。</p>
 <p>如果你追求的是 CRIU 那种“透明恢复”，理论上可以直接在 Java 进程上使用 CRIU。但这有风险，可能会破坏应用程序的内部逻辑。因为 Java 应用可能依赖外部资源的状态，如果环境变化而应用没有感知和调整，就会出问题（比如数据库连接指向了旧的、不存在的 IP，或者文件句柄指向了一个在恢复环境中已变化或不存在的文件）。</p>
@@ -1183,11 +1165,11 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">sig</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">errno</span> <span class="o">==</span> <span class="n">EINTR</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>当JVM完成检查点（checkpoint）后，会进入等待循环，后续恢复进程会通过<code>RESTORE_SIGNAL</code>信号唤醒 JVM。</p>
+</div><p>当 JVM 完成检查点（checkpoint）后，会进入等待循环，后续恢复进程会通过<code>RESTORE_SIGNAL</code>信号唤醒 JVM。</p>
 <h4 id="checkpoint-的进程交互">
     <a href="#checkpoint-%e7%9a%84%e8%bf%9b%e7%a8%8b%e4%ba%a4%e4%ba%92" class="header-anchor">#</a>
     Checkpoint 的进程交互
-</h4><p>在通过外部引擎 <code>criuengine</code>执行<code>criu dump</code>的过程中，使用了Linux 常见的编程技巧<strong>double fork</strong>，主要原因是为了<strong>解耦</strong>：通过让中间进程快速退出，使得执行 <code>criu dump</code> 的孙子进程成为孤儿进程，被 init 进程收养，从而“逃离”了原始 JVM 的进程树。</p>
+</h4><p>在通过外部引擎 <code>criuengine</code>执行<code>criu dump</code>的过程中，使用了 Linux 常见的编程技巧<strong>double fork</strong>，主要原因是为了<strong>解耦</strong>：通过让中间进程快速退出，使得执行 <code>criu dump</code> 的孙子进程成为孤儿进程，被 init 进程收养，从而“逃离”了原始 JVM 的进程树。</p>
 <p>最终执行 <code>criu dump</code> 的进程不属于原始 JVM 进程的进程树，这避免了 CRIU 在执行 Checkpoint 时尝试冻结其自身的问题，保证了 Checkpoint 操作的正确性。</p>
 <p><img src="https://cdn.mazhen.tech/2024/202504271546812.png"
 	
@@ -1234,10 +1216,10 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 <li><strong>准备并切换引擎</strong></li>
 </ol>
 <p>进入 <code>crac::restore()</code> ，首先调用<code>compute_crengine()</code> ，确定外部引擎的路径和参数。</p>
-<p>然后使用当前进程 ID (<code>os::current_process_id()</code>) 创建一个唯一的 <strong>共享内存 (SHM)</strong> 路径，打开 <strong>SHM</strong> 文件 ，并将 Restore 参数写入到 <strong>SHM</strong>（<code>CracRestoreParameters::write_to</code>）。<strong>SHM</strong> 用于在 <code>crac::restore</code>（初始 JVM）和恢复后的 JVM 之间传递新的启动参数、属性和时间戳。</p>
+<p>然后使用当前进程 ID (<code>os::current_process_id()</code>) 创建一个唯一的 <strong>共享内存 (SHM)</strong> 路径，打开 <strong>SHM</strong> 文件，并将 Restore 参数写入到 <strong>SHM</strong>（<code>CracRestoreParameters::write_to</code>）。<strong>SHM</strong> 用于在 <code>crac::restore</code>（初始 JVM）和恢复后的 JVM 之间传递新的启动参数、属性和时间戳。</p>
 <p>最后调用 <code>os::execv(_crengine, _crengine_args)</code>。 <code>execv</code> 会用新的程序（外部引擎 <code>criuengine</code>）<strong>替换</strong>当前的 JVM 进程。初始启动的 JVM 到此结束。</p>
 <ol start="4">
-<li><strong>外部引擎执行Restore (criuengine restore)</strong></li>
+<li><strong>外部引擎执行 Restore (criuengine restore)</strong></li>
 </ol>
 <p>外部引擎 <code>criuengine</code> 执行 <code>restore</code> 方法，构建 <code>criu restore</code> 命令参数。关键参数包括：</p>
 <ul>
@@ -1609,7 +1591,7 @@ CRIU 通过解析 <code>/proc/$pid/maps</code> 和 <code>/proc/$pid/smaps</code>
 </span></span><span class="line"><span class="cl">$ java -XX:CRaCCheckpointTo<span class="o">=</span>cr -Djdk.crac.collect-fd-stacktraces<span class="o">=</span><span class="nb">true</span> -jar target/example-jetty-1.0-SNAPSHOT.jar
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>应用启动后，尝试访问 <code>http://localhost:8080</code>，应该能看到 “Hello World”。</p>
+</div><p>应用启动后，尝试访问 <code>http://localhost:8080</code>，应该能看到“Hello World”。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1955,7 +1937,7 @@ Azul 作为 CRaC 技术的主要推动者之一，提供了包含 CRaC 功能的
 	
 	
 ></p>
-<p>对于常见的 Web 应用程序，例如基于 Spring Boot 、Micronaut 或 Quarkus 构建的应用，采用 CRaC 的恢复机制可以将原先需要数秒的启动过程，<strong>缩短至几十毫秒级别</strong>。这意味着应用能够更快地进入服务状态，提升用户体验和资源利用率。</p>
+<p>对于常见的 Web 应用程序，例如基于 Spring Boot、Micronaut 或 Quarkus 构建的应用，采用 CRaC 的恢复机制可以将原先需要数秒的启动过程，<strong>缩短至几十毫秒级别</strong>。这意味着应用能够更快地进入服务状态，提升用户体验和资源利用率。</p>
 <p>为了具体展示 CRaC 的效果，我对 Glassfish 7 进行了 CRaC 的改造适配。在部署了标准 Spring PetClinic 应用的场景下：</p>
 <ul>
 <li><strong>常规启动耗时：</strong> 通过标准 <code>./bin/asadmin start-domain</code> 命令启动，完成整个启动过程需要 <strong>8.813 秒</strong> (8813 毫秒)。</li>
@@ -2053,7 +2035,7 @@ Apusic JDK 致力于提供稳定可靠的 Java 环境，目前为 <strong>Java 8
 </li>
 <li>
 <p><strong>为 JDK 17 和 21 引入 CRaC 支持</strong>
-Apusic 团队认识到 CRaC（Coordinated Restore at Checkpoint ) 技术在解决 Java 应用冷启动慢和提升运行时效率方面具有巨大潜力。然而，由于CRaC 项目尚未正式合并到 OpenJDK 主线，Apusic 采用了与 Azul 等厂商类似的方式，<strong>主动将其核心功能移植（Port）并集成到了 Apusic JDK 17 和 Apusic JDK 21 发行版中</strong>。</p>
+Apusic 团队认识到 CRaC（Coordinated Restore at Checkpoint）技术在解决 Java 应用冷启动慢和提升运行时效率方面具有巨大潜力。然而，由于 CRaC 项目尚未正式合并到 OpenJDK 主线，Apusic 采用了与 Azul 等厂商类似的方式，<strong>主动将其核心功能移植（Port）并集成到了 Apusic JDK 17 和 Apusic JDK 21 发行版中</strong>。</p>
 </li>
 <li>
 <p><strong>提供特定版本的双重发行版</strong>
