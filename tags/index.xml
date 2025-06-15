@@ -6,28 +6,36 @@
         <description>Recent content in Tags on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Wed, 30 Apr 2025 10:18:47 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Crac</title>
-        <link>https://mazhen.tech/tags/crac/</link>
-        <pubDate>Wed, 30 Apr 2025 10:18:47 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/crac/</guid>
-        <description></description>
-        </item>
-        <item>
+        <lastBuildDate>Sun, 15 Jun 2025 19:39:55 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Java</title>
         <link>https://mazhen.tech/tags/java/</link>
-        <pubDate>Wed, 30 Apr 2025 10:18:47 +0800</pubDate>
+        <pubDate>Sun, 15 Jun 2025 19:39:55 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/java/</guid>
         <description></description>
         </item>
         <item>
+        <title>Jvm</title>
+        <link>https://mazhen.tech/tags/jvm/</link>
+        <pubDate>Sun, 15 Jun 2025 19:39:55 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/jvm/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Linux</title>
         <link>https://mazhen.tech/tags/linux/</link>
-        <pubDate>Wed, 30 Apr 2025 10:18:47 +0800</pubDate>
+        <pubDate>Sun, 15 Jun 2025 19:39:55 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/linux/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Crac</title>
+        <link>https://mazhen.tech/tags/crac/</link>
+        <pubDate>Wed, 30 Apr 2025 10:18:47 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/crac/</guid>
         <description></description>
         </item>
         <item>
