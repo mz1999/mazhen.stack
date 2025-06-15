@@ -12,8 +12,7 @@
         <pubDate>Sun, 15 Jun 2025 19:39:55 +0800</pubDate>
         
         <guid>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8-printassembly-%E6%9F%A5%E7%9C%8B-jit-%E7%BC%96%E8%AF%91%E5%90%8E%E7%9A%84%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81/</guid>
-        <description>&lt;p&gt;使用 PrintAssembly 查看 JIT 编译后的汇编代码&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;-XX:+PrintAssembly&lt;/code&gt; 是一个 JVM 诊断参数，用于查看 JIT 编译器为 Java 方法生成的原生汇编代码。&lt;/p&gt;
+        <description>&lt;p&gt;&lt;code&gt;-XX:+PrintAssembly&lt;/code&gt; 是一个 JVM 诊断参数，用于查看 JIT 编译器为 Java 方法生成的原生汇编代码。&lt;/p&gt;
 &lt;p&gt;直接查看汇编代码，让我们能绕开“黑盒”，直接审视 JIT 编译器对代码实际做了哪些优化，这有助于我们验证关于 JIT 行为的各种断言（例如指令重排、循环展开、安全点插入等），而不是依赖于社区中的一些“都市传说”或经验之谈。&lt;/p&gt;
 &lt;p&gt;当然，对于大多数 Java 开发者来说，阅读汇编代码并非日常工作，它可能看起来很复杂。但幸运的是，我们无需成为汇编专家。借助一些基础知识，特别是 JVM 在输出中自动插入的丰富注释，理解关键逻辑会比想象中容易。&lt;/p&gt;
 &lt;p&gt;本文的目标就是提供一个实战指南，带你从零开始设置并使用 PrintAssembly，并学会如何解读其输出。&lt;/p&gt;
