@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="我曾写过一篇 深入探索 perf CPU Profiling 实现原理 的文章，希望能帮助大家理解这个强大工具背后的运作机制。在那篇文章里，我尽可能地拆解了从中断到调用栈还原的整">
+<title>Wall-Clock 与 CPU-Cycles 采样的区别</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Wall-Clock 与 CPU-Cycles 采样的区别">
+<meta property='og:description' content="我曾写过一篇 深入探索 perf CPU Profiling 实现原理 的文章，希望能帮助大家理解这个强大工具背后的运作机制。在那篇文章里，我尽可能地拆解了从中断到调用栈还原的整">
+<meta property='og:url' content='https://mazhen.tech/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:tag' content='performance' /><meta property='article:published_time' content='2025-06-18T10:09:54&#43;08:00'/><meta property='article:modified_time' content='2025-06-18T10:09:54&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="Wall-Clock 与 CPU-Cycles 采样的区别">
+<meta name="twitter:description" content="我曾写过一篇 深入探索 perf CPU Profiling 实现原理 的文章，希望能帮助大家理解这个强大工具背后的运作机制。在那篇文章里，我尽可能地拆解了从中断到调用栈还原的整">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#最初的误解cpu-的节拍是恒定的吗">最初的误解：CPU 的节拍是恒定的吗？</a></li>
+    <li><a href="#墙上时钟采样wall-clock-sampling">墙上时钟采样（Wall-Clock Sampling）</a></li>
+    <li><a href="#cpu-cycles-采样只关心干活的计步器">CPU-Cycles 采样：只关心“干活”的计步器</a></li>
+    <li><a href="#cpu-cycles-vs-wall-clock">CPU-Cycles vs. Wall-Clock</a></li>
+    <li><a href="#perf-record--f-99-的真正魔法"><code>perf record -F 99</code> 的真正魔法</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/">Wall-Clock 与 CPU-Cycles 采样的区别</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2025-06-18</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 8 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><img src="https://cdn.mazhen.tech/2024/202506181047949.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Feature image"
+	
+	
+></p>
+<p>我曾写过一篇 <a class="link" href="https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"  target="_blank" rel="noopener"
+    >深入探索 perf CPU Profiling 实现原理</a> 的文章，希望能帮助大家理解这个强大工具背后的运作机制。在那篇文章里，我尽可能地拆解了从中断到调用栈还原的整个流程。</p>
+<p>然而，在后续的技术学习和思考过程中，我意识到其中一个核心概念的阐述，虽然看似合理，却隐含着一个重要且易被误解的核心概念。今天，我想写下这篇“勘误与续篇”，与大家一同分享这个让我醍醐灌顶的“Aha!”时刻，重新探讨两种采样方式：<strong>Wall-Clock 采样</strong>与 <strong>CPU-Cycles 采样</strong>。</p>
+<h2 id="最初的误解cpu-的节拍是恒定的吗">
+    <a href="#%e6%9c%80%e5%88%9d%e7%9a%84%e8%af%af%e8%a7%a3cpu-%e7%9a%84%e8%8a%82%e6%8b%8d%e6%98%af%e6%81%92%e5%ae%9a%e7%9a%84%e5%90%97" class="header-anchor">#</a>
+    最初的误解：CPU 的节拍是恒定的吗？
+</h2><p>在我之前的文章中，关于为何采样 <code>cycles</code> 事件能分析 CPU 性能，我是这样描述的：</p>
+<blockquote>
+<p>“每经过一个 CPU 周期都会触发一个 cycles 事件。可以认为，cycles 事件是均匀的分布在程序的执行期间。这样，以固定频率去采样的 cycles 事件，也是均匀的分布在程序的执行期间。我们在采样 cycles 事件时，记录 CPU 正在干什么，持续一段时间收集到多个采样后，我们就能基于这些信息分析程序的行为&hellip;”</p>
+</blockquote>
+<p>这个逻辑听起来是不是无懈可击？一个 4 GHz 的 CPU，每秒不就是产生 40 亿个时钟周期（cycles）吗？那么按 <code>cycles</code> 采样不就等同于按一个极其精确的时间间隔采样吗？</p>
+<p><strong>正是这个看似合理的假设，让我走入了一个误区。</strong> 事实是，CPU 远比我们想象的要“聪明”和“懒惰”。</p>
+<h2 id="墙上时钟采样wall-clock-sampling">
+    <a href="#%e5%a2%99%e4%b8%8a%e6%97%b6%e9%92%9f%e9%87%87%e6%a0%b7wall-clock-sampling" class="header-anchor">#</a>
+    墙上时钟采样（Wall-Clock Sampling）
+</h2><p>为了理解 <code>cpu-cycles</code> 采样的精妙之处，我们首先要看它的参照物：<strong>墙上时钟采样（Wall-Clock Sampling）</strong>。</p>
+<p>你可以把墙上时钟采样想象成一个厨房定时器。你设定它每 1 分钟响一次，它就会忠实地每分钟提醒你一次，<strong>完全不管你是在切菜、炒菜，还是在刷手机，等水烧开</strong>。</p>
+<p>这种采样方式依赖一个全局的、按真实时间流逝的计时器。比如，你设定每 10 毫秒采样一次，操作系统就会每隔 10 毫秒触发一次中断，然后去看：“嘿，CPU 核心此刻正在忙什么？”</p>
+<p>这种方式的核心是<strong>对时间点的快照</strong>，它并不关心两次快照之间发生了什么。让我们从 CPU 的视角来看一个场景：</p>
+<p>假设在 100 毫秒的总时间内，一个 CPU 核心的活动如下：</p>
+<ul>
+<li><strong>0-20ms</strong>: 运行高强度的计算任务（进程 A）。</li>
+<li><strong>20-80ms</strong>: 系统无事可做，CPU 进入<strong>空闲（Idle）状态</strong>。进程 A 正在等待网络数据，而系统中没有其他需要计算的任务。</li>
+<li><strong>80-100ms</strong>: 计算任务（进程 A）被唤醒，继续在 CPU 上运行。</li>
+</ul>
+<p>现在，我们用一个每 10 毫秒一次的墙上时钟采样器来观察这个 CPU 核心。它总共会进行 10 次采样，采样点大约会落在 10ms, 20ms, 30ms, &hellip;, 100ms 的时刻。</p>
+<ul>
+<li>在 <strong>10ms</strong> 和 <strong>20ms</strong> 时刻，采样器会看到 CPU 正在执行<strong>进程 A</strong>。</li>
+<li>在 <strong>30ms, 40ms, 50ms, 60ms, 70ms</strong> 时刻，采样器会看到 CPU 正在执行一个特殊的<strong>空闲任务（Idle Task）</strong>。</li>
+<li>在 <strong>80ms, 90ms, 100ms</strong> 时刻，采样器又会看到 CPU 在执行<strong>进程 A</strong>。</li>
+</ul>
+<p>最终的分析报告会告诉你，在大约 50% 的采样点上，CPU 在执行进程 A，而在另外 50% 的采样点上，CPU 处于空闲状态。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202506171603341.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Wall-Clock Sampling"
+	
+	
+></p>
+<p>这个结果本身是准确的，它忠实地反映了 CPU 在<strong>总时间</strong>内的状态分布。但 Wall-Clock 采样方式，将“计算”和“等待导致的空闲”混在了一起。如果你想找出是什么消耗了最多的 <strong>CPU 计算资源</strong>，这种采样方式可能会给你带来困惑，因为它花费了大量的样本去记录“什么都没在发生”的空闲时刻。</p>
+<p>想起一个流传已久的性能分析领域的笑话：一位程序员使用性能分析器后发现，有一个进程占用了大量的 CPU 时间。于是他花了很大力气进行优化，但程序的运行速度并没有变快。原来被他优化这个进程，其实是“idle loop”，也就是没有其他工作可做时才会运行的部分。</p>
+<h2 id="cpu-cycles-采样只关心干活的计步器">
+    <a href="#cpu-cycles-%e9%87%87%e6%a0%b7%e5%8f%aa%e5%85%b3%e5%bf%83%e5%b9%b2%e6%b4%bb%e7%9a%84%e8%ae%a1%e6%ad%a5%e5%99%a8" class="header-anchor">#</a>
+    CPU-Cycles 采样：只关心“干活”的计步器
+</h2><p>现在，让我们揭开 <code>cpu-cycles</code> 采样的真正面纱。</p>
+<p><strong>“一个 4 GHz 的 CPU，每秒产生 40 亿个 cycles”这个描述是不准确的。</strong> 它描述的是 CPU 的<strong>最高性能</strong>，而不是<strong>恒定状态</strong>。</p>
+<p>正确的理解是：现代 CPU 为了节能和控制温度，会动态地调整自己的状态。</p>
+<ul>
+<li><strong>当无事可做时（Idle）</strong>：CPU 会进入深度睡眠（C-states），此时它的时钟频率极低，甚至可能完全停摆。在这期间，它<strong>几乎不产生任何 <code>cpu-cycles</code></strong>。</li>
+<li><strong>当任务清闲时（Light Load）</strong>：它会降低自己的工作频率（比如从 4 GHz 降到 1 GHz）来省电。</li>
+<li><strong>当任务繁重时（Heavy Load）</strong>：它才会火力全开，提升到标称频率甚至超频来快速完成工作。</li>
+</ul>
+<p>现在，<code>cpu-cycles</code> 的真正含义就清晰了：它不是时间的度量，而是 <strong>CPU 完成工作的度量单位</strong>。</p>
+<p><code>cpu-cycles</code> 采样就像一个只在你跑步时才计数的计步器。当你坐下休息时，计步器是完全静止的。同理，当 CPU 进入空闲状态时，为它计数的 <code>cpu-cycles</code> 计数器也<strong>随之暂停</strong>了。</p>
+<p>操作系统会与 CPU 的性能监控单元（PMU）协作，设定一个阈值，<strong>当累计消耗的 CPU Cycles 达到了预设值（比如 3000 万个周期）时，才会触发一次采样中断</strong>。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202506171641726.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="CPU-Cycles"
+	
+	
+></p>
+<p>这种采样方式保证了<strong>每一次采样，都必然命中了一个真正在消耗 CPU 资源、在“干活”的线程</strong>。一个线程被采样的次数，与它消耗的 CPU 总量成正比。</p>
+<h2 id="cpu-cycles-vs-wall-clock">
+    <a href="#cpu-cycles-vs-wall-clock" class="header-anchor">#</a>
+    CPU-Cycles vs. Wall-Clock
+</h2><p>在分别了解了 Wall-Clock 和 CPU-Cycles 采样之后，我们可能会有一个疑问：它们到底哪个更好？其实，这是一个关乎视角的问题，而非优劣之分。</p>
+<p>当 CPU 被 100% 占满、满负荷运转时，无论是 Wall-Clock 采样还是 cpu-cycles 采样，它们看到的结果会非常相似，都是 CPU 在忙于执行代码的快照。</p>
+<p><img src="https://cdn.mazhen.tech/2024/202506171723000.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="CPU-Cycles vs. Wall-Clock"
+	
+	
+></p>
+<p>然而，真正的区分出现在 CPU 并非 100% 繁忙的时候。这两种方法最根本的区别，在于它们如何看待 CPU 的<strong>空闲（Idle）时间</strong>。</p>
+<ul>
+<li><strong>Wall-Clock 采样</strong>，作为一个时间的忠实记录者，它会一视同仁地记录下所有状态，无论是繁忙的计算，还是无所事事的等待。</li>
+<li><strong>CPU-Cycles 采样</strong>，则像一个只关心产出的质检员。如果生产线（CPU）停了，它也跟着停下休息，完全不关心停了多久。它只在指令执行时才进行工作。</li>
+</ul>
+<p>这种看待问题的不同视角，在性能分析领域有着专门的术语：<strong>On-CPU 分析</strong>和 <strong>Off-CPU 分析</strong>。</p>
+<ul>
+<li><strong>On-CPU 分析</strong>关注的是：“<strong>是什么让我的 CPU 如此忙碌？</strong>”它的目标是找到消耗计算资源最多的代码热点。</li>
+<li><strong>Off-CPU 分析</strong>关注的是：“<strong>我的程序为什么在等待，而不是在运行？</strong>”它的目标是找到那些导致程序停滞的瓶颈，如 I/O 等待、锁竞争、或者休眠。</li>
+</ul>
+<p>这两种分析方法，也对应着我们最关心的两个核心性能指标：吞吐量（Throughput）和延迟（Latency）。</p>
+<ul>
+<li>
+<p><strong>CPU-Cycles 采样</strong>，通过聚焦 On-CPU 时间，帮助我们提升程序的计算效率。这直接关系到<strong>吞吐量</strong>，即单位时间内能处理多少工作。优化掉一个 CPU 热点，意味着每个任务消耗的 CPU 时间更少，服务器自然能承载更多的请求。</p>
+</li>
+<li>
+<p><strong>Wall-Clock 采样</strong>，通过完整地展现包括 Off-CPU 在内的全部时间，帮助我们理解和优化程序的响应速度。这直接关系到<strong>延迟</strong>，即完成单个任务需要多长时间。如果一个请求 99% 的时间都在等待数据库返回结果，那么优化计算逻辑对降低延迟几乎没有帮助。</p>
+</li>
+</ul>
+<p>我们应该如何选择呢？答案是：<strong>取决于你想要解决的问题。</strong></p>
+<p>如果你想优化一个<strong>计算密集型</strong>服务，降低服务器成本，或者想找出算法中的性能瓶颈，那么 <strong>CPU-Cycles 采样</strong>是你的不二之选。它是性能优化的“手术刀”，精准且致命。</p>
+<p>但如果你遇到的问题是“<strong>我的程序启动为什么这么慢？</strong>”，情况就完全不同了。应用程序的启动过程，是一个混合了大量磁盘 I/O（读取配置文件和库）、网络 I/O（连接数据库或服务）以及 CPU 计算的复杂过程。在这种场景下，<strong>Wall-Clock 采样</strong>会非常有用。它能为你绘制一幅完整的启动时间线，清晰地标出那些漫长的“等待”鸿沟，让你知道时间到底被浪费在了哪里。同理，在调试锁竞争或分析外部服务调用延迟时，它也是一把利器。</p>
+<p>总而言之，这两种采样方式没有绝对的优劣，它们像是性能分析工具箱里两种不同用途的工具，为我们提供了观察系统的不同维度。</p>
+<h2 id="perf-record--f-99-的真正魔法">
+    <a href="#perf-record--f-99-%e7%9a%84%e7%9c%9f%e6%ad%a3%e9%ad%94%e6%b3%95" class="header-anchor">#</a>
+    <code>perf record -F 99</code> 的真正魔法
+</h2><p>理解了上述区别，我们才能真正领会 <code>perf record -F 99</code> 命令背后的原理。</p>
+<p>它并不是简单地“每秒采样 99 次”，背后是内核与硬件精巧的协作：</p>
+<ol>
+<li><strong>目标驱动</strong>：<code>-F 99</code> 告诉内核：“我的目标是在<strong>每个 CPU 核心</strong>上，都达到<strong>平均每秒 99 次</strong>的采样频率。”</li>
+<li><strong>动态计算</strong>：内核不是设定一个固定的 <code>cpu-cycles</code> 间隔。相反，它会通过 <code>cpufreq</code> 子系统或 MSR 寄存器，<strong>实时地查询到 CPU 当前的工作频率</strong>。</li>
+<li><strong>智能调整</strong>：
+<ul>
+<li>如果 CPU 正以 4 GHz 的高频率运行，内核会计算出一个较大的 <code>cpu-cycles</code> 间隔（比如 <code>4,000,000,000 / 99</code>），然后设置硬件计数器。</li>
+<li>如果 CPU 因为负载低而降频到 1 GHz，内核会立刻感知到，并自动将采样间隔调整为一个较小的 <code>cpu-cycles</code> 数值（比如 <code>1,000,000,000 / 99</code>）。</li>
+</ul>
+</li>
+</ol>
+<p><strong><code>cpu-cycles</code> 的采样周期是动态变化的，但最终达成“每秒采样 99 次”这个目标。</strong></p>
+<p>这种机制带来了巨大的好处：</p>
+<ul>
+<li><strong>它只在 CPU 忙碌时采样</strong>，天然地过滤掉了所有 I/O 等待和空闲时间造成的噪音。</li>
+<li><strong>它自适应 CPU 的频率变化</strong>，确保了分析结果在不同负载下的一致性。</li>
+<li><strong>它在不同硬件上表现一致</strong>，你在笔记本和在服务器上使用 <code>-F 99</code>，得到的都是相似密度的有效数据。</li>
+</ul>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>这次对性能分析的重新探索，始于一个看似简单的问题：“<strong>为何采样 cycles 事件能分析 CPU 的性能？</strong>”我们最初的假设是，cycles 在时间上是均匀的，采样它就如同按时间采样。</p>
+<p>而经过这趟深入的旅程，我们发现：<strong>CPU-Cycles 采样</strong>并非时间的度量，而是<strong>CPU 完成工作量的度量</strong>。</p>
+<p>当 CPU 因为等待 I/O 或无事可做而进入休眠时，它的 <code>cpu-cycles</code> 计数器也随之暂停。只有当代码真正在 CPU 上执行指令时，cycles 才会产生。这意味着，一个函数被 cycles 采样命中的次数，与它流逝了多少时间无关，而是与其<strong>消耗了多少实际的 CPU 计算资源</strong>成正比。<strong>CPU-Cycles 采样</strong>的结果反映了程序在 CPU 繁忙时间（Busy Time）中的资源消耗分布，是分析 <strong>On-CPU</strong> 问题、优化**吞吐量（Throughput）**的“手术刀”。</p>
+<p><strong>Wall-Clock 采样</strong>以<strong>恒定的时间间隔</strong>为基准，它捕获的是在特定时间点上 CPU 的状态。其结果反映了程序在**总流逝时间（Total Time）<strong>中的状态分布，天然地包含了 <strong>On-CPU</strong> 和 <strong>Off-CPU</strong>（如 Idle, I/O Wait）两个维度，是分析</strong>延迟（Latency）**问题的利器。</p>
+<p>这次“勘误”，不仅修正了我之前的文章，也使我对性能分析的底层原理有了一个更清晰的理解，希望对你也有帮助。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/kernel/">Kernel</a>
+        
+            <a href="/tags/performance/">Performance</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux TCP队列相关参数的总结</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%90%86%E8%A7%A3-crac-%E8%83%8C%E5%90%8E%E7%9A%84-linux-%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">理解 CRaC 背后的 Linux 系统编程</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/crac-%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CRaC 技术深度解析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入探索 perf CPU Profiling 实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA-perf/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从源码构建 perf</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2025 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
