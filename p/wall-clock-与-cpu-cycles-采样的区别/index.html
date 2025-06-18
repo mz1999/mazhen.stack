@@ -594,8 +594,8 @@
     总结
 </h2><p>这次对性能分析的重新探索，始于一个看似简单的问题：“<strong>为何采样 cycles 事件能分析 CPU 的性能？</strong>”我们最初的假设是，cycles 在时间上是均匀的，采样它就如同按时间采样。</p>
 <p>而经过这趟深入的旅程，我们发现：<strong>CPU-Cycles 采样</strong>并非时间的度量，而是<strong>CPU 完成工作量的度量</strong>。</p>
-<p>当 CPU 因为等待 I/O 或无事可做而进入休眠时，它的 <code>cpu-cycles</code> 计数器也随之暂停。只有当代码真正在 CPU 上执行指令时，cycles 才会产生。这意味着，一个函数被 cycles 采样命中的次数，与它流逝了多少时间无关，而是与其<strong>消耗了多少实际的 CPU 计算资源</strong>成正比。<strong>CPU-Cycles 采样</strong>的结果反映了程序在 CPU 繁忙时间（Busy Time）中的资源消耗分布，是分析 <strong>On-CPU</strong> 问题、优化**吞吐量（Throughput）**的“手术刀”。</p>
-<p><strong>Wall-Clock 采样</strong>以<strong>恒定的时间间隔</strong>为基准，它捕获的是在特定时间点上 CPU 的状态。其结果反映了程序在**总流逝时间（Total Time）<strong>中的状态分布，天然地包含了 <strong>On-CPU</strong> 和 <strong>Off-CPU</strong>（如 Idle, I/O Wait）两个维度，是分析</strong>延迟（Latency）**问题的利器。</p>
+<p>当 CPU 因为等待 I/O 或无事可做而进入休眠时，它的 <code>cpu-cycles</code> 计数器也随之暂停。只有当代码真正在 CPU 上执行指令时，cycles 才会产生。这意味着，一个函数被 cycles 采样命中的次数，与它流逝了多少时间无关，而是与其<strong>消耗了多少实际的 CPU 计算资源</strong>成正比。<strong>CPU-Cycles 采样</strong>的结果反映了程序在 CPU 繁忙时间（Busy Time）中的资源消耗分布，是分析 <strong>On-CPU</strong> 问题、优化<strong>吞吐量（Throughput）</strong> 的“手术刀”。</p>
+<p><strong>Wall-Clock 采样</strong>以<strong>恒定的时间间隔</strong>为基准，它捕获的是在特定时间点上 CPU 的状态。其结果反映了程序在<strong>总流逝时间（Total Time）</strong> 中的状态分布，天然地包含了 <strong>On-CPU</strong> 和 <strong>Off-CPU</strong>（如 Idle, I/O Wait）两个维度，是分析<strong>延迟（Latency）</strong> 问题的利器。</p>
 <p>这次“勘误”，不仅修正了我之前的文章，也使我对性能分析的底层原理有了一个更清晰的理解，希望对你也有帮助。</p>
 
 </section>
