@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="在上一篇博客中，我们深入探讨了性能分析中两个概念：Wall-Clock 采样与 CPU-Cycles 采样的本质区别。这一次我想使用 perf 这个强大的工具来验证上一篇的内">
+<title>Perf 的 cpu-clock 与 cpu-cycles 采样实现与对比</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Perf 的 cpu-clock 与 cpu-cycles 采样实现与对比">
+<meta property='og:description' content="在上一篇博客中，我们深入探讨了性能分析中两个概念：Wall-Clock 采样与 CPU-Cycles 采样的本质区别。这一次我想使用 perf 这个强大的工具来验证上一篇的内">
+<meta property='og:url' content='https://mazhen.tech/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='kernel' /><meta property='article:tag' content='performance' /><meta property='article:published_time' content='2025-06-20T11:10:02&#43;08:00'/><meta property='article:modified_time' content='2025-06-20T11:10:02&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="Perf 的 cpu-clock 与 cpu-cycles 采样实现与对比">
+<meta name="twitter:description" content="在上一篇博客中，我们深入探讨了性能分析中两个概念：Wall-Clock 采样与 CPU-Cycles 采样的本质区别。这一次我想使用 perf 这个强大的工具来验证上一篇的内">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#深入内核两种采样事件的实现">深入内核：两种采样事件的实现</a>
+      <ol>
+        <li><a href="#cpu-clock-的实现"><code>cpu-clock</code> 的实现</a></li>
+        <li><a href="#cpu-cycles-的实现"><code>cpu-cycles</code> 的实现</a></li>
+        <li><a href="#它们采集了哪些数据">它们采集了哪些数据？</a></li>
+        <li><a href="#两个事件的对比">两个事件的对比</a></li>
+      </ol>
+    </li>
+    <li><a href="#动手验证">动手验证</a>
+      <ol>
+        <li><a href="#实验程序">实验程序</a>
+          <ol>
+            <li><a href="#防止函数内联">防止函数内联</a></li>
+            <li><a href="#校准计算强度">校准计算强度</a></li>
+          </ol>
+        </li>
+        <li><a href="#编译实验程序">编译实验程序</a></li>
+        <li><a href="#执行采样">执行采样</a>
+          <ol>
+            <li><a href="#实验一cpu-cycles-事件">实验一：<code>cpu-cycles</code> 事件</a></li>
+            <li><a href="#实验二cpu-clock-事件">实验二：<code>cpu-clock</code> 事件</a></li>
+            <li><a href="#对比总结">对比总结</a></li>
+          </ol>
+        </li>
+        <li><a href="#一个有用的技巧进程专属模式下的-cpu-clock">一个有用的技巧：进程专属模式下的 <code>cpu-clock</code></a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/">Perf 的 cpu-clock 与 cpu-cycles 采样实现与对比</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2025-06-20</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 13 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><img src="https://cdn.mazhen.tech/2024/202506201359538.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Feature image"
+	
+	
+></p>
+<p>在上一篇<a class="link" href="https://mazhen.tech/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/"  target="_blank" rel="noopener"
+    >博客</a>中，我们深入探讨了性能分析中两个概念：<strong>Wall-Clock 采样</strong>与 <strong>CPU-Cycles 采样</strong>的本质区别。这一次我想使用 <code>perf</code> 这个强大的工具来验证上一篇的内容。</p>
+<p>对于 <strong>CPU-Cycles 采样</strong>，路径非常明确：<code>perf record -e cycles</code>，或者干脆不带 <code>-e</code> 参数时，默认使用的就是这种基于硬件的 On-CPU 分析。</p>
+<p>但问题来了：如何用 <code>perf</code> 实现 Wall-Clock 采样呢？</p>
+<p>一个看似可能的答案是 <code>cpu-clock</code> 软件事件。然而，<a class="link" href="https://man7.org/linux/man-pages/man2/perf_event_open.2.html"  target="_blank" rel="noopener"
+    >官方文档</a>对它的描述只有一句，语焉不详：</p>
+<blockquote>
+<p>This reports the CPU clock, a high-resolution per-CPU timer.</p>
+<p>报告提供 CPU 时钟信息，即一种高精度的每 CPU 计时器。</p>
+</blockquote>
+<p>我尝试用各种 AI DeepResearch 一番，仍然没有找到答案，而且发现自己之前写的那篇<a class="link" href="https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"  target="_blank" rel="noopener"
+    >《深入探索 perf CPU Profiling 实现原理》</a>竟排在参考引用文档列表中很高的位置。同时，另一位知名开发者 Robert Haas（PostgreSQL 的核心贡献者）也曾<a class="link" href="https://rhaas.blogspot.com/2012/06/perf-good-bad-ugly.html"  target="_blank" rel="noopener"
+    >抱怨过</a> <code>cpu-clock</code> 缺乏文档说明。</p>
+<p>既然现有的资料无法给出确切答案，唯一的办法就是到 Linux 内核源码中找答案，搞清楚 <code>cpu-clock</code> 和 <code>cycles</code> 这对采样事件，究竟在底层是如何实现的，也算给 AI 贡献一些原创素材。</p>
+<h2 id="深入内核两种采样事件的实现">
+    <a href="#%e6%b7%b1%e5%85%a5%e5%86%85%e6%a0%b8%e4%b8%a4%e7%a7%8d%e9%87%87%e6%a0%b7%e4%ba%8b%e4%bb%b6%e7%9a%84%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    深入内核：两种采样事件的实现
+</h2><h3 id="cpu-clock-的实现">
+    <a href="#cpu-clock-%e7%9a%84%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    <code>cpu-clock</code> 的实现
+</h3><p>通过内核源码 <a class="link" href="https://github.com/torvalds/linux/blob/master/kernel/events/core.c"  target="_blank" rel="noopener"
+    >kernel/events/core.c</a>，我们可以分析出 <code>cpu-clock</code> 事件实现的核心逻辑，它的实现依赖于 Linux 的高精度定时器（<code>hrtimer</code>）。</p>
+<p>整个流程可以概括为：</p>
+<ol>
+<li><strong>初始化</strong>：当一个 <code>cpu-clock</code> 事件被创建时，<code>cpu_clock_event_init()</code> 会调用 <code>perf_swevent_init_hrtimer()</code>。这会在每个被监控的 CPU 上设置一个周期性的 <code>hrtimer</code>。</li>
+<li><strong>定时中断</strong>：这个 <code>hrtimer</code> 会以我们指定的频率（例如 <code>-F 99</code> 就是 99Hz）周期性地触发一个硬件中断。</li>
+<li><strong>中断处理</strong>：中断会激活 <code>perf_swevent_hrtimer()</code> 这个处理函数。在这个函数里，内核会判断事件是否需要记录样本。</li>
+<li><strong>样本采集</strong>：如果需要，它会调用 <code>__perf_event_overflow()</code>，最终触发 <code>overflow_handler</code>（如 <code>perf_event_output_forward</code>），后者会收集当前上下文的数据（如调用栈、寄存器等），打包成一个 <code>PERF_RECORD_SAMPLE</code>，然后写入 Ring Buffer。</li>
+</ol>
+<p>简单来说，<strong><code>cpu-clock</code> 是一个纯粹的软件事件，使用 hrtimer 周期性地触发一个中断，中断处理函数负责生成并记录一个样本。</strong> 它就像一个设定的闹钟，每隔固定的时间就响一次，然后记录下那个瞬间 CPU 正在处理的任务。</p>
+<h3 id="cpu-cycles-的实现">
+    <a href="#cpu-cycles-%e7%9a%84%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    <code>cpu-cycles</code> 的实现
+</h3><p><code>cpu-cycles</code> 是一个硬件事件，它直接利用 CPU 内部的性能监控单元（PMU）来统计 CPU 时钟周期，它的实现与 <code>cpu-clock</code> 软件事件有本质区别。</p>
+<p>以  x86 平台上为例，<code>cpu-cycles</code> 事件的实现在 <a class="link" href="https://github.com/torvalds/linux/blob/master/arch/x86/events/core.c"  target="_blank" rel="noopener"
+    >arch/x86/events/core.c</a> 文件中，我们可以看到它的实现与硬件紧密耦合。整体流程如下：</p>
+<ol>
+<li>
+<p><strong>初始化与编程</strong>：当一个 <code>cpu-cycles</code> 事件被创建时，<code>x86_pmu_event_init()</code> 会将这个通用事件类型映射为一个特定的硬件事件编码。事件被启用时，调度器（<code>x86_schedule_events</code>）会为其分配一个可用的硬件性能计数器（PMC）。内核通过 <code>wrmsr</code> 指令将事件编码写入 <code>PerfEvtSel</code> 寄存器，并设置 <code>PMC</code> 寄存器的初始值为一个负数（例如 <code>-sample_period</code>），然后启动该计数器。</p>
+</li>
+<li>
+<p><strong>硬件计数</strong>：CPU 硬件开始自动对每个时钟周期进行计数。<code>PMC</code> 的值从初始的负数开始，每个周期加一，向零逼近。这个过程完全由硬件执行，没有软件开销。</p>
+</li>
+<li>
+<p><strong>硬件中断 (PMI)</strong>：当硬件计数器从 <code>0xFFFF...</code> 溢出到 <code>0</code> 时，PMU 会自动触发一个<strong>性能监控中断（PMI）</strong>。在 x86 平台上，这通常是一个<strong>不可屏蔽中断（NMI）</strong>。</p>
+</li>
+<li>
+<p><strong>中断处理</strong>：NMI 会激活 <code>perf_event_nmi_handler()</code>，它会调用特定于 PMU 的中断处理函数（如 <code>x86_pmu.handle_irq</code>）。此函数会：
+a.  <strong>识别溢出</strong>：检查是哪个 <code>PMC</code> 发生了溢出。
+b.  <strong>重置计数器</strong>：调用 <code>x86_perf_event_set_period()</code> 将该 <code>PMC</code> 的值重新设置为初始的负数，为下一次采样做准备。
+c.  <strong>样本采集</strong>：调用 <code>perf_event_overflow()</code>，最终触发 <code>overflow_handler</code>（如 <code>perf_event_output_forward</code>），后者会收集当前上下文的数据（如调用栈、寄存器等），打包成一个 <code>PERF_RECORD_SAMPLE</code>，然后写入 Ring Buffer。</p>
+</li>
+</ol>
+<p><strong>简而言之，<code>cpu-cycles</code> 是一个硬件事件。</strong> 它不像闹钟，更像一个只在工作时才计数的“计步器”。它关心的是 <strong>CPU 完成的工作量</strong>。</p>
+<h3 id="它们采集了哪些数据">
+    <a href="#%e5%ae%83%e4%bb%ac%e9%87%87%e9%9b%86%e4%ba%86%e5%93%aa%e4%ba%9b%e6%95%b0%e6%8d%ae" class="header-anchor">#</a>
+    它们采集了哪些数据？
+</h3><p>无论是哪种方式触发了采样，最终内核都会通过 <code>perf_prepare_sample()</code> 和 <code>perf_output_sample()</code> 这一系列的函数，将当时的“现场快照”打包成一个 <code>PERF_RECORD_SAMPLE</code> 记录。这份快照通常包含（取决于你的 <code>-g</code> 和其他 <code>perf</code> 参数）：</p>
+<ul>
+<li><strong>指令指针 (IP)</strong>: CPU 当时正在执行哪一条指令的地址。</li>
+<li><strong>进程 ID 和线程 ID (PID/TID)</strong>: 是哪个进程/线程在执行。</li>
+<li><strong>时间戳 (Time)</strong>: 采样发生的时间。</li>
+<li><strong>CPU 编号</strong>: 在哪个 CPU 核心上发生的采样。</li>
+<li><strong>调用链 (Callchain)</strong>: 这是通过 <code>-g</code> 参数启用的。内核会从当前的栈帧指针（Frame Pointer）开始，回溯整个调用栈，记录下从当前函数到顶层函数的完整路径。对于系统调用，它能同时抓取到用户栈和内核栈，拼接成一个完整的调用链。</li>
+<li><strong>其他元数据</strong>: 如事件周期、地址信息等。</li>
+</ul>
+<p>正是这些丰富的数据，让我们能够在事后通过 <code>perf report</code> 或火焰图，重构出程序的运行画像。</p>
+<h3 id="两个事件的对比">
+    <a href="#%e4%b8%a4%e4%b8%aa%e4%ba%8b%e4%bb%b6%e7%9a%84%e5%af%b9%e6%af%94" class="header-anchor">#</a>
+    两个事件的对比
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th style="text-align:left">特性</th>
+<th style="text-align:left"><code>cpu-clock</code></th>
+<th style="text-align:left"><code>cpu-cycles</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>事件源</strong></td>
+<td style="text-align:left">软件 (内核 <code>hrtimer</code>)</td>
+<td style="text-align:left">硬件 (CPU PMU)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>触发机制</strong></td>
+<td style="text-align:left">固定<strong>时间</strong>间隔到达，触发定时器中断</td>
+<td style="text-align:left">固定<strong>工作量</strong>完成，触发 PMC 溢出中断</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CPU 空闲时</strong></td>
+<td style="text-align:left">计时器<strong>继续</strong>运行，会采样到<code>idle</code>任务</td>
+<td style="text-align:left">计数器<strong>暂停</strong>，不会产生任何采样</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="动手验证">
+    <a href="#%e5%8a%a8%e6%89%8b%e9%aa%8c%e8%af%81" class="header-anchor">#</a>
+    动手验证
+</h2><p>理论分析之后，我们需要一个实验来直观地感受这种差异。一个好的实验，应该能创造出极端的对比场景，直观的展示出两种采样方式的差异。</p>
+<p>我的思路是构建一个“脉冲式”的负载模型，让程序在两种截然不同的状态间切换：</p>
+<ul>
+<li><strong>CPU 饱和阶段</strong>: 计算密集型，消耗系统所有的 CPU 资源。</li>
+<li><strong>空闲阶段</strong>: 程序进入长时间的休眠，让所有 CPU 核心休息。</li>
+</ul>
+<h3 id="实验程序">
+    <a href="#%e5%ae%9e%e9%aa%8c%e7%a8%8b%e5%ba%8f" class="header-anchor">#</a>
+    实验程序
+</h3><p>实验程序是一个多线程 C 程序 <code>work_and_wait_mt.c</code>，它会创建与核心数相同的工作线程，所有线程通过屏障（barrier）同步，同时开始计算，同时结束计算，实现“集体计算 100 毫秒，集体休眠 900 毫秒”的脉冲式负载。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;pthread.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdbool.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// --- Configuration ---
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">long</span> <span class="n">burn_time_ms</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">idle_time_ms</span> <span class="o">=</span> <span class="mi">900</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">total_cycles</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">multiplier</span> <span class="o">=</span> <span class="mi">200000</span><span class="p">;</span> <span class="c1">// **重要**: 请先用单线程校准这个值！
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// --- Globals for thread coordination ---
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">pthread_barrier_t</span> <span class="n">barrier</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">volatile</span> <span class="kt">bool</span> <span class="n">time_to_exit</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// CPU 密集型计算函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="nf">burn_cpu</span><span class="p">(</span><span class="kt">long</span> <span class="n">milliseconds</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">volatile</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">milliseconds</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Burn baby burn
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 工作线程的执行函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span><span class="o">*</span> <span class="nf">worker_function</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">thread_id</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="n">arg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Worker thread %d started.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">thread_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">time_to_exit</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 1. 等待主线程的“开始计算”信号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//    所有工作线程和主线程都会在此集合
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果是退出信号，则跳出循环
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">time_to_exit</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 2. 执行计算任务
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">burn_cpu</span><span class="p">(</span><span class="n">burn_time_ms</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 3. 等待所有其他工作线程完成计算
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//    主线程也在此等待，以确认计算阶段结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Worker thread %d exiting.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">thread_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 自动检测可用的 CPU 核心数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">long</span> <span class="n">num_cores</span> <span class="o">=</span> <span class="nf">sysconf</span><span class="p">(</span><span class="n">_SC_NPROCESSORS_ONLN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">num_cores</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">num_cores</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 备用值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Detected %ld CPU cores.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">num_cores</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// +1 是因为主线程也要参与屏障同步
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">pthread_barrier_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">num_cores</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">pthread_t</span><span class="o">*</span> <span class="n">threads</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">num_cores</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">pthread_t</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="o">*</span> <span class="n">thread_ids</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">num_cores</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建工作线程
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_cores</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">thread_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">threads</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">worker_function</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">thread_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">Starting multi-threaded workload...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;----------------------------------------------------------</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">total_cycles</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Cycle %d/%d: Orchestrating CPU burn...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total_cycles</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">// 1. 主线程到达屏障，释放所有等待的 worker 线程开始计算
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 2. 主线程也在此等待，直到所有 worker 线程都完成计算
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Cycle %d/%d: Orchestrating idle period...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total_cycles</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">usleep</span><span class="p">(</span><span class="n">idle_time_ms</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;----------------------------------------------------------</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Workload finished. Signaling threads to exit.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 通知所有线程退出
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">time_to_exit</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 最后一次释放屏障，让所有在等待的线程可以检查到退出标志
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 等待所有线程结束并清理资源
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_cores</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_join</span><span class="p">(</span><span class="n">threads</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="nf">pthread_barrier_destroy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">free</span><span class="p">(</span><span class="n">threads</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">free</span><span class="p">(</span><span class="n">thread_ids</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在编写和测试这样的程序时，有两个细节需要注意。</p>
+<h4 id="防止函数内联">
+    <a href="#%e9%98%b2%e6%ad%a2%e5%87%bd%e6%95%b0%e5%86%85%e8%81%94" class="header-anchor">#</a>
+    防止函数内联
+</h4><p>现代编译器非常智能，当你使用 <code>-O2</code> 等优化选项时，它可能会发现 <code>burn_cpu</code> 函数非常简单，从而执行<strong>函数内联（Function Inlining）</strong>——直接把 <code>burn_cpu</code> 的循环代码“复制 - 粘贴”到调用它的 <code>worker_function</code> 中。这会导致在 <code>perf</code> 报告里，我们看不到 <code>burn_cpu</code> 这个独立的函数，所有的开销都会被算在 <code>worker_function</code> 头上，这会干扰我们的分析。为了避免这种情况，我们必须明确地告诉编译器不要这么做：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="nf">burn_cpu</span><span class="p">(</span><span class="kt">long</span> <span class="n">milliseconds</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="校准计算强度">
+    <a href="#%e6%a0%a1%e5%87%86%e8%ae%a1%e7%ae%97%e5%bc%ba%e5%ba%a6" class="header-anchor">#</a>
+    校准计算强度
+</h4><p><code>burn_cpu</code> 函数里的循环次数需要根据你的 CPU 性能进行调整。一个固定的循环次数，在我的电脑上可能运行 100 毫秒，在你的高性能服务器上可能只需要 30 毫秒。我们需要一个合适的“乘数（multiplier）”，让 <code>burn_cpu(100)</code> 能在你的机器上<strong>大致运行 100 毫秒</strong>。</p>
+<p>我使用了一个简单的校准程序 <code>calibrate.c</code>，它只包含 <code>burn_cpu(1000)</code>，然后用 <code>time</code> 命令来测量其**<code>user</code>时间**（即 CPU 在用户态的实际耗时）。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">burn_cpu</span><span class="p">(</span><span class="kt">long</span> <span class="n">milliseconds</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这是我们要调整的乘数，先从一个初始值开始
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">long</span> <span class="n">multiplier</span> <span class="o">=</span> <span class="mi">200000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">volatile</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">milliseconds</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Just burn cycles
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">test_duration_ms</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span> <span class="c1">// 我们期望它运行 1 秒钟
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Burning CPU for a target of %ldms...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">test_duration_ms</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">burn_cpu</span><span class="p">(</span><span class="n">test_duration_ms</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Calibration burn finished.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在，我们编译并使用 <code>time</code> 命令来测量这个程序的实际运行时间。我们使用 <code>-O2</code> 优化，这更接近生产环境的编译设置。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ gcc -O2 -o calibrate calibrate.c
+</span></span><span class="line"><span class="cl">$ <span class="nb">time</span> ./calibrate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>time</code> 命令会输出类似下面的结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Burning CPU <span class="k">for</span> a target of 1000ms...
+</span></span><span class="line"><span class="cl">Calibration burn finished.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real	0m0.052s
+</span></span><span class="line"><span class="cl">user	0m0.051s
+</span></span><span class="line"><span class="cl">sys	  0m0.001s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里的关键是 <strong><code>user</code> 时间</strong>。它表示程序在用户态实际消耗的 CPU 时间。</p>
+<ul>
+<li><strong>目标时间</strong>: 1.0 秒 (1000ms)</li>
+<li><strong>实际时间</strong>: 0.051 秒</li>
+</ul>
+<p>这说明我们当前的乘数 <code>200000</code> 太小了，程序运行得太快。我们可以用一个简单的比例来计算新的乘数：</p>
+<p><strong>新乘数 = 旧乘数 * (目标时间 / 实际时间)</strong></p>
+<p>在这个例子中：
+新乘数 = 200,000 * (1.0 / 0.051) ≈ 200,000 * 19.6 ≈ <strong>3920000</strong></p>
+<p>我们可以取一个整数，比如 <strong>4000000</strong>。</p>
+<p>现在，修改 <code>calibrate.c</code> 中的乘数为 <code>4000000</code>，然后再次运行校准测试：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ gcc -O2 -o calibrate calibrate.c
+</span></span><span class="line"><span class="cl">$ <span class="nb">time</span> ./calibrate
+</span></span><span class="line"><span class="cl">Burning CPU <span class="k">for</span> a target of 1000ms...
+</span></span><span class="line"><span class="cl">Calibration burn finished.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real	0m0.987s
+</span></span><span class="line"><span class="cl">user	0m0.984s
+</span></span><span class="line"><span class="cl">sys	  0m0.002s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这次的输出 <code>user</code> 时间应该会非常接近 1.0 秒了，现在就可以用这个新的乘数修改 <code>work_and_wait_mt.c</code> ，来进行 <code>perf</code> 对比实验了。</p>
+<h3 id="编译实验程序">
+    <a href="#%e7%bc%96%e8%af%91%e5%ae%9e%e9%aa%8c%e7%a8%8b%e5%ba%8f" class="header-anchor">#</a>
+    编译实验程序
+</h3><p>我们使用以下命令进行编译：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -g -O2 -o work_and_wait_mt work_and_wait_mt.c -pthread
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>-g</code>: 生成调试信息，这是 <code>perf</code> 能够将内存地址翻译成函数名的关键。</li>
+<li><code>-O2</code>: 开启二级优化，这更接近生产环境的编译设置，也使得我们防止内联的操作变得必要。</li>
+<li><code>-pthread</code>: 链接 <code>pthread</code> 库，因为我们用到了多线程和屏障。</li>
+</ul>
+<h3 id="执行采样">
+    <a href="#%e6%89%a7%e8%a1%8c%e9%87%87%e6%a0%b7" class="header-anchor">#</a>
+    执行采样
+</h3><p>现在，我们用两种不同的采样方式，在**系统全局模式（<code>-a</code>）**下，对这个程序进行分析。</p>
+<p>我们使用系统全局（<code>-a</code>）模式，以确保能捕获到 <code>idle</code> 任务。</p>
+<h4 id="实验一cpu-cycles-事件">
+    <a href="#%e5%ae%9e%e9%aa%8c%e4%b8%80cpu-cycles-%e4%ba%8b%e4%bb%b6" class="header-anchor">#</a>
+    实验一：<code>cpu-cycles</code> 事件
+</h4><ol>
+<li><strong>采集数据</strong></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf record -a -F <span class="m">99</span> -g -- ./work_and_wait_mt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li><strong>生成报告</strong></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf report
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li><strong>报告解读</strong></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Samples: 3K of event <span class="s1">&#39;cpu_core/cycles/P&#39;</span>, Event count <span class="o">(</span>approx.<span class="o">)</span>: <span class="m">124421182834</span>
+</span></span><span class="line"><span class="cl">  Children      Self  Command          Shared Object          Symbol
+</span></span><span class="line"><span class="cl">+   99.28%    99.12%  work_and_wait_m  work_and_wait_mt       <span class="o">[</span>.<span class="o">]</span> burn_cpu
+</span></span><span class="line"><span class="cl">     0.25%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> secondary_startup_64_no_verify
+</span></span><span class="line"><span class="cl">     0.25%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> cpu_startup_entry
+</span></span><span class="line"><span class="cl">     0.25%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> do_idle
+</span></span><span class="line"><span class="cl">     0.20%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> start_secondary
+</span></span><span class="line"><span class="cl">     0.19%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> asm_sysvec_apic_timer_interrupt
+</span></span><span class="line"><span class="cl">     0.19%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> cpuidle_idle_call
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> sysvec_apic_timer_interrupt
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> __sysvec_apic_timer_interrupt
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> hrtimer_interrupt
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> __hrtimer_run_queues
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> tick_nohz_highres_handler
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> tick_sched_handle
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> update_process_times
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> scheduler_tick
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> task_tick_fair
+</span></span><span class="line"><span class="cl">     0.16%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> call_cpuidle
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第一行是报告的标题：</p>
+<ul>
+<li><strong>Samples: 3K</strong>: 在程序运行期间，perf 总共捕获了 3000 个样本。</li>
+<li><strong>event &lsquo;cpu_core/cycles/P&rsquo;</strong>: perf 告诉你它采样的是 cycles 事件。这个名字 cpu_core/cycles/P 是一个更具体的硬件事件名称，但本质就是 CPU 时钟周期。</li>
+<li><strong>Event count (approx.)</strong>: 程序在运行时，大约产生了 1 千 2 百亿个 CPU 周期。</li>
+</ul>
+<p>接下来是表格的列：</p>
+<ul>
+<li><strong>Children</strong>: <strong>子项开销</strong>。表示这个函数<strong>以及它调用的所有子函数</strong>总共占用的 CPU 时间百分比。可以理解为，当程序执行到这个函数所在的调用链上时，所花费的时间。</li>
+<li><strong>Self</strong>: <strong>自身开销</strong>。表示 CPU 时间<strong>只花在这个函数本身内部</strong>的百分比，不包括它调用的其他函数。这是定位代码热点的最关键指标。</li>
+<li><strong>Command</strong>: 运行的命令名 (work_and_wait)。</li>
+<li><strong>Shared Object</strong>: 该符号所在的库或可执行文件。</li>
+<li><strong>Symbol</strong>: 函数名或内核符号名。</li>
+</ul>
+<p><strong>Self: 99.12%</strong>，这是最重要的信息。在所有样本中，有 <strong>99.12%</strong> 的样本都是在 CPU 执行 <code>burn_cpu</code> 函数内部的指令时捕获的。这清晰地表明，这个函数是程序中唯一的 CPU 性能热点。</p>
+<p><code>swapper</code>（即 idle 任务）在这里也出现了，但它的占比极小，与 <code>burn_cpu</code> 产生的海量周期相比，这些内核自身的管理开销几乎可以忽略不计。</p>
+<p><strong>总结 cpu-cycles 报告：</strong> <code>burn_cpu</code>消耗了 <strong>99.12%</strong> 的 CPU 算力，<code>perf</code> 准确地抓住了那个让 CPU 发热的元凶。<strong><code>swapper</code>（idle 任务）几乎可以忽略不计</strong>，证明了 <code>cpu-cycles</code> 采样在程序休眠时是“暂停”的，它只关心工作，不关心等待。</p>
+<h4 id="实验二cpu-clock-事件">
+    <a href="#%e5%ae%9e%e9%aa%8c%e4%ba%8ccpu-clock-%e4%ba%8b%e4%bb%b6" class="header-anchor">#</a>
+    实验二：<code>cpu-clock</code> 事件
+</h4><ol>
+<li><strong>采集数据</strong></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf record -a -F <span class="m">99</span> -e cpu-clock -g -- ./work_and_wait_mt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li><strong>生成报告</strong>:</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf report
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="4">
+<li><strong>报告解读</strong>:</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Samples: 15K of event <span class="s1">&#39;cpu-clock&#39;</span>, Event count <span class="o">(</span>approx.<span class="o">)</span>: <span class="m">156434341870</span>
+</span></span><span class="line"><span class="cl">  Children      Self  Command          Shared Object          Symbol
+</span></span><span class="line"><span class="cl">+   63.88%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> secondary_startup_64_no_verify
+</span></span><span class="line"><span class="cl">+   63.88%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> cpu_startup_entry
+</span></span><span class="line"><span class="cl">+   63.88%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> do_idle
+</span></span><span class="line"><span class="cl">+   63.87%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> cpuidle_idle_call
+</span></span><span class="line"><span class="cl">+   63.87%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> call_cpuidle
+</span></span><span class="line"><span class="cl">+   63.87%    63.85%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> cpuidle_enter_state
+</span></span><span class="line"><span class="cl">+   63.87%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> cpuidle_enter
+</span></span><span class="line"><span class="cl">+   58.09%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> start_secondary
+</span></span><span class="line"><span class="cl">+   36.08%    36.08%  work_and_wait_m  work_and_wait_mt       <span class="o">[</span>.<span class="o">]</span> burn_cpu
+</span></span><span class="line"><span class="cl">+    5.79%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> x86_64_start_kernel
+</span></span><span class="line"><span class="cl">+    5.79%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> x86_64_start_reservations
+</span></span><span class="line"><span class="cl">+    5.79%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> start_kernel
+</span></span><span class="line"><span class="cl">+    5.79%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> arch_call_rest_init
+</span></span><span class="line"><span class="cl">+    5.79%     0.00%  swapper          <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> rest_init
+</span></span><span class="line"><span class="cl">     0.01%     0.01%  Lingma           <span class="o">[</span>kernel.kallsyms<span class="o">]</span>      <span class="o">[</span>k<span class="o">]</span> finish_task_switch.isra.0
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>情况发生了戏剧性的反转。在这份报告中，<code>swapper</code> （空闲任务）成为了绝对的主角。有 <strong>63.85%</strong> 的时间样本，都捕获到 CPU 正处于 <code>cpuidle_enter_state</code> 这个函数内部，这正是内核让 CPU“休眠”的地方。</p>
+<p><code>burn_cpu</code> <strong>沦为配角 (36.08% Self)</strong>，曾经消耗了 99% CPU 算力的 <code>burn_cpu</code> 函数，在时间的维度上，只占了 36.08% 的份额。</p>
+<p><strong>总结 cpu-clock 报告：</strong> <strong><code>swapper</code> 成了主角</strong>，占据了 <strong>63.85%</strong> 的时间样本，证明了 CPU 在绝大部分<strong>时间</strong>里，都处于内核安排的“睡眠”状态。<strong><code>burn_cpu</code> 沦为配角</strong>，只占了 <strong>36.08%</strong> 的时间。</p>
+<h4 id="对比总结">
+    <a href="#%e5%af%b9%e6%af%94%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    对比总结
+</h4><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>采样事件</th>
+<th>核心问题</th>
+<th>burn_cpu 表现</th>
+<th>swapper 表现</th>
+<th>分析视角</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>cpu-cycles</strong></td>
+<td>“谁消耗了<strong>算力</strong>？”</td>
+<td><strong>绝对主力 (99%)</strong></td>
+<td>微不足道</td>
+<td><strong>On-CPU</strong> (工作量分析)</td>
+</tr>
+<tr>
+<td><strong>cpu-clock</strong></td>
+<td>“<strong>时间</strong>花在哪了？”</td>
+<td>少数派 (~36%)</td>
+<td><strong>绝对主力 (64%)</strong></td>
+<td><strong>Wall-Clock</strong> (延迟/等待分析)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="一个有用的技巧进程专属模式下的-cpu-clock">
+    <a href="#%e4%b8%80%e4%b8%aa%e6%9c%89%e7%94%a8%e7%9a%84%e6%8a%80%e5%b7%a7%e8%bf%9b%e7%a8%8b%e4%b8%93%e5%b1%9e%e6%a8%a1%e5%bc%8f%e4%b8%8b%e7%9a%84-cpu-clock" class="header-anchor">#</a>
+    一个有用的技巧：进程专属模式下的 <code>cpu-clock</code>
+</h3><p>如果不使用 <code>-a</code> 参数，而是运行以下命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo perf record -F <span class="m">99</span> -e cpu-clock -g -- ./work_and_wait_mt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>得到的报告竟然和 <code>cycles</code> 采样的结果惊人地一致，<code>swapper</code> 消失了，<code>burn_cpu</code> 再次占据了 99% 以上的份额，休息时间（swapper/idle）完全消失了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Samples: 5K of event <span class="s1">&#39;cpu-clock&#39;</span>, Event count <span class="o">(</span>approx.<span class="o">)</span>: <span class="m">56252524690</span>
+</span></span><span class="line"><span class="cl">  Children      Self  Command          Shared Object      Symbol
+</span></span><span class="line"><span class="cl">+   99.98%    99.98%  work_and_wait_m  work_and_wait_mt   <span class="o">[</span>.<span class="o">]</span> burn_cpu
+</span></span><span class="line"><span class="cl">     0.02%     0.02%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>  <span class="o">[</span>k<span class="o">]</span> __check_heap_object
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  work_and_wait_mt   <span class="o">[</span>.<span class="o">]</span> worker_function
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> __printf_chk
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> __vfprintf_internal
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> __printf_buffer_to_file_done
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> _IO_file_xsputn@@GLIBC_2.2.5
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> _IO_do_write@@GLIBC_2.2.5
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> _IO_file_write@@GLIBC_2.2.5
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  libc.so.6          <span class="o">[</span>.<span class="o">]</span> __GI___libc_write
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>  <span class="o">[</span>k<span class="o">]</span> entry_SYSCALL_64_after_hwframe
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>  <span class="o">[</span>k<span class="o">]</span> do_syscall_64
+</span></span><span class="line"><span class="cl">     0.02%     0.00%  work_and_wait_m  <span class="o">[</span>kernel.kallsyms<span class="o">]</span>  <span class="o">[</span>k<span class="o">]</span> x64_sys_call
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>原因是这次使用的命令是<strong>进程专属（Process-Specific）模式</strong>，而不是<strong>系统全局（System-Wide）模式</strong>。</p>
+<p><code>-a</code>参数的全称是 <strong><code>--all-cpus</code></strong>，是对全系统范围内所有 CPU 进行收集。如果不加 <code>-a</code>，上面的命令明确告诉 perf，<strong>只监控 ./work_and_wait_mt 这个进程以及它创建的所有子进程。对于任何其他进程的活动，请直接忽略。</strong></p>
+<p>当 <code>perf</code> 在<strong>进程专属模式</strong>下运行时，它内部有一个强大的“过滤器”，当 <code>cpu-clock</code> 的“闹钟”响起时，<code>perf</code> 会检查当前在 CPU 上运行的是哪个进程。如果恰好是我们的 <code>work_and_wait_mt</code>，样本就被记录下来。如果在程序休眠期间，CPU 上运行的是 <code>swapper</code> 任务，<code>perf</code> 会发现这个任务不属于它的监控目标，于是<strong>直接丢弃了这个样本</strong>。</p>
+<p>通过这个实验我们发现，在<strong>进程专属模式</strong>下，<code>cpu-clock</code> 的行为会因为进程过滤器的存在而变得非常像 <code>cpu-cycles</code>。这意味着，<strong>在不方便使用硬件 <code>cycles</code> 事件，或者想纯粹用软件事件来分析一个特定程序的 On-CPU 热点时，使用“进程专属模式”下的 <code>cpu-clock</code> 是一个完全可行的替代方案。</strong> 同时，要真正地用 <code>cpu-clock</code> 来分析等待时间（Off-CPU），<strong>必须使用 -a 参数切换到系统全局模式</strong>。</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>通过对内核源码的剖析，以及一系列实验，现在我们可以回答开头那个令人困惑的问题了：cpu-clock 和 cycles 到底有何不同？</p>
+<ul>
+<li><strong><code>cpu-clock</code></strong> 基于<strong>时间</strong>，它的闹钟忠实地记录下每个时间点的系统状态。</li>
+<li><strong><code>cpu-cycles</code></strong> 基于<strong>工作量</strong>，它的计步器精准地衡量了 CPU 的实际消耗。</li>
+</ul>
+<p>另外，在<strong>进程专属模式</strong>下，perf 内置的“过滤器”会将所有非目标进程的样本（包括 swapper）丢弃，使得 <code>cpu-clock</code> 的行为趋近于 <code>cpu-cycles</code>，成为一种纯软件实现的 On-CPU 分析替代方案。</p>
+<p>当面对文档的语焉不详和网络信息的模糊不清时，只有深入源码、亲手验证，才是揭开迷雾正确路径。希望这篇文章对你也有帮助。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/kernel/">Kernel</a>
+        
+            <a href="/tags/performance/">Performance</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Wall-Clock 与 CPU-Cycles 采样的区别</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/linux-tcp%E9%98%9F%E5%88%97%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%E7%9A%84%E6%80%BB%E7%BB%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux TCP队列相关参数的总结</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%90%86%E8%A7%A3-crac-%E8%83%8C%E5%90%8E%E7%9A%84-linux-%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">理解 CRaC 背后的 Linux 系统编程</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/crac-%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CRaC 技术深度解析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深入探索 perf CPU Profiling 实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2025 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target=\"_blank\" href=\"https://beian.miit.gov.cn\">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

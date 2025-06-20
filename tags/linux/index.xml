@@ -6,7 +6,761 @@
         <description>Recent content in Linux on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Wed, 18 Jun 2025 10:09:54 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/linux/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 20 Jun 2025 11:10:02 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/linux/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Perf 的 cpu-clock 与 cpu-cycles 采样实现与对比</title>
+        <link>https://mazhen.tech/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/</link>
+        <pubDate>Fri, 20 Jun 2025 11:10:02 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/</guid>
+        <description>&lt;p&gt;&lt;img src=&#34;https://cdn.mazhen.tech/2024/202506201359538.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Feature image&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在上一篇&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;博客&lt;/a&gt;中，我们深入探讨了性能分析中两个概念：&lt;strong&gt;Wall-Clock 采样&lt;/strong&gt;与 &lt;strong&gt;CPU-Cycles 采样&lt;/strong&gt;的本质区别。这一次我想使用 &lt;code&gt;perf&lt;/code&gt; 这个强大的工具来验证上一篇的内容。&lt;/p&gt;
+&lt;p&gt;对于 &lt;strong&gt;CPU-Cycles 采样&lt;/strong&gt;，路径非常明确：&lt;code&gt;perf record -e cycles&lt;/code&gt;，或者干脆不带 &lt;code&gt;-e&lt;/code&gt; 参数时，默认使用的就是这种基于硬件的 On-CPU 分析。&lt;/p&gt;
+&lt;p&gt;但问题来了：如何用 &lt;code&gt;perf&lt;/code&gt; 实现 Wall-Clock 采样呢？&lt;/p&gt;
+&lt;p&gt;一个看似可能的答案是 &lt;code&gt;cpu-clock&lt;/code&gt; 软件事件。然而，&lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/perf_event_open.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方文档&lt;/a&gt;对它的描述只有一句，语焉不详：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This reports the CPU clock, a high-resolution per-CPU timer.&lt;/p&gt;
+&lt;p&gt;报告提供 CPU 时钟信息，即一种高精度的每 CPU 计时器。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;我尝试用各种 AI DeepResearch 一番，仍然没有找到答案，而且发现自己之前写的那篇&lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/p/%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2-perf-cpu-profiling-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;《深入探索 perf CPU Profiling 实现原理》&lt;/a&gt;竟排在参考引用文档列表中很高的位置。同时，另一位知名开发者 Robert Haas（PostgreSQL 的核心贡献者）也曾&lt;a class=&#34;link&#34; href=&#34;https://rhaas.blogspot.com/2012/06/perf-good-bad-ugly.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;抱怨过&lt;/a&gt; &lt;code&gt;cpu-clock&lt;/code&gt; 缺乏文档说明。&lt;/p&gt;
+&lt;p&gt;既然现有的资料无法给出确切答案，唯一的办法就是到 Linux 内核源码中找答案，搞清楚 &lt;code&gt;cpu-clock&lt;/code&gt; 和 &lt;code&gt;cycles&lt;/code&gt; 这对采样事件，究竟在底层是如何实现的，也算给 AI 贡献一些原创素材。&lt;/p&gt;
+&lt;h2 id=&#34;深入内核两种采样事件的实现&#34;&gt;
+    &lt;a href=&#34;#%e6%b7%b1%e5%85%a5%e5%86%85%e6%a0%b8%e4%b8%a4%e7%a7%8d%e9%87%87%e6%a0%b7%e4%ba%8b%e4%bb%b6%e7%9a%84%e5%ae%9e%e7%8e%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    深入内核：两种采样事件的实现
+&lt;/h2&gt;&lt;h3 id=&#34;cpu-clock-的实现&#34;&gt;
+    &lt;a href=&#34;#cpu-clock-%e7%9a%84%e5%ae%9e%e7%8e%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;cpu-clock&lt;/code&gt; 的实现
+&lt;/h3&gt;&lt;p&gt;通过内核源码 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/master/kernel/events/core.c&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;kernel/events/core.c&lt;/a&gt;，我们可以分析出 &lt;code&gt;cpu-clock&lt;/code&gt; 事件实现的核心逻辑，它的实现依赖于 Linux 的高精度定时器（&lt;code&gt;hrtimer&lt;/code&gt;）。&lt;/p&gt;
+&lt;p&gt;整个流程可以概括为：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;初始化&lt;/strong&gt;：当一个 &lt;code&gt;cpu-clock&lt;/code&gt; 事件被创建时，&lt;code&gt;cpu_clock_event_init()&lt;/code&gt; 会调用 &lt;code&gt;perf_swevent_init_hrtimer()&lt;/code&gt;。这会在每个被监控的 CPU 上设置一个周期性的 &lt;code&gt;hrtimer&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;定时中断&lt;/strong&gt;：这个 &lt;code&gt;hrtimer&lt;/code&gt; 会以我们指定的频率（例如 &lt;code&gt;-F 99&lt;/code&gt; 就是 99Hz）周期性地触发一个硬件中断。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;中断处理&lt;/strong&gt;：中断会激活 &lt;code&gt;perf_swevent_hrtimer()&lt;/code&gt; 这个处理函数。在这个函数里，内核会判断事件是否需要记录样本。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;样本采集&lt;/strong&gt;：如果需要，它会调用 &lt;code&gt;__perf_event_overflow()&lt;/code&gt;，最终触发 &lt;code&gt;overflow_handler&lt;/code&gt;（如 &lt;code&gt;perf_event_output_forward&lt;/code&gt;），后者会收集当前上下文的数据（如调用栈、寄存器等），打包成一个 &lt;code&gt;PERF_RECORD_SAMPLE&lt;/code&gt;，然后写入 Ring Buffer。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;简单来说，&lt;strong&gt;&lt;code&gt;cpu-clock&lt;/code&gt; 是一个纯粹的软件事件，使用 hrtimer 周期性地触发一个中断，中断处理函数负责生成并记录一个样本。&lt;/strong&gt; 它就像一个设定的闹钟，每隔固定的时间就响一次，然后记录下那个瞬间 CPU 正在处理的任务。&lt;/p&gt;
+&lt;h3 id=&#34;cpu-cycles-的实现&#34;&gt;
+    &lt;a href=&#34;#cpu-cycles-%e7%9a%84%e5%ae%9e%e7%8e%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;code&gt;cpu-cycles&lt;/code&gt; 的实现
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;cpu-cycles&lt;/code&gt; 是一个硬件事件，它直接利用 CPU 内部的性能监控单元（PMU）来统计 CPU 时钟周期，它的实现与 &lt;code&gt;cpu-clock&lt;/code&gt; 软件事件有本质区别。&lt;/p&gt;
+&lt;p&gt;以  x86 平台上为例，&lt;code&gt;cpu-cycles&lt;/code&gt; 事件的实现在 &lt;a class=&#34;link&#34; href=&#34;https://github.com/torvalds/linux/blob/master/arch/x86/events/core.c&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;arch/x86/events/core.c&lt;/a&gt; 文件中，我们可以看到它的实现与硬件紧密耦合。整体流程如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;初始化与编程&lt;/strong&gt;：当一个 &lt;code&gt;cpu-cycles&lt;/code&gt; 事件被创建时，&lt;code&gt;x86_pmu_event_init()&lt;/code&gt; 会将这个通用事件类型映射为一个特定的硬件事件编码。事件被启用时，调度器（&lt;code&gt;x86_schedule_events&lt;/code&gt;）会为其分配一个可用的硬件性能计数器（PMC）。内核通过 &lt;code&gt;wrmsr&lt;/code&gt; 指令将事件编码写入 &lt;code&gt;PerfEvtSel&lt;/code&gt; 寄存器，并设置 &lt;code&gt;PMC&lt;/code&gt; 寄存器的初始值为一个负数（例如 &lt;code&gt;-sample_period&lt;/code&gt;），然后启动该计数器。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;硬件计数&lt;/strong&gt;：CPU 硬件开始自动对每个时钟周期进行计数。&lt;code&gt;PMC&lt;/code&gt; 的值从初始的负数开始，每个周期加一，向零逼近。这个过程完全由硬件执行，没有软件开销。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;硬件中断 (PMI)&lt;/strong&gt;：当硬件计数器从 &lt;code&gt;0xFFFF...&lt;/code&gt; 溢出到 &lt;code&gt;0&lt;/code&gt; 时，PMU 会自动触发一个&lt;strong&gt;性能监控中断（PMI）&lt;/strong&gt;。在 x86 平台上，这通常是一个&lt;strong&gt;不可屏蔽中断（NMI）&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;中断处理&lt;/strong&gt;：NMI 会激活 &lt;code&gt;perf_event_nmi_handler()&lt;/code&gt;，它会调用特定于 PMU 的中断处理函数（如 &lt;code&gt;x86_pmu.handle_irq&lt;/code&gt;）。此函数会：
+a.  &lt;strong&gt;识别溢出&lt;/strong&gt;：检查是哪个 &lt;code&gt;PMC&lt;/code&gt; 发生了溢出。
+b.  &lt;strong&gt;重置计数器&lt;/strong&gt;：调用 &lt;code&gt;x86_perf_event_set_period()&lt;/code&gt; 将该 &lt;code&gt;PMC&lt;/code&gt; 的值重新设置为初始的负数，为下一次采样做准备。
+c.  &lt;strong&gt;样本采集&lt;/strong&gt;：调用 &lt;code&gt;perf_event_overflow()&lt;/code&gt;，最终触发 &lt;code&gt;overflow_handler&lt;/code&gt;（如 &lt;code&gt;perf_event_output_forward&lt;/code&gt;），后者会收集当前上下文的数据（如调用栈、寄存器等），打包成一个 &lt;code&gt;PERF_RECORD_SAMPLE&lt;/code&gt;，然后写入 Ring Buffer。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;简而言之，&lt;code&gt;cpu-cycles&lt;/code&gt; 是一个硬件事件。&lt;/strong&gt; 它不像闹钟，更像一个只在工作时才计数的“计步器”。它关心的是 &lt;strong&gt;CPU 完成的工作量&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;它们采集了哪些数据&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%83%e4%bb%ac%e9%87%87%e9%9b%86%e4%ba%86%e5%93%aa%e4%ba%9b%e6%95%b0%e6%8d%ae&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    它们采集了哪些数据？
+&lt;/h3&gt;&lt;p&gt;无论是哪种方式触发了采样，最终内核都会通过 &lt;code&gt;perf_prepare_sample()&lt;/code&gt; 和 &lt;code&gt;perf_output_sample()&lt;/code&gt; 这一系列的函数，将当时的“现场快照”打包成一个 &lt;code&gt;PERF_RECORD_SAMPLE&lt;/code&gt; 记录。这份快照通常包含（取决于你的 &lt;code&gt;-g&lt;/code&gt; 和其他 &lt;code&gt;perf&lt;/code&gt; 参数）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;指令指针 (IP)&lt;/strong&gt;: CPU 当时正在执行哪一条指令的地址。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;进程 ID 和线程 ID (PID/TID)&lt;/strong&gt;: 是哪个进程/线程在执行。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时间戳 (Time)&lt;/strong&gt;: 采样发生的时间。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CPU 编号&lt;/strong&gt;: 在哪个 CPU 核心上发生的采样。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;调用链 (Callchain)&lt;/strong&gt;: 这是通过 &lt;code&gt;-g&lt;/code&gt; 参数启用的。内核会从当前的栈帧指针（Frame Pointer）开始，回溯整个调用栈，记录下从当前函数到顶层函数的完整路径。对于系统调用，它能同时抓取到用户栈和内核栈，拼接成一个完整的调用链。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;其他元数据&lt;/strong&gt;: 如事件周期、地址信息等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;正是这些丰富的数据，让我们能够在事后通过 &lt;code&gt;perf report&lt;/code&gt; 或火焰图，重构出程序的运行画像。&lt;/p&gt;
+&lt;h3 id=&#34;两个事件的对比&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%a4%e4%b8%aa%e4%ba%8b%e4%bb%b6%e7%9a%84%e5%af%b9%e6%af%94&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    两个事件的对比
+&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;特性&lt;/th&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;&lt;code&gt;cpu-clock&lt;/code&gt;&lt;/th&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;&lt;code&gt;cpu-cycles&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;strong&gt;事件源&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;软件 (内核 &lt;code&gt;hrtimer&lt;/code&gt;)&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;硬件 (CPU PMU)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;strong&gt;触发机制&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;固定&lt;strong&gt;时间&lt;/strong&gt;间隔到达，触发定时器中断&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;固定&lt;strong&gt;工作量&lt;/strong&gt;完成，触发 PMC 溢出中断&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;strong&gt;CPU 空闲时&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;计时器&lt;strong&gt;继续&lt;/strong&gt;运行，会采样到&lt;code&gt;idle&lt;/code&gt;任务&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;计数器&lt;strong&gt;暂停&lt;/strong&gt;，不会产生任何采样&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;动手验证&#34;&gt;
+    &lt;a href=&#34;#%e5%8a%a8%e6%89%8b%e9%aa%8c%e8%af%81&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    动手验证
+&lt;/h2&gt;&lt;p&gt;理论分析之后，我们需要一个实验来直观地感受这种差异。一个好的实验，应该能创造出极端的对比场景，直观的展示出两种采样方式的差异。&lt;/p&gt;
+&lt;p&gt;我的思路是构建一个“脉冲式”的负载模型，让程序在两种截然不同的状态间切换：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CPU 饱和阶段&lt;/strong&gt;: 计算密集型，消耗系统所有的 CPU 资源。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;空闲阶段&lt;/strong&gt;: 程序进入长时间的休眠，让所有 CPU 核心休息。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;实验程序&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%9e%e9%aa%8c%e7%a8%8b%e5%ba%8f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    实验程序
+&lt;/h3&gt;&lt;p&gt;实验程序是一个多线程 C 程序 &lt;code&gt;work_and_wait_mt.c&lt;/code&gt;，它会创建与核心数相同的工作线程，所有线程通过屏障（barrier）同步，同时开始计算，同时结束计算，实现“集体计算 100 毫秒，集体休眠 900 毫秒”的脉冲式负载。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;  1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 35
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 36
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 37
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 38
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 39
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 40
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 41
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 42
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 43
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 44
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 45
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 46
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 47
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 48
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 49
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 50
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 51
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 52
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 53
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 54
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 55
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 56
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 57
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 58
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 59
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 60
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 61
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 62
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 63
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 64
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 65
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 66
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 67
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 68
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 69
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 70
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 71
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 72
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 73
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 74
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 75
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 76
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 77
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 78
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 79
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 80
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 81
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 82
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 83
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 84
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 85
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 86
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 87
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 88
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 89
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 90
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 91
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 92
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 93
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 94
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 95
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 96
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 97
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 98
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 99
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;100
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;101
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;102
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;103
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;104
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;105
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;106
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;pthread.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdbool.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// --- Configuration ---
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;burn_time_ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;100&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;idle_time_ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;900&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;total_cycles&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;multiplier&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;200000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// **重要**: 请先用单线程校准这个值！
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// --- Globals for thread coordination ---
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;pthread_barrier_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;volatile&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;bool&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;time_to_exit&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// CPU 密集型计算函数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;__attribute__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;noinline&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;burn_cpu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;milliseconds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;volatile&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;unsigned&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;milliseconds&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;multiplier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// Burn baby burn
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 工作线程的执行函数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;worker_function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;thread_id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Worker thread %d started.&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;thread_id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;time_to_exit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// 1. 等待主线程的“开始计算”信号
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;c1&#34;&gt;//    所有工作线程和主线程都会在此集合
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;nf&#34;&gt;pthread_barrier_wait&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// 如果是退出信号，则跳出循环
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;time_to_exit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;k&#34;&gt;break&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// 2. 执行计算任务
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;nf&#34;&gt;burn_cpu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;burn_time_ms&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// 3. 等待所有其他工作线程完成计算
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;c1&#34;&gt;//    主线程也在此等待，以确认计算阶段结束
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;nf&#34;&gt;pthread_barrier_wait&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Worker thread %d exiting.&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;thread_id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;NULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 自动检测可用的 CPU 核心数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;sysconf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_SC_NPROCESSORS_ONLN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// 备用值
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Detected %ld CPU cores.&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// +1 是因为主线程也要参与屏障同步
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;nf&#34;&gt;pthread_barrier_init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;NULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;pthread_t&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;threads&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;malloc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;pthread_t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;thread_ids&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;malloc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 创建工作线程
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;thread_ids&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;pthread_create&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;threads&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;NULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;worker_function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;thread_ids&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;Starting multi-threaded workload...&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;----------------------------------------------------------&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;total_cycles&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Cycle %d/%d: Orchestrating CPU burn...&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;total_cycles&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// 1. 主线程到达屏障，释放所有等待的 worker 线程开始计算
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;nf&#34;&gt;pthread_barrier_wait&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// 2. 主线程也在此等待，直到所有 worker 线程都完成计算
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;        &lt;span class=&#34;nf&#34;&gt;pthread_barrier_wait&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Cycle %d/%d: Orchestrating idle period...&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;total_cycles&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;usleep&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;idle_time_ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;----------------------------------------------------------&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Workload finished. Signaling threads to exit.&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 通知所有线程退出
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;time_to_exit&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 最后一次释放屏障，让所有在等待的线程可以检查到退出标志
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;nf&#34;&gt;pthread_barrier_wait&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 等待所有线程结束并清理资源
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;num_cores&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;pthread_join&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;threads&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;NULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;pthread_barrier_destroy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;barrier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;free&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;threads&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;free&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;thread_ids&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在编写和测试这样的程序时，有两个细节需要注意。&lt;/p&gt;
+&lt;h4 id=&#34;防止函数内联&#34;&gt;
+    &lt;a href=&#34;#%e9%98%b2%e6%ad%a2%e5%87%bd%e6%95%b0%e5%86%85%e8%81%94&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    防止函数内联
+&lt;/h4&gt;&lt;p&gt;现代编译器非常智能，当你使用 &lt;code&gt;-O2&lt;/code&gt; 等优化选项时，它可能会发现 &lt;code&gt;burn_cpu&lt;/code&gt; 函数非常简单，从而执行&lt;strong&gt;函数内联（Function Inlining）&lt;/strong&gt;——直接把 &lt;code&gt;burn_cpu&lt;/code&gt; 的循环代码“复制 - 粘贴”到调用它的 &lt;code&gt;worker_function&lt;/code&gt; 中。这会导致在 &lt;code&gt;perf&lt;/code&gt; 报告里，我们看不到 &lt;code&gt;burn_cpu&lt;/code&gt; 这个独立的函数，所有的开销都会被算在 &lt;code&gt;worker_function&lt;/code&gt; 头上，这会干扰我们的分析。为了避免这种情况，我们必须明确地告诉编译器不要这么做：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;__attribute__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;noinline&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;burn_cpu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;milliseconds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// ...
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;校准计算强度&#34;&gt;
+    &lt;a href=&#34;#%e6%a0%a1%e5%87%86%e8%ae%a1%e7%ae%97%e5%bc%ba%e5%ba%a6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    校准计算强度
+&lt;/h4&gt;&lt;p&gt;&lt;code&gt;burn_cpu&lt;/code&gt; 函数里的循环次数需要根据你的 CPU 性能进行调整。一个固定的循环次数，在我的电脑上可能运行 100 毫秒，在你的高性能服务器上可能只需要 30 毫秒。我们需要一个合适的“乘数（multiplier）”，让 &lt;code&gt;burn_cpu(100)&lt;/code&gt; 能在你的机器上&lt;strong&gt;大致运行 100 毫秒&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;我使用了一个简单的校准程序 &lt;code&gt;calibrate.c&lt;/code&gt;，它只包含 &lt;code&gt;burn_cpu(1000)&lt;/code&gt;，然后用 &lt;code&gt;time&lt;/code&gt; 命令来测量其**&lt;code&gt;user&lt;/code&gt;时间**（即 CPU 在用户态的实际耗时）。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;burn_cpu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;milliseconds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 这是我们要调整的乘数，先从一个初始值开始
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;multiplier&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;200000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;volatile&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;unsigned&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;milliseconds&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;multiplier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;// Just burn cycles
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;test_duration_ms&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// 我们期望它运行 1 秒钟
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Burning CPU for a target of %ldms...&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;test_duration_ms&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;burn_cpu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;test_duration_ms&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Calibration burn finished.&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;现在，我们编译并使用 &lt;code&gt;time&lt;/code&gt; 命令来测量这个程序的实际运行时间。我们使用 &lt;code&gt;-O2&lt;/code&gt; 优化，这更接近生产环境的编译设置。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ gcc -O2 -o calibrate calibrate.c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ &lt;span class=&#34;nb&#34;&gt;time&lt;/span&gt; ./calibrate
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;time&lt;/code&gt; 命令会输出类似下面的结果：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Burning CPU &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; a target of 1000ms...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Calibration burn finished.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;real	0m0.052s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;user	0m0.051s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sys	  0m0.001s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里的关键是 &lt;strong&gt;&lt;code&gt;user&lt;/code&gt; 时间&lt;/strong&gt;。它表示程序在用户态实际消耗的 CPU 时间。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;目标时间&lt;/strong&gt;: 1.0 秒 (1000ms)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;实际时间&lt;/strong&gt;: 0.051 秒&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这说明我们当前的乘数 &lt;code&gt;200000&lt;/code&gt; 太小了，程序运行得太快。我们可以用一个简单的比例来计算新的乘数：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;新乘数 = 旧乘数 * (目标时间 / 实际时间)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在这个例子中：
+新乘数 = 200,000 * (1.0 / 0.051) ≈ 200,000 * 19.6 ≈ &lt;strong&gt;3920000&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;我们可以取一个整数，比如 &lt;strong&gt;4000000&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;现在，修改 &lt;code&gt;calibrate.c&lt;/code&gt; 中的乘数为 &lt;code&gt;4000000&lt;/code&gt;，然后再次运行校准测试：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ gcc -O2 -o calibrate calibrate.c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ &lt;span class=&#34;nb&#34;&gt;time&lt;/span&gt; ./calibrate
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Burning CPU &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; a target of 1000ms...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Calibration burn finished.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;real	0m0.987s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;user	0m0.984s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sys	  0m0.002s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这次的输出 &lt;code&gt;user&lt;/code&gt; 时间应该会非常接近 1.0 秒了，现在就可以用这个新的乘数修改 &lt;code&gt;work_and_wait_mt.c&lt;/code&gt; ，来进行 &lt;code&gt;perf&lt;/code&gt; 对比实验了。&lt;/p&gt;
+&lt;h3 id=&#34;编译实验程序&#34;&gt;
+    &lt;a href=&#34;#%e7%bc%96%e8%af%91%e5%ae%9e%e9%aa%8c%e7%a8%8b%e5%ba%8f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    编译实验程序
+&lt;/h3&gt;&lt;p&gt;我们使用以下命令进行编译：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gcc -g -O2 -o work_and_wait_mt work_and_wait_mt.c -pthread
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-g&lt;/code&gt;: 生成调试信息，这是 &lt;code&gt;perf&lt;/code&gt; 能够将内存地址翻译成函数名的关键。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-O2&lt;/code&gt;: 开启二级优化，这更接近生产环境的编译设置，也使得我们防止内联的操作变得必要。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-pthread&lt;/code&gt;: 链接 &lt;code&gt;pthread&lt;/code&gt; 库，因为我们用到了多线程和屏障。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;执行采样&#34;&gt;
+    &lt;a href=&#34;#%e6%89%a7%e8%a1%8c%e9%87%87%e6%a0%b7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    执行采样
+&lt;/h3&gt;&lt;p&gt;现在，我们用两种不同的采样方式，在**系统全局模式（&lt;code&gt;-a&lt;/code&gt;）**下，对这个程序进行分析。&lt;/p&gt;
+&lt;p&gt;我们使用系统全局（&lt;code&gt;-a&lt;/code&gt;）模式，以确保能捕获到 &lt;code&gt;idle&lt;/code&gt; 任务。&lt;/p&gt;
+&lt;h4 id=&#34;实验一cpu-cycles-事件&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%9e%e9%aa%8c%e4%b8%80cpu-cycles-%e4%ba%8b%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    实验一：&lt;code&gt;cpu-cycles&lt;/code&gt; 事件
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;采集数据&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf record -a -F &lt;span class=&#34;m&#34;&gt;99&lt;/span&gt; -g -- ./work_and_wait_mt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;strong&gt;生成报告&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf report
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;&lt;strong&gt;报告解读&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Samples: 3K of event &lt;span class=&#34;s1&#34;&gt;&amp;#39;cpu_core/cycles/P&amp;#39;&lt;/span&gt;, Event count &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;approx.&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;: &lt;span class=&#34;m&#34;&gt;124421182834&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  Children      Self  Command          Shared Object          Symbol
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   99.28%    99.12%  work_and_wait_m  work_and_wait_mt       &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; burn_cpu
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.25%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; secondary_startup_64_no_verify
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.25%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; cpu_startup_entry
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.25%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; do_idle
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.20%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; start_secondary
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.19%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; asm_sysvec_apic_timer_interrupt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.19%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; cpuidle_idle_call
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; sysvec_apic_timer_interrupt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __sysvec_apic_timer_interrupt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; hrtimer_interrupt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __hrtimer_run_queues
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; tick_nohz_highres_handler
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; tick_sched_handle
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; update_process_times
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; scheduler_tick
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; task_tick_fair
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.16%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; call_cpuidle
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;第一行是报告的标题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Samples: 3K&lt;/strong&gt;: 在程序运行期间，perf 总共捕获了 3000 个样本。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;event &amp;lsquo;cpu_core/cycles/P&amp;rsquo;&lt;/strong&gt;: perf 告诉你它采样的是 cycles 事件。这个名字 cpu_core/cycles/P 是一个更具体的硬件事件名称，但本质就是 CPU 时钟周期。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Event count (approx.)&lt;/strong&gt;: 程序在运行时，大约产生了 1 千 2 百亿个 CPU 周期。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来是表格的列：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Children&lt;/strong&gt;: &lt;strong&gt;子项开销&lt;/strong&gt;。表示这个函数&lt;strong&gt;以及它调用的所有子函数&lt;/strong&gt;总共占用的 CPU 时间百分比。可以理解为，当程序执行到这个函数所在的调用链上时，所花费的时间。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Self&lt;/strong&gt;: &lt;strong&gt;自身开销&lt;/strong&gt;。表示 CPU 时间&lt;strong&gt;只花在这个函数本身内部&lt;/strong&gt;的百分比，不包括它调用的其他函数。这是定位代码热点的最关键指标。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Command&lt;/strong&gt;: 运行的命令名 (work_and_wait)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Shared Object&lt;/strong&gt;: 该符号所在的库或可执行文件。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Symbol&lt;/strong&gt;: 函数名或内核符号名。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Self: 99.12%&lt;/strong&gt;，这是最重要的信息。在所有样本中，有 &lt;strong&gt;99.12%&lt;/strong&gt; 的样本都是在 CPU 执行 &lt;code&gt;burn_cpu&lt;/code&gt; 函数内部的指令时捕获的。这清晰地表明，这个函数是程序中唯一的 CPU 性能热点。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;swapper&lt;/code&gt;（即 idle 任务）在这里也出现了，但它的占比极小，与 &lt;code&gt;burn_cpu&lt;/code&gt; 产生的海量周期相比，这些内核自身的管理开销几乎可以忽略不计。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;总结 cpu-cycles 报告：&lt;/strong&gt; &lt;code&gt;burn_cpu&lt;/code&gt;消耗了 &lt;strong&gt;99.12%&lt;/strong&gt; 的 CPU 算力，&lt;code&gt;perf&lt;/code&gt; 准确地抓住了那个让 CPU 发热的元凶。&lt;strong&gt;&lt;code&gt;swapper&lt;/code&gt;（idle 任务）几乎可以忽略不计&lt;/strong&gt;，证明了 &lt;code&gt;cpu-cycles&lt;/code&gt; 采样在程序休眠时是“暂停”的，它只关心工作，不关心等待。&lt;/p&gt;
+&lt;h4 id=&#34;实验二cpu-clock-事件&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%9e%e9%aa%8c%e4%ba%8ccpu-clock-%e4%ba%8b%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    实验二：&lt;code&gt;cpu-clock&lt;/code&gt; 事件
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;采集数据&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf record -a -F &lt;span class=&#34;m&#34;&gt;99&lt;/span&gt; -e cpu-clock -g -- ./work_and_wait_mt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;strong&gt;生成报告&lt;/strong&gt;:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf report
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;&lt;strong&gt;报告解读&lt;/strong&gt;:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Samples: 15K of event &lt;span class=&#34;s1&#34;&gt;&amp;#39;cpu-clock&amp;#39;&lt;/span&gt;, Event count &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;approx.&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;: &lt;span class=&#34;m&#34;&gt;156434341870&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  Children      Self  Command          Shared Object          Symbol
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.88%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; secondary_startup_64_no_verify
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.88%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; cpu_startup_entry
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.88%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; do_idle
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.87%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; cpuidle_idle_call
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.87%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; call_cpuidle
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.87%    63.85%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; cpuidle_enter_state
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   63.87%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; cpuidle_enter
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   58.09%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; start_secondary
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   36.08%    36.08%  work_and_wait_m  work_and_wait_mt       &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; burn_cpu
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+    5.79%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; x86_64_start_kernel
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+    5.79%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; x86_64_start_reservations
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+    5.79%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; start_kernel
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+    5.79%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; arch_call_rest_init
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+    5.79%     0.00%  swapper          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; rest_init
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.01%     0.01%  Lingma           &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; finish_task_switch.isra.0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;情况发生了戏剧性的反转。在这份报告中，&lt;code&gt;swapper&lt;/code&gt; （空闲任务）成为了绝对的主角。有 &lt;strong&gt;63.85%&lt;/strong&gt; 的时间样本，都捕获到 CPU 正处于 &lt;code&gt;cpuidle_enter_state&lt;/code&gt; 这个函数内部，这正是内核让 CPU“休眠”的地方。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;burn_cpu&lt;/code&gt; &lt;strong&gt;沦为配角 (36.08% Self)&lt;/strong&gt;，曾经消耗了 99% CPU 算力的 &lt;code&gt;burn_cpu&lt;/code&gt; 函数，在时间的维度上，只占了 36.08% 的份额。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;总结 cpu-clock 报告：&lt;/strong&gt; &lt;strong&gt;&lt;code&gt;swapper&lt;/code&gt; 成了主角&lt;/strong&gt;，占据了 &lt;strong&gt;63.85%&lt;/strong&gt; 的时间样本，证明了 CPU 在绝大部分&lt;strong&gt;时间&lt;/strong&gt;里，都处于内核安排的“睡眠”状态。&lt;strong&gt;&lt;code&gt;burn_cpu&lt;/code&gt; 沦为配角&lt;/strong&gt;，只占了 &lt;strong&gt;36.08%&lt;/strong&gt; 的时间。&lt;/p&gt;
+&lt;h4 id=&#34;对比总结&#34;&gt;
+    &lt;a href=&#34;#%e5%af%b9%e6%af%94%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    对比总结
+&lt;/h4&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;采样事件&lt;/th&gt;
+&lt;th&gt;核心问题&lt;/th&gt;
+&lt;th&gt;burn_cpu 表现&lt;/th&gt;
+&lt;th&gt;swapper 表现&lt;/th&gt;
+&lt;th&gt;分析视角&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;cpu-cycles&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;“谁消耗了&lt;strong&gt;算力&lt;/strong&gt;？”&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;绝对主力 (99%)&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;微不足道&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;On-CPU&lt;/strong&gt; (工作量分析)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;cpu-clock&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;“&lt;strong&gt;时间&lt;/strong&gt;花在哪了？”&lt;/td&gt;
+&lt;td&gt;少数派 (~36%)&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;绝对主力 (64%)&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Wall-Clock&lt;/strong&gt; (延迟/等待分析)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;一个有用的技巧进程专属模式下的-cpu-clock&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%80%e4%b8%aa%e6%9c%89%e7%94%a8%e7%9a%84%e6%8a%80%e5%b7%a7%e8%bf%9b%e7%a8%8b%e4%b8%93%e5%b1%9e%e6%a8%a1%e5%bc%8f%e4%b8%8b%e7%9a%84-cpu-clock&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    一个有用的技巧：进程专属模式下的 &lt;code&gt;cpu-clock&lt;/code&gt;
+&lt;/h3&gt;&lt;p&gt;如果不使用 &lt;code&gt;-a&lt;/code&gt; 参数，而是运行以下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ sudo perf record -F &lt;span class=&#34;m&#34;&gt;99&lt;/span&gt; -e cpu-clock -g -- ./work_and_wait_mt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;得到的报告竟然和 &lt;code&gt;cycles&lt;/code&gt; 采样的结果惊人地一致，&lt;code&gt;swapper&lt;/code&gt; 消失了，&lt;code&gt;burn_cpu&lt;/code&gt; 再次占据了 99% 以上的份额，休息时间（swapper/idle）完全消失了。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Samples: 5K of event &lt;span class=&#34;s1&#34;&gt;&amp;#39;cpu-clock&amp;#39;&lt;/span&gt;, Event count &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;approx.&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;: &lt;span class=&#34;m&#34;&gt;56252524690&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  Children      Self  Command          Shared Object      Symbol
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+   99.98%    99.98%  work_and_wait_m  work_and_wait_mt   &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; burn_cpu
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.02%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __check_heap_object
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  work_and_wait_mt   &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; worker_function
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __printf_chk
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __vfprintf_internal
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __printf_buffer_to_file_done
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; _IO_file_xsputn@@GLIBC_2.2.5
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; _IO_do_write@@GLIBC_2.2.5
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; _IO_file_write@@GLIBC_2.2.5
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  libc.so.6          &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;.&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; __GI___libc_write
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; entry_SYSCALL_64_after_hwframe
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; do_syscall_64
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     0.02%     0.00%  work_and_wait_m  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;kernel.kallsyms&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;k&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; x64_sys_call
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;原因是这次使用的命令是&lt;strong&gt;进程专属（Process-Specific）模式&lt;/strong&gt;，而不是&lt;strong&gt;系统全局（System-Wide）模式&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;-a&lt;/code&gt;参数的全称是 &lt;strong&gt;&lt;code&gt;--all-cpus&lt;/code&gt;&lt;/strong&gt;，是对全系统范围内所有 CPU 进行收集。如果不加 &lt;code&gt;-a&lt;/code&gt;，上面的命令明确告诉 perf，&lt;strong&gt;只监控 ./work_and_wait_mt 这个进程以及它创建的所有子进程。对于任何其他进程的活动，请直接忽略。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当 &lt;code&gt;perf&lt;/code&gt; 在&lt;strong&gt;进程专属模式&lt;/strong&gt;下运行时，它内部有一个强大的“过滤器”，当 &lt;code&gt;cpu-clock&lt;/code&gt; 的“闹钟”响起时，&lt;code&gt;perf&lt;/code&gt; 会检查当前在 CPU 上运行的是哪个进程。如果恰好是我们的 &lt;code&gt;work_and_wait_mt&lt;/code&gt;，样本就被记录下来。如果在程序休眠期间，CPU 上运行的是 &lt;code&gt;swapper&lt;/code&gt; 任务，&lt;code&gt;perf&lt;/code&gt; 会发现这个任务不属于它的监控目标，于是&lt;strong&gt;直接丢弃了这个样本&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;通过这个实验我们发现，在&lt;strong&gt;进程专属模式&lt;/strong&gt;下，&lt;code&gt;cpu-clock&lt;/code&gt; 的行为会因为进程过滤器的存在而变得非常像 &lt;code&gt;cpu-cycles&lt;/code&gt;。这意味着，&lt;strong&gt;在不方便使用硬件 &lt;code&gt;cycles&lt;/code&gt; 事件，或者想纯粹用软件事件来分析一个特定程序的 On-CPU 热点时，使用“进程专属模式”下的 &lt;code&gt;cpu-clock&lt;/code&gt; 是一个完全可行的替代方案。&lt;/strong&gt; 同时，要真正地用 &lt;code&gt;cpu-clock&lt;/code&gt; 来分析等待时间（Off-CPU），&lt;strong&gt;必须使用 -a 参数切换到系统全局模式&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;
+    &lt;a href=&#34;#%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    总结
+&lt;/h2&gt;&lt;p&gt;通过对内核源码的剖析，以及一系列实验，现在我们可以回答开头那个令人困惑的问题了：cpu-clock 和 cycles 到底有何不同？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;cpu-clock&lt;/code&gt;&lt;/strong&gt; 基于&lt;strong&gt;时间&lt;/strong&gt;，它的闹钟忠实地记录下每个时间点的系统状态。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;cpu-cycles&lt;/code&gt;&lt;/strong&gt; 基于&lt;strong&gt;工作量&lt;/strong&gt;，它的计步器精准地衡量了 CPU 的实际消耗。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;另外，在&lt;strong&gt;进程专属模式&lt;/strong&gt;下，perf 内置的“过滤器”会将所有非目标进程的样本（包括 swapper）丢弃，使得 &lt;code&gt;cpu-clock&lt;/code&gt; 的行为趋近于 &lt;code&gt;cpu-cycles&lt;/code&gt;，成为一种纯软件实现的 On-CPU 分析替代方案。&lt;/p&gt;
+&lt;p&gt;当面对文档的语焉不详和网络信息的模糊不清时，只有深入源码、亲手验证，才是揭开迷雾正确路径。希望这篇文章对你也有帮助。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>Wall-Clock 与 CPU-Cycles 采样的区别</title>
         <link>https://mazhen.tech/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/</link>
         <pubDate>Wed, 18 Jun 2025 10:09:54 +0800</pubDate>
