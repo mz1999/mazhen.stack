@@ -539,12 +539,24 @@
 <p>实际上，Safepoint 是 JVM 的一个基础性平台机制。任何需要<strong>安全地检查或修改所有线程共享数据</strong>（如堆、类元数据、线程栈等）的重量级操作，都必须依赖它来创造一个安全确定的执行环境。GC 只是这个平台上最“知名”的客户而已。</p>
 <p>除了 GC，还有一些常见的 VM 操作，同样需要在全局 Safepoint 中执行：</p>
 <ul>
-<li><strong>代码反优化 (Deoptimization)</strong>：当 JIT 编译后的代码因为某些原因（如分支预测失败、加载了未被预期的子类等）需要回退到解释执行状态时，JVM 需要暂停线程，修改其栈帧，这个过程必须在 Safepoint 中进行。</li>
-<li><strong>类的重定义与热部署 (Class Redefinition)</strong>：像我们在 IDE 中热更新代码，或者使用某些动态诊断工具时，JVM 需要替换掉已加载的类。这个操作会涉及修改类的元数据和可能存在的实例，显然也需要所有线程暂停。</li>
-<li><strong>线程堆栈转储 (Thread Dump)</strong>：当我们使用 <code>jstack</code> 或其他工具来获取所有线程的堆栈快照时，为了得到一个准确、一致的视图，JVM 会触发一次 Safepoint。</li>
-<li><strong>堆转储 (Heap Dump)</strong>：与线程转储类似，生成堆快照也需要在一个静态的内存视图下进行。</li>
-<li><strong>偏向锁批量撤销 (Bulk Revocation of Biased Locks)</strong>：当某个类的偏向锁被大量撤销时，JVM 需要遍历所有线程栈和堆，找到并修改相关的锁记录。</li>
-<li><strong>其他 JVMTI 操作</strong>：许多通过 JVMTI（JVM Tool Interface）提供的调试和监控功能，例如强制修改变量值等，也依赖 Safepoint 来保证操作的原子性和安全性。</li>
+<li>
+<p><strong>代码反优化 (Deoptimization)</strong>：当 JIT 编译后的代码因为某些原因（如分支预测失败、加载了未被预期的子类等）需要回退到解释执行状态时，JVM 需要暂停线程，修改其栈帧，这个过程必须在 Safepoint 中进行。</p>
+</li>
+<li>
+<p><strong>类的重定义与热部署 (Class Redefinition)</strong>：像我们在 IDE 中热更新代码，或者使用某些动态诊断工具时，JVM 需要替换掉已加载的类。这个操作会涉及修改类的元数据和可能存在的实例，显然也需要所有线程暂停。</p>
+</li>
+<li>
+<p><strong>线程堆栈转储 (Thread Dump)</strong>：当我们使用 <code>jstack</code> 或其他工具来获取所有线程的堆栈快照时，为了得到一个准确、一致的视图，JVM 会触发一次 Safepoint。</p>
+</li>
+<li>
+<p><strong>堆转储 (Heap Dump)</strong>：与线程转储类似，生成堆快照也需要在一个静态的内存视图下进行。</p>
+</li>
+<li>
+<p><strong>偏向锁批量撤销 (Bulk Revocation of Biased Locks)</strong>：当某个类的偏向锁被大量撤销时，JVM 需要遍历所有线程栈和堆，找到并修改相关的锁记录。</p>
+</li>
+<li>
+<p><strong>其他 JVMTI 操作</strong>：许多通过 JVMTI（JVM Tool Interface）提供的调试和监控功能，例如强制修改变量值等，也依赖 Safepoint 来保证操作的原子性和安全性。</p>
+</li>
 </ul>
 <p>因此，下一次当你的应用出现卡顿，而 GC 日志却“清白无辜”时，不妨思考一下，是否是上述这些原因之一，触发了一次意料之外的 Safepoint 停顿。</p>
 <h2 id="safepoint-的工作机制">
@@ -742,7 +754,7 @@
 </li>
 <li>
 <p><strong>武装与轮询</strong></p>
-<p><code>begin()</code> 方法会设置一个全局的 Safepoint 状态标志，并遍历所有存活的 JavaThread 实例，修改它们各自线程本地的轮询状态。这个过程被称为 <strong>“武装”（Arming）</strong>。此后，每个正在运行的线程在执行到代码中的**轮询点（Poll Location）**时，就会检测到这个状态改变。</p>
+<p><code>begin()</code> 方法会设置一个全局的 Safepoint 状态标志，并遍历所有存活的 JavaThread 实例，修改它们各自线程本地的轮询状态。这个过程被称为 <strong>“武装”（Arming）</strong>。此后，每个正在运行的线程在执行到代码中的 <strong>轮询点（Poll Location）</strong> 时，就会检测到这个状态改变。</p>
 </li>
 <li>
 <p><strong>阻塞与同步</strong></p>
