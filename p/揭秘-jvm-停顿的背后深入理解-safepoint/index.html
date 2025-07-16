@@ -733,28 +733,28 @@
 </h3><p>有了 VMThread 和 VM_Operation 这两个基本构件，Safepoint 的整体执行流程就变得非常清晰了。它是一个标准化的、由 VMThread 主导的调度过程。</p>
 <ol>
 <li>
-<p><strong>提交任务</strong>
-当一个需要 Safepoint 的 <code>VM_Operation</code> 被创建并提交到 <code>VMOperationQueue</code> 后，它就进入了等待处理的状态。</p>
+<p><strong>提交任务</strong></p>
+<p>当一个需要 Safepoint 的 <code>VM_Operation</code> 被创建并提交到 <code>VMOperationQueue</code> 后，它就进入了等待处理的状态。</p>
 </li>
 <li>
-<p><strong>调度与发起</strong>
-VMThread 在其主循环中，从队列里取出这个 <code>VM_Operation</code>。在确认该任务需要 Safepoint 后，它便调用 <code>SafepointSynchronize::begin()</code>，正式启动了将所有线程带入 Safepoint 的同步过程。</p>
+<p><strong>调度与发起</strong></p>
+<p>VMThread 在其主循环中，从队列里取出这个 <code>VM_Operation</code>。在确认该任务需要 Safepoint 后，它便调用 <code>SafepointSynchronize::begin()</code>，正式启动了将所有线程带入 Safepoint 的同步过程。</p>
 </li>
 <li>
-<p><strong>武装与轮询</strong>
-<code>begin()</code> 方法会设置一个全局的 Safepoint 状态标志，并遍历所有存活的 JavaThread 实例，修改它们各自线程本地的轮询状态。这个过程被称为 <strong>“武装”（Arming）</strong>。此后，每个正在运行的线程在执行到代码中的**轮询点（Poll Location）**时，就会检测到这个状态改变。</p>
+<p><strong>武装与轮询</strong></p>
+<p><code>begin()</code> 方法会设置一个全局的 Safepoint 状态标志，并遍历所有存活的 JavaThread 实例，修改它们各自线程本地的轮询状态。这个过程被称为 <strong>“武装”（Arming）</strong>。此后，每个正在运行的线程在执行到代码中的**轮询点（Poll Location）**时，就会检测到这个状态改变。</p>
 </li>
 <li>
-<p><strong>阻塞与同步</strong>
-一旦检测到暂停请求，线程会主动执行 <code>SafepointSynchronize::block()</code> 方法，使自身进入阻塞状态，并在一个全局的屏障（WaitBarrier）上等待。VMThread 则会持续检查所有线程的状态，直到确认<strong>所有</strong>线程都已暂停。这个等待所有线程完成同步的耗时，就是 <strong>TTSP（Time-To-Safepoint）</strong>。</p>
+<p><strong>阻塞与同步</strong></p>
+<p>一旦检测到暂停请求，线程会主动执行 <code>SafepointSynchronize::block()</code> 方法，使自身进入阻塞状态，并在一个全局的屏障（WaitBarrier）上等待。VMThread 则会持续检查所有线程的状态，直到确认<strong>所有</strong>线程都已暂停。这个等待所有线程完成同步的耗时，就是 <strong>TTSP（Time-To-Safepoint）</strong>。</p>
 </li>
 <li>
-<p><strong>执行操作</strong>
-一旦确认所有线程都已同步，JVM 就进入了一个全局静止状态。此时，VMThread 才安全地调用 <code>VM_Operation</code> 对象的核心 <code>doit()</code> 方法，执行实际的任务逻辑（例如，GC 扫描）。</p>
+<p><strong>执行操作</strong></p>
+<p>一旦确认所有线程都已同步，JVM 就进入了一个全局静止状态。此时，VMThread 才安全地调用 <code>VM_Operation</code> 对象的核心 <code>doit()</code> 方法，执行实际的任务逻辑（例如，GC 扫描）。</p>
 </li>
 <li>
-<p><strong>恢复执行</strong>
-操作完成后，VMThread 调用 <code>SafepointSynchronize::end()</code> 方法。该方法负责重置全局状态，解除对各线程轮询状态的“武装”，并最终通过 <code>WaitBarrier</code> 唤醒所有被阻塞的 Java 线程，使其恢复正常执行。</p>
+<p><strong>恢复执行</strong></p>
+<p>操作完成后，VMThread 调用 <code>SafepointSynchronize::end()</code> 方法。该方法负责重置全局状态，解除对各线程轮询状态的“武装”，并最终通过 <code>WaitBarrier</code> 唤醒所有被阻塞的 Java 线程，使其恢复正常执行。</p>
 </li>
 </ol>
 <p>这个流程确保了所有全局操作都在一个绝对安全、一致的环境中进行，是 JVM 稳定运行的基石。在接下来的部分，我们将深入探讨第 3 步中的“轮询”是如何在不同执行模式下被高效实现的。</p>
@@ -842,7 +842,7 @@ VMThread 在其主循环中，从队列里取出这个 <code>VM_Operation</code>
 <p>此时，虽然 JIT 编译的代码中包含了内存读取指令，但 <code>test</code> 指令要访问的内存地址是<strong>一个合法的、可读的普通内存地址</strong>（<code>good_page</code>）。因此，<code>test</code> 指令每次都能成功执行，速度极快，几乎不产生任何性能开销，也不会引起分支预测失败。这是 Safepoint 机制性能如此之高的关键。</p>
 </li>
 <li>
-<p>*<strong>发起 Safepoint（慢速路径）</strong></p>
+<p><strong>发起 Safepoint（慢速路径）</strong></p>
 <p>当 <code>VMThread</code> 决定发起一次全局 Safepoint 时，它会执行一个关键动作：<strong>将所有线程的轮询指针，都修改为指向那个被保护的、权限为 <code>PROT_NONE</code> 的轮询页地址（<code>bad_page</code>）</strong>。</p>
 </li>
 <li>
