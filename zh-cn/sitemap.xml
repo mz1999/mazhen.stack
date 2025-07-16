@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,23 +28,20 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/kernel/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/java/</loc>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/linux/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/performance/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -57,13 +54,19 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E6%8F%AD%E7%A7%98-jvm-%E5%81%9C%E9%A1%BF%E7%9A%84%E8%83%8C%E5%90%8E%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-safepoint/</loc>
+    <lastmod>2025-07-16T11:13:04+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/kernel/</loc>
+    <lastmod>2025-06-20T11:10:02+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/</loc>
     <lastmod>2025-06-20T11:10:02+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/wall-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E7%9A%84%E5%8C%BA%E5%88%AB/</loc>
     <lastmod>2025-06-18T10:09:54+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2025-06-15T19:39:55+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/jvm/</loc>
     <lastmod>2025-06-15T19:39:55+08:00</lastmod>
