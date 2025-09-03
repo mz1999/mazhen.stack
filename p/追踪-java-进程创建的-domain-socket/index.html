@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。 对于 Java 应用打开的">
+<title>追踪 Java 进程创建的 domain socket</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="追踪 Java 进程创建的 domain socket">
+<meta property='og:description' content="在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。 对于 Java 应用打开的">
+<meta property='og:url' content='https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='trace' /><meta property='article:tag' content='crac' /><meta property='article:tag' content='bcc' /><meta property='article:published_time' content='2025-09-03T10:37:32&#43;08:00'/><meta property='article:modified_time' content='2025-09-03T10:37:32&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="追踪 Java 进程创建的 domain socket">
+<meta name="twitter:description" content="在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。 对于 Java 应用打开的">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#初步排查过程">初步排查过程</a></li>
+    <li><a href="#strace">strace</a></li>
+    <li><a href="#安装-bcc">安装 BCC</a></li>
+    <li><a href="#bcc-脚本">BCC 脚本</a></li>
+    <li><a href="#最终定位">最终定位</a></li>
+    <li><a href="#sssd-是什么">SSSD 是什么</a>
+      <ol>
+        <li><a href="#查看-sssd-进程及其配置">查看 SSSD 进程及其配置</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/">追踪 Java 进程创建的 domain socket</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2025-09-03</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 8 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。</p>
+<p>对于 Java 应用打开的文件，可以通过定义<a class="link" href="https://docs.azul.com/core/crac/fd-policies"  target="_blank" rel="noopener"
+    >文件描述符策略</a> 让 CRaC 自动处理。对于监听端口或连接池，一般建议应用实现 CRaC 的 <a class="link" href="https://github.com/CRaC/org.crac/blob/master/src/main/java/org/crac/Resource.java"  target="_blank" rel="noopener"
+    >Resource</a> 接口，在 checkpoint 前关闭资源，在 restore 后重新打开。</p>
+<p>但有一些资源，不是 Java 应用直接打开持有的，而是底层的 JVM 或依赖的 C 库打开的，这类资源要追踪定位是谁创建的比较困难。</p>
+<h2 id="初步排查过程">
+    <a href="#%e5%88%9d%e6%ad%a5%e6%8e%92%e6%9f%a5%e8%bf%87%e7%a8%8b" class="header-anchor">#</a>
+    初步排查过程
+</h2><p>最近我就碰到了这样一个例子。在对 Java 应用创建 checkpoint 时，报如下异常：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">An</span><span class="w"> </span><span class="n">exception</span><span class="w"> </span><span class="n">during</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">checkpoint</span><span class="w"> </span><span class="n">operation</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">CheckpointException</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Suppressed</span><span class="p">:</span><span class="w"> </span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">CheckpointOpenSocketException</span><span class="p">:</span><span class="w"> </span><span class="n">FD</span><span class="w"> </span><span class="n">fd</span><span class="o">=</span><span class="n">6</span><span class="w"> </span><span class="n">type</span><span class="o">=</span><span class="n">socket</span><span class="w"> </span><span class="n">path</span><span class="o">=</span><span class="n">socket</span><span class="p">:</span><span class="o">[</span><span class="n">2885875383</span><span class="o">]</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">29295</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">translateJVMExceptions</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">116</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore1</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">189</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">315</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestoreInternal</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">328</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>表明 Java 应用持有文件描述 (fd) 6，类型是 socket，inode 为 2885875383.</p>
+<p>于是查看该 Java 进程持有的所有 socket 资源：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ll /proc/2444401/fd  <span class="p">|</span> grep socket
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">lrwx------ <span class="m">1</span> root root <span class="m">64</span> Sep  <span class="m">3</span> 11:19 <span class="m">6</span> -&gt; socket:<span class="o">[</span>2885875383<span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>果然 Java 进程持有的 fd 6，类型是 socket，inode 为 2885875383。进一步使用 <code>lsof</code> 命令查看这个 socket 资源的详细信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">lsof -p <span class="m">2444401</span> <span class="p">|</span> grep <span class="m">2885875383</span>
+</span></span><span class="line"><span class="cl">exe     <span class="m">2444401</span> root    6u     unix 0x00000000b8935f1c       0t0 <span class="m">2885875383</span> <span class="nv">type</span><span class="o">=</span>STREAM
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第五列为 <code>unix</code>，表示该文件描述符对应的资源是 <code>unix domain socket</code>。</p>
+<p>想进一步调研这个 domain socket 的来源和作用，它的一端是 Java 进程持有，那么另一端是谁持有呢？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># -U ：筛选 Unix 域套接字（Unix Domain Sockets）。</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -a：逻辑 “与”（AND） 操作，将前面的条件（-p 和 -U）组合，表示必须同时满足</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># +E：显示套接字的 端点信息（Endpoints）。</span>
+</span></span><span class="line"><span class="cl">lsof -p <span class="m">2444401</span> -U -a +E
+</span></span><span class="line"><span class="cl">COMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF       NODE NAME
+</span></span><span class="line"><span class="cl">exe     <span class="m">2444401</span> root    6u  unix 0x00000000b8935f1c      0t0 <span class="m">2885875383</span> <span class="nv">type</span><span class="o">=</span>STREAM
+</span></span><span class="line"><span class="cl">exe     <span class="m">2444401</span> root   57u  unix 0x00000000a4202b14      0t0 <span class="m">2885883519</span> <span class="nv">type</span><span class="o">=</span>STREAM
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>输出中并没有发现对端的进程信息。</p>
+<p>一般情况下，加了 <code>+E</code> 参数，输出中会通过 <code>-&gt;INO=</code> 指示出对端进程信息，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo lsof -p <span class="m">1167</span> -U -a +E
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">container <span class="m">1131</span> root    8u  unix 0xffff9d34cdf28c00      0t0 <span class="m">14525</span> /run/containerd/containerd.sock <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">21711</span> 1167,dockerd,8u <span class="o">(</span>CONNECTED<span class="o">)</span>
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">dockerd   <span class="m">1167</span> root    8u  unix 0xffff9d34cdf29400      0t0 <span class="m">21711</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">14525</span> 1131,container,8u <span class="o">(</span>CONNECTED<span class="o">)</span>
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看出，在 <code>containerd</code> 这一端，它使用文件描述符 8（标记为 8u，表示可读可写）来管理 domain socket，这个套接字被绑定到文件系统路径 <code>/run/containerd/containerd.sock</code> 上。行末的 <code>-&gt;INO=21711 1167,dockerd,8u (CONNECTED)</code> 表明，该套接字的对端是进程 ID 为 1167 的 <code>dockerd</code>。<code>dockerd</code> 同样使用文件描述符 8 来管理这个连接，且连接状态为已建立<code>（CONNECTED）</code>。</p>
+<p>再查看 <code>dockerd</code> 进程这端的情况，它也使用文件描述符 8（8u）来维护这个通信通道。与 <code>containerd</code>不同，<code>dockerd</code> 端的套接字没有绑定任何文件系统路径，这是一个匿名套接字。同样，行末的 <code>-&gt;INO=14525 1131,container,8u (CONNECTED)</code> 验证了连接的对称性，对端是进程 ID 为 1131 的 containerd，连接状态同样是已建立。</p>
+<p>而我们上面查看 Java 进程 2444401 持有的 domain socket，并么有发现对端信息。我们现在只知道 Java 进程通过文件描述符 6 持有一个 domain socket，但是 domain socket 的作用是什么，为什么会被创建，完全不知道。如何进一步排查呢？</p>
+<h2 id="strace">
+    <a href="#strace" class="header-anchor">#</a>
+    strace
+</h2><p>首先想到的是通过 strace 追踪系统调用，看能不能发现什么有用的信息。在 Java 进程的启动命令前加入 strace：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># -f 跟踪子进程（fork/vfork/clone 创建的进程）</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -yy 增强网络信息显示，打印 socket 的完整协议信息</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -e trace=desc,network  过滤系统调用类型，跟踪文件描述符和网络相关的调用</span>
+</span></span><span class="line"><span class="cl">strace -f -yy -e <span class="nv">trace</span><span class="o">=</span>desc,network -o /tmp/startup_trace.log java ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最终在 <code>startup_trace.log</code> 文件中，没有找到文件描述 6 相关的信息，这条路没走通。</p>
+<h2 id="安装-bcc">
+    <a href="#%e5%ae%89%e8%a3%85-bcc" class="header-anchor">#</a>
+    安装 BCC
+</h2><p>然后想到，可以使用 eBPF 追踪系统中，所有 domain socket 的创建信息。先安装 <a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >BCC</a>，当前内核版本较低，从源码编译安装 BCC。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 安装编译依赖</span>
+</span></span><span class="line"><span class="cl">dnf groupinstall -y <span class="s2">&#34;Development Tools&#34;</span>
+</span></span><span class="line"><span class="cl">dnf install -y cmake clang llvm python3-devel elfutils-libelf-devel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装 LLVM 和 Clang 开发包</span>
+</span></span><span class="line"><span class="cl">dnf install -y llvm-devel clang-devel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查找 LLVM 安装路径</span>
+</span></span><span class="line"><span class="cl">find /usr -name <span class="s2">&#34;LLVMConfig.cmake&#34;</span> 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">/usr/lib64/cmake/llvm/LLVMConfig.cmake
+</span></span><span class="line"><span class="cl">which llvm-config
+</span></span><span class="line"><span class="cl">/usr/bin/llvm-config
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 克隆 BCC 源码</span>
+</span></span><span class="line"><span class="cl">git clone https://github.com/iovisor/bcc.git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> bcc
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 创建构建目录</span>
+</span></span><span class="line"><span class="cl">mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 配置编译，指定 Python 路径</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用找到的 LLVM 路径配置 CMake，`-DLLVM_DIR` 参数应该指向包含 `LLVMConfig.cmake` 文件的目录</span>
+</span></span><span class="line"><span class="cl">cmake .. -DPYTHON_CMD<span class="o">=</span>python3 -DLLVM_DIR<span class="o">=</span>/usr/lib64/cmake/llvm
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 编译（使用多核加速）</span>
+</span></span><span class="line"><span class="cl">make -j<span class="k">$(</span>nproc<span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装</span>
+</span></span><span class="line"><span class="cl">make install
+</span></span><span class="line"><span class="cl">ldconfig
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>安装完成后进行验证：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">python3 -c <span class="s2">&#34;from bcc import BPF; print(&#39;BCC 安装成功！&#39;)&#34;</span>
+</span></span><span class="line"><span class="cl">BCC 安装成功！
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="bcc-脚本">
+    <a href="#bcc-%e8%84%9a%e6%9c%ac" class="header-anchor">#</a>
+    BCC 脚本
+</h2><p>指挥 AI 写一个追踪 domain socket 创建的脚本 <code>trace_unix_socket_creation.py</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">re</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">bcc</span> <span class="kn">import</span> <span class="n">BPF</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># AF_UNIX 的值为 1</span>
+</span></span><span class="line"><span class="cl"><span class="n">AF_UNIX</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">prog</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;uapi/linux/ptrace.h&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;linux/sched.h&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;net/sock.h&gt; // For AF_UNIX
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">struct data_t {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 ppid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int stack_id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_HASH(infotmp, u32, struct data_t);
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_STACK_TRACE(stack_traces, 1024);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// Hook for socket() syscall
+</span></span></span><span class="line"><span class="cl"><span class="s2">int trace_socket_entry(struct pt_regs *ctx, int domain, int type, int protocol) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (domain != AF_UNIX) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">    
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = bpf_get_current_pid_tgid() &gt;&gt; 32;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 ppid = 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    bpf_probe_read_kernel(&amp;ppid, sizeof(ppid), &amp;task-&gt;real_parent-&gt;tgid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t data = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.tid = tid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.ppid = ppid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.stack_id = stack_traces.get_stackid(ctx, BPF_F_USER_STACK);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.update(&amp;tid, &amp;data);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">int trace_socket_return(struct pt_regs *ctx) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = bpf_get_current_pid_tgid() &gt;&gt; 32;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t *datap = infotmp.lookup(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (!datap) return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int retval = PT_REGS_RC(ctx);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (retval &gt;= 0) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_trace_printk(&#34;socket(AF_UNIX) call: ppid=</span><span class="si">%d</span><span class="s2"> tid=</span><span class="si">%d</span><span class="s2"> new_fd=</span><span class="si">%d</span><span class="s2">\\n&#34;, datap-&gt;ppid, datap-&gt;tid, retval);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_trace_printk(&#34;stackid=</span><span class="si">%d</span><span class="s2">\\n&#34;, datap-&gt;stack_id);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">b</span> <span class="o">=</span> <span class="n">BPF</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">prog</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">b</span><span class="o">.</span><span class="n">attach_kprobe</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="s2">&#34;__sys_socket&#34;</span><span class="p">,</span> <span class="n">fn_name</span><span class="o">=</span><span class="s2">&#34;trace_socket_entry&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">b</span><span class="o">.</span><span class="n">attach_kretprobe</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="s2">&#34;__sys_socket&#34;</span><span class="p">,</span> <span class="n">fn_name</span><span class="o">=</span><span class="s2">&#34;trace_socket_return&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Tracing socket(AF_UNIX, ...) calls... Ctrl-C to stop.</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">tid_to_tgid_cache</span> <span class="o">=</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">get_tgid</span><span class="p">(</span><span class="n">tid</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tid_to_tgid_cache</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">tid_to_tgid_cache</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># --- 关键修改：处理竞态条件 ---</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;/proc/</span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">/status&#34;</span><span class="p">,</span> <span class="s2">&#34;r&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;Tgid:&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">tgid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">tid_to_tgid_cache</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span> <span class="o">=</span> <span class="n">tgid</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="n">tgid</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 捕获 FileNotFoundError 或 ProcessLookupError</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">ProcessLookupError</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># 线程已退出，返回 -1 表示无效</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">cpu</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">trace_fields</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="s2">&#34;stackid=&#34;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;stackid=(\d+)&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">sid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                <span class="n">tgid</span> <span class="o">=</span> <span class="n">get_tgid</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1"># 只有在成功获取 TGID 时才尝试解析符号</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">tgid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">b</span><span class="p">[</span><span class="s2">&#34;stack_traces&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">sid</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;    </span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">b</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">tgid</span><span class="p">,</span> <span class="n">show_module</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_offset</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;    [Could not get symbols for exited tid </span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">]&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>AI 还贴心的给出了脚本执行的流程图：
+<img src="https://cdn.mazhen.tech/2024/202509031554586.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="flow"
+	
+	
+></p>
+<h2 id="最终定位">
+    <a href="#%e6%9c%80%e7%bb%88%e5%ae%9a%e4%bd%8d" class="header-anchor">#</a>
+    最终定位
+</h2><p>先停止 Java 进程，然后运行该脚本，在启动 Java 进程。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./trace_unix_socket_creation.py &gt; socket_trace
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 <code>socket_trace</code> 中根据 Java 进程的 PID 搜索，找到了 文件描述 6 的创建调用堆栈：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">socket(AF_UNIX) call: ppid=1527014 tid=1527479 new_fd=6\n
+</span></span><span class="line"><span class="cl">stackid=523\n
+</span></span><span class="line"><span class="cl">    b&#39;socket+0x8 [libc-2.28.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;[unknown] [libnss_sss.so.2]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;_nss_sss_getpwuid_r+0xe4 [libnss_sss.so.2]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;getpwuid_r+0x14c [libc-2.28.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;get_user_name(unsigned int)+0x5c [libjvm.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;PerfMemory::create_memory_region(unsigned long)+0x94 [libjvm.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;perfMemory_init()+0xa8 [libjvm.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;vm_init_globals()+0x24 [libjvm.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;Threads::create_vm(JavaVMInitArgs*, bool*)+0x234 [libjvm.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;JNI_CreateJavaVM+0x80 [libjvm.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;JavaMain+0x80 [libjli.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;ThreadJavaMain+0xc [libjli.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;[unknown] [libpthread-2.28.so]&#39;
+</span></span><span class="line"><span class="cl">    b&#39;[unknown] [libc-2.28.so]&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>调用堆栈记录了文件描述符 6 被创建的全过程，让我们从下往上，一步步还原：</p>
+<ol>
+<li>
+<p><strong><code>JNI_CreateJavaVM</code></strong>: Java 虚拟机的诞生。当我们执行 <code>java</code> 命令时，<code>libjli.so</code> (Java Launcher Interface) 库会加载核心的 JVM 库 (<code>libjvm.so</code>)，并调用 <code>JNI_CreateJavaVM</code> 这个函数来真正创建和初始化一个 JVM 实例。</p>
+</li>
+<li>
+<p><strong><code>Threads::create_vm</code> -&gt; <code>vm_init_globals</code></strong>: 在 JVM 内部，<code>create_vm</code> 函数开始搭建虚拟机运行所需的基础环境，其中一步就是初始化各种全局组件 (<code>vm_init_globals</code>)。</p>
+</li>
+<li>
+<p><strong><code>perfMemory_init</code></strong>: <code>perfMemory</code> 子系统被初始化。这个子系统是 JVM 性能监控的关键。它负责创建一块特殊的内存区域，用于存放 JVM 内部的性能计数器，例如 JIT 编译统计、垃圾回收次数和耗时等。我们熟知的 <code>jps</code>、<code>jstat</code>、<code>jcmd</code> 等命令行工具，正是通过读取这块内存区域来获取 JVM 实时运行数据的。</p>
+</li>
+<li>
+<p><strong><code>PerfMemory::create_memory_region</code> -&gt; <code>get_user_name</code></strong>: <code>PerfMemory</code> 创建的这块内存区域，实际上是以内存映射文件（memory-mapped file）的形式存在的，这些文件通常位于 <code>/tmp/hsperfdata_&lt;username&gt;/</code> 目录下（<code>hsperfdata</code> 是 HotSpot Performance Data 的缩写）。为了构建这个目录路径，JVM 需要知道当前运行它的用户名是什么，于是它调用了内部函数 <code>get_user_name</code>。</p>
+</li>
+<li>
+<p><strong><code>getpwuid_r</code> -&gt; <code>_nss_sss_getpwuid_r</code></strong>: <code>get_user_name</code> 函数通过调用标准的 glibc 函数 <code>getpwuid_r</code>，根据当前用户的 UID (User ID) 来查询其用户名。在现代 Linux 系统中，这个查询过程并非简单地读取 <code>/etc/passwd</code> 文件。它是由 <strong>NSS (Name Service Switch)</strong> 机制来管理的。NSS 会根据 <code>/etc/nsswitch.conf</code> 的配置，将这类查询请求转发给相应的处理模块。在我们的例子中，请求被转发给了 <strong>SSSD (System Security Services Daemon)</strong> 的客户端库 <code>libnss_sss.so.2</code>。</p>
+</li>
+<li>
+<p><strong><code>[unknown] [libnss_sss.so.2]</code> -&gt; <code>socket</code></strong>: <code>libnss_sss.so.2</code> 库只是一个“中间人”，它需要和后台运行的 <code>sssd</code> 守护进程进行通信，才能真正完成用户信息的查询。它选择的通信方式正是 Unix Domain Socket。于是，它调用了 <code>socket()</code> 系统调用来创建一个套接字，准备连接 <code>sssd</code> 服务。</p>
+</li>
+<li>
+<p><strong><code>new_fd=6</code></strong>: 在这个精确的时间点，我们的 Java 进程中最小的可用文件描述符编号恰好是 6。因此，内核将 6 这个编号分配给了这个新创建的套接字。</p>
+</li>
+</ol>
+<p>所以，文件描述符 6 并非由我们的 Java 应用代码直接创建，而是在 JVM 启动的极早期，由其内部的性能监控子系统为了获取当前用户名，间接触发了系统的 NSS 模块，进而由 SSSD 客户端库创建的、用于和 SSSD 后台服务通信的 Unix Domain Socket。</p>
+<h2 id="sssd-是什么">
+    <a href="#sssd-%e6%98%af%e4%bb%80%e4%b9%88" class="header-anchor">#</a>
+    SSSD 是什么
+</h2><p>从堆栈分析可知，这个 Domain Socket 是为了连接 SSSD 服务。SSSD (System Security Services Daemon) 是现代 Linux 系统中用于集中管理身份认证、授权和用户信息查询的核心服务。它充当了一个缓存和转发层，可以对接多种后端服务，如本地文件、LDAP、Kerberos 或 Active Directory。</p>
+<p>SSSD 的作用是响应来自 <code>libnss_sss</code> 库的请求，查询并返回当前 UID 对应的用户名。<code>libc</code> 库在第一次查询后，通常会保持这个套接字连接打开，以便后续的查询可以复用这个连接，避免重复创建和连接的开销。这解释了为什么在 Java 进程的整个生命周期中，我们都能看到这个 FD 6 的存在。</p>
+<h3 id="查看-sssd-进程及其配置">
+    <a href="#%e6%9f%a5%e7%9c%8b-sssd-%e8%bf%9b%e7%a8%8b%e5%8f%8a%e5%85%b6%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    查看 SSSD 进程及其配置
+</h3><p>我们可以使用 <code>systemctl</code> 来确认 <code>sssd</code> 服务的运行状态。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 检查 sssd 服务的总体状态</span>
+</span></span><span class="line"><span class="cl">systemctl status sssd
+</span></span><span class="line"><span class="cl">● sssd.service - System Security Services Daemon
+</span></span><span class="line"><span class="cl">   Loaded: loaded <span class="o">(</span>/usr/lib/systemd/system/sssd.service<span class="p">;</span> enabled<span class="p">;</span> vendor preset: disabled<span class="o">)</span>
+</span></span><span class="line"><span class="cl">   Active: active <span class="o">(</span>running<span class="o">)</span> since Tue 2025-08-05 11:03:10 CST<span class="p">;</span> <span class="m">4</span> weeks <span class="m">1</span> days ago
+</span></span><span class="line"><span class="cl"> Main PID: <span class="m">916</span> <span class="o">(</span>sssd<span class="o">)</span>
+</span></span><span class="line"><span class="cl">    Tasks: <span class="m">4</span>
+</span></span><span class="line"><span class="cl">   Memory: 45.8M
+</span></span><span class="line"><span class="cl">   CGroup: /system.slice/sssd.service
+</span></span><span class="line"><span class="cl">           ├─ <span class="m">916</span> /usr/sbin/sssd -i --logger<span class="o">=</span>files
+</span></span><span class="line"><span class="cl">           ├─1027 /usr/libexec/sssd/sssd_be --domain implicit_files --uid <span class="m">0</span> --gid <span class="m">0</span> --logger<span class="o">=</span>files
+</span></span><span class="line"><span class="cl">           ├─1054 /usr/libexec/sssd/sssd_nss --uid <span class="m">0</span> --gid <span class="m">0</span> --logger<span class="o">=</span>files
+</span></span><span class="line"><span class="cl">           └─1055 /usr/libexec/sssd/sssd_pam --uid <span class="m">0</span> --gid <span class="m">0</span> --logger<span class="o">=</span>files
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看 <code>/etc/nsswitch.conf</code> 文件，是否在 passwd、group、shadow 等关键数据库的查询源列表中包含了 sss。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat /etc/nsswitch.conf
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">passwd:      sss files systemd
+</span></span><span class="line"><span class="cl">shadow:     files sss
+</span></span><span class="line"><span class="cl">group:       sss files systemd
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>passwd</code> 这一行表明，当需要查询用户信息时，首先就去问 SSSD 服务 (sss)，然后再查找本地的 /etc/passwd 文件 (files)，如果前两者都找不到，还会查询由 systemd-logind 管理的动态用户。</p>
+<p>这个配置清晰地表明，SSSD 在该系统的用户和组信息查询中处于最高优先级。这解释了，在 JVM 在启动时，为了获取当前用户名，就会立即触发与 SSSD 的通信。</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>通过 <code>lsof</code> 初步定位问题，再借助强大的 eBPF 工具 BCC 深入追踪系统调用，成功地揭开了 JVM 底层的文件描述符的秘密。它并非由应用代码创建，而是 JVM 初始化性能监控模块时，通过 NSS 机制与系统核心的 SSSD 服务建立的通信通道。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">Java</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/trace/">Trace</a>
+        
+            <a href="/tags/crac/">Crac</a>
+        
+            <a href="/tags/bcc/">Bcc</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%90%86%E8%A7%A3-crac-%E8%83%8C%E5%90%8E%E7%9A%84-linux-%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">理解 CRaC 背后的 Linux 系统编程</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/crac-%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CRaC 技术深度解析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%8F%AD%E7%A7%98-jvm-%E5%81%9C%E9%A1%BF%E7%9A%84%E8%83%8C%E5%90%8E%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-safepoint/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">揭秘 JVM 停顿的背后：深入理解 Safepoint</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8-printassembly-%E6%9F%A5%E7%9C%8B-jit-%E7%BC%96%E8%AF%91%E5%90%8E%E7%9A%84%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用 PrintAssembly 查看 JIT 编译后的汇编代码</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/perf-%E7%9A%84-cpu-clock-%E4%B8%8E-cpu-cycles-%E9%87%87%E6%A0%B7%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AF%B9%E6%AF%94/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Perf 的 cpu-clock 与 cpu-cycles 采样实现与对比</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2025 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
