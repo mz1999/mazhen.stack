@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,11 +15,14 @@
                 href="https://mazhen.tech/"
                 />
   </url><url>
+    <loc>https://mazhen.tech/tags/async-profiler/</loc>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
+  </url><url>
     <loc>https://mazhen.tech/tags/bcc/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -32,19 +35,19 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/tags/crac/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/linux/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -57,10 +60,16 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/trace/</loc>
-    <lastmod>2025-09-03T10:37:32+08:00</lastmod>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/tracing-and-locating-socket-creation-in-java-processes/</loc>
+    <lastmod>2025-09-15T14:47:32+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/</loc>
+    <lastmod>2025-09-14T14:47:32+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/</loc>
     <lastmod>2025-09-03T10:37:32+08:00</lastmod>

@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="When using CRaC to create a checkpoint image, Java applications need to properly handle the external resources they hold, such as open log files, listening service ports, and external database connection pools. For files opened by a Java application, CRaC can handle them automatically by defining File Descriptor Policies. For listening ports or connection pools enabled by the application, it is generally recommended that the application implements CRaC&rsquo;s Resource interface to close these resources before a checkpoint and reopen them after a restore.">
+<title>Tracing and Locating Socket Creation in Java Processes</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/tracing-and-locating-socket-creation-in-java-processes/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Tracing and Locating Socket Creation in Java Processes">
+<meta property='og:description' content="When using CRaC to create a checkpoint image, Java applications need to properly handle the external resources they hold, such as open log files, listening service ports, and external database connection pools. For files opened by a Java application, CRaC can handle them automatically by defining File Descriptor Policies. For listening ports or connection pools enabled by the application, it is generally recommended that the application implements CRaC&rsquo;s Resource interface to close these resources before a checkpoint and reopen them after a restore.">
+<meta property='og:url' content='https://mazhen.tech/p/tracing-and-locating-socket-creation-in-java-processes/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='trace' /><meta property='article:tag' content='crac' /><meta property='article:tag' content='bcc' /><meta property='article:tag' content='async-profiler' /><meta property='article:published_time' content='2025-09-15T14:47:32&#43;08:00'/><meta property='article:modified_time' content='2025-09-15T14:47:32&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="Tracing and Locating Socket Creation in Java Processes">
+<meta name="twitter:description" content="When using CRaC to create a checkpoint image, Java applications need to properly handle the external resources they hold, such as open log files, listening service ports, and external database connection pools. For files opened by a Java application, CRaC can handle them automatically by defining File Descriptor Policies. For listening ports or connection pools enabled by the application, it is generally recommended that the application implements CRaC&rsquo;s Resource interface to close these resources before a checkpoint and reopen them after a restore.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#using-bcc-to-trace-and-locate-unix-socket-creation">Using BCC to Trace and Locate Unix Socket Creation</a></li>
+    <li><a href="#using-async-profiler-to-trace-socket-creation">Using async-profiler to Trace Socket Creation</a>
+      <ol>
+        <li><a href="#tracing-the-creation-location-of-socketpair">Tracing the creation location of <code>socketpair</code></a></li>
+        <li><a href="#tracing-the-listening-position-of-a-service-port">Tracing the Listening Position of a Service Port</a></li>
+      </ol>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/tracing-and-locating-socket-creation-in-java-processes/">Tracing and Locating Socket Creation in Java Processes</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2025-09-15</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 16 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>When using <a class="link" href="https://openjdk.org/projects/crac/"  target="_blank" rel="noopener"
+    >CRaC</a> to create a checkpoint image, Java applications need to properly handle the external resources they hold, such as open log files, listening service ports, and external database connection pools.</p>
+<p>For files opened by a Java application, CRaC can handle them automatically by defining <a class="link" href="https://docs.azul.com/core/crac/fd-policies"  target="_blank" rel="noopener"
+    >File Descriptor Policies</a>. For listening ports or connection pools enabled by the application, it is generally recommended that the application implements CRaC&rsquo;s <a class="link" href="https://github.com/CRaC/org.crac/blob/master/src/main/java/org/crac/Resource.java"  target="_blank" rel="noopener"
+    >Resource</a> interface to close these resources before a <code>checkpoint</code> and reopen them after a <code>restore</code>.</p>
+<p>To properly handle network resources held by a Java application, one must first know where these resources are created. However, in real-world development, applications usually do not call the JDK&rsquo;s basic network APIs directly. In most cases, network connections are handled by frameworks like Netty or Dubbo, so developers may not even know where listening ports are opened or network connections are created.</p>
+<p>Furthermore, some resources, like <code>Unix sockets</code>, are not typically created directly by Java but are opened by the underlying JVM or dependent C libraries, making it even more difficult to trace their creation.</p>
+<p>This article will introduce how to use <a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >BCC</a> and <a class="link" href="https://github.com/async-profiler/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a> to trace and locate the specific points of <code>Socket</code> creation in a Java application.</p>
+<h2 id="using-bcc-to-trace-and-locate-unix-socket-creation">
+    <a href="#using-bcc-to-trace-and-locate-unix-socket-creation" class="header-anchor">#</a>
+    Using BCC to Trace and Locate Unix Socket Creation
+</h2><p>Let&rsquo;s start with a concrete example. When creating a <code>checkpoint</code> image for a Java application, the following exception was encountered:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nl">Suppressed</span><span class="p">:</span><span class="w"> </span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">CheckpointOpenSocketException</span><span class="p">:</span><span class="w"> </span><span class="n">FD</span><span class="w"> </span><span class="n">fd</span><span class="o">=</span><span class="n">4</span><span class="w"> </span><span class="n">type</span><span class="o">=</span><span class="n">socket</span><span class="w"> </span><span class="n">path</span><span class="o">=</span><span class="n">socket</span><span class="p">:</span><span class="o">[</span><span class="n">7504404</span><span class="o">]</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">29295</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">translateJVMExceptions</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">116</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore1</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">189</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">315</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestoreInternal</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">328</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Even though the JVM parameter <code>-Djdk.crac.collect-fd-stacktraces=true</code> was added, the logs still did not show the specific location where file descriptor 4 (FD 4) was opened. This usually means that FD 4 was likely opened in Native Code.</p>
+<p>We use the <code>lsof</code> command to view the details of FD 4:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ lsof -p <span class="m">172963</span> <span class="p">|</span> grep <span class="m">7504404</span>     
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span> mazhen    4u     unix 0x00000000bfe2338f       0t0  <span class="m">7504404</span> <span class="nv">type</span><span class="o">=</span>STREAM
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The fifth column, <code>unix</code>, indicates that the resource corresponding to this file descriptor is a <code>Unix socket</code>.</p>
+<p>To further investigate the origin and purpose of this <code>Unix socket</code>, we need to find out which process is connected to the other end:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># -U: Filter for Unix Sockets.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -a: Logical AND operation, combining the preceding conditions (-p and -U).</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># +E: Display socket endpoint information.</span>
+</span></span><span class="line"><span class="cl">$ sudo lsof -p <span class="m">172963</span> -U -a +E
+</span></span><span class="line"><span class="cl">COMMAND    PID          USER   FD   TYPE             DEVICE SIZE/OFF    NODE NAME
+</span></span><span class="line"><span class="cl">lwsmd     <span class="m">1373</span>          root   73u  unix 0x000000001b73058d      0t0 <span class="m">7506688</span> /var/lib/pbis/.lsassd <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7504404</span> 172963,exe,4u
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span>        mazhen    4u  unix 0x00000000bfe2338f      0t0 <span class="m">7504404</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7506688</span> 1373,lwsmd,73u
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span>        mazhen  407u  unix 0x000000005c8b74c1      0t0 <span class="m">7507634</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7507635</span> 172963,exe,408u
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span>        mazhen  408u  unix 0x00000000cf9143dc      0t0 <span class="m">7507635</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7507634</span> 172963,exe,407u
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From the output, we can see that file descriptor 4 is connected to an external process, <code>lwsmd</code>. This is a security authentication-related service used to integrate Linux into Windows Active Directory. The Java process communicates with <code>lwsmd</code> via a <code>Unix socket</code> to implement user authentication and permission management.</p>
+<p>Additionally, we found a pair of file descriptors, 407 and 408, which are the two ends of a <code>Unix socket</code>, both created and held by the Java process itself. This resource pair did not throw an exception during the checkpoint process, indicating they were handled properly.</p>
+<p>Now we know the Java process creates these <code>Unix sockets</code>, but the key question is: <strong>How do we locate the exact creation point?</strong></p>
+<p>The most direct way to find the source of <code>Unix socket</code> creation is to trace the <strong>system call</strong> it triggers at the kernel level. By capturing the complete call stack at the moment the system call occurs, we can trace it back to the specific code location.</p>
+<p>At the application level, code creates <code>Unix sockets</code> by calling the <code>socket()</code> and <code>socketpair()</code> <strong>library functions</strong> provided by <code>glibc</code>. These functions prepare the arguments and then execute a special CPU instruction to switch from user mode to kernel mode, initiating the actual <strong>system call</strong>.</p>
+<p>To observe this event in the kernel, we can use the kernel&rsquo;s static probe points: <strong>Tracepoints</strong>. <code>Tracepoints</code> are static probes preset by kernel developers in the kernel code, allowing us to observe key kernel activities. When a system call request enters the kernel, the corresponding <code>tracepoint</code> is triggered, and we can use tools to capture this event and get context information, including the call stack.</p>
+<p>For creating <code>Unix sockets</code>, we are interested in the following two <code>tracepoints</code>:</p>
+<ul>
+<li><code>syscalls:sys_enter_socket</code>: Triggered when the <code>socket()</code> system call enters the kernel.</li>
+<li><code>syscalls:sys_enter_socketpair</code>: Triggered when the <code>socketpair()</code> system call enters the kernel.</li>
+</ul>
+<p>Since the <code>socket()</code> function can create various types of sockets (TCP, UDP, etc.), we must add a filter to our tracing to only capture calls where the first argument, <code>family</code>, is <code>AF_UNIX</code>. This allows us to precisely target the creation of <strong>Unix sockets</strong>.</p>
+<p>To achieve this, we will use <a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >BCC (BPF Compiler Collection)</a>, a powerful toolset.</p>
+<p>BCC comes with a general-purpose <a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/trace.py"  target="_blank" rel="noopener"
+    >trace</a> tool that can trace any function. We can use it for a quick proof of concept:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo python3 /usr/share/bcc/tools/trace -K -U <span class="s1">&#39;t:syscalls:sys_enter_socket (args-&gt;family == 1) &#34;socket(family=%d, type=%d)&#34;, args-&gt;family, args-&gt;type&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>-K</code>, <code>-U</code>: Capture kernel and user-space stacks, respectively.</li>
+<li><code>t:syscalls:sys_enter_socket</code>: Specifies the <code>tracepoint</code> to trace.</li>
+<li><code>(args-&gt;family == 1)</code>: A filter to only care about <code>AF_UNIX</code> (value 1) type socket creations.</li>
+</ul>
+<p>The output of this command is as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="m">177325</span>  <span class="m">177330</span>  java            sys_enter_socket socket<span class="o">(</span><span class="nv">family</span><span class="o">=</span>1, <span class="nv">type</span><span class="o">=</span>526337<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        -14        socket+0xb <span class="o">[</span>libc.so.6<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        __nscd_open_socket+0x3b <span class="o">[</span>libc.so.6<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        inet_pton+0x2e <span class="o">[</span>libc.so.6<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As you can see, this command successfully captured the <code>socket</code> call and its stack. However, it has a major drawback: <strong>the output does not include the file descriptor returned by the system call</strong>. Therefore, we cannot associate this stack with the FD 4 we are interested in.</p>
+<p>To get the file descriptor returned by <code>socket()</code> or <code>socketpair()</code>, we need to write a custom BCC script:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">bcc</span> <span class="kn">import</span> <span class="n">BPF</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># BPF C code</span>
+</span></span><span class="line"><span class="cl"><span class="n">prog</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;uapi/linux/ptrace.h&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;linux/sched.h&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;net/sock.h&gt; // for AF_UNIX
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// Define data structure to send to userspace
+</span></span></span><span class="line"><span class="cl"><span class="s2">enum call_type {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    TYPE_SOCKET = 1,
+</span></span></span><span class="line"><span class="cl"><span class="s2">    TYPE_SOCKETPAIR = 2,
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">struct event_t {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u64 ts;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 pid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 ppid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int stack_id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int fds[2]; // fds[0] for socket, fds[0] &amp; fds[1] for socketpair
+</span></span></span><span class="line"><span class="cl"><span class="s2">    enum call_type call_type;
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_PERF_OUTPUT(events);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// Used to pass socketpair parameter pointer between enter and exit
+</span></span></span><span class="line"><span class="cl"><span class="s2">struct data_t {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int *sv_ptr;
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_HASH(infotmp, u32, struct data_t);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_STACK_TRACE(stack_traces, 16384);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// --- tracepoint for socket() ---
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_enter_socket) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (args-&gt;family != AF_UNIX) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t data = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.sv_ptr = NULL; //  Mark this as socket() call
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.update(&amp;tid, &amp;data);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_exit_socket) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t *datap = infotmp.lookup(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (!datap) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int retval = args-&gt;ret;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (retval &gt;= 0) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct event_t event = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        u64 id = bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.ts = bpf_ktime_get_ns();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.pid = id &gt;&gt; 32;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.tid = (u32)id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_probe_read_kernel(&amp;event.ppid, sizeof(event.ppid), &amp;task-&gt;real_parent-&gt;tgid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.stack_id = stack_traces.get_stackid(args, BPF_F_USER_STACK);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.call_type = TYPE_SOCKET;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.fds[0] = retval;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.fds[1] = -1;
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        events.perf_submit(args, &amp;event, sizeof(event));
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// --- tracepoint for socketpair() ---
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_enter_socketpair) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (args-&gt;family != AF_UNIX) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t data = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.sv_ptr = (int *)args-&gt;usockvec;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.update(&amp;tid, &amp;data);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_exit_socketpair) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t *datap = infotmp.lookup(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (!datap || !datap-&gt;sv_ptr) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        if (datap) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">            infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        }
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int retval = args-&gt;ret;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (retval == 0) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct event_t event = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        u64 id = bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.ts = bpf_ktime_get_ns();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.pid = id &gt;&gt; 32;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.tid = (u32)id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_probe_read_kernel(&amp;event.ppid, sizeof(event.ppid), &amp;task-&gt;real_parent-&gt;tgid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.stack_id = stack_traces.get_stackid(args, BPF_F_USER_STACK);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.call_type = TYPE_SOCKETPAIR;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_probe_read_user(&amp;event.fds, sizeof(event.fds), datap-&gt;sv_ptr);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        events.perf_submit(args, &amp;event, sizeof(event));
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Load BPF program</span>
+</span></span><span class="line"><span class="cl"><span class="n">b</span> <span class="o">=</span> <span class="n">BPF</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">prog</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Tracing socket(AF_UNIX) and socketpair(AF_UNIX) calls... Ctrl-C to stop.</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Perf Buffer callback handler</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">print_event</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s2">&#34;events&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">time_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ts</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">tgid</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pid</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">call_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># TYPE_SOCKET</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_str</span> <span class="o">=</span> <span class="s2">&#34;[socket(AF_UNIX)]&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fds_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;[FD=</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">fds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">]&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">call_type</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># TYPE_SOCKETPAIR</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_str</span> <span class="o">=</span> <span class="s2">&#34;[socketpair(AF_UNIX)]&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fds_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;[FDs=[</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">fds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">fds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">]]&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_str</span> <span class="o">=</span> <span class="s2">&#34;UNKNOWN&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fds_str</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[</span><span class="si">{</span><span class="n">time_str</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">call_str</span><span class="si">}</span><span class="s2"> [PPID=</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">ppid</span><span class="si">}</span><span class="s2">] [PID=</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">pid</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">fds_str</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">b</span><span class="p">[</span><span class="s2">&#34;stack_traces&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">stack_id</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;    </span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">b</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">tgid</span><span class="p">,</span> <span class="n">show_module</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_offset</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;    [Stack trace unavailable for stack_id </span><span class="si">%d</span><span class="s2"> due to process exit]&#34;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">stack_id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Open perf buffer and set callback function</span>
+</span></span><span class="line"><span class="cl"><span class="n">b</span><span class="p">[</span><span class="s2">&#34;events&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">open_perf_buffer</span><span class="p">(</span><span class="n">print_event</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Main loop, poll perf buffer</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">b</span><span class="o">.</span><span class="n">perf_buffer_poll</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The idea behind this script is to store information on system call <strong>entry</strong> (<code>sys_enter_*</code>) and capture the return value (i.e., the file descriptor) on <strong>exit</strong> (<code>sys_exit_*</code>), then send the file descriptor, stack trace, and other information to the user-space Python program for printing.</p>
+<p>First, run this script, and then start the Java application.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo ./trace_unix_socket.py &gt; unixsocket
+</span></span><span class="line"><span class="cl"><span class="c1"># Start the Java application in another terminal</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Get the PID of the Java process</span>
+</span></span><span class="line"><span class="cl">$ jps
+</span></span><span class="line"><span class="cl"><span class="m">178106</span> Jps
+</span></span><span class="line"><span class="cl"><span class="m">177961</span> GlassFishMain
+</span></span><span class="line"><span class="cl"><span class="c1"># Confirm the Unix socket again with lsof</span>
+</span></span><span class="line"><span class="cl">$ sudo lsof -p <span class="m">177961</span> -U -a +E 
+</span></span><span class="line"><span class="cl">COMMAND    PID          USER   FD   TYPE             DEVICE SIZE/OFF    NODE NAME
+</span></span><span class="line"><span class="cl">lwsmd     <span class="m">1373</span>          root   78u  unix 0x000000001e5b48ae      0t0 <span class="m">7629677</span> /var/lib/pbis/.lsassd <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7625335</span> 177961,exe,4u
+</span></span><span class="line"><span class="cl">exe     <span class="m">177961</span>        mazhen    4u  unix 0x00000000b7b4fa52      0t0 <span class="m">7625335</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7629677</span> 1373,lwsmd,78u
+</span></span><span class="line"><span class="cl">exe     <span class="m">177961</span>        mazhen  407u  unix 0x0000000078480cf3      0t0 <span class="m">7630050</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7630051</span> 177961,exe,408u
+</span></span><span class="line"><span class="cl">exe     <span class="m">177961</span>        mazhen  408u  unix 0x000000002d0320c8      0t0 <span class="m">7630051</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7630050</span> 177961,exe,407u
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now, in the script&rsquo;s output file <code>unixsocket</code>, we can search by the process PID (177961) and file descriptors (FD 4, 407, 408) to find the corresponding creation stacks:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>12:23:13.184181<span class="o">]</span> <span class="o">[</span>socket<span class="o">(</span>AF_UNIX<span class="o">)]</span> <span class="o">[</span><span class="nv">PPID</span><span class="o">=</span>177932<span class="o">]</span> <span class="o">[</span><span class="nv">PID</span><span class="o">=</span>177961<span class="o">]</span> <span class="o">[</span><span class="nv">FD</span><span class="o">=</span>4<span class="o">]</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;socket+0xb [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;__nscd_get_mapping+0xbd [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;__nscd_get_map_ref+0xcf [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>12:23:20.370346<span class="o">]</span> <span class="o">[</span>socketpair<span class="o">(</span>AF_UNIX<span class="o">)]</span> <span class="o">[</span><span class="nv">PPID</span><span class="o">=</span>2583<span class="o">]</span> <span class="o">[</span><span class="nv">PID</span><span class="o">=</span>177961<span class="o">]</span> <span class="o">[</span><span class="nv">FDs</span><span class="o">=[</span>407, 408<span class="o">]]</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;socketpair+0xe [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;JavaCalls::call_helper(JavaValue*, methodHandle const&amp;, JavaCallArguments*, JavaThread*)+0x334 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;JavaCalls::call_virtual(JavaValue*, Handle, Klass*, Symbol*, Symbol*, JavaThread*)+0x20c [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;thread_entry(JavaThread*, JavaThread*)+0x70 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;JavaThread::run()+0x127 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;Thread::call_run()+0xa1 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;thread_native_entry(Thread*)+0xe3 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;start_thread+0x2f3 [libc.so.6]&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>For FD 4, the functions <code>__nscd_get_mapping</code> and <code>__nscd_get_map_ref</code> in the call stack are key clues. They indicate that glibc is attempting a name service query (e.g., resolving a username). This explains our earlier observation of why the Java process connects to <code>lwsmd</code>. The <code>__nscd_*</code> functions are the generic client logic used by glibc for name resolution, and the actual service it connects to is determined by the system&rsquo;s NSS (Name Service Switch). In my test scenario, the NSS configuration directs authentication queries to <code>lwsmd</code>, which is why the Java process connects to it via a <code>Unix socket</code>. At this point, we know the purpose and origin of FD 4. How to handle this resource requires further exploration, but at least we have identified the root cause.</p>
+<p>Looking at FDs 407 and 408, we can see function calls from <code>libjvm.so</code>, which clearly indicates that a Java thread called <code>socketpair</code> to create this <code>Unix socket</code> pair. However, the most critical part of the call stack is shown as <code>[unknown]</code>.</p>
+<p>This is because the JIT (Just-In-Time) compiler dynamically compiles hot code into machine code at runtime and stores it in anonymous memory regions. These regions do not have traditional symbol tables, so general-purpose system-level tools like BCC cannot find any symbol information when trying to resolve these memory addresses, and can only display them as <code>[unknown]</code>.</p>
+<p>Although this <code>Unix socket</code> (FDs 407, 408) was handled properly and did not cause a CRaC exception, if we are curious and want to know exactly which piece of Java code created it, what should we do?</p>
+<p>To solve the <code>[unknown]</code> problem, we need a tool that understands the Java runtime better: <a class="link" href="https://github.com/async-profiler/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a>.</p>
+<h2 id="using-async-profiler-to-trace-socket-creation">
+    <a href="#using-async-profiler-to-trace-socket-creation" class="header-anchor">#</a>
+    Using async-profiler to Trace Socket Creation
+</h2><p><a class="link" href="https://github.com/async-profiler/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a> is a low-overhead, high-precision performance analysis tool for Java that directly utilizes Linux&rsquo;s <code>perf_events</code> subsystem and HotSpot JVM-specific APIs to collect performance data.</p>
+<p>Compared to traditional Java Profilers, it can not only analyze Java code but also monitor the activities of non-Java threads (like GC and JIT compiler threads) and display native and kernel frames in call stacks, giving us a complete view from Java methods down to C/C++ library functions and kernel system calls.</p>
+<p>General-purpose system tracing tools like BCC do not understand the internal workings of the JVM. When they encounter machine code generated by the JIT compiler in anonymous memory regions, they cannot find corresponding symbol tables and thus cannot resolve method names. In contrast, <code>async-profiler</code> uses specific APIs provided by HotSpot (like <code>AsyncGetCallTrace</code>) and can parse JVM internal data structures to obtain symbol information for JIT-compiled code, accurately mapping memory addresses back to the original Java method names.</p>
+<p>In essence, <code>async-profiler</code> combines the capabilities of system-level tracing tools and traditional Java profilers, providing a complete and accurate performance insight into Java applications.</p>
+<h3 id="tracing-the-creation-location-of-socketpair">
+    <a href="#tracing-the-creation-location-of-socketpair" class="header-anchor">#</a>
+    Tracing the creation location of <code>socketpair</code>
+</h3><p>In the previous section, we used BCC to trace <code>Unix socket</code>-related system calls. This time, we will use <code>async-profiler</code> to do the same, but with the ability to display Java method names in the call stack.</p>
+<p><code>async-profiler</code> supports using Linux&rsquo;s <code>perf_events</code>, so it can capture <code>tracepoint</code> events from <code>perf_events</code>, achieving the same system call tracing as BCC. Additionally, <code>async-profiler</code> can be launched as a Java Agent, which means we can load it at the start of the Java process and not miss any early initialization behavior.</p>
+<p>Returning to our previous question, to locate the Java code that created the <code>socketpair</code> for file descriptors 408 and 409, we can attach <code>async-profiler</code> as an agent when starting the Java application and specify that we want to trace the <code>syscalls:sys_enter_socketpair</code> event.</p>
+<p>Modify the Java startup command as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">java -agentpath:/path/to/libasyncProfiler.so<span class="o">=</span>start,event<span class="o">=</span>syscalls:sys_enter_socketpair,file<span class="o">=</span>/tmp/socketpair-trace.html ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Parameter explanation:</p>
+<ul>
+<li><code>-agentpath:/path/to/libasyncProfiler.so</code>: Specifies the location of the <code>async-profiler</code> dynamic library.</li>
+<li><code>start</code>: Indicates that profiling should start immediately.</li>
+<li><code>event=syscalls:sys_enter_socketpair</code>: Specifies the event to trace. Here we are interested in the entry of the <code>socketpair</code> system call.</li>
+<li><code>file=/tmp/socketpair-trace.html</code>: Outputs the analysis result as an HTML flame graph.</li>
+</ul>
+<p>Note that by default, the kernel may prohibit non-root users from tracing certain sensitive kernel events (like system calls), so it&rsquo;s best to start the Java application with <code>sudo</code>.</p>
+<p>After the application runs and exits normally, the <code>/tmp/socketpair-trace.html</code> file will be generated according to the configuration.</p>
+<p><img src="https://cdn.mazhen.tech/2025/202509151411050.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="sys_enter_socketpair"
+	
+	
+></p>
+<p>This flame graph clearly reveals the parts that BCC could not resolve (<code>[unknown]</code>), accurately pinpointing the Java code source that created the <code>socketpair</code>.</p>
+<p>From the graph above, we can see that this <code>socketpair</code> was created by Java&rsquo;s <code>WatchService</code> API in its Linux implementation. <code>WatchService</code> is a standard interface provided by Java NIO for monitoring directory changes in the file system (such as file creation, modification, or deletion). The call stack shows that the <code>WatchService</code> was called by the <code>FileInstall</code> component of the Apache Felix framework. Its purpose is to monitor a deployment directory to enable hot deployment of OSGi bundles.</p>
+<p>We observed earlier that the file descriptor pair created by <code>socketpair</code> did not cause an exception during the checkpoint process. The reason is that CRaC already provides built-in support for the Linux implementation of Java&rsquo;s <code>WatchService</code> (see <a class="link" href="https://github.com/openjdk/crac/pull/72"  target="_blank" rel="noopener"
+    >OpenJDK CRaC PR #72</a>). This means CRaC can automatically recognize and properly handle the internal file descriptors used by <code>WatchService</code>.</p>
+<h3 id="tracing-the-listening-position-of-a-service-port">
+    <a href="#tracing-the-listening-position-of-a-service-port" class="header-anchor">#</a>
+    Tracing the Listening Position of a Service Port
+</h3><p>The same principle applies to locating the listening position of a network service port. For network services created with the NIO framework, the application needs to implement the <code>Resource</code> interface to adapt to CRaC, handling the closing and reopening of the listening port. If not handled properly, an exception similar to the following may occur when creating a <code>checkpoint</code> image:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">CheckpointException</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Suppressed</span><span class="p">:</span><span class="w"> </span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">EPollSelectorImpl$BusySelectorException</span><span class="p">:</span><span class="w"> </span><span class="n">Selector</span><span class="w"> </span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">EPollSelectorImpl</span><span class="nd">@476d29ab</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">registered</span><span class="w"> </span><span class="n">keys</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">channels</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">ServerSocketChannelImpl</span><span class="o">[</span><span class="n">closed</span><span class="o">]]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">EPollSelectorImpl</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">EPollSelectorImpl</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">405</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">invokeBeforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">43</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">58</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">BlockingOrderedContext</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">BlockingOrderedContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">64</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">invokeBeforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">43</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">58</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore1</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">154</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">315</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestoreInternal</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">328</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>From the exception message, we know that the direct cause of the <code>checkpoint</code> failure is that the <code>EPollSelectorImpl</code> instance is in a &ldquo;busy&rdquo; state. It appears that even though the <code>ServerSocketChannel</code> itself may have been closed, its registration with the <code>Selector</code> was not fully cancelled.</p>
+<p>However, this exception message does not tell us <strong>where</strong> in the application this port was created and listened on. To properly handle the listening port, we must first find its creation point.</p>
+<p>How can we do this? We can trace a key system call: <code>bind</code>.</p>
+<p>The <code>bind</code> system call is a necessary step for any network server program to start. Its function is to associate a created <code>socket</code> file descriptor with a specific IP address and port number. Only after <code>bind</code> is successfully executed can the server listen for and accept client connections on that port. Therefore, by capturing the call stack when the <code>bind</code> system call occurs, we can precisely locate which piece of Java code triggered the port listening.</p>
+<p>Use the following command to start the Java application:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">java -agentpath:/path/to/libasyncProfiler.so<span class="o">=</span>start,event<span class="o">=</span>syscalls:sys_enter_bind,file<span class="o">=</span>/tmp/bind-trace.html -jar ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After the application starts successfully and begins serving traffic, stop it and then analyze the generated <code>/tmp/bind-trace.html</code> file.</p>
+<p><img src="https://cdn.mazhen.tech/2025/202509151452321.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="sys_enter_bind"
+	
+	
+></p>
+<p>From the flame graph above, we can see that the port binding operation was performed by the Grizzly NIO framework, which acts as the underlying network engine for the GlassFish application server. The entire process is automatically triggered by the HK2 dependency injection framework during the server startup phase to initialize and start the core network services.</p>
+<p>By analyzing the flame graph, we can conclude that implementing the <code>Resource</code> interface at the <code>GrizzlyListener</code> level would be a reasonable approach to manage the closing and restarting of the listening port.</p>
+<h2 id="summary">
+    <a href="#summary" class="header-anchor">#</a>
+    Summary
+</h2><p>This article aims to solve the challenge of accurately locating the creation points of network resources (like <code>Unix sockets</code> and service listening ports) when adapting Java applications for CRaC.</p>
+<p>First, it introduces the use of the system-level tracing tool <strong>BCC</strong>. Although BCC can capture the call stacks of native code by tracing system calls like <code>socket</code> and <code>socketpair</code>, it cannot resolve JIT-compiled Java code, leading to key information being displayed as <code>[unknown]</code>.</p>
+<p>To address this issue, the article introduces the more powerful <strong><code>async-profiler</code></strong>. It combines the capability of underlying <code>perf_events</code> tracing with a deep understanding of the JVM internals, allowing it to perfectly resolve symbols for JIT code. Through practical examples of tracing <code>sys_enter_socketpair</code> and <code>sys_enter_bind</code> tracepoints, it demonstrates how to use the flame graphs generated by <code>async-profiler</code> to trace system calls back to specific Java code.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">Java</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/trace/">Trace</a>
+        
+            <a href="/tags/crac/">Crac</a>
+        
+            <a href="/tags/bcc/">Bcc</a>
+        
+            <a href="/tags/async-profiler/">Async-Profiler</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">追踪定位 Java 进程的 Socket 创建</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">追踪 Java 进程创建的 domain socket</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%90%86%E8%A7%A3-crac-%E8%83%8C%E5%90%8E%E7%9A%84-linux-%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">理解 CRaC 背后的 Linux 系统编程</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/crac-%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CRaC 技术深度解析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%8F%AD%E7%A7%98-jvm-%E5%81%9C%E9%A1%BF%E7%9A%84%E8%83%8C%E5%90%8E%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-safepoint/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">揭秘 JVM 停顿的背后：深入理解 Safepoint</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2025 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

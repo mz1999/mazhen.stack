@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。 对于 Java 应用打开的">
+<title>追踪定位 Java 进程的 Socket 创建</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="追踪定位 Java 进程的 Socket 创建">
+<meta property='og:description' content="在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。 对于 Java 应用打开的">
+<meta property='og:url' content='https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='trace' /><meta property='article:tag' content='crac' /><meta property='article:tag' content='bcc' /><meta property='article:tag' content='async-profiler' /><meta property='article:published_time' content='2025-09-14T14:47:32&#43;08:00'/><meta property='article:modified_time' content='2025-09-14T14:47:32&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="追踪定位 Java 进程的 Socket 创建">
+<meta name="twitter:description" content="在使用 CRaC 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。 对于 Java 应用打开的">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#使用-bcc-追踪定位-unix-socket-的创建">使用 BCC 追踪定位 Unix Socket 的创建</a></li>
+    <li><a href="#使用-async-profiler-追踪-socket-创建">使用 async-profiler 追踪 Socket 创建</a>
+      <ol>
+        <li><a href="#追踪-socketpair-的创建位置">追踪 socketpair 的创建位置</a></li>
+        <li><a href="#追踪服务端口的监听位置">追踪服务端口的监听位置</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/">追踪定位 Java 进程的 Socket 创建</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2025-09-14</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 11 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>在使用 <a class="link" href="https://openjdk.org/projects/crac/"  target="_blank" rel="noopener"
+    >CRaC</a> 创建 checkpoint 镜像时，需要 Java 应用能够恰当处理它持有的外部资源，例如打开的日志文件，监听的服务端口，对外创建的数据库连接池等。</p>
+<p>对于 Java 应用打开的文件，可以通过定义<a class="link" href="https://docs.azul.com/core/crac/fd-policies"  target="_blank" rel="noopener"
+    >文件描述符策略</a> 让 CRaC 自动处理。对于应用启用的监听端口，或创建的连接池，一般建议应用实现 CRaC 的 <a class="link" href="https://github.com/CRaC/org.crac/blob/master/src/main/java/org/crac/Resource.java"  target="_blank" rel="noopener"
+    >Resource</a> 接口，在 <code>checkpoint</code> 前关闭资源，在 <code>restore</code> 后重新打开。</p>
+<p>要妥善的处理 Java 持有的网络资源，首先需要知道这些资源具体是在哪里创建的。然而在实际开发中，应用程序通常不会直接调用 JDK 的基础网络 API，大多数情况下是通过 Netty、Dubbo 等框架来处理网络连接，所以造成开发人员可能自己都不知道在哪里打开了监听端口，或者创建了网络连接。</p>
+<p>还有一些资源，例如 <code>Unix socket</code>，一般不是 Java 直接创建持有的，而是底层的 JVM 或依赖的 C 库打开的，要追踪定位这类资源的创建，就更加困难了。</p>
+<p>本文将介绍如何使用 <a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >BCC</a>  和 <a class="link" href="https://github.com/async-profiler/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a> 追踪定位 Java 应用中创建 <code>Socket</code> 的具体位置。</p>
+<h2 id="使用-bcc-追踪定位-unix-socket-的创建">
+    <a href="#%e4%bd%bf%e7%94%a8-bcc-%e8%bf%bd%e8%b8%aa%e5%ae%9a%e4%bd%8d-unix-socket-%e7%9a%84%e5%88%9b%e5%bb%ba" class="header-anchor">#</a>
+    使用 BCC 追踪定位 Unix Socket 的创建
+</h2><p>我们从一个具体的的例子开始。在为某个 Java 应用创建 <code>checkpoint</code> 镜像时，遇到了如下异常：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nl">Suppressed</span><span class="p">:</span><span class="w"> </span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">CheckpointOpenSocketException</span><span class="p">:</span><span class="w"> </span><span class="n">FD</span><span class="w"> </span><span class="n">fd</span><span class="o">=</span><span class="n">4</span><span class="w"> </span><span class="n">type</span><span class="o">=</span><span class="n">socket</span><span class="w"> </span><span class="n">path</span><span class="o">=</span><span class="n">socket</span><span class="p">:</span><span class="o">[</span><span class="n">7504404</span><span class="o">]</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">29295</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">translateJVMExceptions</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">116</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore1</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">189</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">315</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestoreInternal</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">328</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>尽管已经添加了 JVM 参数 <code>-Djdk.crac.collect-fd-stacktraces=true</code>，但日志中仍然没有输出文件描述符 4（FD 4）的具体打开位置。这通常意味着 FD 4 很可能是在 Native Code 中被打开的。</p>
+<p>我们使用 <code>lsof</code> 命令查看 FD 4 的详细信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ lsof -p <span class="m">172963</span> <span class="p">|</span> grep <span class="m">7504404</span>     
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span> mazhen    4u     unix 0x00000000bfe2338f       0t0  <span class="m">7504404</span> <span class="nv">type</span><span class="o">=</span>STREAM
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第五列的 <code>unix</code> 表明，该文件描述符对应的资源是一个 <code>Unix socket</code>。</p>
+<p>为了进一步调研这个 <code>Unix socket</code> 的来源和作用，我们需要知道它的另一端连接着哪个进程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># -U ：筛选 Unix Socket。</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -a：逻辑 “与”（AND）操作，将前面的条件（-p 和 -U）组合，表示必须同时满足</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># +E：显示套接字的端点信息（Endpoints）。</span>
+</span></span><span class="line"><span class="cl">$ sudo lsof -p <span class="m">172963</span> -U -a +E
+</span></span><span class="line"><span class="cl">COMMAND    PID          USER   FD   TYPE             DEVICE SIZE/OFF    NODE NAME
+</span></span><span class="line"><span class="cl">lwsmd     <span class="m">1373</span>          root   73u  unix 0x000000001b73058d      0t0 <span class="m">7506688</span> /var/lib/pbis/.lsassd <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7504404</span> 172963,exe,4u
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span>        mazhen    4u  unix 0x00000000bfe2338f      0t0 <span class="m">7504404</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7506688</span> 1373,lwsmd,73u
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span>        mazhen  407u  unix 0x000000005c8b74c1      0t0 <span class="m">7507634</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7507635</span> 172963,exe,408u
+</span></span><span class="line"><span class="cl">exe     <span class="m">172963</span>        mazhen  408u  unix 0x00000000cf9143dc      0t0 <span class="m">7507635</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7507634</span> 172963,exe,407u
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从输出中可以看出，文件描述符 4 连接到外部进程 <code>lwsmd</code>。这是一个安全认证相关的服务，用于将 Linux 集成到 Windows 的 Active Directory。Java 进程通过 <code>Unix socket</code> 和 <code>lwsmd</code> 通信，以实现用户认证和权限管理。</p>
+<p>此外，我们还发现了一对文件描述符 407 和 408，它们是一个 <code>Unix socket</code> 的两端，并且都是由该 Java 进程自身创建和持有。在创建 checkpoint 镜像时，这对资源并没有抛出异常，说明它们已经被妥善处理。</p>
+<p>现在我们知道了 Java 进程会创建这些 <code>Unix socket</code>，但关键问题是：<strong>如何定位到具体的创建位置呢？</strong></p>
+<p>要找到创建 <code>Unix socket</code> 的源头，最直接的方法就是追踪它在内核层面触发的<strong>系统调用</strong>。通过捕获系统调用发生时的完整调用堆栈，我们就能反向追溯到具体的代码位置。</p>
+<p>在应用程序层面，代码通过调用 <code>glibc</code> 提供的 <code>socket()</code> 和 <code>socketpair()</code> <strong>库函数</strong> 创建 <code>Unix socket</code>，它们的会准备好参数，然后执行一条特殊的 CPU 指令，使程序从用户模式切换到内核模式，从而发起真正的<strong>系统调用</strong>。</p>
+<p>为了在内核中观察到这个事件，我们可以利用内核的静态探测点：<strong>Tracepoints</strong>。<code>Tracepoint</code> 是内核开发者在内核代码中预设的静态探测点，允许我们观察内核的关键活动。当一个系统调用请求进入内核时，相应的 <code>tracepoint</code> 就会被触发，我们可以使用工具捕获这个事件，获取当时的上下文信息，包括调用堆栈。</p>
+<p>对于创建 <code>Unix socket</code> 的操作，我们关心以下两个 <code>tracepoint</code>：</p>
+<ul>
+<li><code>syscalls:sys_enter_socket</code>: 当 <code>socket()</code> 系统调用进入内核时触发。</li>
+<li><code>syscalls:sys_enter_socketpair</code>: 当 <code>socketpair()</code> 系统调用进入内核时触发。</li>
+</ul>
+<p>由于 <code>socket()</code> 函数可以创建多种类型的 socket (TCP, UDP 等)，我们必须在追踪时添加一个过滤条件，只捕获其第一个参数 <code>family</code> 为 <code>AF_UNIX</code> 的调用，这样才能精确地锁定 <strong>Unix socket</strong> 的创建。</p>
+<p>要实现这一点，我们将使用 <a class="link" href="https://github.com/iovisor/bcc"  target="_blank" rel="noopener"
+    >BCC（BPF Compiler Collection）</a> 这是一个强大的工具集。</p>
+<p>BCC 自带了一个通用的 <a class="link" href="https://github.com/iovisor/bcc/blob/master/tools/trace.py"  target="_blank" rel="noopener"
+    >trace</a> 工具，能够追踪任意函数，我们可以先用它来快速验证一下思路：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo python3 /usr/share/bcc/tools/trace -K -U <span class="s1">&#39;t:syscalls:sys_enter_socket (args-&gt;family == 1) &#34;socket(family=%d, type=%d)&#34;, args-&gt;family, args-&gt;type&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>-K</code>, <code>-U</code>: 分别表示捕获内核和用户空间的堆栈。</li>
+<li><code>t:syscalls:sys_enter_socket</code>: 指定要追踪的 <code>tracepoint</code>。</li>
+<li><code>(args-&gt;family == 1)</code>: 过滤器，只关心 <code>AF_UNIX</code> (值为 1) 类型的 socket 创建。</li>
+</ul>
+<p>这个命令的输出如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="m">177325</span>  <span class="m">177330</span>  java            sys_enter_socket socket<span class="o">(</span><span class="nv">family</span><span class="o">=</span>1, <span class="nv">type</span><span class="o">=</span>526337<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        -14        socket+0xb <span class="o">[</span>libc.so.6<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        __nscd_open_socket+0x3b <span class="o">[</span>libc.so.6<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        inet_pton+0x2e <span class="o">[</span>libc.so.6<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看出，这个命令成功捕获到了 <code>socket</code> 调用及其堆栈。但它有一个很大的缺点：<strong>输出中不包含系统调用返回的文件描述符</strong>。因此，我们无法将这个堆栈与我们关心的 FD 4 关联起来。</p>
+<p>为了获取 <code>socket</code> 或 <code>socketpair()</code> 返回的文件描述符，我们需要编写一个自定义的 BCC 脚本：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">bcc</span> <span class="kn">import</span> <span class="n">BPF</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># BPF C code</span>
+</span></span><span class="line"><span class="cl"><span class="n">prog</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;uapi/linux/ptrace.h&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;linux/sched.h&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">#include &lt;net/sock.h&gt; // for AF_UNIX
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// Define data structure to send to userspace
+</span></span></span><span class="line"><span class="cl"><span class="s2">enum call_type {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    TYPE_SOCKET = 1,
+</span></span></span><span class="line"><span class="cl"><span class="s2">    TYPE_SOCKETPAIR = 2,
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">struct event_t {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u64 ts;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 pid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 ppid;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int stack_id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int fds[2]; // fds[0] for socket, fds[0] &amp; fds[1] for socketpair
+</span></span></span><span class="line"><span class="cl"><span class="s2">    enum call_type call_type;
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_PERF_OUTPUT(events);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// Used to pass socketpair parameter pointer between enter and exit
+</span></span></span><span class="line"><span class="cl"><span class="s2">struct data_t {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int *sv_ptr;
+</span></span></span><span class="line"><span class="cl"><span class="s2">};
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_HASH(infotmp, u32, struct data_t);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">BPF_STACK_TRACE(stack_traces, 16384);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// --- tracepoint for socket() ---
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_enter_socket) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (args-&gt;family != AF_UNIX) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t data = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.sv_ptr = NULL; //  Mark this as socket() call
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.update(&amp;tid, &amp;data);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_exit_socket) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t *datap = infotmp.lookup(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (!datap) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int retval = args-&gt;ret;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (retval &gt;= 0) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct event_t event = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        u64 id = bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.ts = bpf_ktime_get_ns();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.pid = id &gt;&gt; 32;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.tid = (u32)id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_probe_read_kernel(&amp;event.ppid, sizeof(event.ppid), &amp;task-&gt;real_parent-&gt;tgid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.stack_id = stack_traces.get_stackid(args, BPF_F_USER_STACK);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.call_type = TYPE_SOCKET;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.fds[0] = retval;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.fds[1] = -1;
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        events.perf_submit(args, &amp;event, sizeof(event));
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">// --- tracepoint for socketpair() ---
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_enter_socketpair) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (args-&gt;family != AF_UNIX) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t data = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    data.sv_ptr = (int *)args-&gt;usockvec;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.update(&amp;tid, &amp;data);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">TRACEPOINT_PROBE(syscalls, sys_exit_socketpair) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">    u32 tid = (u32)bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">    struct data_t *datap = infotmp.lookup(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (!datap || !datap-&gt;sv_ptr) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        if (datap) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">            infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        }
+</span></span></span><span class="line"><span class="cl"><span class="s2">        return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    int retval = args-&gt;ret;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    if (retval == 0) {
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct event_t event = </span><span class="si">{}</span><span class="s2">;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        u64 id = bpf_get_current_pid_tgid();
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.ts = bpf_ktime_get_ns();
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.pid = id &gt;&gt; 32;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.tid = (u32)id;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_probe_read_kernel(&amp;event.ppid, sizeof(event.ppid), &amp;task-&gt;real_parent-&gt;tgid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.stack_id = stack_traces.get_stackid(args, BPF_F_USER_STACK);
+</span></span></span><span class="line"><span class="cl"><span class="s2">        event.call_type = TYPE_SOCKETPAIR;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        bpf_probe_read_user(&amp;event.fds, sizeof(event.fds), datap-&gt;sv_ptr);
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">        events.perf_submit(args, &amp;event, sizeof(event));
+</span></span></span><span class="line"><span class="cl"><span class="s2">    }
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    infotmp.delete(&amp;tid);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s2">}
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Load BPF program</span>
+</span></span><span class="line"><span class="cl"><span class="n">b</span> <span class="o">=</span> <span class="n">BPF</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">prog</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Tracing socket(AF_UNIX) and socketpair(AF_UNIX) calls... Ctrl-C to stop.</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Perf Buffer callback handler</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">print_event</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s2">&#34;events&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">time_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ts</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">tgid</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pid</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">call_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># TYPE_SOCKET</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_str</span> <span class="o">=</span> <span class="s2">&#34;[socket(AF_UNIX)]&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fds_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;[FD=</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">fds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">]&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">call_type</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># TYPE_SOCKETPAIR</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_str</span> <span class="o">=</span> <span class="s2">&#34;[socketpair(AF_UNIX)]&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fds_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;[FDs=[</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">fds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">fds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">]]&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_str</span> <span class="o">=</span> <span class="s2">&#34;UNKNOWN&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fds_str</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[</span><span class="si">{</span><span class="n">time_str</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">call_str</span><span class="si">}</span><span class="s2"> [PPID=</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">ppid</span><span class="si">}</span><span class="s2">] [PID=</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">pid</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">fds_str</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">b</span><span class="p">[</span><span class="s2">&#34;stack_traces&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">stack_id</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;    </span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">b</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">tgid</span><span class="p">,</span> <span class="n">show_module</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_offset</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;    [Stack trace unavailable for stack_id </span><span class="si">%d</span><span class="s2"> due to process exit]&#34;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">stack_id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Open perf buffer and set callback function</span>
+</span></span><span class="line"><span class="cl"><span class="n">b</span><span class="p">[</span><span class="s2">&#34;events&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">open_perf_buffer</span><span class="p">(</span><span class="n">print_event</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Main loop, poll perf buffer</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">b</span><span class="o">.</span><span class="n">perf_buffer_poll</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个脚本的思路是在系统调用<strong>进入</strong> (<code>sys_enter_*</code>) 时暂存信息，在<strong>退出</strong> (<code>sys_exit_*</code>) 时捕获返回值（即文件描述符），然后将文件描述符、堆栈信息等一并发送到用户空间的 Python 程序进行打印。</p>
+<p>先运行这个脚本，然后再启动 Java 应用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sudo ./trace_unix_socket.py &gt; unixsocket
+</span></span><span class="line"><span class="cl"><span class="c1"># 在另一个终端启动 Java 应用</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 获取 Java 进程的 PID</span>
+</span></span><span class="line"><span class="cl">$ jps
+</span></span><span class="line"><span class="cl"><span class="m">178106</span> Jps
+</span></span><span class="line"><span class="cl"><span class="m">177961</span> GlassFishMain
+</span></span><span class="line"><span class="cl"><span class="c1"># 再次使用 lsof 确认 Unix socket</span>
+</span></span><span class="line"><span class="cl">$ sudo lsof -p <span class="m">177961</span> -U -a +E 
+</span></span><span class="line"><span class="cl">COMMAND    PID          USER   FD   TYPE             DEVICE SIZE/OFF    NODE NAME
+</span></span><span class="line"><span class="cl">lwsmd     <span class="m">1373</span>          root   78u  unix 0x000000001e5b48ae      0t0 <span class="m">7629677</span> /var/lib/pbis/.lsassd <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7625335</span> 177961,exe,4u
+</span></span><span class="line"><span class="cl">exe     <span class="m">177961</span>        mazhen    4u  unix 0x00000000b7b4fa52      0t0 <span class="m">7625335</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7629677</span> 1373,lwsmd,78u
+</span></span><span class="line"><span class="cl">exe     <span class="m">177961</span>        mazhen  407u  unix 0x0000000078480cf3      0t0 <span class="m">7630050</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7630051</span> 177961,exe,408u
+</span></span><span class="line"><span class="cl">exe     <span class="m">177961</span>        mazhen  408u  unix 0x000000002d0320c8      0t0 <span class="m">7630051</span> <span class="nv">type</span><span class="o">=</span>STREAM -&gt;INO<span class="o">=</span><span class="m">7630050</span> 177961,exe,407u
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在，我们可以在脚本的输出文件 <code>unixsocket</code> 中，根据进程 PID (177961) 和文件描述符（FD 4，407，408）进行查找，找到对应的创建堆栈：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>12:23:13.184181<span class="o">]</span> <span class="o">[</span>socket<span class="o">(</span>AF_UNIX<span class="o">)]</span> <span class="o">[</span><span class="nv">PPID</span><span class="o">=</span>177932<span class="o">]</span> <span class="o">[</span><span class="nv">PID</span><span class="o">=</span>177961<span class="o">]</span> <span class="o">[</span><span class="nv">FD</span><span class="o">=</span>4<span class="o">]</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;socket+0xb [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;__nscd_get_mapping+0xbd [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;__nscd_get_map_ref+0xcf [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>12:23:20.370346<span class="o">]</span> <span class="o">[</span>socketpair<span class="o">(</span>AF_UNIX<span class="o">)]</span> <span class="o">[</span><span class="nv">PPID</span><span class="o">=</span>2583<span class="o">]</span> <span class="o">[</span><span class="nv">PID</span><span class="o">=</span>177961<span class="o">]</span> <span class="o">[</span><span class="nv">FDs</span><span class="o">=[</span>407, 408<span class="o">]]</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;socketpair+0xe [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;JavaCalls::call_helper(JavaValue*, methodHandle const&amp;, JavaCallArguments*, JavaThread*)+0x334 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;JavaCalls::call_virtual(JavaValue*, Handle, Klass*, Symbol*, Symbol*, JavaThread*)+0x20c [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;thread_entry(JavaThread*, JavaThread*)+0x70 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;JavaThread::run()+0x127 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;Thread::call_run()+0xa1 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;thread_native_entry(Thread*)+0xe3 [libjvm.so]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;start_thread+0x2f3 [libc.so.6]&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于 FD 4，调用堆栈中的 <code>__nscd_get_mapping</code> 和 <code>__nscd_get_map_ref</code> 函数是关键线索，它表明 glibc 正在尝试进行一次名称服务查询（例如，解析一个用户名）。这正好解释了前面我们观察到的现象，为何 Java 进程会连接到 <code>lwsmd</code>。<code>__nscd_*</code> 是 glibc 用于名称解析的通用客户端逻辑，而具体解析动作需要连接到哪个服务，则由系统的 NSS(Name Service Switch) 决定。在我的测试场景，NSS 的配置将认证查询指向了 <code>lwsmd</code>，所以 Java 进程才会通过 <code>Unix socket</code>连接 <code>lwsmd</code>。至此，我们知道了 FD 4 的作用和来源，至于如何处理这个资源，还需要后续再探索，但至少现在我们已经明确了问题的根源。</p>
+<p>再看 FD 407 和 408，我们可以看到 <code>libjvm.so</code> 的函数调用，这清晰地表明是 Java 线程调用了 <code>socketpair</code> 创建了这对 <code>Unix socket</code>。然而，最关键的调用栈部分却显示为 <code>[unknown]</code>。</p>
+<p>这是因为 JIT (Just-In-Time) 编译器在运行时会将热点代码动态编译成机器码，并存放在匿名的内存区域。这些区域没有传统的符号表，因此像 BCC 这样的通用系统级工具在试图解析这些内存地址时，找不到任何符号信息，只能无奈地显示为 <code>[unknown]</code>。</p>
+<p>虽然这个 <code>Unix socket</code> (FD 407, 408) 已经被妥善处理，没有引起 CRaC 异常，但如果我们出于好奇，想知道究竟是哪段 Java 代码创建了它，应该如何做呢？</p>
+<p>要解决 <code>[unknown]</code> 的问题，我们需要一个更了解 Java 运行时的工具： <a class="link" href="https://github.com/async-profiler/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a> 。</p>
+<h2 id="使用-async-profiler-追踪-socket-创建">
+    <a href="#%e4%bd%bf%e7%94%a8-async-profiler-%e8%bf%bd%e8%b8%aa-socket-%e5%88%9b%e5%bb%ba" class="header-anchor">#</a>
+    使用 async-profiler 追踪 Socket 创建
+</h2><p><a class="link" href="https://github.com/async-profiler/async-profiler"  target="_blank" rel="noopener"
+    >async-profiler</a> 是一个为 Java 设计的低开销、高精度的性能分析工具，它直接利用 Linux 的 <code>perf_events</code> 子系统和 HotSpot JVM 特有的 API 来收集性能数据。</p>
+<p>相比传统 Java Profiler，它不仅能分析 Java 代码，还能监控到非 Java 线程（如 GC、JIT 编译器线程）的活动，并能展示原生代码（Native）和内核（Kernel）的调用栈帧，让我们看到从 Java 方法到 C/C++ 库函数再到内核系统调用的完整链路。</p>
+<p>BCC 等通用系统追踪工具，它们不理解 JVM 的内部工作原理，当遇到 JIT 编译器在匿名内存区域生成的机器码时，找不到对应的符号表，无法解析出方法名。而 <code>async-profiler</code> 是利用 HotSpot 提供的特定 API（如 AsyncGetCallTrace），它能解析 JVM 内部数据结构，从而获取 JIT 编译后代码的符号信息，将内存地址精确地映射回原始的 Java 方法名。</p>
+<p>可以这么说，<code>async-profiler</code> 综合了系统级追踪工具和传统 Java profiler 的能力，提供了对 Java 应用完整、精确性能洞察。</p>
+<h3 id="追踪-socketpair-的创建位置">
+    <a href="#%e8%bf%bd%e8%b8%aa-socketpair-%e7%9a%84%e5%88%9b%e5%bb%ba%e4%bd%8d%e7%bd%ae" class="header-anchor">#</a>
+    追踪 socketpair 的创建位置
+</h3><p>上一节，我们利用 BCC 追踪 <code>Unix socket</code> 相关的系统调用，这次我们用 <code>async-profiler</code> 完成同样的功能，并且能在调用堆栈中展示出 Java 方法名。</p>
+<p><code>async-profiler</code> 支持使用 Linux 的 <code>perf_events</code> ，所以它能够捕获 <code>perf_events</code> 中的 <code>tracepoint</code> 事件，实现和 BCC 一样的系统调用追踪。同时，<code>async-profiler</code> 可以作为一个 Java Agent 启动，这意味着我们可以在 Java 进程启动时就加载它，不会错过 Java 应用早期的初始化行为。</p>
+<p>回到之前的问题，为了定位创建文件描述符 408 和 409 的 <code>socketpair</code> 调用究竟源于哪段 Java 代码，我们可以在启动 Java 应用时，通过 <code>-agentpath</code> 参数挂载 <code>async-profiler</code>，并指定追踪 <code>syscalls:sys_enter_socketpair</code> 事件。</p>
+<p>修改 Java 启动命令如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">java -agentpath:/path/to/libasyncProfiler.so<span class="o">=</span>start,event<span class="o">=</span>syscalls:sys_enter_socketpair,file<span class="o">=</span>/tmp/socketpair-trace.html ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>参数说明：</p>
+<ul>
+<li><code>-agentpath:/path/to/libasyncProfiler.so</code>: 指定 <code>async-profiler</code> 动态链接库的位置。</li>
+<li><code>start</code>: 表示立即开始分析。</li>
+<li><code>event=syscalls:sys_enter_socketpair</code>: 指定要追踪的事件。这里我们关心 <code>socketpair</code> 系统调用的入口。</li>
+<li><code>file=/tmp/socketpair-trace.html</code>: 将分析结果输出为一个 HTML 格式的火焰图。</li>
+</ul>
+<p>需要注意的是，一般内核默认禁止非 root 用户追踪某些敏感的内核事件（比如系统调用），所以最好使用 <code>sudo</code> 启动 Java 应用。</p>
+<p>应用正常运行并结束后，会根据配置生成 <code>/tmp/socketpair-trace.html</code> 文件。</p>
+<p><img src="https://cdn.mazhen.tech/2025/202509151411050.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="sys_enter_socketpair"
+	
+	
+></p>
+<p>这张火焰图清晰地揭示了之前 BCC 无法解析的 [unknown] 部分，可以精准地定位到创建 <code>socketpair</code> 的 Java 代码源头。</p>
+<p>从上图可以看出，这个 <code>socketpair</code> 是由 Java 的 WatchService API 在其 Linux 实现中创建的。WatchService 是 Java NIO 提供的一个标准接口，用于监控文件系统的目录变化（如文件的创建、修改或删除）。调用堆栈显示，是 Apache Felix 框架的 FileInstall 组件调用了 WatchService，其目的是为了监控一个部署目录，从而实现 OSGi bundle 的热部署功能。</p>
+<p>我们前面观察到，这对由 <code>socketpair</code> 创建的文件描述符并没有在 checkpoint 过程中引发异常。原因是，CRaC 已经专门为 Java 的 <code>WatchService</code> 在 Linux 上的实现提供了内置支持（见 <a class="link" href="https://github.com/openjdk/crac/pull/72"  target="_blank" rel="noopener"
+    >OpenJDK CRaC PR #72</a>）。这意味着 CRaC 能够自动识别并妥善处理 <code>WatchService</code> 在内部使用的相关文件描述符。</p>
+<h3 id="追踪服务端口的监听位置">
+    <a href="#%e8%bf%bd%e8%b8%aa%e6%9c%8d%e5%8a%a1%e7%ab%af%e5%8f%a3%e7%9a%84%e7%9b%91%e5%90%ac%e4%bd%8d%e7%bd%ae" class="header-anchor">#</a>
+    追踪服务端口的监听位置
+</h3><p>同样的原理也适用于定位网络服务端口的监听位置。对于使用 NIO 框架创建的网络服务，如果要适配 CRaC，需要应用实现 <code>Resource</code> 接口，处理好监听端口的关闭和重新打开。如果未做适当的处理，那么在创建 <code>checkpoint</code> 镜像时，则会遇到类似下面的异常：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">CheckpointException</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Suppressed</span><span class="p">:</span><span class="w"> </span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">EPollSelectorImpl$BusySelectorException</span><span class="p">:</span><span class="w"> </span><span class="n">Selector</span><span class="w"> </span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">EPollSelectorImpl</span><span class="nd">@476d29ab</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">registered</span><span class="w"> </span><span class="n">keys</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">channels</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">ServerSocketChannelImpl</span><span class="o">[</span><span class="n">closed</span><span class="o">]]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">sun</span><span class="p">.</span><span class="na">nio</span><span class="p">.</span><span class="na">ch</span><span class="p">.</span><span class="na">EPollSelectorImpl</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">EPollSelectorImpl</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">405</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">invokeBeforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">43</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">58</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">BlockingOrderedContext</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">BlockingOrderedContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">64</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">invokeBeforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">43</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">impl</span><span class="p">.</span><span class="na">AbstractContext</span><span class="p">.</span><span class="na">beforeCheckpoint</span><span class="p">(</span><span class="n">AbstractContext</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">58</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore1</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">154</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestore</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">315</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">at</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">base</span><span class="o">/</span><span class="n">jdk</span><span class="p">.</span><span class="na">internal</span><span class="p">.</span><span class="na">crac</span><span class="p">.</span><span class="na">mirror</span><span class="p">.</span><span class="na">Core</span><span class="p">.</span><span class="na">checkpointRestoreInternal</span><span class="p">(</span><span class="n">Core</span><span class="p">.</span><span class="na">java</span><span class="p">:</span><span class="n">328</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>从异常信息中，我们知道 <code>checkpoint</code> 失败的直接原因是 <code>EPollSelectorImpl</code> 实例正处于“忙碌”状态。可以看出，即使 <code>ServerSocketChannel</code> 本身可能已经关闭，但它与 <code>Selector</code> 的注册关系没有被完全解除。</p>
+<p>但这个异常信息并没有告诉我们这个端口是在应用程序的<strong>哪个位置</strong>被创建和监听的。要妥善的处理监听端口，必须先找到创建监听端口的具体位置。</p>
+<p>如何做呢？我们可以追踪一个关键的系统调用：<code>bind</code>。</p>
+<p><code>bind</code> 系统调用是任何网络服务端程序启动的必经之路。它的作用是将一个创建好的 <code>socket</code> 文件描述符与一个具体的 IP 地址和端口号绑定起来。只有执行了 <code>bind</code> 并成功之后，服务器才能在该端口上监听并接受客户端连接。因此，通过捕获 <code>bind</code> 系统调用发生时的调用堆栈，我们就能精确地定位到是哪一段 Java 代码触发了端口监听。</p>
+<p>使用以下命令启动 Java 应用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">java -agentpath:/path/to/libasyncProfiler.so<span class="o">=</span>start,event<span class="o">=</span>syscalls:sys_enter_bind,file<span class="o">=</span>/tmp/bind-trace.html -jar ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>应用成功启动并对外提供服务后，停止应用，然后分析生成的 <code>/tmp/bind-trace.html</code> 文件。</p>
+<p><img src="https://cdn.mazhen.tech/2025/202509151452321.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="sys_enter_bind"
+	
+	
+></p>
+<p>从上面的火焰图可以看出，端口绑定操作是由 Grizzly NIO 框架执行的，该框架作为 GlassFish 应用服务器的底层网络引擎。整个过程在服务器启动阶段，由 HK2 依赖注入框架自动触发，以初始化和启动核心的网络服务。</p>
+<p>通过分析火焰图，我们可以得出结论：在 <code>GrizzlyListener</code> 处实现 <code>Resource</code> 接口可能比较合理，可以在这里管理监听端口的关闭和重启。</p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>本文旨在解决为 Java 应用适配 CRaC 时，如何精确定位网络资源（如 <code>Unix socket</code> 和服务监听端口）创建位置的难题。</p>
+<p>首先介绍了使用系统级追踪工具 <strong>BCC</strong> 的方法。虽然 BCC 能通过追踪 <code>socket</code> 和 <code>socketpair</code> 等系统调用，捕获到原生代码的调用堆栈，但它无法解析 JIT 编译的 Java 代码，导致关键信息显示为 <code>[unknown]</code>。</p>
+<p>为解决此问题，文章介绍了更为强大的 <strong><code>async-profiler</code></strong>。它结合了底层 <code>perf_events</code> 追踪能力，以及对 JVM 内部的理解，能够完美解析 JIT 代码的符号。通过追踪 <code>sys_enter_socketpair</code> 和 <code>sys_enter_bind</code> tracepoint 的实际案例，展示了如何利用 <code>async-profiler</code> 生成的火焰图，将系统调用反向追溯到具体的 Java 代码。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">Java</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/trace/">Trace</a>
+        
+            <a href="/tags/crac/">Crac</a>
+        
+            <a href="/tags/bcc/">Bcc</a>
+        
+            <a href="/tags/async-profiler/">Async-Profiler</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/tracing-and-locating-socket-creation-in-java-processes/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Tracing and Locating Socket Creation in Java Processes</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">追踪 Java 进程创建的 domain socket</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%90%86%E8%A7%A3-crac-%E8%83%8C%E5%90%8E%E7%9A%84-linux-%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">理解 CRaC 背后的 Linux 系统编程</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/crac-%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CRaC 技术深度解析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%8F%AD%E7%A7%98-jvm-%E5%81%9C%E9%A1%BF%E7%9A%84%E8%83%8C%E5%90%8E%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-safepoint/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">揭秘 JVM 停顿的背后：深入理解 Safepoint</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2025 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
