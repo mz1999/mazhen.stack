@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="在上一篇文章追踪定位 Java 进程的 Socket 创建中，我们使用 BCC 脚本成功捕获了 Java 进程在启动阶段对 Unix socket 的创建。其中，对于一个由 JVM 原生代码触发的 socket 调用，我们得到">
+<title>使用 DWARF 还原完整的 glibc 调用堆栈</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8-dwarf-%E8%BF%98%E5%8E%9F%E5%AE%8C%E6%95%B4%E7%9A%84-glibc-%E8%B0%83%E7%94%A8%E5%A0%86%E6%A0%88/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="使用 DWARF 还原完整的 glibc 调用堆栈">
+<meta property='og:description' content="在上一篇文章追踪定位 Java 进程的 Socket 创建中，我们使用 BCC 脚本成功捕获了 Java 进程在启动阶段对 Unix socket 的创建。其中，对于一个由 JVM 原生代码触发的 socket 调用，我们得到">
+<meta property='og:url' content='https://mazhen.tech/p/%E4%BD%BF%E7%94%A8-dwarf-%E8%BF%98%E5%8E%9F%E5%AE%8C%E6%95%B4%E7%9A%84-glibc-%E8%B0%83%E7%94%A8%E5%A0%86%E6%A0%88/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='java' /><meta property='article:tag' content='linux' /><meta property='article:tag' content='trace' /><meta property='article:tag' content='perf' /><meta property='article:tag' content='bcc' /><meta property='article:published_time' content='2025-09-19T09:47:41&#43;08:00'/><meta property='article:modified_time' content='2025-09-19T09:47:41&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="使用 DWARF 还原完整的 glibc 调用堆栈">
+<meta name="twitter:description" content="在上一篇文章追踪定位 Java 进程的 Socket 创建中，我们使用 BCC 脚本成功捕获了 Java 进程在启动阶段对 Unix socket 的创建。其中，对于一个由 JVM 原生代码触发的 socket 调用，我们得到">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#丢失的帧指针-frame-pointers">丢失的帧指针 (Frame Pointers)</a></li>
+    <li><a href="#历史回顾为何帧指针会丢失">历史回顾，为何帧指针会“丢失”？</a></li>
+    <li><a href="#使用-gdb-验证猜想">使用 GDB 验证猜想</a></li>
+    <li><a href="#使用-dwarf-堆栈回溯">使用 DWARF 堆栈回溯</a></li>
+    <li><a href="#还原完整的调用堆栈">还原完整的调用堆栈</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BD%BF%E7%94%A8-dwarf-%E8%BF%98%E5%8E%9F%E5%AE%8C%E6%95%B4%E7%9A%84-glibc-%E8%B0%83%E7%94%A8%E5%A0%86%E6%A0%88/">使用 DWARF 还原完整的 glibc 调用堆栈</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2025-09-19</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 8 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>在上一篇文章<a class="link" href="https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/"  target="_blank" rel="noopener"
+    >追踪定位 Java 进程的 Socket 创建</a>中，我们使用 BCC 脚本成功捕获了 Java 进程在启动阶段对 <code>Unix socket</code> 的创建。其中，对于一个由 JVM 原生代码触发的 <code>socket</code> 调用，我们得到了如下调用堆栈：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">[</span>12:23:13.184181<span class="o">]</span> <span class="o">[</span>socket<span class="o">(</span>AF_UNIX<span class="o">)]</span> <span class="o">[</span><span class="nv">PPID</span><span class="o">=</span>177932<span class="o">]</span> <span class="o">[</span><span class="nv">PID</span><span class="o">=</span>177961<span class="o">]</span> <span class="o">[</span><span class="nv">FD</span><span class="o">=</span>4<span class="o">]</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;socket+0xb [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;__nscd_get_mapping+0xbd [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;__nscd_get_map_ref+0xcf [libc.so.6]&#39;</span>
+</span></span><span class="line"><span class="cl">    b<span class="s1">&#39;[unknown]&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>虽然我们根据堆栈中的 <code>__nscd_get_mapping</code> 等函数名推断出其行为与名称服务查询有关，但这个结果留下了一个明显的问题：调用堆栈在 <code>__nscd_get_map_ref</code> 函数之后就中断了，最后一行显示为 <code>[unknown]</code>。</p>
+<p><code>__nscd_get_map_ref</code> 这个函数名表明它是一个内部实现函数，而非供外部程序直接调用的公共 API。因此，调用它的函数极有可能仍然位于 <code>glibc</code> 库的内部。这就引出了一个疑问：<strong>为什么堆栈会在 <code>glibc</code> 库的内部中断？<code>[unknown]</code> 的背后究竟隐藏着哪个函数？</strong></p>
+<p>本文将深入分析这个现象的底层原因，并提供一个能获取完整原生调用堆栈的方法。</p>
+<h2 id="丢失的帧指针-frame-pointers">
+    <a href="#%e4%b8%a2%e5%a4%b1%e7%9a%84%e5%b8%a7%e6%8c%87%e9%92%88-frame-pointers" class="header-anchor">#</a>
+    丢失的帧指针 (Frame Pointers)
+</h2><p>要理解堆栈为什么会中断，我们首先需要了解 BCC 默认是如何获取调用堆栈的。它使用的是一种名为“<strong>帧指针回溯</strong>”（Frame Pointer Walking）的技术。</p>
+<p>简单来说，当一个函数被调用时，它会在自己的<strong>栈帧</strong>（<strong>Stack Frame</strong>）中保存上一个函数栈帧的基地址。这个基地址通常存储在一个专用的寄存器中（在 x86-64 架构上是 <code>%rbp</code>），这个寄存器就被称为<strong>帧指针</strong>（<strong>Frame Pointer</strong>）。通过当前函数的帧指针，可以找到上一个函数的帧指针，如此层层递进，形成一个类似链表的结构。BCC 正是依赖这条“指针链”来快速地回溯出完整的函数调用关系。</p>
+<p>这种方法的优点是速度快、性能开销很低。但它的缺点是，它严重依赖于被追踪的程序在编译时保留了帧指针。如果编译器为了性能优化（例如，使用 <code>-fomit-frame-pointer</code> 标志），决定不使用 <code>%rbp</code> 寄存器作为帧指针，而是将其当作一个通用寄存器来使用，那么这个函数栈帧中就不会包含保存上一个帧指针的操作。当堆栈回溯到这个函数时，指针链就会在此处断裂。</p>
+<p>基于以上原理，我们可以做出一个合理的推测：BCC 的堆栈追踪之所以在 <code>glibc</code> 内部中断，是因为调用链中的某个函数在编译时被优化，省略了帧指针，导致回溯链条在此处断裂。</p>
+<h2 id="历史回顾为何帧指针会丢失">
+    <a href="#%e5%8e%86%e5%8f%b2%e5%9b%9e%e9%a1%be%e4%b8%ba%e4%bd%95%e5%b8%a7%e6%8c%87%e9%92%88%e4%bc%9a%e4%b8%a2%e5%a4%b1" class="header-anchor">#</a>
+    历史回顾，为何帧指针会“丢失”？
+</h2><p>前面我们推测堆栈中断是由于 glibc 中的某些函数在编译时省略了帧指针。但为什么编译器会做出这样的优化呢？</p>
+<p>知名性能专家 <a class="link" href="https://www.brendangregg.com/"  target="_blank" rel="noopener"
+    >Brendan Gregg</a> 在他的文章 <a class="link" href="https://www.brendangregg.com/blog/2024-03-17/the-return-of-the-frame-pointers.html"  target="_blank" rel="noopener"
+    >The Return of the Frame Pointers</a> 中详细阐述了这个问题。在过去的 32 位 CPU 架构（如 x86）时代，CPU 可用的通用寄存器数量非常有限。为了尽可能地提升性能，编译器开发者无所不用其极。其中一项广为采用的优化就是通过 <code>-fomit-frame-pointer</code> 编译标志，不再将 <code>%ebp</code> 寄存器固定用作帧指针，而是将其解放出来，作为一个通用的寄存器参与数据计算。</p>
+<p>这个优化的理论收益是：可以减少函数调用时的指令数，并多出一个可用的寄存器，从而生成体积更小、执行速度可能更快的代码。代价则是牺牲了程序的调试性和可分析性，使得基于帧指针的堆栈回溯变得不可靠。在那个年代，这个选择被认为是值得的，并逐渐成为了 GCC 等主流编译器的默认行为。</p>
+<p>在现代的 64 位 CPU (x86-64) 上，寄存器数量已经大大增加，省略帧指针带来的性能优势已经微乎其微，但这个编译默认选项却作为一种“历史惯例”被长期保留了下来。因此，我们当前系统上使用的 <code>glibc</code> 库，其二进制文件很可能就是遵循这一惯例构建的产物。</p>
+<p>业界已经重新认识到帧指针对于系统可观测性的重要性。现在，主流的 Linux 发行版（如 Ubuntu 24.04 和 Fedora 38）已经开始在其软件包的编译选项中重新默认启用帧指针。但在那之前，我们仍然需要处理这些“历史遗留”的二进制文件。</p>
+<h2 id="使用-gdb-验证猜想">
+    <a href="#%e4%bd%bf%e7%94%a8-gdb-%e9%aa%8c%e8%af%81%e7%8c%9c%e6%83%b3" class="header-anchor">#</a>
+    使用 GDB 验证猜想
+</h2><p>现在我们使用 GDB (GNU Debugger) 直接检查相关函数的汇编代码，验证 <code>glibc</code> 内部的某些函数可能省略了帧指针的推测。</p>
+<p><strong>加载 <code>libc.so.6</code> 到 GDB</strong></p>
+<p>我们首先启动 GDB，并将 <code>glibc</code> 库作为分析目标加载进来。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ gdb /usr/lib/x86_64-linux-gnu/libc.so.6
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>检查导致回溯失败的函数 <code>__nscd_get_map_ref</code></strong></p>
+<p>根据 BCC 的输出，<code>__nscd_get_map_ref</code> 是堆栈中可见的最后一个函数名。回溯正是在尝试寻找<strong>它的调用者</strong>时失败的。因此，我们首先来检查这个函数的汇编代码。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(gdb) disassemble __nscd_get_map_ref
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>输出结果会类似下面这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Dump of assembler code for function __nscd_get_map_ref:
+</span></span><span class="line"><span class="cl">   0x0000000000171670 &lt;+0&gt;:	endbr64 
+</span></span><span class="line"><span class="cl">   0x0000000000171674 &lt;+4&gt;:	push   %r15
+</span></span><span class="line"><span class="cl">   0x0000000000171676 &lt;+6&gt;:	push   %r14
+</span></span><span class="line"><span class="cl">   0x0000000000171678 &lt;+8&gt;:	push   %r13
+</span></span><span class="line"><span class="cl">   0x000000000017167a &lt;+10&gt;:	push   %r12
+</span></span><span class="line"><span class="cl">   0x000000000017167c &lt;+12&gt;:	push   %rbp
+</span></span><span class="line"><span class="cl">   0x000000000017167d &lt;+13&gt;:	push   %rbx
+</span></span><span class="line"><span class="cl">   0x000000000017167e &lt;+14&gt;:	sub    $0x28,%rsp
+</span></span><span class="line"><span class="cl">   ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们看到，这个函数的序言<strong>没有</strong> <code>push %rbp</code> 和 <code>mov %rsp,%rbp</code>。它直接通过 <code>sub</code> 指令来操作栈顶指针 <code>%rsp</code> 以分配栈空间。这明确地证明了 <code>__nscd_get_map_ref</code> 这个函数在编译时<strong>省略了帧指针</strong>。正是因为缺少这个关键的“路标”，BCC 无法找到其调用者的栈帧，导致回溯在此中断，下一行只能显示为 <code>[unknown]</code>。</p>
+<p><strong>检查被成功“穿越”的函数 <code>__nscd_get_mapping</code></strong></p>
+<p>我们再来检查一下堆栈中的前一个函数 <code>__nscd_get_mapping</code>。BCC 成功地从这个函数回溯到了 <code>__nscd_get_map_ref</code>，这说明 <code>__nscd_get_mapping</code> 自身应该保留了帧指针。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(gdb) disassemble __nscd_get_mapping
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这一次，输出结果证实了我们的推断：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Dump of assembler code for function __nscd_get_mapping:
+</span></span><span class="line"><span class="cl">   0x0000000000171210 &lt;+0&gt;:	endbr64 
+</span></span><span class="line"><span class="cl">   0x0000000000171214 &lt;+4&gt;:	push   %rbp
+</span></span><span class="line"><span class="cl">   0x0000000000171215 &lt;+5&gt;:	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>头两行指令 <code>push %rbp</code> 和 <code>mov %rsp,%rbp</code> 是设置帧指针的标准操作。这证明了 <code>__nscd_get_mapping</code> <strong>确实保留了帧指针</strong>，BCC 正是利用了这一点，才得以成功地从它回溯到上一层。</p>
+<p>至此，证据确凿。BCC 的帧指针回溯之旅在成功经过 <code>__nscd_get_mapping</code> 之后，到达了 <code>__nscd_get_map_ref</code> 这一站。由于 <code>__nscd_get_map_ref</code> 函数本身缺少帧指针，导致 BCC 无法定位其调用者的信息，回溯过程被迫中断。我们的猜想得到了验证。</p>
+<h2 id="使用-dwarf-堆栈回溯">
+    <a href="#%e4%bd%bf%e7%94%a8-dwarf-%e5%a0%86%e6%a0%88%e5%9b%9e%e6%ba%af" class="header-anchor">#</a>
+    使用 DWARF 堆栈回溯
+</h2><p>既然基于帧指针的“快捷方式”因为道路中断而无法走通，我们就需要启用一种更可靠的回溯方法。这个方法就是基于 <strong>DWARF</strong> 调试信息。</p>
+<p><code>DWARF</code> 是一种被广泛使用的调试信息格式。当程序以 <code>-g</code> 等标志编译时，编译器会生成丰富的 <code>DWARF</code> 信息，并将其存储在可执行文件中，或者是一个独立的符号文件。这些信息详尽地描述了程序的结构，包括函数、变量、类型，以及如何在任何指令点精确地重建调用堆栈的规则。</p>
+<p>与依赖运行时指针链的帧指针回溯不同，<code>DWARF</code> 回溯更像是拿着一张由编译器绘制的“代码地图”和“堆栈布局说明书”。性能分析工具（如 <code>perf</code>）可以利用这份“地图”，即使在函数省略了帧指针的情况下，也能通过分析当前的指令指针和栈内容，精确地计算出调用者的位置。</p>
+<p>要成功使用 <code>DWARF</code> 回溯，我们必须满足两个前提条件：</p>
+<ol>
+<li>
+<p><strong>安装必要的依赖</strong>：<code>perf</code> 的 <code>DWARF</code> 回溯功能依赖于一些系统库（如 <code>libunwind</code>, <code>libdw</code>）。我们需要确保这些库已经安装，以保证 <code>perf</code> 的核心引擎能够正常工作。</p>
+</li>
+<li>
+<p><strong>调试信息必须存在</strong>：被追踪的程序库（在我们的案例中是 <code>glibc</code>）必须有对应的调试信息包（在 Ubuntu 上通常是 <code>dbgsym</code> 或 <code>dbg</code> 包）。这些包包含了 <code>perf</code> 解读堆栈所需的 <code>DWARF</code> 地图。</p>
+</li>
+</ol>
+<p>满足这两个条件后，我们就可以指示 <code>perf</code> 工具使用 <code>DWARF</code> 模式来捕获调用堆栈，从而绕过帧指针缺失的问题。</p>
+<h2 id="还原完整的调用堆栈">
+    <a href="#%e8%bf%98%e5%8e%9f%e5%ae%8c%e6%95%b4%e7%9a%84%e8%b0%83%e7%94%a8%e5%a0%86%e6%a0%88" class="header-anchor">#</a>
+    还原完整的调用堆栈
+</h2><p>现在，来捕获之前中断的完整调用堆栈。</p>
+<p><strong>准备环境</strong></p>
+<p>在开始追踪之前，我们需要确保 <code>perf</code> 的 <code>DWARF</code> 引擎及其依赖是完整的，并且 <code>glibc</code> 的调试信息也已经就绪。</p>
+<p>在 Ubuntu 系统上，可以通过以下命令安装所有必要的软件包：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 安装 perf 进行 DWARF 回溯所需的核心依赖库</span>
+</span></span><span class="line"><span class="cl">sudo apt install libunwind-dev libdw-dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装 glibc 的调试符号包</span>
+</span></span><span class="line"><span class="cl">sudo apt install libc6-dbg
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>使用 <code>perf</code> 捕获数据</strong></p>
+<p>环境准备就绪后，我们就可以使用 <code>perf record</code> 命令来启动 Java 应用并捕获系统调用事件。这次，我们将明确要求 <code>perf</code> 使用 <code>DWARF</code> 模式进行堆栈回溯。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 放宽内核对 perf 的安全限制，允许追踪用户空间</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> -1 <span class="p">|</span> sudo tee /proc/sys/kernel/perf_event_paranoid
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 --call-graph dwarf 参数启动追踪</span>
+</span></span><span class="line"><span class="cl">sudo perf record -e syscalls:sys_enter_socket --call-graph dwarf -- java Main
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>参数说明：</p>
+<ul>
+<li><code>--call-graph dwarf</code>：这是最关键的参数。它指示 <code>perf</code> 在捕获事件时，必须使用 <code>DWARF</code> 信息来回溯并记录完整的调用堆栈。</li>
+<li><code>-- java Main</code>：<code>--</code> 符号告诉 <code>perf</code>，后面的所有内容都是要执行的命令。请将其替换为您实际的 Java 应用启动命令。</li>
+</ul>
+<p><code>perf</code> 会启动 Java 应用，并从进程开始到结束持续追踪。应用退出后，追踪数据会自动保存在当前目录下的 <code>perf.data</code> 文件中。</p>
+<p><strong>分析结果</strong></p>
+<p>最后，我们使用 <code>perf script</code> 命令来读取 <code>perf.data</code> 文件，并将其中的原始数据翻译成人类可读的调用堆栈。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo perf script
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这一次，输出的结果将不再有 <code>[unknown]</code>。您会看到一份类似下面这样完整、清晰的调用堆栈：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">java 391724 [003] 952479.264820: syscalls:sys_enter_socket: family: 0x00000001, type: 0x00080801, protocol: 0x00000000
+</span></span><span class="line"><span class="cl">            7fb4c96feb3b __GI_socket+0xb (inlined)
+</span></span><span class="line"><span class="cl">            7fb4c9747c4f open_socket+0x3f (/usr/lib/x86_64-linux-gnu/libc.so.6)
+</span></span><span class="line"><span class="cl">            7fb4c97482cc __nscd_get_mapping+0xbc (/usr/lib/x86_64-linux-gnu/libc.so.6)
+</span></span><span class="line"><span class="cl">            7fb4c974873e __nscd_get_map_ref+0xce (/usr/lib/x86_64-linux-gnu/libc.so.6)
+</span></span><span class="line"><span class="cl">            7fb4c97449c6 nscd_getpw_r+0x66 (/usr/lib/x86_64-linux-gnu/libc.so.6)
+</span></span><span class="line"><span class="cl">            7fb4c9744e45 __nscd_getpwuid_r+0x65 (/usr/lib/x86_64-linux-gnu/libc.so.6)
+</span></span><span class="line"><span class="cl">            7fb4c96c0e3f __getpwuid_r+0x1bf (inlined)
+</span></span><span class="line"><span class="cl">            7fb4c8aaba99 get_user_name+0x59 (/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so)
+</span></span><span class="line"><span class="cl">            7fb4c8aad1e3 PerfMemory::create_memory_region+0x93 (/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so)
+</span></span><span class="line"><span class="cl">            7fb4c8aab773 perfMemory_init+0x73 (/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so)
+</span></span><span class="line"><span class="cl">            7fb4c863b3c6 vm_init_globals+0x26 (/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so)
+</span></span><span class="line"><span class="cl">            7fb4c8cfa409 Threads::create_vm+0x249 (/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so)
+</span></span><span class="line"><span class="cl">            7fb4c8709c6d JNI_CreateJavaVM+0x4d (/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so)
+</span></span><span class="line"><span class="cl">            7fb4c98050f0 JavaMain+0x90 (/usr/lib/jvm/java-17-openjdk-amd64/lib/libjli.so)
+</span></span><span class="line"><span class="cl">            7fb4c9809a38 ThreadJavaMain+0x8 (/usr/lib/jvm/java-17-openjdk-amd64/lib/libjli.so)
+</span></span><span class="line"><span class="cl">            7fb4c966bac2 start_thread+0x2f2 (/usr/lib/x86_64-linux-gnu/libc.so.6)
+</span></span><span class="line"><span class="cl">            7fb4c96fd84f __clone3+0x2f (inlined)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过与 BCC 的输出进行对比，我们可以清晰地看到，之前中断的堆栈已经被完美地补充完整了。<code>[unknown]</code> 的真实身份——<code>nscd_getpw_r</code>、<code>__getpwuid_r</code> 等函数——以及更上层的 <code>libjvm.so</code> 内部调用，现在都已一目了然。</p>
+<p>通过 <code>perf</code> 捕获的这份完整调用堆栈，为我们揭示了 <code>Unix socket</code> 创建的完整路径：</p>
+<ol>
+<li>
+<p><strong>事件的起点</strong>：在 JVM 启动的极早期阶段（<code>JNI_CreateJavaVM</code> -&gt; <code>Threads::create_vm</code>），JVM 需要初始化其性能数据子系统（<code>PerfMemory</code>）。</p>
+</li>
+<li>
+<p><strong>直接原因</strong>：<code>PerfMemory::create_memory_region</code> 函数在初始化过程中，调用了其内部的 <code>get_user_name</code> 函数，目的是为了获取当前运行用户的名称。这通常是为了创建用户专属的性能数据文件（例如 <code>/tmp/hsperfdata_&lt;user&gt;/&lt;pid&gt;</code>）。</p>
+</li>
+<li>
+<p><strong>触发系统调用</strong>：为了从用户 ID 解析出用户名，<code>get_user_name</code> 函数调用了 <code>glibc</code> 提供的标准 POSIX 函数 <code>__getpwuid_r</code>。</p>
+</li>
+<li>
+<p><strong>NSS 介入</strong>：系统的 NSS(Name Service Switch) 框架接管了这个请求。<code>glibc</code> 内部的 <code>__nscd_*</code> 系列函数开始工作，准备通过配置好的名称服务守护进程（如 <code>lwsmd</code> 或 <code>nscd</code>）来完成查询。</p>
+</li>
+<li>
+<p><strong>最终结果</strong>：为了与这个守护进程通信，<code>glibc</code> 的客户端逻辑最终调用了 <code>socket()</code> 系统调用，创建了我们最初观察到的那个 <code>Unix socket</code>。</p>
+</li>
+</ol>
+<p><strong>这个 <code>Unix socket</code> 的创建，其根本原因在于 JVM 在初始化性能监控模块时，需要获取当前用户信息。</strong></p>
+<h2 id="总结">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-anchor">#</a>
+    总结
+</h2><p>本文深入探讨了<a class="link" href="%28https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/%29" >上一篇文章</a> 中遗留的一个问题：为何使用 BCC 追踪 <code>Unix socket</code> 创建时，调用堆栈会在 <code>glibc</code> 库内部中断并显示 <code>[unknown]</code>。</p>
+<p>首先分析了 BCC 默认依赖的“帧指针回溯”技术在面对编译优化时的问题。通过 GDB 对 <code>glibc</code> 库相关函数的汇编代码进行现场取证，证实了堆栈中断的确是因为 <code>glibc</code> 内部某个函数在编译时省略了帧指针。</p>
+<p>为了解决这个问题，文章介绍了“DWARF 回溯”方法，最终成功捕获到了从 JVM 内部 C++ 函数到 <code>glibc</code> 再到系统调用的完整调用堆栈，彻底解开了 <code>[unknown]</code> 背后的秘密。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">Java</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+            <a href="/tags/trace/">Trace</a>
+        
+            <a href="/tags/perf/">Perf</a>
+        
+            <a href="/tags/bcc/">Bcc</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/tracing-and-locating-socket-creation-in-java-processes/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Tracing and Locating Socket Creation in Java Processes</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">追踪定位 Java 进程的 Socket 创建</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%BF%BD%E8%B8%AA-java-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E7%9A%84-domain-socket/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">追踪 Java 进程创建的 domain socket</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%8F%AD%E7%A7%98-jvm-%E5%81%9C%E9%A1%BF%E7%9A%84%E8%83%8C%E5%90%8E%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-safepoint/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">揭秘 JVM 停顿的背后：深入理解 Safepoint</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8-printassembly-%E6%9F%A5%E7%9C%8B-jit-%E7%BC%96%E8%AF%91%E5%90%8E%E7%9A%84%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用 PrintAssembly 查看 JIT 编译后的汇编代码</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2025 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

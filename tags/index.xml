@@ -6,7 +6,47 @@
         <description>Recent content in Tags on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Mon, 15 Sep 2025 14:47:32 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 19 Sep 2025 09:47:41 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Bcc</title>
+        <link>https://mazhen.tech/tags/bcc/</link>
+        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/bcc/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Java</title>
+        <link>https://mazhen.tech/tags/java/</link>
+        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/java/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Linux</title>
+        <link>https://mazhen.tech/tags/linux/</link>
+        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/linux/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Perf</title>
+        <link>https://mazhen.tech/tags/perf/</link>
+        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/perf/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Trace</title>
+        <link>https://mazhen.tech/tags/trace/</link>
+        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/trace/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Async-Profiler</title>
         <link>https://mazhen.tech/tags/async-profiler/</link>
         <pubDate>Mon, 15 Sep 2025 14:47:32 +0800</pubDate>
@@ -15,43 +55,11 @@
         <description></description>
         </item>
         <item>
-        <title>Bcc</title>
-        <link>https://mazhen.tech/tags/bcc/</link>
-        <pubDate>Mon, 15 Sep 2025 14:47:32 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/bcc/</guid>
-        <description></description>
-        </item>
-        <item>
         <title>Crac</title>
         <link>https://mazhen.tech/tags/crac/</link>
         <pubDate>Mon, 15 Sep 2025 14:47:32 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/crac/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Java</title>
-        <link>https://mazhen.tech/tags/java/</link>
-        <pubDate>Mon, 15 Sep 2025 14:47:32 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/java/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Linux</title>
-        <link>https://mazhen.tech/tags/linux/</link>
-        <pubDate>Mon, 15 Sep 2025 14:47:32 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/linux/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Trace</title>
-        <link>https://mazhen.tech/tags/trace/</link>
-        <pubDate>Mon, 15 Sep 2025 14:47:32 +0800</pubDate>
-        
-        <guid>https://mazhen.tech/tags/trace/</guid>
         <description></description>
         </item>
         <item>
