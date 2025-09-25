@@ -6,7 +6,209 @@
         <description>Recent content in Linux on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Fri, 19 Sep 2025 09:47:41 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/linux/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 25 Sep 2025 10:24:48 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/linux/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>手动创建 kprobe 事件追踪 bind 系统调用</title>
+        <link>https://mazhen.tech/p/%E6%89%8B%E5%8A%A8%E5%88%9B%E5%BB%BA-kprobe-%E4%BA%8B%E4%BB%B6%E8%BF%BD%E8%B8%AA-bind-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</link>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/p/%E6%89%8B%E5%8A%A8%E5%88%9B%E5%BB%BA-kprobe-%E4%BA%8B%E4%BB%B6%E8%BF%BD%E8%B8%AA-bind-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</guid>
+        <description>&lt;p&gt;在前面的文章 &lt;a class=&#34;link&#34; href=&#34;https://mazhen.tech/p/%E8%BF%BD%E8%B8%AA%E5%AE%9A%E4%BD%8D-java-%E8%BF%9B%E7%A8%8B%E7%9A%84-socket-%E5%88%9B%E5%BB%BA/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;追踪定位 Java 进程的 Socket 创建&lt;/a&gt;中，介绍了如何使用 &lt;code&gt;async-profiler&lt;/code&gt; 追踪 &lt;code&gt;tracepoint&lt;/code&gt; 事件 &lt;code&gt;sys_enter_bind&lt;/code&gt;，定位 Java 中网络监听端口的创建。但部分系统因内核配置限制可能不支持该事件。本文将详细介绍如何通过手动创建&lt;code&gt;kprobe&lt;/code&gt;事件，实现对&lt;code&gt;bind&lt;/code&gt;系统调用的精准追踪。&lt;/p&gt;
+&lt;h2 id=&#34;问题背景系统不支持-syscallssys_enter_bind-tracepoint&#34;&gt;
+    &lt;a href=&#34;#%e9%97%ae%e9%a2%98%e8%83%8c%e6%99%af%e7%b3%bb%e7%bb%9f%e4%b8%8d%e6%94%af%e6%8c%81-syscallssys_enter_bind-tracepoint&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    问题背景：系统不支持 syscalls:sys_enter_bind tracepoint
+&lt;/h2&gt;&lt;p&gt;当执行&lt;code&gt;perf list | grep syscalls&lt;/code&gt;时，若输出中没有&lt;code&gt;syscalls:sys_enter_bind&lt;/code&gt;，说明系统内核未启用&lt;code&gt;CONFIG_SYSCALL_TRACEPOINTS&lt;/code&gt;配置（可通过&lt;code&gt;grep CONFIG_SYSCALL_TRACEPOINTS /boot/config-$(uname -r)&lt;/code&gt;验证）。此时无法直接使用&lt;code&gt;syscalls&lt;/code&gt;系列跟踪点，需通过&lt;code&gt;kprobe&lt;/code&gt;动态探测内核函数实现追踪。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案手动创建-kprobe-事件追踪-bind-系统调用&#34;&gt;
+    &lt;a href=&#34;#%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88%e6%89%8b%e5%8a%a8%e5%88%9b%e5%bb%ba-kprobe-%e4%ba%8b%e4%bb%b6%e8%bf%bd%e8%b8%aa-bind-%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    解决方案：手动创建 kprobe 事件追踪 bind 系统调用
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;kprobe&lt;/code&gt;是内核提供的动态调试机制，可在任意内核函数的入口/出口插入探测点。&lt;code&gt;bind&lt;/code&gt;系统调用的内核实现函数通常为&lt;code&gt;sys_bind&lt;/code&gt;或&lt;code&gt;__sys_bind&lt;/code&gt;，我们可通过&lt;code&gt;kprobe&lt;/code&gt;追踪该函数。&lt;/p&gt;
+&lt;h3 id=&#34;步骤-1确认-bind-系统调用的内核实现函数&#34;&gt;
+    &lt;a href=&#34;#%e6%ad%a5%e9%aa%a4-1%e7%a1%ae%e8%ae%a4-bind-%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8%e7%9a%84%e5%86%85%e6%a0%b8%e5%ae%9e%e7%8e%b0%e5%87%bd%e6%95%b0&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    步骤 1：确认 bind 系统调用的内核实现函数
+&lt;/h3&gt;&lt;p&gt;首先需确定当前内核中&lt;code&gt;bind&lt;/code&gt;系统调用对应的函数名，执行以下命令（需 root 权限）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;grep -r &lt;span class=&#34;s2&#34;&gt;&amp;#34;bind&amp;#34;&lt;/span&gt; /proc/kallsyms &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep -E &lt;span class=&#34;s2&#34;&gt;&amp;#34;sys_bind|__sys_bind&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;示例输出（不同系统可能不同）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ffff000008aabbe0 T __sys_bind
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;记录函数名（如&lt;code&gt;__sys_bind&lt;/code&gt;），后续将基于此创建探测点。&lt;/p&gt;
+&lt;h3 id=&#34;步骤-2手动创建-kprobe-事件&#34;&gt;
+    &lt;a href=&#34;#%e6%ad%a5%e9%aa%a4-2%e6%89%8b%e5%8a%a8%e5%88%9b%e5%bb%ba-kprobe-%e4%ba%8b%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    步骤 2：手动创建 kprobe 事件
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;kprobe&lt;/code&gt;事件需通过内核&lt;code&gt;tracefs&lt;/code&gt;接口创建，操作如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;进入 tracefs 目录&lt;/strong&gt;（内核跟踪接口目录）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; /sys/kernel/debug/tracing
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;创建 kprobe 事件&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;使用&lt;code&gt;echo&lt;/code&gt;命令向&lt;code&gt;kprobe_events&lt;/code&gt;文件写入事件定义，格式为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# p:表示在函数入口插入探测点，kprobes/bind_kprobe 为事件名，__sys_bind 为目标内核函数&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;p:kprobes/bind_kprobe __sys_bind&amp;#39;&lt;/span&gt; &amp;gt; kprobe_events
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;验证事件创建成功&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;查看&lt;code&gt;kprobe_events&lt;/code&gt;文件确认事件已添加：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cat kprobe_events
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 输出应包含：p:kprobes/bind_kprobe __sys_bind&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;步骤-3启用-kprobe-事件&#34;&gt;
+    &lt;a href=&#34;#%e6%ad%a5%e9%aa%a4-3%e5%90%af%e7%94%a8-kprobe-%e4%ba%8b%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    步骤 3：启用 kprobe 事件
+&lt;/h3&gt;&lt;p&gt;创建事件后需手动启用，否则&lt;code&gt;perf&lt;/code&gt;无法捕获：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 启用事件（1表示启用，0表示禁用）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &amp;gt; events/kprobes/bind_kprobe/enable
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;步骤-4用-perf-追踪-bind-系统调用&#34;&gt;
+    &lt;a href=&#34;#%e6%ad%a5%e9%aa%a4-4%e7%94%a8-perf-%e8%bf%bd%e8%b8%aa-bind-%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    步骤 4：用 perf 追踪 bind 系统调用
+&lt;/h3&gt;&lt;p&gt;事件启用后，&lt;code&gt;perf&lt;/code&gt;可直接追踪该&lt;code&gt;kprobe&lt;/code&gt;事件，操作如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;启动 perf 追踪&lt;/strong&gt;（在任意目录执行）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# -e 指定追踪 kprobes:bind_kprobe 事件，-g 记录调用栈，-a 追踪所有 CPU&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;perf record -e kprobes:bind_kprobe -g -a
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;此时&lt;code&gt;perf&lt;/code&gt;会持续运行，等待&lt;code&gt;bind&lt;/code&gt;系统调用触发。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;触发 bind 操作&lt;/strong&gt;：
+在另一个终端启动目标程序（如需要追踪的 Java 进程），执行可能触发&lt;code&gt;bind&lt;/code&gt;的操作（如启动网络服务）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;停止追踪并分析结果&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;按&lt;code&gt;Ctrl+C&lt;/code&gt;停止&lt;code&gt;perf&lt;/code&gt;，生成&lt;code&gt;perf.data&lt;/code&gt;文件；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;执行&lt;code&gt;perf report&lt;/code&gt;查看结果，可看到触发&lt;code&gt;bind&lt;/code&gt;调用的进程、调用栈等信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;perf report
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;步骤-5清理-kprobe-事件&#34;&gt;
+    &lt;a href=&#34;#%e6%ad%a5%e9%aa%a4-5%e6%b8%85%e7%90%86-kprobe-%e4%ba%8b%e4%bb%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    步骤 5：清理 kprobe 事件
+&lt;/h3&gt;&lt;p&gt;追踪完成后，需清理创建的&lt;code&gt;kprobe&lt;/code&gt;事件，避免占用系统资源：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;禁用事件&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; /sys/kernel/debug/tracing
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; &amp;gt; events/kprobes/bind_kprobe/enable
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;删除事件&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 使用相对路径删除（在 tracing 目录下）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;-:kprobes/bind_kprobe&amp;#39;&lt;/span&gt; &amp;gt; kprobe_events
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;验证清理结果&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cat kprobe_events  &lt;span class=&#34;c1&#34;&gt;# 输出为空，说明事件已删除&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;关键注意事项&#34;&gt;
+    &lt;a href=&#34;#%e5%85%b3%e9%94%ae%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    关键注意事项
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内核配置要求&lt;/strong&gt;：
+系统需启用&lt;code&gt;CONFIG_KPROBE_EVENTS&lt;/code&gt;和&lt;code&gt;CONFIG_DEBUG_FS&lt;/code&gt;（可通过&lt;code&gt;grep -E &amp;quot;CONFIG_KPROBE_EVENTS|CONFIG_DEBUG_FS&amp;quot; /boot/config-$(uname -r)&lt;/code&gt;验证，需均为&lt;code&gt;y&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;权限问题&lt;/strong&gt;：
+所有操作需 root 权限，且&lt;code&gt;tracefs&lt;/code&gt;需已挂载（默认挂载，若未挂载可执行&lt;code&gt;mount -t tracefs nodev /sys/kernel/debug/tracing&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;总结&#34;&gt;
+    &lt;a href=&#34;#%e6%80%bb%e7%bb%93&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    总结
+&lt;/h2&gt;&lt;p&gt;当系统不支持&lt;code&gt;syscalls:sys_enter_bind&lt;/code&gt;跟踪点时，通过手动创建&lt;code&gt;kprobe&lt;/code&gt;事件，可间接实现对&lt;code&gt;bind&lt;/code&gt;系统调用的追踪。该方法依赖内核动态探测机制，无需重新编译内核，适用于多数 Linux 发行版，是调试网络程序绑定端口行为的有效手段。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>使用 DWARF 还原完整的 glibc 调用堆栈</title>
         <link>https://mazhen.tech/p/%E4%BD%BF%E7%94%A8-dwarf-%E8%BF%98%E5%8E%9F%E5%AE%8C%E6%95%B4%E7%9A%84-glibc-%E8%B0%83%E7%94%A8%E5%A0%86%E6%A0%88/</link>
         <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>

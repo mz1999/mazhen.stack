@@ -6,10 +6,10 @@
         <description>Recent content in Tags on mazhen.tech</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Fri, 19 Sep 2025 09:47:41 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 25 Sep 2025 10:24:48 +0800</lastBuildDate><atom:link href="https://mazhen.tech/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Bcc</title>
         <link>https://mazhen.tech/tags/bcc/</link>
-        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/bcc/</guid>
         <description></description>
@@ -17,15 +17,23 @@
         <item>
         <title>Java</title>
         <link>https://mazhen.tech/tags/java/</link>
-        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/java/</guid>
         <description></description>
         </item>
         <item>
+        <title>Kprobe</title>
+        <link>https://mazhen.tech/tags/kprobe/</link>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
+        
+        <guid>https://mazhen.tech/tags/kprobe/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Linux</title>
         <link>https://mazhen.tech/tags/linux/</link>
-        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/linux/</guid>
         <description></description>
@@ -33,7 +41,7 @@
         <item>
         <title>Perf</title>
         <link>https://mazhen.tech/tags/perf/</link>
-        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/perf/</guid>
         <description></description>
@@ -41,7 +49,7 @@
         <item>
         <title>Trace</title>
         <link>https://mazhen.tech/tags/trace/</link>
-        <pubDate>Fri, 19 Sep 2025 09:47:41 +0800</pubDate>
+        <pubDate>Thu, 25 Sep 2025 10:24:48 +0800</pubDate>
         
         <guid>https://mazhen.tech/tags/trace/</guid>
         <description></description>
