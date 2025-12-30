@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,11 +15,11 @@
                 href="https://mazhen.tech/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/bcc/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/ai/</loc>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -31,23 +31,20 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/java/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <loc>https://mazhen.tech/p/claude-code--%E6%99%BA%E8%B0%B1-ai-%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</loc>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
   </url><url>
-    <loc>https://mazhen.tech/tags/kprobe/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/java/</loc>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/linux/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/perf/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -60,6 +57,15 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2025-12-29T15:28:06+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/bcc/</loc>
+    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/kprobe/</loc>
+    <lastmod>2025-09-25T10:24:48+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/perf/</loc>
     <lastmod>2025-09-25T10:24:48+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/trace/</loc>
