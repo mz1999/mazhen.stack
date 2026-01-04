@@ -374,7 +374,27 @@
     <li><a href="#安装-claude-code">安装 Claude Code</a></li>
     <li><a href="#配置智谱-api">配置智谱 API</a></li>
     <li><a href="#精选-mcp-服务">精选 MCP 服务</a></li>
-    <li><a href="#使用技巧">使用技巧</a></li>
+    <li><a href="#精选-skills">精选 Skills</a>
+      <ol>
+        <li><a href="#官方-skillshttpsgithubcomanthropicsclaude-plugins-official"><a href="https://github.com/anthropics/claude-plugins-official">官方 skills</a></a></li>
+        <li><a href="#superpowershttpsgithubcomobrasuperpowers"><a href="https://github.com/obra/superpowers">superpowers</a></a></li>
+        <li><a href="#dev-browserhttpsgithubcomsawyerhooddev-browser"><a href="https://github.com/SawyerHood/dev-browser">dev-browser</a></a></li>
+      </ol>
+    </li>
+    <li><a href="#使用技巧">使用技巧</a>
+      <ol>
+        <li><a href="#危险模式"><strong>危险模式</strong></a></li>
+        <li><a href="#plan-mode"><strong>Plan Mode</strong></a></li>
+        <li><a href="#深度思考"><strong>深度思考</strong></a></li>
+        <li><a href="#claudemd"><strong>CLAUDE.md</strong></a></li>
+        <li><a href="#ide"><strong>IDE</strong></a></li>
+        <li><a href="#输入多行"><strong>输入多行</strong></a></li>
+        <li><a href="#上下文处理"><strong>上下文处理</strong></a></li>
+        <li><a href="#规划头脑风暴">规划/头脑风暴</a></li>
+        <li><a href="#uiux">UI/UX</a></li>
+        <li><a href="#前端测试">前端测试</a></li>
+      </ol>
+    </li>
     <li><a href="#学习教程">学习教程</a></li>
   </ol>
 </nav>
@@ -440,7 +460,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 2 分钟
+                    阅读时长: 3 分钟
                 </time>
             </div>
         
@@ -574,7 +594,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>使用 Coding Tool Helper 还可以安装<a class="link" href="https://docs.bigmodel.cn/cn/coding-plan/extension/usage-query-plugin"  target="_blank" rel="noopener"
-    >智谱用量查询插件</a>，以及套餐专属 MCP 服务</p>
+    >智谱用量查询插件</a>，以及套餐专属 MCP 服务：</p>
 <ul>
 <li><a class="link" href="https://docs.bigmodel.cn/cn/coding-plan/mcp/vision-mcp-server"  target="_blank" rel="noopener"
     >视觉理解 MCP</a></li>
@@ -588,8 +608,7 @@
 <h2 id="精选-mcp-服务">
     <a href="#%e7%b2%be%e9%80%89-mcp-%e6%9c%8d%e5%8a%a1" class="header-anchor">#</a>
     精选 MCP 服务
-</h2><p>我觉得有价值的 MCP 服务：</p>
-<ul>
+</h2><ul>
 <li><a class="link" href="https://context7.com/"  target="_blank" rel="noopener"
     >context7</a> 给 AI 工具提供最新的 API 文档。</li>
 </ul>
@@ -621,13 +640,67 @@
     >Playwright MCP server</a></p>
 </li>
 </ul>
-<h2 id="使用技巧">
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude mcp add playwright npx @playwright/mcp@latest
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="精选-skills">
+    <a href="#%e7%b2%be%e9%80%89-skills" class="header-anchor">#</a>
+    精选 Skills
+</h2><h3 id="官方-skillshttpsgithubcomanthropicsclaude-plugins-official">
+    <a href="#%e5%ae%98%e6%96%b9-skillshttpsgithubcomanthropicsclaude-plugins-official" class="header-anchor">#</a>
+    <a class="link" href="https://github.com/anthropics/claude-plugins-official"  target="_blank" rel="noopener"
+    >官方 skills</a>
+</h3><p><strong>推荐插件列表</strong></p>
+<ul>
+<li><a class="link" href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design"  target="_blank" rel="noopener"
+    >frontend-design</a></li>
+<li><a class="link" href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-wiggum"  target="_blank" rel="noopener"
+    >ralph-wiggum</a> Claude Code 之父 <a class="link" href="https://x.com/bcherny"  target="_blank" rel="noopener"
+    >Boris Cherny</a> 推荐的 <a class="link" href="https://x.com/bcherny/status/2007179832300581177"  target="_blank" rel="noopener"
+    >skill</a>，内部是一个循环，不停的根据任务说明书，一遍又一遍地改进工作，直到彻底完成，可以让 Claude Code“通宵干活”。</li>
+</ul>
+<h3 id="superpowershttpsgithubcomobrasuperpowers">
+    <a href="#superpowershttpsgithubcomobrasuperpowers" class="header-anchor">#</a>
+    <a class="link" href="https://github.com/obra/superpowers"  target="_blank" rel="noopener"
+    >superpowers</a>
+</h3><p>superpowers 一套专为 AI 编程 Agent 设计的全流程工作流系统。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/plugin marketplace add obra/superpowers-marketplace
+</span></span><span class="line"><span class="cl">/plugin install superpowers@superpowers-marketplace
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="dev-browserhttpsgithubcomsawyerhooddev-browser">
+    <a href="#dev-browserhttpsgithubcomsawyerhooddev-browser" class="header-anchor">#</a>
+    <a class="link" href="https://github.com/SawyerHood/dev-browser"  target="_blank" rel="noopener"
+    >dev-browser</a>
+</h3><p>让 Claude 控制浏览器，进行测试和验证。功能和 <code>Playwright MCP</code> 类似，但据说比 <code>Playwright MCP</code> 强。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/plugin marketplace add sawyerhood/dev-browser
+</span></span><span class="line"><span class="cl">/plugin install dev-browser@sawyerhood/dev-browser
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="使用技巧">
     <a href="#%e4%bd%bf%e7%94%a8%e6%8a%80%e5%b7%a7" class="header-anchor">#</a>
     使用技巧
-</h2><ul>
-<li><strong>危险模式</strong></li>
-</ul>
-<div class="highlight"><div class="chroma">
+</h2><h3 id="危险模式">
+    <a href="#%e5%8d%b1%e9%99%a9%e6%a8%a1%e5%bc%8f" class="header-anchor">#</a>
+    <strong>危险模式</strong>
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
@@ -635,14 +708,14 @@
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude --dangerously-skip-permissions
 </span></span></code></pre></td></tr></table>
 </div>
-</div><ul>
-<li><strong>Plan Mode</strong></li>
-</ul>
-<p>连续按 <code>Shift + Tab</code>，直到切换成 <code>Plan Mode</code>，只和你讨论需求，不会进行任何代码的修改。</p>
-<ul>
-<li><strong>深度思考</strong></li>
-</ul>
-<p>在提示中加入关键词：</p>
+</div><h3 id="plan-mode">
+    <a href="#plan-mode" class="header-anchor">#</a>
+    <strong>Plan Mode</strong>
+</h3><p>连续按 <code>Shift + Tab</code>，直到切换成 <code>Plan Mode</code>，只和你讨论需求，不会进行任何代码的修改。</p>
+<h3 id="深度思考">
+    <a href="#%e6%b7%b1%e5%ba%a6%e6%80%9d%e8%80%83" class="header-anchor">#</a>
+    <strong>深度思考</strong>
+</h3><p>在提示中加入关键词：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -659,15 +732,15 @@
 </span></span><span class="line"><span class="cl">（你的需求描述）ultrathink
 </span></span></code></pre></td></tr></table>
 </div>
-</div><ul>
-<li><strong>CLAUDE.md</strong></li>
-</ul>
-<p>开发指南、构建命令、代码风格等关键信息，参考<a class="link" href="https://gist.github.com/Xuanwo/fa5162ed3548ae4f962dcc8b8e256bed"  target="_blank" rel="noopener"
+</div><h3 id="claudemd">
+    <a href="#claudemd" class="header-anchor">#</a>
+    <strong>CLAUDE.md</strong>
+</h3><p>开发指南、构建命令、代码风格等关键信息，参考<a class="link" href="https://gist.github.com/Xuanwo/fa5162ed3548ae4f962dcc8b8e256bed"  target="_blank" rel="noopener"
     >Xuanwo&rsquo;s AGENTS.md</a></p>
-<ul>
-<li><strong>IDE</strong></li>
-</ul>
-<div class="highlight"><div class="chroma">
+<h3 id="ide">
+    <a href="#ide" class="header-anchor">#</a>
+    <strong>IDE</strong>
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
@@ -676,10 +749,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>选择 Claude Code 连接的 IDE，如果选择 vs code，会自动安装 Claude Code for VS Code 插件。</p>
-<ul>
-<li><strong>输入多行</strong></li>
-</ul>
-<div class="highlight"><div class="chroma">
+<h3 id="输入多行">
+    <a href="#%e8%be%93%e5%85%a5%e5%a4%9a%e8%a1%8c" class="header-anchor">#</a>
+    <strong>输入多行</strong>
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
@@ -688,10 +761,10 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>在 macOS 上，使用 <code>Option + Enter</code> 插入换行符（Line breaks），而不是直接发送消息，达到输入多行的效果。</p>
-<ul>
-<li><strong>上下文处理</strong></li>
-</ul>
-<div class="highlight"><div class="chroma">
+<h3 id="上下文处理">
+    <a href="#%e4%b8%8a%e4%b8%8b%e6%96%87%e5%a4%84%e7%90%86" class="header-anchor">#</a>
+    <strong>上下文处理</strong>
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -729,7 +802,50 @@
 </span></span><span class="line"><span class="cl">/rewind
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="学习教程">
+</div><h3 id="规划头脑风暴">
+    <a href="#%e8%a7%84%e5%88%92%e5%a4%b4%e8%84%91%e9%a3%8e%e6%9a%b4" class="header-anchor">#</a>
+    规划/头脑风暴
+</h3><p>如果你只有一个初步的想法，还没有详细的规划，可以先使用 <strong>Superpowers</strong> 的 <code>/superpowers:brainstorm</code> 进行头脑风暴，和 Claude Code 讨论，一步步梳理想法，清晰目标，最终完成详细的产品规划。</p>
+<p>有了规划，可以继续使用 <code>/superpowers:write-plan</code> 创建具体的实现方案，最后 <code>/superpowers:execute-plan</code>，方案落地执行。</p>
+<p>另外，Claude code 内置的 <strong>AskUserQuestion</strong> 工具也很有用，它的作用是，AI 在遇到模糊不清的情况或需要决策时，AI 会主动暂停，然后不断向你提问，目标清晰后再继续执行。</p>
+<p>你也可以主动触发 <strong>AskUserQuestionTool</strong> ，例如 <a class="link" href="https://x.com/trq212"  target="_blank" rel="noopener"
+    >Thariq</a> 分享的<a class="link" href="https://aiengineerguide.com/blog/improvise-spec-claude-code/"  target="_blank" rel="noopener"
+    >方法</a>，开始动手前，让 <strong>AskUserQuestionTool</strong> 对你的规划进行“面试“：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">read this @SPEC.md and interview me in detail using the AskUserQuestionTool about literally anything: technical implementation, UI &amp; UX, concerns, tradeoffs, etc. but make sure the questions are not obvious
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">be very in-depth and continue interviewing me continually until it&#39;s complete, then write the spec to the file
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>结合 <strong>Superpowers</strong>，我们可以在 <strong>Superpowers</strong> 完成设计后，让 <strong>AskUserQuestionTool</strong> 面试提问，相信经过 <strong>AskUserQuestionTool</strong> 的锤炼，产品设计更加清晰，符合你的预期。</p>
+<h3 id="uiux">
+    <a href="#uiux" class="header-anchor">#</a>
+    UI/UX
+</h3><p>关于 UI/UX 设计，我还没有太多经验，不知道怎么生成令人惊艳的界面。目前只是在产品设计规划阶段，细化对界面的需求：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">我希望使用 shadcn/ui，主题为 npx shadcn@latest add https://tweakcn.com/r/themes/claude.json，页面布局参考常见的 SaaS 软件，左右两栏布局，左边是菜单栏。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>据说可以用 <a class="link" href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design"  target="_blank" rel="noopener"
+    >frontend-design</a> 改进前端设计，可能要先学习完  <a class="link" href="https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb"  target="_blank" rel="noopener"
+    >Frontend Aesthetics: A Prompting Guide</a> 才会用吧。</p>
+<h3 id="前端测试">
+    <a href="#%e5%89%8d%e7%ab%af%e6%b5%8b%e8%af%95" class="header-anchor">#</a>
+    前端测试
+</h3><p>配置好 <code>Playwright MCP server</code>，就可以在 Claude Code 中明确要求使用 <strong>Playwright</strong> 进行前端功能测试。</p>
+<p>如果是在本地开发，也可以使用 <a class="link" href="https://github.com/SawyerHood/dev-browser"  target="_blank" rel="noopener"
+    >dev-browser</a> 进行前端测试。</p>
+<h2 id="学习教程">
     <a href="#%e5%ad%a6%e4%b9%a0%e6%95%99%e7%a8%8b" class="header-anchor">#</a>
     学习教程
 </h2><ul>
@@ -744,6 +860,10 @@
 <li>
 <p><a class="link" href="https://zhipu-ai.feishu.cn/wiki/TrlMwahsfihLrKkZsy0cpuTenCz"  target="_blank" rel="noopener"
     >GLM Coding 开发者社区</a></p>
+</li>
+<li>
+<p><a class="link" href="https://github.com/github/spec-kit"  target="_blank" rel="noopener"
+    >Spec Kit</a></p>
 </li>
 </ul>
 
@@ -912,7 +1032,7 @@
         
             2014 - 
         
-        2025 mazhen.tech
+        2026 mazhen.tech
     </section>
     
     <section class="powerby">

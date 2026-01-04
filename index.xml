@@ -131,7 +131,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;使用 Coding Tool Helper 还可以安装&lt;a class=&#34;link&#34; href=&#34;https://docs.bigmodel.cn/cn/coding-plan/extension/usage-query-plugin&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;智谱用量查询插件&lt;/a&gt;，以及套餐专属 MCP 服务&lt;/p&gt;
+    &gt;智谱用量查询插件&lt;/a&gt;，以及套餐专属 MCP 服务：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://docs.bigmodel.cn/cn/coding-plan/mcp/vision-mcp-server&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;视觉理解 MCP&lt;/a&gt;&lt;/li&gt;
@@ -145,8 +145,7 @@
 &lt;h2 id=&#34;精选-mcp-服务&#34;&gt;
     &lt;a href=&#34;#%e7%b2%be%e9%80%89-mcp-%e6%9c%8d%e5%8a%a1&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     精选 MCP 服务
-&lt;/h2&gt;&lt;p&gt;我觉得有价值的 MCP 服务：&lt;/p&gt;
-&lt;ul&gt;
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://context7.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;context7&lt;/a&gt; 给 AI 工具提供最新的 API 文档。&lt;/li&gt;
 &lt;/ul&gt;
@@ -178,13 +177,67 @@
     &gt;Playwright MCP server&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;使用技巧&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;claude mcp add playwright npx @playwright/mcp@latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;精选-skills&#34;&gt;
+    &lt;a href=&#34;#%e7%b2%be%e9%80%89-skills&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    精选 Skills
+&lt;/h2&gt;&lt;h3 id=&#34;官方-skillshttpsgithubcomanthropicsclaude-plugins-official&#34;&gt;
+    &lt;a href=&#34;#%e5%ae%98%e6%96%b9-skillshttpsgithubcomanthropicsclaude-plugins-official&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-plugins-official&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方 skills&lt;/a&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;推荐插件列表&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;frontend-design&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-wiggum&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ralph-wiggum&lt;/a&gt; Claude Code 之父 &lt;a class=&#34;link&#34; href=&#34;https://x.com/bcherny&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Boris Cherny&lt;/a&gt; 推荐的 &lt;a class=&#34;link&#34; href=&#34;https://x.com/bcherny/status/2007179832300581177&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;skill&lt;/a&gt;，内部是一个循环，不停的根据任务说明书，一遍又一遍地改进工作，直到彻底完成，可以让 Claude Code“通宵干活”。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;superpowershttpsgithubcomobrasuperpowers&#34;&gt;
+    &lt;a href=&#34;#superpowershttpsgithubcomobrasuperpowers&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;a class=&#34;link&#34; href=&#34;https://github.com/obra/superpowers&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;superpowers&lt;/a&gt;
+&lt;/h3&gt;&lt;p&gt;superpowers 一套专为 AI 编程 Agent 设计的全流程工作流系统。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/plugin marketplace add obra/superpowers-marketplace
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/plugin install superpowers@superpowers-marketplace
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;dev-browserhttpsgithubcomsawyerhooddev-browser&#34;&gt;
+    &lt;a href=&#34;#dev-browserhttpsgithubcomsawyerhooddev-browser&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;a class=&#34;link&#34; href=&#34;https://github.com/SawyerHood/dev-browser&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;dev-browser&lt;/a&gt;
+&lt;/h3&gt;&lt;p&gt;让 Claude 控制浏览器，进行测试和验证。功能和 &lt;code&gt;Playwright MCP&lt;/code&gt; 类似，但据说比 &lt;code&gt;Playwright MCP&lt;/code&gt; 强。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/plugin marketplace add sawyerhood/dev-browser
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/plugin install dev-browser@sawyerhood/dev-browser
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;使用技巧&#34;&gt;
     &lt;a href=&#34;#%e4%bd%bf%e7%94%a8%e6%8a%80%e5%b7%a7&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     使用技巧
-&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;危险模式&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;/h2&gt;&lt;h3 id=&#34;危险模式&#34;&gt;
+    &lt;a href=&#34;#%e5%8d%b1%e9%99%a9%e6%a8%a1%e5%bc%8f&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;危险模式&lt;/strong&gt;
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
@@ -192,14 +245,14 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;claude --dangerously-skip-permissions
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Plan Mode&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;连续按 &lt;code&gt;Shift + Tab&lt;/code&gt;，直到切换成 &lt;code&gt;Plan Mode&lt;/code&gt;，只和你讨论需求，不会进行任何代码的修改。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;深度思考&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;在提示中加入关键词：&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;plan-mode&#34;&gt;
+    &lt;a href=&#34;#plan-mode&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;Plan Mode&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;连续按 &lt;code&gt;Shift + Tab&lt;/code&gt;，直到切换成 &lt;code&gt;Plan Mode&lt;/code&gt;，只和你讨论需求，不会进行任何代码的修改。&lt;/p&gt;
+&lt;h3 id=&#34;深度思考&#34;&gt;
+    &lt;a href=&#34;#%e6%b7%b1%e5%ba%a6%e6%80%9d%e8%80%83&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;深度思考&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;在提示中加入关键词：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -216,15 +269,15 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;（你的需求描述）ultrathink
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;CLAUDE.md&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;开发指南、构建命令、代码风格等关键信息，参考&lt;a class=&#34;link&#34; href=&#34;https://gist.github.com/Xuanwo/fa5162ed3548ae4f962dcc8b8e256bed&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/div&gt;&lt;h3 id=&#34;claudemd&#34;&gt;
+    &lt;a href=&#34;#claudemd&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;CLAUDE.md&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;开发指南、构建命令、代码风格等关键信息，参考&lt;a class=&#34;link&#34; href=&#34;https://gist.github.com/Xuanwo/fa5162ed3548ae4f962dcc8b8e256bed&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Xuanwo&amp;rsquo;s AGENTS.md&lt;/a&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;IDE&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;h3 id=&#34;ide&#34;&gt;
+    &lt;a href=&#34;#ide&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;IDE&lt;/strong&gt;
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
@@ -233,10 +286,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;选择 Claude Code 连接的 IDE，如果选择 vs code，会自动安装 Claude Code for VS Code 插件。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;输入多行&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;h3 id=&#34;输入多行&#34;&gt;
+    &lt;a href=&#34;#%e8%be%93%e5%85%a5%e5%a4%9a%e8%a1%8c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;输入多行&lt;/strong&gt;
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
@@ -245,10 +298,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;在 macOS 上，使用 &lt;code&gt;Option + Enter&lt;/code&gt; 插入换行符（Line breaks），而不是直接发送消息，达到输入多行的效果。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;上下文处理&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;h3 id=&#34;上下文处理&#34;&gt;
+    &lt;a href=&#34;#%e4%b8%8a%e4%b8%8b%e6%96%87%e5%a4%84%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    &lt;strong&gt;上下文处理&lt;/strong&gt;
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -286,7 +339,50 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/rewind
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;学习教程&#34;&gt;
+&lt;/div&gt;&lt;h3 id=&#34;规划头脑风暴&#34;&gt;
+    &lt;a href=&#34;#%e8%a7%84%e5%88%92%e5%a4%b4%e8%84%91%e9%a3%8e%e6%9a%b4&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    规划/头脑风暴
+&lt;/h3&gt;&lt;p&gt;如果你只有一个初步的想法，还没有详细的规划，可以先使用 &lt;strong&gt;Superpowers&lt;/strong&gt; 的 &lt;code&gt;/superpowers:brainstorm&lt;/code&gt; 进行头脑风暴，和 Claude Code 讨论，一步步梳理想法，清晰目标，最终完成详细的产品规划。&lt;/p&gt;
+&lt;p&gt;有了规划，可以继续使用 &lt;code&gt;/superpowers:write-plan&lt;/code&gt; 创建具体的实现方案，最后 &lt;code&gt;/superpowers:execute-plan&lt;/code&gt;，方案落地执行。&lt;/p&gt;
+&lt;p&gt;另外，Claude code 内置的 &lt;strong&gt;AskUserQuestion&lt;/strong&gt; 工具也很有用，它的作用是，AI 在遇到模糊不清的情况或需要决策时，AI 会主动暂停，然后不断向你提问，目标清晰后再继续执行。&lt;/p&gt;
+&lt;p&gt;你也可以主动触发 &lt;strong&gt;AskUserQuestionTool&lt;/strong&gt; ，例如 &lt;a class=&#34;link&#34; href=&#34;https://x.com/trq212&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Thariq&lt;/a&gt; 分享的&lt;a class=&#34;link&#34; href=&#34;https://aiengineerguide.com/blog/improvise-spec-claude-code/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;方法&lt;/a&gt;，开始动手前，让 &lt;strong&gt;AskUserQuestionTool&lt;/strong&gt; 对你的规划进行“面试“：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;read this @SPEC.md and interview me in detail using the AskUserQuestionTool about literally anything: technical implementation, UI &amp;amp; UX, concerns, tradeoffs, etc. but make sure the questions are not obvious
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;be very in-depth and continue interviewing me continually until it&amp;#39;s complete, then write the spec to the file
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;结合 &lt;strong&gt;Superpowers&lt;/strong&gt;，我们可以在 &lt;strong&gt;Superpowers&lt;/strong&gt; 完成设计后，让 &lt;strong&gt;AskUserQuestionTool&lt;/strong&gt; 面试提问，相信经过 &lt;strong&gt;AskUserQuestionTool&lt;/strong&gt; 的锤炼，产品设计更加清晰，符合你的预期。&lt;/p&gt;
+&lt;h3 id=&#34;uiux&#34;&gt;
+    &lt;a href=&#34;#uiux&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    UI/UX
+&lt;/h3&gt;&lt;p&gt;关于 UI/UX 设计，我还没有太多经验，不知道怎么生成令人惊艳的界面。目前只是在产品设计规划阶段，细化对界面的需求：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我希望使用 shadcn/ui，主题为 npx shadcn@latest add https://tweakcn.com/r/themes/claude.json，页面布局参考常见的 SaaS 软件，左右两栏布局，左边是菜单栏。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;据说可以用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;frontend-design&lt;/a&gt; 改进前端设计，可能要先学习完  &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Frontend Aesthetics: A Prompting Guide&lt;/a&gt; 才会用吧。&lt;/p&gt;
+&lt;h3 id=&#34;前端测试&#34;&gt;
+    &lt;a href=&#34;#%e5%89%8d%e7%ab%af%e6%b5%8b%e8%af%95&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    前端测试
+&lt;/h3&gt;&lt;p&gt;配置好 &lt;code&gt;Playwright MCP server&lt;/code&gt;，就可以在 Claude Code 中明确要求使用 &lt;strong&gt;Playwright&lt;/strong&gt; 进行前端功能测试。&lt;/p&gt;
+&lt;p&gt;如果是在本地开发，也可以使用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/SawyerHood/dev-browser&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;dev-browser&lt;/a&gt; 进行前端测试。&lt;/p&gt;
+&lt;h2 id=&#34;学习教程&#34;&gt;
     &lt;a href=&#34;#%e5%ad%a6%e4%b9%a0%e6%95%99%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     学习教程
 &lt;/h2&gt;&lt;ul&gt;
@@ -301,6 +397,10 @@
 &lt;li&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://zhipu-ai.feishu.cn/wiki/TrlMwahsfihLrKkZsy0cpuTenCz&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;GLM Coding 开发者社区&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/github/spec-kit&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Spec Kit&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 </description>
