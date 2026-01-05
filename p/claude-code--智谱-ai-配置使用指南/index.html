@@ -391,8 +391,10 @@
         <li><a href="#输入多行"><strong>输入多行</strong></a></li>
         <li><a href="#上下文处理"><strong>上下文处理</strong></a></li>
         <li><a href="#规划头脑风暴">规划/头脑风暴</a></li>
+        <li><a href="#参考-spec-kit">参考 spec-kit</a></li>
         <li><a href="#uiux">UI/UX</a></li>
         <li><a href="#前端测试">前端测试</a></li>
+        <li><a href="#状态栏定制">状态栏定制</a></li>
       </ol>
     </li>
     <li><a href="#学习教程">学习教程</a></li>
@@ -460,7 +462,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 3 分钟
+                    阅读时长: 4 分钟
                 </time>
             </div>
         
@@ -752,7 +754,8 @@
 <h3 id="输入多行">
     <a href="#%e8%be%93%e5%85%a5%e5%a4%9a%e8%a1%8c" class="header-anchor">#</a>
     <strong>输入多行</strong>
-</h3><div class="highlight"><div class="chroma">
+</h3><p>在 macOS 上，使用 <code>Option + Enter</code> 插入换行符（Line breaks）。可用通过设置，将换行操作绑定到 <code>Shift + Enter</code>。</p>
+<div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
@@ -760,8 +763,7 @@
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/terminal-setup
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>在 macOS 上，使用 <code>Option + Enter</code> 插入换行符（Line breaks），而不是直接发送消息，达到输入多行的效果。</p>
-<h3 id="上下文处理">
+</div><h3 id="上下文处理">
     <a href="#%e4%b8%8a%e4%b8%8b%e6%96%87%e5%a4%84%e7%90%86" class="header-anchor">#</a>
     <strong>上下文处理</strong>
 </h3><div class="highlight"><div class="chroma">
@@ -824,6 +826,16 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>结合 <strong>Superpowers</strong>，我们可以在 <strong>Superpowers</strong> 完成设计后，让 <strong>AskUserQuestionTool</strong> 面试提问，相信经过 <strong>AskUserQuestionTool</strong> 的锤炼，产品设计更加清晰，符合你的预期。</p>
+<h3 id="参考-spec-kit">
+    <a href="#%e5%8f%82%e8%80%83-spec-kit" class="header-anchor">#</a>
+    参考 spec-kit
+</h3><p><a class="link" href="https://github.com/github/spec-kit"  target="_blank" rel="noopener"
+    >Spec Kit</a> 是一套很重的规则，很多人不建议使用，但参考部分技巧还是可取的，例如 <a class="link" href="https://x.com/yetone"  target="_blank" rel="noopener"
+    >yetone</a> 在<a class="link" href="https://x.com/yetone/status/2007727272497930468"  target="_blank" rel="noopener"
+    >推文</a>中提到，可参考<a class="link" href="https://github.com/github/spec-kit/blob/main/spec-driven.md#the-nine-articles-of-development"  target="_blank" rel="noopener"
+    >The Nine Articles of Development</a>的前三个规则。</p>
+<p>如何使用？可以将规则定义放在一个固定的路径，然后在 <a class="link" href="http://AGENTS.md/CLAUDE.md"  target="_blank" rel="noopener"
+    >http://AGENTS.md/CLAUDE.md</a> 中引用这个路径。</p>
 <h3 id="uiux">
     <a href="#uiux" class="header-anchor">#</a>
     UI/UX
@@ -836,16 +848,53 @@
 <pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">我希望使用 shadcn/ui，主题为 npx shadcn@latest add https://tweakcn.com/r/themes/claude.json，页面布局参考常见的 SaaS 软件，左右两栏布局，左边是菜单栏。
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>据说可以用 <a class="link" href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design"  target="_blank" rel="noopener"
-    >frontend-design</a> 改进前端设计，可能要先学习完  <a class="link" href="https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb"  target="_blank" rel="noopener"
-    >Frontend Aesthetics: A Prompting Guide</a> 才会用吧。</p>
+</div><p>上面的提示让 Claude Code 参考 <a class="link" href="https://tweakcn.com/"  target="_blank" rel="noopener"
+    >tweakcn.com</a> 预定义的样式生成界面，也可以直接将<a class="link" href="https://tweakcn.com/editor/theme"  target="_blank" rel="noopener"
+    >theme</a>的 <code>css</code> 代码直接复制给 Claude code。</p>
+<p>据说可以用 <a class="link" href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design"  target="_blank" rel="noopener"
+    >frontend-design</a> 改进前端设计，打算先学习  <a class="link" href="https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb"  target="_blank" rel="noopener"
+    >Frontend Aesthetics: A Prompting Guide</a>。是否可以让 <code>frontend-design</code> 根据需求直接生成页面？</p>
+<p>另外可以参考一些生成前端页面的 prompt 或 skills：</p>
+<ol>
+<li><a class="link" href="https://www.designprompts.dev/"  target="_blank" rel="noopener"
+    >designprompts.dev</a> 和 <a class="link" href="https://designprompt.vercel.app/"  target="_blank" rel="noopener"
+    >designprompt.vercel.app</a> 提供了多种前端风格的 prompt，可以直接复制使用。</li>
+<li><a class="link" href="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"  target="_blank" rel="noopener"
+    >UI UX Pro Max</a> UI/UX skill，包含了多种前端样式。</li>
+</ol>
 <h3 id="前端测试">
     <a href="#%e5%89%8d%e7%ab%af%e6%b5%8b%e8%af%95" class="header-anchor">#</a>
     前端测试
 </h3><p>配置好 <code>Playwright MCP server</code>，就可以在 Claude Code 中明确要求使用 <strong>Playwright</strong> 进行前端功能测试。</p>
 <p>如果是在本地开发，也可以使用 <a class="link" href="https://github.com/SawyerHood/dev-browser"  target="_blank" rel="noopener"
     >dev-browser</a> 进行前端测试。</p>
-<h2 id="学习教程">
+<h3 id="状态栏定制">
+    <a href="#%e7%8a%b6%e6%80%81%e6%a0%8f%e5%ae%9a%e5%88%b6" class="header-anchor">#</a>
+    状态栏定制
+</h3><p>目前有两个定制 statusline 的小工具，都能实时显示使用的模型，context usage 等信息。</p>
+<ol>
+<li><a class="link" href="https://github.com/jarrodwatts/claude-hud"  target="_blank" rel="noopener"
+    >Claude HUD</a></li>
+<li><a class="link" href="https://github.com/Owloops/claude-powerline"  target="_blank" rel="noopener"
+    >Claude Powerline</a></li>
+</ol>
+<p>我选择了 <a class="link" href="https://github.com/Owloops/claude-powerline"  target="_blank" rel="noopener"
+    >Claude Powerline</a>，配置很简单，在 <code>.claude/settings.json</code> 中添加如下配置即可：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl">  <span class="s2">&#34;statusLine&#34;</span><span class="err">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;command&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;command&#34;</span><span class="p">:</span> <span class="s2">&#34;npx -y @owloops/claude-powerline@latest --style=powerline --theme=gruvbox&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span><span class="err">,</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="学习教程">
     <a href="#%e5%ad%a6%e4%b9%a0%e6%95%99%e7%a8%8b" class="header-anchor">#</a>
     学习教程
 </h2><ul>
@@ -860,10 +909,6 @@
 <li>
 <p><a class="link" href="https://zhipu-ai.feishu.cn/wiki/TrlMwahsfihLrKkZsy0cpuTenCz"  target="_blank" rel="noopener"
     >GLM Coding 开发者社区</a></p>
-</li>
-<li>
-<p><a class="link" href="https://github.com/github/spec-kit"  target="_blank" rel="noopener"
-    >Spec Kit</a></p>
 </li>
 </ul>
 

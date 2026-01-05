@@ -289,7 +289,8 @@
 &lt;h3 id=&#34;输入多行&#34;&gt;
     &lt;a href=&#34;#%e8%be%93%e5%85%a5%e5%a4%9a%e8%a1%8c&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     &lt;strong&gt;输入多行&lt;/strong&gt;
-&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;/h3&gt;&lt;p&gt;在 macOS 上，使用 &lt;code&gt;Option + Enter&lt;/code&gt; 插入换行符（Line breaks）。可用通过设置，将换行操作绑定到 &lt;code&gt;Shift + Enter&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
@@ -297,8 +298,7 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/terminal-setup
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;在 macOS 上，使用 &lt;code&gt;Option + Enter&lt;/code&gt; 插入换行符（Line breaks），而不是直接发送消息，达到输入多行的效果。&lt;/p&gt;
-&lt;h3 id=&#34;上下文处理&#34;&gt;
+&lt;/div&gt;&lt;h3 id=&#34;上下文处理&#34;&gt;
     &lt;a href=&#34;#%e4%b8%8a%e4%b8%8b%e6%96%87%e5%a4%84%e7%90%86&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     &lt;strong&gt;上下文处理&lt;/strong&gt;
 &lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -361,6 +361,16 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;结合 &lt;strong&gt;Superpowers&lt;/strong&gt;，我们可以在 &lt;strong&gt;Superpowers&lt;/strong&gt; 完成设计后，让 &lt;strong&gt;AskUserQuestionTool&lt;/strong&gt; 面试提问，相信经过 &lt;strong&gt;AskUserQuestionTool&lt;/strong&gt; 的锤炼，产品设计更加清晰，符合你的预期。&lt;/p&gt;
+&lt;h3 id=&#34;参考-spec-kit&#34;&gt;
+    &lt;a href=&#34;#%e5%8f%82%e8%80%83-spec-kit&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    参考 spec-kit
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/github/spec-kit&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Spec Kit&lt;/a&gt; 是一套很重的规则，很多人不建议使用，但参考部分技巧还是可取的，例如 &lt;a class=&#34;link&#34; href=&#34;https://x.com/yetone&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;yetone&lt;/a&gt; 在&lt;a class=&#34;link&#34; href=&#34;https://x.com/yetone/status/2007727272497930468&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;推文&lt;/a&gt;中提到，可参考&lt;a class=&#34;link&#34; href=&#34;https://github.com/github/spec-kit/blob/main/spec-driven.md#the-nine-articles-of-development&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;The Nine Articles of Development&lt;/a&gt;的前三个规则。&lt;/p&gt;
+&lt;p&gt;如何使用？可以将规则定义放在一个固定的路径，然后在 &lt;a class=&#34;link&#34; href=&#34;http://AGENTS.md/CLAUDE.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;http://AGENTS.md/CLAUDE.md&lt;/a&gt; 中引用这个路径。&lt;/p&gt;
 &lt;h3 id=&#34;uiux&#34;&gt;
     &lt;a href=&#34;#uiux&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     UI/UX
@@ -373,16 +383,53 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我希望使用 shadcn/ui，主题为 npx shadcn@latest add https://tweakcn.com/r/themes/claude.json，页面布局参考常见的 SaaS 软件，左右两栏布局，左边是菜单栏。
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;据说可以用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;frontend-design&lt;/a&gt; 改进前端设计，可能要先学习完  &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;Frontend Aesthetics: A Prompting Guide&lt;/a&gt; 才会用吧。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;上面的提示让 Claude Code 参考 &lt;a class=&#34;link&#34; href=&#34;https://tweakcn.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;tweakcn.com&lt;/a&gt; 预定义的样式生成界面，也可以直接将&lt;a class=&#34;link&#34; href=&#34;https://tweakcn.com/editor/theme&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;theme&lt;/a&gt;的 &lt;code&gt;css&lt;/code&gt; 代码直接复制给 Claude code。&lt;/p&gt;
+&lt;p&gt;据说可以用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;frontend-design&lt;/a&gt; 改进前端设计，打算先学习  &lt;a class=&#34;link&#34; href=&#34;https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Frontend Aesthetics: A Prompting Guide&lt;/a&gt;。是否可以让 &lt;code&gt;frontend-design&lt;/code&gt; 根据需求直接生成页面？&lt;/p&gt;
+&lt;p&gt;另外可以参考一些生成前端页面的 prompt 或 skills：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.designprompts.dev/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;designprompts.dev&lt;/a&gt; 和 &lt;a class=&#34;link&#34; href=&#34;https://designprompt.vercel.app/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;designprompt.vercel.app&lt;/a&gt; 提供了多种前端风格的 prompt，可以直接复制使用。&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/nextlevelbuilder/ui-ux-pro-max-skill&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;UI UX Pro Max&lt;/a&gt; UI/UX skill，包含了多种前端样式。&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h3 id=&#34;前端测试&#34;&gt;
     &lt;a href=&#34;#%e5%89%8d%e7%ab%af%e6%b5%8b%e8%af%95&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     前端测试
 &lt;/h3&gt;&lt;p&gt;配置好 &lt;code&gt;Playwright MCP server&lt;/code&gt;，就可以在 Claude Code 中明确要求使用 &lt;strong&gt;Playwright&lt;/strong&gt; 进行前端功能测试。&lt;/p&gt;
 &lt;p&gt;如果是在本地开发，也可以使用 &lt;a class=&#34;link&#34; href=&#34;https://github.com/SawyerHood/dev-browser&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;dev-browser&lt;/a&gt; 进行前端测试。&lt;/p&gt;
-&lt;h2 id=&#34;学习教程&#34;&gt;
+&lt;h3 id=&#34;状态栏定制&#34;&gt;
+    &lt;a href=&#34;#%e7%8a%b6%e6%80%81%e6%a0%8f%e5%ae%9a%e5%88%b6&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
+    状态栏定制
+&lt;/h3&gt;&lt;p&gt;目前有两个定制 statusline 的小工具，都能实时显示使用的模型，context usage 等信息。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/jarrodwatts/claude-hud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Claude HUD&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Owloops/claude-powerline&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Claude Powerline&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;我选择了 &lt;a class=&#34;link&#34; href=&#34;https://github.com/Owloops/claude-powerline&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Claude Powerline&lt;/a&gt;，配置很简单，在 &lt;code&gt;.claude/settings.json&lt;/code&gt; 中添加如下配置即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;s2&#34;&gt;&amp;#34;statusLine&amp;#34;&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;command&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;#34;command&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;npx -y @owloops/claude-powerline@latest --style=powerline --theme=gruvbox&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;学习教程&#34;&gt;
     &lt;a href=&#34;#%e5%ad%a6%e4%b9%a0%e6%95%99%e7%a8%8b&#34; class=&#34;header-anchor&#34;&gt;#&lt;/a&gt;
     学习教程
 &lt;/h2&gt;&lt;ul&gt;
@@ -397,10 +444,6 @@
 &lt;li&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://zhipu-ai.feishu.cn/wiki/TrlMwahsfihLrKkZsy0cpuTenCz&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;GLM Coding 开发者社区&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/github/spec-kit&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;Spec Kit&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 </description>
