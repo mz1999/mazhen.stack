@@ -754,7 +754,7 @@
 <h3 id="输入多行">
     <a href="#%e8%be%93%e5%85%a5%e5%a4%9a%e8%a1%8c" class="header-anchor">#</a>
     <strong>输入多行</strong>
-</h3><p>在 macOS 上，使用 <code>Option + Enter</code> 插入换行符（Line breaks）。可用通过设置，将换行操作绑定到 <code>Shift + Enter</code>。</p>
+</h3><p><del>在 macOS 上，使用 <code>Option + Enter</code> 插入换行符（Line breaks）。可用通过设置，将换行操作绑定到 <code>Shift + Enter</code></del>。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -763,7 +763,9 @@
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/terminal-setup
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="上下文处理">
+</div><p>Claude Code 2.1.0 <a class="link" href="https://x.com/bcherny/status/2009072293826453669"  target="_blank" rel="noopener"
+    >最新发布</a>，使用 <code>Shift+Enter</code> 键来插入换行符，在 <strong>iTerm2</strong>, <strong>WezTerm</strong>, <strong>Ghostty</strong> 和 <strong>Kitty</strong> 上无需进行任何设置。</p>
+<h3 id="上下文处理">
     <a href="#%e4%b8%8a%e4%b8%8b%e6%96%87%e5%a4%84%e7%90%86" class="header-anchor">#</a>
     <strong>上下文处理</strong>
 </h3><div class="highlight"><div class="chroma">
@@ -875,11 +877,35 @@
 <ol>
 <li><a class="link" href="https://github.com/jarrodwatts/claude-hud"  target="_blank" rel="noopener"
     >Claude HUD</a></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Step 1: Add the marketplace</span>
+</span></span><span class="line"><span class="cl">/plugin marketplace add jarrodwatts/claude-hud
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Step 2: Install the plugin</span>
+</span></span><span class="line"><span class="cl">/plugin install claude-hud
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Step 3: Configure the statusline</span>
+</span></span><span class="line"><span class="cl">/claude-hud:setup
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
 <li><a class="link" href="https://github.com/Owloops/claude-powerline"  target="_blank" rel="noopener"
     >Claude Powerline</a></li>
 </ol>
-<p>我选择了 <a class="link" href="https://github.com/Owloops/claude-powerline"  target="_blank" rel="noopener"
-    >Claude Powerline</a>，配置很简单，在 <code>.claude/settings.json</code> 中添加如下配置即可：</p>
+<p><a class="link" href="https://github.com/Owloops/claude-powerline"  target="_blank" rel="noopener"
+    >Claude Powerline</a> 的配置更简单，在 <code>.claude/settings.json</code> 中添加如下配置即可：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
