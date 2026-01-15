@@ -393,6 +393,7 @@
         <li><a href="#规划头脑风暴">规划/头脑风暴</a></li>
         <li><a href="#参考-spec-kit">参考 spec-kit</a></li>
         <li><a href="#uiux">UI/UX</a></li>
+        <li><a href="#stitch">Stitch</a></li>
         <li><a href="#前端测试">前端测试</a></li>
         <li><a href="#状态栏定制">状态栏定制</a></li>
       </ol>
@@ -462,7 +463,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 4 分钟
+                    阅读时长: 5 分钟
                 </time>
             </div>
         
@@ -648,6 +649,18 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude mcp add playwright npx @playwright/mcp@latest
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><a class="link" href="https://github.com/ChromeDevTools/chrome-devtools-mcp"  target="_blank" rel="noopener"
+    >Chrome DevTools MCP</a></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="精选-skills">
@@ -863,13 +876,22 @@
     >designprompt.vercel.app</a> 提供了多种前端风格的 prompt，可以直接复制使用。</li>
 <li><a class="link" href="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"  target="_blank" rel="noopener"
     >UI UX Pro Max</a> UI/UX skill，包含了多种前端样式。</li>
+<li><a class="link" href="https://www.ui-skills.com/"  target="_blank" rel="noopener"
+    >ui-skills</a> 一个专门用来设计界面 UI 的 Claude Skill。</li>
 </ol>
+<h3 id="stitch">
+    <a href="#stitch" class="header-anchor">#</a>
+    Stitch
+</h3><p><a class="link" href="https://stitch.google.com/"  target="_blank" rel="noopener"
+    >Stitch</a> ，Google 出品的 UI 设计器，必须拎出来作为单独一个小节介绍。可以根据你的描述内容，直接输出高保真效果图，并能导出 HTML 页面。</p>
+<p>我觉得可以将前面 Superpowers 生成的产品功能规划，喂给 Stitch，让它生成界面效果图，导出 HTML 页面，然后让 Claude Code 根据页面，填充功能。</p>
 <h3 id="前端测试">
     <a href="#%e5%89%8d%e7%ab%af%e6%b5%8b%e8%af%95" class="header-anchor">#</a>
     前端测试
 </h3><p>配置好 <code>Playwright MCP server</code>，就可以在 Claude Code 中明确要求使用 <strong>Playwright</strong> 进行前端功能测试。</p>
-<p>如果是在本地开发，也可以使用 <a class="link" href="https://github.com/SawyerHood/dev-browser"  target="_blank" rel="noopener"
-    >dev-browser</a> 进行前端测试。</p>
+<p><del>如果是在本地开发，也可以使用 <a class="link" href="https://github.com/SawyerHood/dev-browser"  target="_blank" rel="noopener"
+    >dev-browser</a> 进行前端测试。</del></p>
+<p><strong>Chrome DevTools MCP</strong> 虽然只支持 Chrome，但它支持更多的性能分析和浏览器调试功能，优先推荐使用。</p>
 <h3 id="状态栏定制">
     <a href="#%e7%8a%b6%e6%80%81%e6%a0%8f%e5%ae%9a%e5%88%b6" class="header-anchor">#</a>
     状态栏定制
