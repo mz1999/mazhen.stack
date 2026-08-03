@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 几个要先搞懂的概念 # 层级结构 从大到小，四层嵌套： # Client / Server 分离 为什么 detach 不死？ Server:后台进程，真正持有 agent。你关终端它还在。 Cl">
+<title>Herdr 操作手册</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/herdr-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="Herdr 操作手册">
+<meta property='og:description' content="# 几个要先搞懂的概念 # 层级结构 从大到小，四层嵌套： # Client / Server 分离 为什么 detach 不死？ Server:后台进程，真正持有 agent。你关终端它还在。 Cl">
+<meta property='og:url' content='https://mazhen.tech/p/herdr-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ai' /><meta property='article:tag' content='linux' /><meta property='article:published_time' content='2026-08-03T17:10:48&#43;08:00'/><meta property='article:modified_time' content='2026-08-03T17:10:48&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="Herdr 操作手册">
+<meta name="twitter:description" content="# 几个要先搞懂的概念 # 层级结构 从大到小，四层嵌套： # Client / Server 分离 为什么 detach 不死？ Server:后台进程，真正持有 agent。你关终端它还在。 Cl">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#几个要先搞懂的概念">几个要先搞懂的概念</a>
+      <ol>
+        <li><a href="#层级结构">层级结构</a></li>
+        <li><a href="#client--server-分离">Client / Server 分离</a></li>
+        <li><a href="#两层-tab-不要混淆-ghostty-用户必读">两层 Tab 不要混淆 (Ghostty 用户必读)</a></li>
+      </ol>
+    </li>
+    <li><a href="#两端安装">两端安装</a>
+      <ol>
+        <li><a href="#mac-本机">Mac 本机</a></li>
+        <li><a href="#linux-服务器">Linux 服务器</a></li>
+      </ol>
+    </li>
+    <li><a href="#本地工作流">本地工作流</a>
+      <ol>
+        <li><a href="#启动">启动</a></li>
+        <li><a href="#干活">干活</a></li>
+        <li><a href="#暂时离开">暂时离开</a></li>
+        <li><a href="#回来">回来</a></li>
+        <li><a href="#彻底结束-慎用杀全部-agent">彻底结束 (慎用，杀全部 agent)</a></li>
+      </ol>
+    </li>
+    <li><a href="#远程工作流-ssh-场景">远程工作流 (SSH 场景)</a>
+      <ol>
+        <li><a href="#模式-aherdr---remotemac-日常用推荐">模式 A:<code>herdr --remote</code>(Mac 日常用，推荐)</a></li>
+        <li><a href="#模式-b先-ssh-再-herdrtmux-式">模式 B:先 SSH 再 herdr(tmux 式)</a></li>
+        <li><a href="#配置-ssh-别名">配置 SSH 别名</a></li>
+        <li><a href="#典型的一天">典型的一天</a></li>
+      </ol>
+    </li>
+    <li><a href="#日常操作速查">日常操作速查</a>
+      <ol>
+        <li><a href="#prefix-键--ctrlb先按松开再按动作键">Prefix 键 = <code>Ctrl+B</code>(先按，松开，再按动作键)</a></li>
+        <li><a href="#5-个必记">5 个必记</a></li>
+        <li><a href="#tab-操作">Tab 操作</a></li>
+        <li><a href="#pane-操作">Pane 操作</a></li>
+        <li><a href="#workspace-操作">Workspace 操作</a></li>
+        <li><a href="#鼠标操作">鼠标操作</a></li>
+        <li><a href="#查看所有快捷键-忘了随时查">查看所有快捷键 (忘了随时查)</a></li>
+      </ol>
+    </li>
+    <li><a href="#agent-状态管理">Agent 状态管理</a>
+      <ol>
+        <li><a href="#五种状态">五种状态</a></li>
+        <li><a href="#done-vs-idle-的区别">done vs idle 的区别</a></li>
+        <li><a href="#检测原理">检测原理</a></li>
+        <li><a href="#不要在-herdr-pane-里再开-tmux">不要在 Herdr pane 里再开 tmux</a></li>
+      </ol>
+    </li>
+    <li><a href="#多-agent-并行">多 Agent 并行</a>
+      <ol>
+        <li><a href="#什么时候该多开">什么时候该多开</a></li>
+        <li><a href="#多开的正确姿势">多开的正确姿势</a></li>
+        <li><a href="#创建-worktree-隔离的-workspace">创建 worktree 隔离的 workspace</a></li>
+      </ol>
+    </li>
+    <li><a href="#退出与恢复">退出与恢复</a></li>
+    <li><a href="#配置与定制">配置与定制</a>
+      <ol>
+        <li><a href="#配置文件位置">配置文件位置</a></li>
+        <li><a href="#改-prefix-键">改 prefix 键</a></li>
+        <li><a href="#无-prefix-直按键-推荐配-ctrlalt跨终端安全">无 prefix 直按键 (推荐配 Ctrl+Alt，跨终端安全)</a></li>
+        <li><a href="#关闭鼠标捕获">关闭鼠标捕获</a></li>
+        <li><a href="#远程模式用裸-ssh-不生成临时配置">远程模式：用裸 ssh 不生成临时配置</a></li>
+        <li><a href="#named-session一般不用需要完全隔离时才用">Named Session(一般不用，需要完全隔离时才用)</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/herdr-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C/">Herdr 操作手册</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-08-03</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="几个要先搞懂的概念">
+    <a href="#%e5%87%a0%e4%b8%aa%e8%a6%81%e5%85%88%e6%90%9e%e6%87%82%e7%9a%84%e6%a6%82%e5%bf%b5" class="header-anchor">#</a>
+    几个要先搞懂的概念
+</h2><h3 id="层级结构">
+    <a href="#%e5%b1%82%e7%ba%a7%e7%bb%93%e6%9e%84" class="header-anchor">#</a>
+    层级结构
+</h3><p>从大到小，四层嵌套：</p>
+<p><img src="https://cdn.mazhen.tech/2026/20260803171237461.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Herdr 层级结构"
+	
+	
+></p>
+<h3 id="client--server-分离">
+    <a href="#client--server-%e5%88%86%e7%a6%bb" class="header-anchor">#</a>
+    Client / Server 分离
+</h3><p>为什么 detach 不死？</p>
+<ul>
+<li><strong>Server</strong>:后台进程，<strong>真正持有 agent</strong>。你关终端它还在。</li>
+<li><strong>Client</strong>:终端 UI，只是&quot;显示器 + 键盘&quot;,attach 到 server。</li>
+<li><code>Ctrl+B Q</code>(detach)→ 客户端断开，<strong>server 继续</strong>。</li>
+<li>再敲 <code>herdr</code> → reattach，界面原样恢复。</li>
+</ul>
+<p><strong>记住</strong>:agent 跑在 server 里，不是跑在你的终端里。这是 SSH 断线不丢 agent 的根本原因。</p>
+<p><img src="https://cdn.mazhen.tech/2026/20260803171359559.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Client/Server 与 detach/reattach"
+	
+	
+></p>
+<h3 id="两层-tab-不要混淆-ghostty-用户必读">
+    <a href="#%e4%b8%a4%e5%b1%82-tab-%e4%b8%8d%e8%a6%81%e6%b7%b7%e6%b7%86-ghostty-%e7%94%a8%e6%88%b7%e5%bf%85%e8%af%bb" class="header-anchor">#</a>
+    两层 Tab 不要混淆 (Ghostty 用户必读)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Ghostty(外层)        ← Cmd+1/2/3 切 Ghostty 原生 tab
+</span></span><span class="line"><span class="cl">  └─ Herdr(内层)     ← Ctrl+B 然后 1/2/3 切 Herdr 的 tab
+</span></span><span class="line"><span class="cl">       └─ Pane
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>Cmd+数字</code> 是 Ghostty 的，Herdr 抢不到，所以 Herdr 用 <code>prefix+ 数字</code>。两层各管各的。</p>
+<h2 id="两端安装">
+    <a href="#%e4%b8%a4%e7%ab%af%e5%ae%89%e8%a3%85" class="header-anchor">#</a>
+    两端安装
+</h2><h3 id="mac-本机">
+    <a href="#mac-%e6%9c%ac%e6%9c%ba" class="header-anchor">#</a>
+    Mac 本机
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -fsSL https://herdr.dev/install.sh <span class="p">|</span> sh
+</span></span><span class="line"><span class="cl">herdr --version   <span class="c1"># 验证</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="linux-服务器">
+    <a href="#linux-%e6%9c%8d%e5%8a%a1%e5%99%a8" class="header-anchor">#</a>
+    Linux 服务器
+</h3><p>SSH 上去后：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -fsSL https://herdr.dev/install.sh <span class="p">|</span> sh
+</span></span><span class="line"><span class="cl">herdr --version
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>升级 (用官方脚本装的才适用):</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr update
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="本地工作流">
+    <a href="#%e6%9c%ac%e5%9c%b0%e5%b7%a5%e4%bd%9c%e6%b5%81" class="header-anchor">#</a>
+    本地工作流
+</h2><h3 id="启动">
+    <a href="#%e5%90%af%e5%8a%a8" class="header-anchor">#</a>
+    启动
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr     <span class="c1"># 启动 server + 打开 client(已存在则 attach)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="干活">
+    <a href="#%e5%b9%b2%e6%b4%bb" class="header-anchor">#</a>
+    干活
+</h3><p>在 pane 里像平时一样启动 agent:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude           <span class="c1"># 启动 Claude Code</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 或多开</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Ctrl+B, V → 右切新 pane → 再敲 claude</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>侧边栏自动显示状态。</p>
+<h3 id="暂时离开">
+    <a href="#%e6%9a%82%e6%97%b6%e7%a6%bb%e5%bc%80" class="header-anchor">#</a>
+    暂时离开
+</h3><p><code>Ctrl+B</code> 松开，再按 <code>Q</code> → detach,agent 继续跑。</p>
+<h3 id="回来">
+    <a href="#%e5%9b%9e%e6%9d%a5" class="header-anchor">#</a>
+    回来
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr     <span class="c1"># reattach</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="彻底结束-慎用杀全部-agent">
+    <a href="#%e5%bd%bb%e5%ba%95%e7%bb%93%e6%9d%9f-%e6%85%8e%e7%94%a8%e6%9d%80%e5%85%a8%e9%83%a8-agent" class="header-anchor">#</a>
+    彻底结束 (慎用，杀全部 agent)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr server stop
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="远程工作流-ssh-场景">
+    <a href="#%e8%bf%9c%e7%a8%8b%e5%b7%a5%e4%bd%9c%e6%b5%81-ssh-%e5%9c%ba%e6%99%af" class="header-anchor">#</a>
+    远程工作流 (SSH 场景)
+</h2><p><img src="https://cdn.mazhen.tech/2026/20260803171634989.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="远程两种模式对比"
+	
+	
+></p>
+<p>这是你最大的收益区：<strong>SSH 断线不丢 agent</strong>。两种模式，按场景选。</p>
+<h3 id="模式-aherdr---remotemac-日常用推荐">
+    <a href="#%e6%a8%a1%e5%bc%8f-aherdr---remotemac-%e6%97%a5%e5%b8%b8%e7%94%a8%e6%8e%a8%e8%8d%90" class="header-anchor">#</a>
+    模式 A:<code>herdr --remote</code>(Mac 日常用，推荐)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr --remote workbox
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>特点</strong>:</p>
+<ul>
+<li>Mac 当瘦客户端，SSH 连服务器，把服务器 Herdr 界面拉到本地</li>
+<li><strong>agent 跑在服务器</strong>,但你在 Mac 上操作</li>
+<li><strong>图片粘贴能用</strong>(Herdr 把 Mac 剪贴板图片桥接到服务器)★裸 SSH 做不到</li>
+<li>用 Mac 本地的快捷键配置</li>
+</ul>
+<p><strong>适合</strong>:你在 Mac 上日常连服务器干活，尤其要给 Claude 发截图时。</p>
+<h3 id="模式-b先-ssh-再-herdrtmux-式">
+    <a href="#%e6%a8%a1%e5%bc%8f-b%e5%85%88-ssh-%e5%86%8d-herdrtmux-%e5%bc%8f" class="header-anchor">#</a>
+    模式 B:先 SSH 再 herdr(tmux 式)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ssh workbox
+</span></span><span class="line"><span class="cl">herdr
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>特点</strong>:</p>
+<ul>
+<li>整个 Herdr 在服务器上跑，终端只是显示器</li>
+<li>图片粘贴不行</li>
+<li>界面自适应窄屏</li>
+</ul>
+<p><strong>适合</strong>:手机/平板 SSH 连过去时、或临时简单连一下。</p>
+<h3 id="配置-ssh-别名">
+    <a href="#%e9%85%8d%e7%bd%ae-ssh-%e5%88%ab%e5%90%8d" class="header-anchor">#</a>
+    配置 SSH 别名
+</h3><p>编辑 Mac 的 <code>~/.ssh/config</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Host workbox
+</span></span><span class="line"><span class="cl">  HostName server.example.com
+</span></span><span class="line"><span class="cl">  User you
+</span></span><span class="line"><span class="cl">  Port 2222
+</span></span><span class="line"><span class="cl">  ForwardAgent yes        # ★让服务器能借你 Mac 的 SSH 密钥做 git
+</span></span><span class="line"><span class="cl">  ServerAliveInterval 60  # 防 SSH 断线
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>之后直接：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr --remote workbox
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="典型的一天">
+    <a href="#%e5%85%b8%e5%9e%8b%e7%9a%84%e4%b8%80%e5%a4%a9" class="header-anchor">#</a>
+    典型的一天
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">上午  Mac: herdr --remote workbox
+</span></span><span class="line"><span class="cl">      → 连服务器,开 3 个 Claude 并行
+</span></span><span class="line"><span class="cl">开会  Ctrl+B Q → detach,服务器 agent 继续跑
+</span></span><span class="line"><span class="cl">下午  Mac: herdr --remote workbox → reattach,接着干
+</span></span><span class="line"><span class="cl">晚上  手机: ssh workbox → herdr → 窄屏看状态、做决策
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="日常操作速查">
+    <a href="#%e6%97%a5%e5%b8%b8%e6%93%8d%e4%bd%9c%e9%80%9f%e6%9f%a5" class="header-anchor">#</a>
+    日常操作速查
+</h2><h3 id="prefix-键--ctrlb先按松开再按动作键">
+    <a href="#prefix-%e9%94%ae--ctrlb%e5%85%88%e6%8c%89%e6%9d%be%e5%bc%80%e5%86%8d%e6%8c%89%e5%8a%a8%e4%bd%9c%e9%94%ae" class="header-anchor">#</a>
+    Prefix 键 = <code>Ctrl+B</code>(先按，松开，再按动作键)
+</h3><h3 id="5-个必记">
+    <a href="#5-%e4%b8%aa%e5%bf%85%e8%ae%b0" class="header-anchor">#</a>
+    5 个必记
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>动作</th>
+<th>快捷键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新建 tab</td>
+<td><code>Ctrl+B</code> → <code>C</code></td>
+</tr>
+<tr>
+<td>右切 / 下切 pane</td>
+<td><code>Ctrl+B</code> → <code>V</code> / <code>Ctrl+B</code> → <code>-</code></td>
+</tr>
+<tr>
+<td>pane 间移动</td>
+<td><code>Ctrl+B</code> → <code>H/J/K/L</code>(左/下/上/右，vim 风格)</td>
+</tr>
+<tr>
+<td>workspace 导航</td>
+<td><code>Ctrl+B</code> → <code>W</code></td>
+</tr>
+<tr>
+<td>detach(保留 agent)</td>
+<td><code>Ctrl+B</code> → <code>Q</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="tab-操作">
+    <a href="#tab-%e6%93%8d%e4%bd%9c" class="header-anchor">#</a>
+    Tab 操作
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>动作</th>
+<th>快捷键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下一个 / 上一个 tab</td>
+<td><code>Ctrl+B</code> → <code>N</code> / <code>P</code></td>
+</tr>
+<tr>
+<td>跳到第 1–9 个 tab</td>
+<td><code>Ctrl+B</code> → <code>1..9</code></td>
+</tr>
+<tr>
+<td>重命名 tab</td>
+<td><code>Ctrl+B</code> → <code>Shift+T</code></td>
+</tr>
+<tr>
+<td>关闭 tab</td>
+<td><code>Ctrl+B</code> → <code>Shift+X</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="pane-操作">
+    <a href="#pane-%e6%93%8d%e4%bd%9c" class="header-anchor">#</a>
+    Pane 操作
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>动作</th>
+<th>快捷键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>放大/还原当前 pane(zoom)</td>
+<td><code>Ctrl+B</code> → <code>Z</code></td>
+</tr>
+<tr>
+<td>关闭 pane</td>
+<td><code>Ctrl+B</code> → <code>X</code></td>
+</tr>
+<tr>
+<td>交换 pane 位置</td>
+<td><code>Ctrl+B</code> → <code>Shift+H/J/K/L</code></td>
+</tr>
+<tr>
+<td>调整大小模式</td>
+<td><code>Ctrl+B</code> → <code>R</code></td>
+</tr>
+<tr>
+<td>复制模式 (翻历史)</td>
+<td><code>Ctrl+B</code> → <code>[</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="workspace-操作">
+    <a href="#workspace-%e6%93%8d%e4%bd%9c" class="header-anchor">#</a>
+    Workspace 操作
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>动作</th>
+<th>快捷键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新建 workspace</td>
+<td><code>Ctrl+B</code> → <code>Shift+N</code></td>
+</tr>
+<tr>
+<td>重命名 workspace</td>
+<td><code>Ctrl+B</code> → <code>Shift+W</code></td>
+</tr>
+<tr>
+<td>关闭 workspace</td>
+<td><code>Ctrl+B</code> → <code>Shift+D</code></td>
+</tr>
+<tr>
+<td>全局跳转选择器</td>
+<td><code>Ctrl+B</code> → <code>G</code></td>
+</tr>
+<tr>
+<td>切换侧边栏显隐</td>
+<td><code>Ctrl+B</code> → <code>B</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="鼠标操作">
+    <a href="#%e9%bc%a0%e6%a0%87%e6%93%8d%e4%bd%9c" class="header-anchor">#</a>
+    鼠标操作
+</h3><ul>
+<li>点击 pane / tab / workspace / agent → 切换</li>
+<li>拖动分割边框 → 调整 pane 大小</li>
+<li>选中文字 → 选中</li>
+<li>右键 → 菜单</li>
+<li>拖选 → 直接复制 (不用进 copy mode)</li>
+</ul>
+<h3 id="查看所有快捷键-忘了随时查">
+    <a href="#%e6%9f%a5%e7%9c%8b%e6%89%80%e6%9c%89%e5%bf%ab%e6%8d%b7%e9%94%ae-%e5%bf%98%e4%ba%86%e9%9a%8f%e6%97%b6%e6%9f%a5" class="header-anchor">#</a>
+    查看所有快捷键 (忘了随时查)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Ctrl+B → ?
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="agent-状态管理">
+    <a href="#agent-%e7%8a%b6%e6%80%81%e7%ae%a1%e7%90%86" class="header-anchor">#</a>
+    Agent 状态管理
+</h2><p><img src="https://cdn.mazhen.tech/2026/20260803171832272.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Agent 五状态机"
+	
+	
+></p>
+<h3 id="五种状态">
+    <a href="#%e4%ba%94%e7%a7%8d%e7%8a%b6%e6%80%81" class="header-anchor">#</a>
+    五种状态
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+<th>你该做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 <code>blocked</code></td>
+<td><strong>需要你</strong>:等输入/审批/决策</td>
+<td><strong>立刻处理</strong></td>
+</tr>
+<tr>
+<td>🔵 <code>working</code></td>
+<td>正在干活</td>
+<td>别打扰</td>
+</tr>
+<tr>
+<td>⚪ <code>done</code></td>
+<td>干完了，<strong>你还没看过</strong></td>
+<td>去看结果</td>
+</tr>
+<tr>
+<td>🟢 <code>idle</code></td>
+<td>完成/等待，<strong>已被你看过</strong></td>
+<td>可派新活</td>
+</tr>
+<tr>
+<td>❓ <code>unknown</code></td>
+<td>Herdr 拿不准</td>
+<td>主动检查</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="done-vs-idle-的区别">
+    <a href="#done-vs-idle-%e7%9a%84%e5%8c%ba%e5%88%ab" class="header-anchor">#</a>
+    done vs idle 的区别
+</h3><ul>
+<li><code>done</code>:后台默默干完了，你没看过 → 提醒&quot;有成果待领取&quot;</li>
+<li><code>idle</code>:你看过了 → 已知悉，待命</li>
+</ul>
+<p><strong>怎么算&quot;看过&quot;</strong>:聚焦到那个 tab，或用 focus 命令 targeting 该 pane/agent。<strong>CLI 读取不算看过</strong>(防止 agent 自动操作误清状态)。</p>
+<h3 id="检测原理">
+    <a href="#%e6%a3%80%e6%b5%8b%e5%8e%9f%e7%90%86" class="header-anchor">#</a>
+    检测原理
+</h3><p>Herdr 通过三方式识别 pane 里的 agent:</p>
+<ol>
+<li>前台进程</li>
+<li>屏幕特征 (screen manifests)—— 认审批框、加载态等</li>
+<li>可选集成插件 (装了更准)</li>
+</ol>
+<p><strong>零配置</strong>识别 Claude Code / Codex / OpenCode / Amp 等 20+ agent。</p>
+<h3 id="不要在-herdr-pane-里再开-tmux">
+    <a href="#%e4%b8%8d%e8%a6%81%e5%9c%a8-herdr-pane-%e9%87%8c%e5%86%8d%e5%bc%80-tmux" class="header-anchor">#</a>
+    不要在 Herdr pane 里再开 tmux
+</h3><p>会<strong>屏蔽 agent 状态检测</strong>(tmux 把内部输出吃掉)。要让状态功能生效，agent 必须直接跑在 Herdr pane 里。</p>
+<h2 id="多-agent-并行">
+    <a href="#%e5%a4%9a-agent-%e5%b9%b6%e8%a1%8c" class="header-anchor">#</a>
+    多 Agent 并行
+</h2><h3 id="什么时候该多开">
+    <a href="#%e4%bb%80%e4%b9%88%e6%97%b6%e5%80%99%e8%af%a5%e5%a4%9a%e5%bc%80" class="header-anchor">#</a>
+    什么时候该多开
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>能独立拆分的任务</th>
+<th>多开价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全栈前后端 (可并行)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>多功能/多分支 (配 git worktree)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>写 + 测试 分离</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>写 + 审查 分工</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>多个不相关 bug 并排</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>一个任务串行就够</td>
+<td>❌ 别折腾</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="多开的正确姿势">
+    <a href="#%e5%a4%9a%e5%bc%80%e7%9a%84%e6%ad%a3%e7%a1%ae%e5%a7%bf%e5%8a%bf" class="header-anchor">#</a>
+    多开的正确姿势
+</h3><ul>
+<li><strong>用 git worktree 物理隔离</strong>:每个 agent 绑一个分支的工作目录，改的不是同一份代码</li>
+<li><strong>agent 各干各的，不要让它们同时改同一份代码</strong>(merge 冲突地狱)</li>
+<li><strong>真并行</strong>(同时跑),不是串行流水线</li>
+</ul>
+<h3 id="创建-worktree-隔离的-workspace">
+    <a href="#%e5%88%9b%e5%bb%ba-worktree-%e9%9a%94%e7%a6%bb%e7%9a%84-workspace" class="header-anchor">#</a>
+    创建 worktree 隔离的 workspace
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr worktree create   <span class="c1"># 把分支映射到独立 workspace</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="退出与恢复">
+    <a href="#%e9%80%80%e5%87%ba%e4%b8%8e%e6%81%a2%e5%a4%8d" class="header-anchor">#</a>
+    退出与恢复
+</h2><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>你想要</th>
+<th>命令</th>
+<th>agent 命运</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>暂时离开/下班/开会</td>
+<td><code>Ctrl+B</code> → <code>Q</code></td>
+<td>✅ 继续跑</td>
+</tr>
+<tr>
+<td>回来继续</td>
+<td><code>herdr</code>(或 <code>herdr --remote workbox</code>)</td>
+<td>✅ reattach</td>
+</tr>
+<tr>
+<td>彻底关掉 (不要 agent 了)</td>
+<td><code>herdr server stop</code></td>
+<td>❌ 全部杀掉</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>日常退出永远用 <code>Ctrl+B Q</code>,只有确定不要 agent 才 <code>herdr server stop</code>。</strong></p>
+<h2 id="配置与定制">
+    <a href="#%e9%85%8d%e7%bd%ae%e4%b8%8e%e5%ae%9a%e5%88%b6" class="header-anchor">#</a>
+    配置与定制
+</h2><h3 id="配置文件位置">
+    <a href="#%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6%e4%bd%8d%e7%bd%ae" class="header-anchor">#</a>
+    配置文件位置
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">~/.config/herdr/config.toml
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="改-prefix-键">
+    <a href="#%e6%94%b9-prefix-%e9%94%ae" class="header-anchor">#</a>
+    改 prefix 键
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">keys</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">prefix</span> <span class="p">=</span> <span class="s2">&#34;ctrl+a&#34;</span>   <span class="c"># 比如改成 Ctrl+A</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="无-prefix-直按键-推荐配-ctrlalt跨终端安全">
+    <a href="#%e6%97%a0-prefix-%e7%9b%b4%e6%8c%89%e9%94%ae-%e6%8e%a8%e8%8d%90%e9%85%8d-ctrlalt%e8%b7%a8%e7%bb%88%e7%ab%af%e5%ae%89%e5%85%a8" class="header-anchor">#</a>
+    无 prefix 直按键 (推荐配 Ctrl+Alt，跨终端安全)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">keys</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">focus_pane_left</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+h&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+h&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">focus_pane_down</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+j&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+j&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">focus_pane_up</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+k&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+k&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">focus_pane_right</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+l&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+l&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">previous_tab</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+p&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+[&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">next_tab</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+n&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+]&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">new_tab</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+c&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+c&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">zoom</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;prefix+z&#34;</span><span class="p">,</span> <span class="s2">&#34;ctrl+alt+z&#34;</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>官方推荐 <code>Ctrl+Alt</code> 家族：几乎不被任何终端/OS 占用。但要避开：</p>
+<ul>
+<li><code>Ctrl+Alt+方向键</code>(Ghostty 占)</li>
+<li><code>Ctrl+Alt+T</code>(Ubuntu 开终端)</li>
+<li><code>Ctrl+Alt+F1..F12</code>(Linux 虚拟控制台)</li>
+</ul>
+</blockquote>
+<h3 id="关闭鼠标捕获">
+    <a href="#%e5%85%b3%e9%97%ad%e9%bc%a0%e6%a0%87%e6%8d%95%e8%8e%b7" class="header-anchor">#</a>
+    关闭鼠标捕获
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">ui</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">mouse_capture</span> <span class="p">=</span> <span class="kc">false</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="远程模式用裸-ssh-不生成临时配置">
+    <a href="#%e8%bf%9c%e7%a8%8b%e6%a8%a1%e5%bc%8f%e7%94%a8%e8%a3%b8-ssh-%e4%b8%8d%e7%94%9f%e6%88%90%e4%b8%b4%e6%97%b6%e9%85%8d%e7%bd%ae" class="header-anchor">#</a>
+    远程模式：用裸 ssh 不生成临时配置
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">remote</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">manage_ssh_config</span> <span class="p">=</span> <span class="kc">false</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="named-session一般不用需要完全隔离时才用">
+    <a href="#named-session%e4%b8%80%e8%88%ac%e4%b8%8d%e7%94%a8%e9%9c%80%e8%a6%81%e5%ae%8c%e5%85%a8%e9%9a%94%e7%a6%bb%e6%97%b6%e6%89%8d%e7%94%a8" class="header-anchor">#</a>
+    Named Session(一般不用，需要完全隔离时才用)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr session list
+</span></span><span class="line"><span class="cl">herdr session attach work
+</span></span><span class="line"><span class="cl">herdr session attach side-project
+</span></span><span class="line"><span class="cl">herdr session stop work
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>官方建议：先用 workspace，不够了再用 named session。</strong></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai/">Ai</a>
+        
+            <a href="/tags/linux/">Linux</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/claude-code--%E6%99%BA%E8%B0%B1-ai-%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Claude Code &#43; 智谱 AI 配置使用指南</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E-vibe-coding-%E5%88%B0%E8%BD%AF%E4%BB%B6%E5%B7%A5%E5%8E%82%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E6%AD%A3%E5%9C%A8%E7%BB%8F%E5%8E%86%E4%BB%80%E4%B9%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从 Vibe Coding 到软件工厂，软件工程正在经历什么</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%89%8B%E5%8A%A8%E5%88%9B%E5%BB%BA-kprobe-%E4%BA%8B%E4%BB%B6%E8%BF%BD%E8%B8%AA-bind-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">手动创建 kprobe 事件追踪 bind 系统调用</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8-dwarf-%E8%BF%98%E5%8E%9F%E5%AE%8C%E6%95%B4%E7%9A%84-glibc-%E8%B0%83%E7%94%A8%E5%A0%86%E6%A0%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用 DWARF 还原完整的 glibc 调用堆栈</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/tracing-and-locating-socket-creation-in-java-processes/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Tracing and Locating Socket Creation in Java Processes</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2026 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
