@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="# 1. dsh 到底是什么：不是“DeepSeek 版 Claude Code” # 1.1 发布事实与官方定位 # 1.1.1 现象级发布：一次“涨星纪录”背后的事实清单 2026 年 8 月 13 日，De">
+<title>DeepSeek Harness 深度解析：“一切皆插件”的 Agent 运行时</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/deepseek-harness-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E7%9A%84-agent-%E8%BF%90%E8%A1%8C%E6%97%B6/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="DeepSeek Harness 深度解析：“一切皆插件”的 Agent 运行时">
+<meta property='og:description' content="# 1. dsh 到底是什么：不是“DeepSeek 版 Claude Code” # 1.1 发布事实与官方定位 # 1.1.1 现象级发布：一次“涨星纪录”背后的事实清单 2026 年 8 月 13 日，De">
+<meta property='og:url' content='https://mazhen.tech/p/deepseek-harness-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E7%9A%84-agent-%E8%BF%90%E8%A1%8C%E6%97%B6/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ai' /><meta property='article:tag' content='deepseek' /><meta property='article:tag' content='harness' /><meta property='article:published_time' content='2026-08-16T21:33:03&#43;08:00'/><meta property='article:modified_time' content='2026-08-16T21:33:03&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="DeepSeek Harness 深度解析：“一切皆插件”的 Agent 运行时">
+<meta name="twitter:description" content="# 1. dsh 到底是什么：不是“DeepSeek 版 Claude Code” # 1.1 发布事实与官方定位 # 1.1.1 现象级发布：一次“涨星纪录”背后的事实清单 2026 年 8 月 13 日，De">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-dsh-到底是什么不是deepseek-版-claude-code">1. dsh 到底是什么：不是“DeepSeek 版 Claude Code”</a>
+      <ol>
+        <li><a href="#11-发布事实与官方定位">1.1 发布事实与官方定位</a>
+          <ol>
+            <li><a href="#111-现象级发布一次涨星纪录背后的事实清单">1.1.1 现象级发布：一次“涨星纪录”背后的事实清单</a></li>
+            <li><a href="#112-官方公式agent--model--harness">1.1.2 官方公式：Agent = Model + Harness</a></li>
+            <li><a href="#113-发布脉络从更新日志脚注到三连发">1.1.3 发布脉络：从更新日志脚注到“三连发”</a></li>
+          </ol>
+        </li>
+        <li><a href="#12-harness-这个品类的本质">1.2 Harness 这个品类的本质</a>
+          <ol>
+            <li><a href="#121-harness--包裹模型的运行时层">1.2.1 Harness = 包裹模型的运行时层</a></li>
+            <li><a href="#122-对标-claude-code-是表象定义品类才是实质">1.2.2 对标 Claude Code 是表象，定义品类才是实质</a></li>
+          </ol>
+        </li>
+        <li><a href="#13-预览版成色与官方警告">1.3 预览版成色与官方警告</a>
+          <ol>
+            <li><a href="#131-全大写警告与地基优先立场该怎么看待-v01">1.3.1 全大写警告与“地基优先”立场：该怎么看待 v0.1</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#2-设计理念一切皆插件并且没有特权核心">2. 设计理念：一切皆插件，并且没有特权核心</a>
+      <ol>
+        <li><a href="#21everything-is-a-plugin的完整含义">2.1“Everything is a plugin”的完整含义</a>
+          <ol>
+            <li><a href="#211-官方列举">2.1.1 官方列举</a></li>
+            <li><a href="#212-核心包解剖">2.1.2 核心包解剖</a></li>
+          </ol>
+        </li>
+        <li><a href="#22-与传统核心--挂件架构的根本分野">2.2 与传统“核心 + 挂件”架构的根本分野</a>
+          <ol>
+            <li><a href="#221-对比-codex-阵营">2.2.1 对比 Codex 阵营</a></li>
+            <li><a href="#222没有需要打补丁的特权核心">2.2.2“没有需要打补丁的特权核心”</a></li>
+          </ol>
+        </li>
+        <li><a href="#23-cordis-元框架只提供组合不提供能力">2.3 Cordis 元框架：只提供组合，不提供能力</a>
+          <ol>
+            <li><a href="#231-论文5-原话">2.3.1 论文§5 原话</a></li>
+            <li><a href="#232-乐高类比">2.3.2 乐高类比</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#3-理论根基cordis-论文与时空可组合性">3. 理论根基：Cordis 论文与“时空可组合性”</a>
+      <ol>
+        <li><a href="#31-论文概况与作者谱系">3.1 论文概况与作者谱系</a>
+          <ol>
+            <li><a href="#311-论文与作者">3.1.1 论文与作者</a></li>
+            <li><a href="#312-cordis-溯源从聊天机器人到-deepseek">3.1.2 Cordis 溯源：从聊天机器人到 DeepSeek</a></li>
+          </ol>
+        </li>
+        <li><a href="#32-空间可组合性插件之间自动接线">3.2 空间可组合性：插件之间自动接线</a>
+          <ol>
+            <li><a href="#321-定义与机制">3.2.1 定义与机制</a></li>
+          </ol>
+        </li>
+        <li><a href="#33-时间可组合性插件能真正拔掉">3.3 时间可组合性：插件能真正拔掉</a>
+          <ol>
+            <li><a href="#331-定义与纠偏">3.3.1 定义与纠偏</a></li>
+            <li><a href="#332-为什么传统插件做不到">3.3.2 为什么传统插件做不到</a></li>
+          </ol>
+        </li>
+        <li><a href="#34-范畴论符号的大白话翻译">3.4 范畴论符号的大白话翻译</a>
+          <ol>
+            <li><a href="#341-γ--环境状态--撤销账本">3.4.1 ∂Γ = 环境状态 + 撤销账本</a></li>
+            <li><a href="#342-twisted-composition-与-track-同态">3.4.2 twisted composition 与 track 同态</a></li>
+            <li><a href="#343-观测等价恢复到什么程度算恢复">3.4.3 观测等价：恢复到什么程度算恢复</a></li>
+            <li><a href="#344-四大元定理通俗版">3.4.4 四大元定理通俗版</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#4-实现原理-i可逆插件拔掉一个插件影响如何全部恢复">4. 实现原理 I：可逆插件——拔掉一个插件，影响如何全部恢复</a>
+      <ol>
+        <li><a href="#41-核心机制注册时配对登记逆操作">4.1 核心机制：注册时配对登记逆操作</a>
+          <ol>
+            <li><a href="#411-一切经-ctx-的注册内部都走-ctxeffect">4.1.1 一切经 ctx 的注册内部都走 ctx.effect()</a></li>
+            <li><a href="#412-卸载--逆序启动并发回收总账中的全部-disposer">4.1.2 卸载 = 逆序启动、并发回收总账中的全部 disposer</a></li>
+            <li><a href="#413-父子级联父卸载递归卸载子树">4.1.3 父子级联：父卸载递归卸载子树</a></li>
+          </ol>
+        </li>
+        <li><a href="#42-fiber-状态机依赖驱动的六态生命周期">4.2 Fiber 状态机：依赖驱动的六态生命周期</a>
+          <ol>
+            <li><a href="#421-六态与-epoch状态迁移由依赖指纹驱动">4.2.1 六态与 epoch：状态迁移由依赖指纹驱动</a></li>
+            <li><a href="#422-依赖消失回-pendingfiber-活着可以复活">4.2.2 依赖消失回 PENDING：fiber 活着，可以复活</a></li>
+            <li><a href="#423-级联语义notify-重算依赖relied-guard-保证有序退场">4.2.3 级联语义：notify 重算依赖，relied guard 保证有序退场</a></li>
+          </ol>
+        </li>
+        <li><a href="#43-能撤销什么不能撤销什么边界得划清楚">4.3 能撤销什么、不能撤销什么——边界得划清楚</a>
+          <ol>
+            <li><a href="#431-自动可撤一切经-ctx-介导的注册">4.3.1 自动可撤：一切经 ctx 介导的注册</a></li>
+            <li><a href="#432-不可回滚越过-ctx-边界的外部副作用">4.3.2 不可回滚：越过 ctx 边界的外部副作用</a></li>
+            <li><a href="#433-理论划界acquisition-可逆emission-需补偿">4.3.3 理论划界：acquisition 可逆，emission 需补偿</a></li>
+          </ol>
+        </li>
+        <li><a href="#44-hmr-与创造模式可逆性的两个高光应用">4.4 HMR 与创造模式：可逆性的两个高光应用</a>
+          <ol>
+            <li><a href="#441-hmr事务性热替换绝不进入半重载状态">4.4.1 HMR：事务性热替换，绝不进入半重载状态</a></li>
+            <li><a href="#442-与相近概念的关系定位">4.4.2 与相近概念的关系定位</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#5-实现原理-ii插件如何协作服务事件与配置叠加">5. 实现原理 II：插件如何协作——服务、事件与配置叠加</a>
+      <ol>
+        <li><a href="#51-服务与依赖注入">5.1 服务与依赖注入</a>
+          <ol>
+            <li><a href="#511-服务注册--service-基类-superctxname-或-ctxprovide消费方-inject-声明硬依赖未就绪则静默-pending">5.1.1 服务注册 = Service 基类 super(ctx,name) 或 ctx.provide；消费方 inject 声明硬依赖，未就绪则静默 PENDING</a></li>
+            <li><a href="#512-类型安全通过对-cordis-contextevents-接口的-typescript-声明合并实现">5.1.2 类型安全通过对 Cordis Context/Events 接口的 TypeScript 声明合并实现</a></li>
+          </ol>
+        </li>
+        <li><a href="#52-类型化事件每个事件都是扩展点">5.2 类型化事件：每个事件都是扩展点</a>
+          <ol>
+            <li><a href="#521-三类事件会话事件持久事实重启仍在agent-事件观察拦截进行中的工作能力事件给文件系统工具遥测附加策略与适配器">5.2.1 三类事件：会话事件（持久事实，重启仍在）、Agent 事件（观察/拦截进行中的工作）、能力事件（给文件系统/工具/遥测附加策略与适配器）</a></li>
+            <li><a href="#522-五种发射模式emitparallelserialbailwaterfallwaterfall-可逐棒改写值如拦截改写模型请求">5.2.2 五种发射模式：emit/parallel/serial/bail/waterfall（waterfall 可逐棒改写值，如拦截改写模型请求）</a></li>
+          </ol>
+        </li>
+        <li><a href="#53-配置叠加模型profile--bundle--patch">5.3 配置叠加模型：profile → bundle → patch</a>
+          <ol>
+            <li><a href="#531-三层叠加实际顺序与反直觉点home-patch-优先级高于-profile-patch按-id-整段替换而非深合并">5.3.1 三层叠加实际顺序与反直觉点：home patch 优先级高于 profile patch；按 id 整段替换而非深合并</a></li>
+            <li><a href="#532-agent-preset-与-scope-父链agentpresetglobal同一系统为不同会话装不同提示词工具规则scope-是路由原语而非沙箱">5.3.2 Agent Preset 与 scope 父链（agent→preset→global）：同一系统为不同会话装不同提示词/工具/规则；scope 是路由原语而非沙箱</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#6-实现原理-iii事件溯源会话模型可见即已记录">6. 实现原理 III：事件溯源会话——“模型可见即已记录”</a>
+      <ol>
+        <li><a href="#61-官方自认的事件溯源架构">6.1 官方自认的事件溯源架构</a>
+          <ol>
+            <li><a href="#611-session--append-only-的-sessionevent-日志唯一真相源模型消息历史由-derivemessages-从日志投射不单独存储">6.1.1 Session = append-only 的 SessionEvent 日志，唯一真相源；模型消息历史由 deriveMessages() 从日志投射，不单独存储</a></li>
+            <li><a href="#612-事件信封与核心词汇turnstartendstepstartendusermessage带-source-区分真人合成注入assistantchunktoken-级保真toolcall存未解析原文requestheader完整快照">6.1.2 事件信封与核心词汇：turn/start|end、step/start|end、user/message（带 source 区分真人/合成注入）、assistant/chunk（token 级保真）、tool/call（存未解析原文）、request/header（完整快照）</a></li>
+          </ol>
+        </li>
+        <li><a href="#62-运行时强制不变量">6.2 运行时强制不变量</a>
+          <ol>
+            <li><a href="#621model-visible-means-loggedinvariantts-在每次-llm-调用前把请求-messages-与日志投射做-json-逐字节比对不一致即报-desync可观测性从约定升级为强制">6.2.1“Model-visible means logged”：invariant.ts 在每次 LLM 调用前把请求 messages 与日志投射做 JSON 逐字节比对，不一致即报 desync——可观测性从约定升级为强制</a></li>
+          </ol>
+        </li>
+        <li><a href="#63-一条事件流喂所有操作">6.3 一条事件流喂所有操作</a>
+          <ol>
+            <li><a href="#631-resume重放重建--崩溃合成-interrupted-闭合fork事件前缀--谱系-header检索ftstraceevent-溯源链回放llm-replay-无-api-key-逐-chunk-重建模型行为共享同一份事件流">6.3.1 resume（重放重建 + 崩溃合成 interrupted 闭合）、fork（事件前缀 + 谱系 header）、检索（FTS+traceEvent 溯源链）、回放（llm-replay 无 API key 逐 chunk 重建模型行为）共享同一份事件流</a></li>
+            <li><a href="#632-多-agent子-agent-独立日志经-parentsessiondelegationdepth-关联主会话trajectory-视图按来源徽标systemusercontextassistanttool呈现">6.3.2 多 Agent：子 agent 独立日志经 parentSession/delegationDepth 关联主会话；Trajectory 视图按来源徽标（SYSTEM/USER/CONTEXT/ASSISTANT/TOOL）呈现</a></li>
+          </ol>
+        </li>
+        <li><a href="#64-与可逆插件的合流">6.4 与可逆插件的合流</a>
+          <ol>
+            <li><a href="#641-插件可逆性管空间中的现在影响可回滚事件溯源管时间上的过去历史可重建合起来全系统状态可撤销可重建可分叉可审计同时校正时间可组合性事件流的社区误读">6.4.1 插件可逆性管“空间中的现在”（影响可回滚），事件溯源管“时间上的过去”（历史可重建）；合起来全系统状态可撤销/可重建/可分叉/可审计——同时校正“时间可组合性=事件流”的社区误读</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#7-agent-loop-插件化换掉-loop它还是-agent-吗">7. Agent Loop 插件化：换掉 loop，它还是 agent 吗</a>
+      <ol>
+        <li><a href="#71-架构分离agent-是什么与agent-怎么跑">7.1 架构分离：“agent 是什么”与“agent 怎么跑”</a>
+          <ol>
+            <li><a href="#711-coreagent-定义不变契约coreagent-loop-只是默认实现">7.1.1 core/agent 定义不变契约，core/agent-loop 只是默认实现</a></li>
+            <li><a href="#712-默认-loop-是普通插件的证据agentloop-extends-service">7.1.2 默认 loop 是普通插件的证据：AgentLoop extends Service</a></li>
+          </ol>
+        </li>
+        <li><a href="#72agent-性的四层不变量">7.2“agent 性”的四层不变量</a>
+          <ol>
+            <li><a href="#721-会话连续性agentid--sessionidresume-后历史延续">7.2.1 会话连续性：agent.id === session.id，resume 后历史延续</a></li>
+            <li><a href="#722-agent-接口契约uisubagentacp-只对接口编程">7.2.2 Agent 接口契约：UI/subagent/ACP 只对接口编程</a></li>
+            <li><a href="#723-工具守卫管线与模型路由不随-loop-走">7.2.3 工具守卫管线与模型路由不随 loop 走</a></li>
+          </ol>
+        </li>
+        <li><a href="#73-默认-loop-的轮次结构源码级">7.3 默认 loop 的轮次结构（源码级）</a>
+          <ol>
+            <li><a href="#731-step--一次模型请求--其工具调用turn--零或多个-step">7.3.1 step = 一次模型请求 + 其工具调用，turn = 零或多个 step</a></li>
+          </ol>
+        </li>
+        <li><a href="#74-直接回答用户之问">7.4 直接回答用户之问</a>
+          <ol>
+            <li><a href="#741-换-loop-换的是控制流骨架变与不变的对照">7.4.1 换 loop 换的是“控制流骨架”：变与不变的对照</a></li>
+            <li><a href="#742-两个必须纠正的流行误读">7.4.2 两个必须纠正的流行误读</a></li>
+            <li><a href="#743-对照组loop-写死是行业常态">7.4.3 对照组：loop 写死是行业常态</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#8-四种模式与创造模式为自进化铺设的跑道">8. 四种模式与创造模式：为自进化铺设的跑道</a>
+      <ol>
+        <li><a href="#81-四种运行模式对照">8.1 四种运行模式对照</a>
+          <ol>
+            <li><a href="#811-同一插件集的四种-preset">8.1.1 同一插件集的四种 preset</a></li>
+            <li><a href="#812-ptc-实质一段-ts-程序一次组合多次工具调用">8.1.2 PTC 实质：一段 TS 程序一次组合多次工具调用</a></li>
+          </ol>
+        </li>
+        <li><a href="#82-创造模式机制全解">8.2 创造模式机制全解</a>
+          <ol>
+            <li><a href="#821-自指工具链一次完整的自我扩展循环">8.2.1 自指工具链：一次完整的自我扩展循环</a></li>
+            <li><a href="#822重启即消失是设计选择安全定级--bash-等价信任">8.2.2“重启即消失”是设计选择；安全定级 = bash 等价信任</a></li>
+          </ol>
+        </li>
+        <li><a href="#83-自进化叙事的正反双方">8.3 自进化叙事的正反双方</a>
+          <ol>
+            <li><a href="#831-正方jy-zhang-的六点论述">8.3.1 正方：JY Zhang 的六点论述</a></li>
+            <li><a href="#832-反方宝玉自进化伪命题论">8.3.2 反方：宝玉“自进化伪命题”论</a></li>
+            <li><a href="#833-yageai-论证链整套-cordis-机制皆为自进化的物理插槽">8.3.3 yage.ai 论证链：整套 Cordis 机制皆为自进化的“物理插槽”</a></li>
+          </ol>
+        </li>
+        <li><a href="#84-战略闭环的蛛丝马迹">8.4 战略闭环的蛛丝马迹</a>
+          <ol>
+            <li><a href="#841-崔添翼转发翁荔轨迹基础设施齐备rl-闭环属社区推断">8.4.1 崔添翼转发翁荔；轨迹基础设施齐备；RL 闭环属社区推断</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#9-谱系与横评dsh-在插件架构史与-harness-竞争中的位置">9. 谱系与横评：dsh 在插件架构史与 harness 竞争中的位置</a>
+      <ol>
+        <li><a href="#91-插件架构谱系对照">9.1 插件架构谱系对照</a>
+          <ol>
+            <li><a href="#911-对比表cordis-vs-osgi-vs-vscode-disposable-vs-webpack-vs-微内核-vs-effect-ts卸载语义依赖管理可逆性保证核心可否替换四个维度">9.1.1 对比表：Cordis vs OSGi vs VSCode Disposable vs webpack vs 微内核 vs Effect-TS——卸载语义、依赖管理、可逆性保证、核心可否替换四个维度</a></li>
+            <li><a href="#912-结论cordis-未发明可撤销真正创新是形式化与升格">9.1.2 结论：Cordis 未发明“可撤销”，真正创新是形式化与升格</a></li>
+          </ol>
+        </li>
+        <li><a href="#92-主流-harness-架构横评">9.2 主流 harness 架构横评</a>
+          <ol>
+            <li><a href="#921-对比矩阵dsh-vs-codex-vs-claude-code-vs-opencode-vs-kimi语言核心形态loop-可否替换扩展机制会话持久化开源度">9.2.1 对比矩阵：dsh vs Codex vs Claude Code vs OpenCode vs Kimi——语言/核心形态/loop 可否替换/扩展机制/会话持久化/开源度</a></li>
+            <li><a href="#922-声明式-vs-命令式插件两种世界观的理性分叉">9.2.2 声明式 vs 命令式插件：两种世界观的理性分叉</a></li>
+          </ol>
+        </li>
+        <li><a href="#93-为什么模型厂商必须自研-harness">9.3 为什么模型厂商必须自研 harness</a>
+          <ol>
+            <li><a href="#931-基准分数对-harness-敏感掌握-harness掌握评测话语权与轨迹数据管道">9.3.1 基准分数对 harness 敏感：掌握 harness=掌握评测话语权与轨迹数据管道</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#10-社区生态与风险">10. 社区、生态与风险</a>
+      <ol>
+        <li><a href="#101-赞誉与批评">10.1 赞誉与批评</a>
+          <ol>
+            <li><a href="#1011-赞誉hn-登顶-555-分armin-ronacher-好评乐高自进化讨论热度">10.1.1 赞誉：HN 登顶 555 分、Armin Ronacher 好评、乐高/自进化讨论热度</a></li>
+            <li><a href="#1012-批评nodejs-门槛不知能做什么的学习成本兼容性警告引发观望">10.1.2 批评：Node.js 门槛、“不知能做什么”的学习成本、兼容性警告引发观望</a></li>
+          </ol>
+        </li>
+        <li><a href="#102-安全讨论">10.2 安全讨论</a>
+          <ol>
+            <li><a href="#1021-腾讯新闻刊发安全评审4-个-poc-证实攻击链默认可达官方审批管线存在但未默认接线">10.2.1 腾讯新闻刊发安全评审：4 个 PoC 证实攻击链默认可达；官方审批管线存在但未默认接线</a></li>
+          </ol>
+        </li>
+        <li><a href="#103-早期生态速览">10.3 早期生态速览</a>
+          <ol>
+            <li><a href="#1031-两天-700-插件仓库腾讯-qq-bot-官宣三步接入dsh-deck-桌面端3-款-tuiglm-53-人格插件">10.3.1 两天 700+ 插件仓库、腾讯 QQ Bot 官宣三步接入、DSH-Deck 桌面端、3 款 TUI、GLM-5.3 人格插件</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#11-总结dsh-到底是一个什么样的系统">11. 总结：dsh 到底是一个什么样的系统</a>
+      <ol>
+        <li><a href="#111-五个疑问的逐条清算">11.1 五个疑问的逐条清算</a>
+          <ol>
+            <li><a href="#1111-设计理念一切皆插件--无特权核心--时空可组合性覆盖率100-组件付可逆税才是与旧插件系统的本质差异">11.1.1 设计理念：一切皆插件 + 无特权核心 + 时空可组合性——覆盖率（100% 组件付可逆税）才是与旧插件系统的本质差异</a></li>
+            <li><a href="#1112插件拿走影响全恢复-注册时配对登记逆操作--fiber-总账-lifo-撤销边界是经-ctx-介导的注册外部副作用不在其内">11.1.2“插件拿走影响全恢复”= 注册时配对登记逆操作 + fiber 总账 LIFO 撤销；边界是经 ctx 介导的注册，外部副作用不在其内</a></li>
+            <li><a href="#1113-实现原理三支柱可逆-effect-机制--反应式依赖注入事件--事件溯源会话">11.1.3 实现原理三支柱：可逆 effect 机制 + 反应式依赖注入/事件 + 事件溯源会话</a></li>
+            <li><a href="#1114loop-是插件还是-agent-吗-是agent-身份不变量集合会话日志--接口契约--守卫管线loop-只是可换的控制流策略">11.1.4“loop 是插件还是 agent 吗”= 是。agent 身份=不变量集合（会话日志 + 接口契约 + 守卫管线），loop 只是可换的控制流策略</a></li>
+            <li><a href="#1115-第一性原理总结dsh-把可撤销可重建从开发者纪律升格为运行时结构性保证并以此为-agent-自我修改铺设物理基础">11.1.5 第一性原理总结：dsh 把“可撤销/可重建”从开发者纪律升格为运行时结构性保证，并以此为 agent 自我修改铺设物理基础</a></li>
+          </ol>
+        </li>
+        <li><a href="#112-本质判断与开放问题">11.2 本质判断与开放问题</a>
+          <ol>
+            <li><a href="#1121-本质为模型改写自己的-harness准备的跑道coding-agent-是第一个载荷而非终点媒体定性战略产品成立">11.2.1 本质：为“模型改写自己的 harness”准备的跑道；coding agent 是第一个载荷而非终点；媒体定性“战略&gt;产品”成立</a></li>
+            <li><a href="#1122-开放问题清单无第二个生产级-loop-实现动态插件持久化无路线图rl-闭环无官方承认安全信任模型空缺v4-生产验证尚浅论文未经同行评议">11.2.2 开放问题清单：无第二个生产级 loop 实现、动态插件持久化无路线图、RL 闭环无官方承认、安全信任模型空缺、v4 生产验证尚浅、论文未经同行评议</a></li>
+            <li><a href="#1123-对读者的行动建议现在该怎么看待使用观望-dsh分层成熟度组合机制层4-年陈agent-应用层2-天大">11.2.3 对读者的行动建议：现在该怎么看待/使用/观望 dsh（分层成熟度：组合机制层≈4 年陈，agent 应用层=2 天大）</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/deepseek-harness-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E7%9A%84-agent-%E8%BF%90%E8%A1%8C%E6%97%B6/">DeepSeek Harness 深度解析：“一切皆插件”的 Agent 运行时</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-08-16</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 95 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="1-dsh-到底是什么不是deepseek-版-claude-code">
+    <a href="#1-dsh-%e5%88%b0%e5%ba%95%e6%98%af%e4%bb%80%e4%b9%88%e4%b8%8d%e6%98%afdeepseek-%e7%89%88-claude-code" class="header-anchor">#</a>
+    1. dsh 到底是什么：不是“DeepSeek 版 Claude Code”
+</h2><h3 id="11-发布事实与官方定位">
+    <a href="#11-%e5%8f%91%e5%b8%83%e4%ba%8b%e5%ae%9e%e4%b8%8e%e5%ae%98%e6%96%b9%e5%ae%9a%e4%bd%8d" class="header-anchor">#</a>
+    1.1 发布事实与官方定位
+</h3><h4 id="111-现象级发布一次涨星纪录背后的事实清单">
+    <a href="#111-%e7%8e%b0%e8%b1%a1%e7%ba%a7%e5%8f%91%e5%b8%83%e4%b8%80%e6%ac%a1%e6%b6%a8%e6%98%9f%e7%ba%aa%e5%bd%95%e8%83%8c%e5%90%8e%e7%9a%84%e4%ba%8b%e5%ae%9e%e6%b8%85%e5%8d%95" class="header-anchor">#</a>
+    1.1.1 现象级发布：一次“涨星纪录”背后的事实清单
+</h4><p>2026 年 8 月 13 日，DeepSeek 将 DeepSeek Harness（命令行名为 <code>dsh</code>）以 MIT 协议开源，官方口径为“v0.1 开发者预览版，面向全球 Harness 开发者开放测试”。热度先摆出来：发布后约 1.5 小时 GitHub Star 突破 2.4 万，被快科技称为“GitHub 史上涨星速度最快的项目”；不到 24 小时超过 7 万星；Hacker News 讨论帖以 555 分、241 条评论登顶，团队负责人崔添翼亲自回帖征集反馈。这些星数是第三方 48 小时内的快照，不是官方披露——说明“现象级热度”足够了，当精确统计看就过了。</p>
+<p>这组数据的含义不止于“火”。一个尚未发布正式版、官方明示将有破坏性变更的预览项目，在一天内获得的关注度超过了许多成熟产品数年的积累——社区押注的对象显然不只是一个工具，而是它背后代表的那个新品类。</p>
+<h4 id="112-官方公式agent--model--harness">
+    <a href="#112-%e5%ae%98%e6%96%b9%e5%85%ac%e5%bc%8fagent--model--harness" class="header-anchor">#</a>
+    1.1.2 官方公式：Agent = Model + Harness
+</h4><p>DeepSeek 在官网为 harness 单独开设了产品页，开宗明义写下一个公式：“Agent = Model + Harness”，并给出定义——“模型是智能体的灵魂。Harness 让智能体理解环境、使用工具、在真实场景中持续工作”。这个公式并非发布当天的营销话术，其最早出处是 2026 年 5 月 DeepSeek 的公开招聘启事，其中明确写道“除模型本身以外的所有工作，都属于 Harness 的范畴”。换言之，“Harness”在 DeepSeek 的内部话语里，从立项之初就是与“模型”并列的一级概念，而非某个产品的名字。</p>
+<h4 id="113-发布脉络从更新日志脚注到三连发">
+    <a href="#113-%e5%8f%91%e5%b8%83%e8%84%89%e7%bb%9c%e4%bb%8e%e6%9b%b4%e6%96%b0%e6%97%a5%e5%bf%97%e8%84%9a%e6%b3%a8%e5%88%b0%e4%b8%89%e8%bf%9e%e5%8f%91" class="header-anchor">#</a>
+    1.1.3 发布脉络：从更新日志脚注到“三连发”
+</h4><p>dsh 的首次官方亮相并不在发布会上，而藏在一个脚注里。2026 年 7 月 31 日 V4-Flash 正式版的 API 更新日志中，官方加注：公开基准中的 Code Agent 任务“使用 DeepSeek Harness 极简模式（即将发布）作为测试框架”。到 8 月 13 日，DeepSeek 同日完成三连发：V4-Pro 正式 GA、宣布 API 峰谷定价（8 月 16 日生效，谷时半价）、当晚开源 dsh。VentureBeat 在报道中点破了其中的关键关联：V4-Pro 的 Code Agent 基准同样用 dsh 极简模式测出，这意味着这些分数是“模型 + Harness”的组合成绩，而非裸模型成绩。这是理解 dsh 战略位置的第一块拼图：它先以“官方评测脚手架”的身份存在，然后才以“开源产品”的身份面世。</p>
+<p>下表汇总 dsh 的基本信息，供后续章节引用。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定位</td>
+<td>开源 Agent Harness（智能体运行层），官方公式 Agent = Model + Harness</td>
+</tr>
+<tr>
+<td>开源协议</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td>仓库</td>
+<td>GitHub <code>deepseek-ai/deepseek-harness</code></td>
+</tr>
+<tr>
+<td>包名 / 运行方式</td>
+<td>npm <code>@deepseek-ai/dsh</code>，Node.js 22+，CLI / Web UI / headless / Python SDK</td>
+</tr>
+<tr>
+<td>版本状态</td>
+<td>宣传 v0.1 开发者预览；实际包版本 0.1.0-rc.5/rc.6，无 GitHub release/tag</td>
+</tr>
+<tr>
+<td>架构基底</td>
+<td>Cordis 元框架驱动，“一切皆插件”，无特权核心</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>解读</strong>：这张表里最容易被忽略的是最后一行与倒数第二行的张力：一个连正式 tag 都没有的 rc 版本，却背着一套完整的元框架架构。这说明 DeepSeek 发布的是“地基”而非“成品”——协议（MIT）与仓库结构服务于生态共建，版本状态则诚实地标明了它离生产可用还有多远。读者在后续章节看到任何精巧设计时，都应同时记住这两行。</p>
+<h3 id="12-harness-这个品类的本质">
+    <a href="#12-harness-%e8%bf%99%e4%b8%aa%e5%93%81%e7%b1%bb%e7%9a%84%e6%9c%ac%e8%b4%a8" class="header-anchor">#</a>
+    1.2 Harness 这个品类的本质
+</h3><h4 id="121-harness--包裹模型的运行时层">
+    <a href="#121-harness--%e5%8c%85%e8%a3%b9%e6%a8%a1%e5%9e%8b%e7%9a%84%e8%bf%90%e8%a1%8c%e6%97%b6%e5%b1%82" class="header-anchor">#</a>
+    1.2.1 Harness = 包裹模型的运行时层
+</h4><p>“Harness”原义是马具——套在马身上、把马的力量传导到车轮上的那套挽具。这个隐喻精确得近乎苛刻：马提供力量，但方向、刹车、载荷分配全部由挽具决定。套用到 AI 上，Harness 是包裹模型的运行时层：它调度上下文（决定模型每一轮“看见”什么）、管理工具（决定模型能“碰”什么）、维护任务状态（决定多轮之间什么被记住）、收集反馈并划定边界（权限、沙箱、审批），最终完成从理解需求到交付结果的闭环。</p>
+<p>由此可以划清它与两个邻近概念的界限：framework（框架）是给开发者写代码用的抽象，而 harness 是模型“住在里面”的运行环境；CLI 只是 harness 可能长出来的一种交互界面，正如 dsh 同时提供 CLI、Web UI 与 SDK。多数社区文章说不清这个区别，是因为此前这个品类没有独立名字——它一直寄生在“coding agent 产品”的外壳里被一并售卖。</p>
+<h4 id="122-对标-claude-code-是表象定义品类才是实质">
+    <a href="#122-%e5%af%b9%e6%a0%87-claude-code-%e6%98%af%e8%a1%a8%e8%b1%a1%e5%ae%9a%e4%b9%89%e5%93%81%e7%b1%bb%e6%89%8d%e6%98%af%e5%ae%9e%e8%b4%a8" class="header-anchor">#</a>
+    1.2.2 对标 Claude Code 是表象，定义品类才是实质
+</h4><p>“DeepSeek 版 Claude Code”是流传最广、也最表层的误读。这个类比只对了一句话：两者都是终端里可用的 coding agent。但架构哲学完全不同——Claude Code 与 Codex 的 agent loop（模型与工具之间“思考 - 行动 - 观察”的循环）都写死在各自核心中、不可替换；而 dsh 连 loop 本身都是一个可替换的普通插件。这一差异的机制细节留给第 2 章与第 7 章展开，此处只需记住：对标的是产品形态，分叉的是架构哲学。</p>
+<p>更深一层的定位来自官方与媒体的双向印证。官方公告只字未提任何对标对象，而是强调“没有特权核心”、邀请全球开发者“共建 DSH 插件生态”；36 氪的解读则直言其打法是“不跟你比谁的缰绳编得好，直接宣布缰绳这个东西不该收钱”——如同 R1 对准闭源模型溢价，dsh 对准的是闭源 harness 外壳的溢价。这正对应官方公式中被忽略的后半句逻辑：模型决定 AI 能做什么，Harness 决定 AI 如何把事情做完。DeepSeek 开源的不是又一个产品，而是把这个品类本身变成了公共基础设施。</p>
+<h3 id="13-预览版成色与官方警告">
+    <a href="#13-%e9%a2%84%e8%a7%88%e7%89%88%e6%88%90%e8%89%b2%e4%b8%8e%e5%ae%98%e6%96%b9%e8%ad%a6%e5%91%8a" class="header-anchor">#</a>
+    1.3 预览版成色与官方警告
+</h3><h4 id="131-全大写警告与地基优先立场该怎么看待-v01">
+    <a href="#131-%e5%85%a8%e5%a4%a7%e5%86%99%e8%ad%a6%e5%91%8a%e4%b8%8e%e5%9c%b0%e5%9f%ba%e4%bc%98%e5%85%88%e7%ab%8b%e5%9c%ba%e8%af%a5%e6%80%8e%e4%b9%88%e7%9c%8b%e5%be%85-v01" class="header-anchor">#</a>
+    1.3.1 全大写警告与“地基优先”立场：该怎么看待 v0.1
+</h4><p>判断 dsh 价值的前提，是先看清它此刻的成色。README 以全大写明示：“THERE WILL BE COMPATIBILITY-BREAKING CHANGES”（将出现破坏兼容性的变更）；宣传的“v0.1”实际对应 npm 上的 0.1.0-rc.5/rc.6，仓库没有任何 release 或 git tag 钉住版本。更直白的是 AGENTS.md 中一段标注“在首个带 tag 的正式版前删除本节”的预发布立场：在没有外部消费者时，“优先正确的地基而非兼容垫片”，可自由重命名、重新打包，会话格式版本保持为 0 且不作任何兼容承诺。</p>
+<p>把这三条证据放在一起，官方态度可以概括为一种罕见的坦率：它主动拆掉了“拿来即用”的预期，把“不确定性”写在了门口。对读者来说，这意味着——当前版本适合用来学习架构、试水插件、参与生态共建，而不适合锁定进生产系统；社区的兼容性追踪实测（运行级实测 5 个插件、0 个可用）也从侧面印证了这一判断。但反过来，“地基优先”恰恰意味着此刻读到的架构决策（一切皆插件、append-only 会话日志、可逆副作用）最可能原样进入正式版——现在正是深入理解它的最好时机，后面十章也从这里出发。</p>
+<p>这十章的行进逻辑，是专为“读了很多分析仍然迷路”的读者设计的：先解决“它为什么被设计成这样”——第 2 章讲“一切皆插件、无特权核心”的设计理念，第 3 章引入论文给出的理论框架“时空可组合性”；再拆开机器看内部——第 4 至 6 章依次讲透三根机制支柱：可逆插件机制（注册即记账、卸载即回滚）、协作机制（反应式依赖注入与类型化事件）、事件溯源会话（append-only 日志是唯一真相源）；随后正面迎战那个最硌人的哲学追问——第 7 章回答“loop 可换，这还是不是 agent”；接着把镜头拉远——第 8 章讲运行模式与自进化能力，第 9 章在架构谱系中横评 dsh 与 Claude Code、Codex 等的位置，第 10 章盘点社区反响、争议与风险；最后第 11 章回到起点，把萦绕在每位读者心头的五个疑问逐条清算，给出本质判断。迷路往往不是因为缺少信息，而是因为信息没有顺序——这条路线就是顺序。</p>
+<h2 id="2-设计理念一切皆插件并且没有特权核心">
+    <a href="#2-%e8%ae%be%e8%ae%a1%e7%90%86%e5%bf%b5%e4%b8%80%e5%88%87%e7%9a%86%e6%8f%92%e4%bb%b6%e5%b9%b6%e4%b8%94%e6%b2%a1%e6%9c%89%e7%89%b9%e6%9d%83%e6%a0%b8%e5%bf%83" class="header-anchor">#</a>
+    2. 设计理念：一切皆插件，并且没有特权核心
+</h2><p>很多读者读完 dsh 的介绍文章后留下的印象是“又一个插件系统”。这个印象只对了一半。插件系统不新鲜——VSCode、webpack、Eclipse、Obsidian 都有；dsh 真正独特的地方不是“有插件”，而是<strong>插件化覆盖率达到了 100%，连系统主干本身也是插件</strong>。本章先把官方“一切皆插件”（everything is a plugin）的完整含义讲清楚，再解释为什么“没有特权核心”（no privileged core）才是它与传统架构的根本分野，最后引出支撑这一切的 Cordis 元框架。</p>
+<h3 id="21everything-is-a-plugin的完整含义">
+    <a href="#21everything-is-a-plugin%e7%9a%84%e5%ae%8c%e6%95%b4%e5%90%ab%e4%b9%89" class="header-anchor">#</a>
+    2.1“Everything is a plugin”的完整含义
+</h3><h4 id="211-官方列举">
+    <a href="#211-%e5%ae%98%e6%96%b9%e5%88%97%e4%b8%be" class="header-anchor">#</a>
+    2.1.1 官方列举
+</h4><p>dsh 的 README 只用一句话描述自己的架构：“It uses an architecture where <strong>everything is a plugin</strong>”。这句话的字面含义在官网的产品页被展开成一份清单：模型（models）、工具（tools）、技能（skills）、会话（sessions）、沙箱（sandboxes）、存储（storage）、循环（loops）、调度（scheduling）以及 UI——“Plugins provide every agent capability”，即 Agent 的每一项能力都由插件提供，而不是由某个内置核心提供。</p>
+<p>官方公众号的发布公告进一步说清了“由插件提供”在工程上意味着什么：Cordis 元框架只负责插件的加载、卸载与依赖关系，Agent Harness 的所有具体组件都是不同的 Cordis 插件，插件之间通过 Cordis 的服务与事件协作，可以在配置层自由组合；“开发者无需改动 DeepSeek Harness 的源码本身，就能以插件的方式独立选择、替换或扩展其中的任一能力”。这里有一个容易被读漏的限定：替换的方式是<strong>在配置层换一行挂载记录</strong>，而不是 fork 仓库改源码。这个限定是理解后文“无特权核心”的关键。</p>
+<h4 id="212-核心包解剖">
+    <a href="#212-%e6%a0%b8%e5%bf%83%e5%8c%85%e8%a7%a3%e5%89%96" class="header-anchor">#</a>
+    2.1.2 核心包解剖
+</h4><p>“一切皆插件”不是口号，它在仓库里体现为：那些在任何其他 Agent 框架里会被写进“内核”的东西，在 dsh 里都被做成了独立包，各自是一个 Cordis 插件。官方架构文档给出的核心包清单如下：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>核心包</th>
+<th>职责</th>
+<th>一句话解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/session</code></td>
+<td>append-only 会话事件日志，持久化的唯一真相源</td>
+<td>模型看到的每一条信息都先记账，会话的恢复、分叉、回放都从这本账重建</td>
+</tr>
+<tr>
+<td><code>core/system-prompt</code></td>
+<td>系统提示词组装服务</td>
+<td>模型每轮看到的“出厂说明”是动态拼装出来的，拼法本身可替换</td>
+</tr>
+<tr>
+<td><code>core/tools</code></td>
+<td>工具注册表与守卫管线（pre-execute → execute → post-execute → result）</td>
+<td>工具执行的“海关”：权限、沙箱、审批都在这里把关，与具体 loop 无关</td>
+</tr>
+<tr>
+<td><code>core/agent</code></td>
+<td>Agent 接口契约、运行中注册表与 <code>agent/*</code> 事件词汇</td>
+<td>只定义“agent 长什么样”，不定义“agent 怎么跑”</td>
+</tr>
+<tr>
+<td><code>core/agent-loop</code></td>
+<td>上述接口的默认驱动实现（ReactLoopAgent）</td>
+<td>真正“调模型、跑工具、重复”的循环——但它也只是契约的一个默认实现</td>
+</tr>
+<tr>
+<td><code>llm/llm</code></td>
+<td>模型适配层（<code>ctx.llm</code> 服务 seam）</td>
+<td>把不同模型供应商统一成一个可替换接口，换模型 = 换适配器插件</td>
+</tr>
+<tr>
+<td><code>core/scope</code></td>
+<td>按 agent 划分作用域的注册原语（零依赖库，无 <code>ctx</code> 键）</td>
+<td>同进程多 agent 的注册路由原语（非沙箱）</td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表里最值得停下来看的是中间两行的分工。<code>core/agent</code> 的 README 开宗明义：所有插件（UI、hooks、编排器）都面向这里定义的 <code>Agent</code> 句柄编程，“it has zero loop dependency, so the loop is swappable”——契约与循环零依赖，所以循环可换。而 <code>core/agent-loop</code> 作为默认实现，在源码里就是一个普通的服务插件：<code>export class AgentLoop extends Service implements AgentFactory</code>，通过 <code>static inject = ['agents', 'sessions', 'llm', 'tools', 'systemPrompt']</code> 声明五个依赖，再把自己注册为 agent 工厂。也就是说，“主干”与“枝叶”之间没有架构地位之差，只有“谁先被挂上树”的先后之差。注意一个反直觉点：这张表里没有一行是“不可替换的内核”——<code>core/*</code> 的命名暗示“核心”，但它们在 Cordis 眼里的身份与你写的第三方插件完全相同，区别仅是官方发行版默认挂载了它们。</p>
+<h3 id="22-与传统核心--挂件架构的根本分野">
+    <a href="#22-%e4%b8%8e%e4%bc%a0%e7%bb%9f%e6%a0%b8%e5%bf%83--%e6%8c%82%e4%bb%b6%e6%9e%b6%e6%9e%84%e7%9a%84%e6%a0%b9%e6%9c%ac%e5%88%86%e9%87%8e" class="header-anchor">#</a>
+    2.2 与传统“核心 + 挂件”架构的根本分野
+</h3><h4 id="221-对比-codex-阵营">
+    <a href="#221-%e5%af%b9%e6%af%94-codex-%e9%98%b5%e8%90%a5" class="header-anchor">#</a>
+    2.2.1 对比 Codex 阵营
+</h4><p>要理解 dsh 的分野，先看行业常态。以 OpenAI Codex 为代表的一派选择了编译期确定的单体核心：Codex CLI 从 TypeScript 重写为 Rust，官方给出的理由是零依赖安装、原生沙箱绑定（Seatbelt/Landlock）、无 GC 的低内存占用与基于 wire protocol 的扩展。在这条路线里，agent loop 是编译进二进制的一段裸循环——源码级证据是 <code>codex-rs/core/src/tasks/regular.rs</code> 里的 <code>loop { run_turn(...) }</code>，外部世界只能通过 MCP、hooks、skills 这类声明式“挂件”与之交互，主干不可触碰。社区对此有一句传神的总结：Codex 交付的是“成品家具”，loop 焊死在椅子里；想换 harness 的行为只能 fork。</p>
+<p>VSCode 是这个模式的教科书先例：扩展可以注册命令、监听、状态栏，且 <code>ExtensionContext.subscriptions</code> 里的 Disposable 会在扩展停用时统一回收，但编辑器内核本身不可替换——离开所有插件，它依然是一个功能完整的编辑器。这类架构的共同结构是“特权核心 + 边缘挂件”：核心享有不可替换的特权，插件只能在核心划好的边界内活动。dsh 把这个结构倒转了过来：Cordis 是一等公民，主干本身也是插件。官方 coding agent 发行版与社区魔改版在架构地位上<strong>完全平等</strong>——两者都只是“一组被挂载的插件”，没有任何一行代码位于插件够不到的地方。</p>
+<h4 id="222没有需要打补丁的特权核心">
+    <a href="#222%e6%b2%a1%e6%9c%89%e9%9c%80%e8%a6%81%e6%89%93%e8%a1%a5%e4%b8%81%e7%9a%84%e7%89%b9%e6%9d%83%e6%a0%b8%e5%bf%83" class="header-anchor">#</a>
+    2.2.2“没有需要打补丁的特权核心”
+</h4><p>dsh 官方架构文档对这个分野的表述极其直白：“There is <strong>no privileged core</strong> to patch: you extend dsh by mounting a plugin beside the others, and registrations are effects that unwind when their plugin unloads”——不存在需要打补丁的特权核心，扩展 dsh 的方式是把插件挂载到其他插件旁边，而一切注册都是随插件卸载自动撤销的副作用。</p>
+<p>这里需要做一个精确的概念切割：很多人第一反应是“这不就是微内核（microkernel）吗”。像，但不是。以微内核架构的工业标杆 OSGi 为例，其规范明确强制 system bundle <strong>不可卸载</strong>——对框架本体调用 <code>uninstall()</code> 必须抛出 <code>BundleException</code>；即便普通 bundle，停止后其导出的 package 代码仍留在 JVM 中可被其他 bundle 执行，线程与连接等资源也要开发者在 <code>stop()</code> 里手动释放。也就是说，OSGi 的微内核仍然保留着一个享有特权、不可触碰的中心。dsh 把这个中心也削掉了：连 agent loop 都可以替换，拆光所有插件之后什么都不剩。更准确地说，dsh 不是“又一个微内核”，而是把微内核思想推到极限后的形态——中心不再是一个“较小的内核”，而是一个<strong>不提供任何能力、只提供组合规则的元框架</strong>。完整的插件架构谱系对比留待第 9 章，这里只需记住一句话：传统架构的插件覆盖率是“边缘 100%、中心 0%”，dsh 是全局 100%。</p>
+<h3 id="23-cordis-元框架只提供组合不提供能力">
+    <a href="#23-cordis-%e5%85%83%e6%a1%86%e6%9e%b6%e5%8f%aa%e6%8f%90%e4%be%9b%e7%bb%84%e5%90%88%e4%b8%8d%e6%8f%90%e4%be%9b%e8%83%bd%e5%8a%9b" class="header-anchor">#</a>
+    2.3 Cordis 元框架：只提供组合，不提供能力
+</h3><h4 id="231-论文5-原话">
+    <a href="#231-%e8%ae%ba%e6%96%875-%e5%8e%9f%e8%af%9d" class="header-anchor">#</a>
+    2.3.1 论文§5 原话
+</h4><p>削掉特权核心之后，剩下的那个“东西”是什么？答案是 Cordis，而且它的自我定义收得非常紧。论文《A Programming Paradigm for Spatiotemporal Composability》§5 开头原话：“Cordis is a meta-framework of spatiotemporal composability: unlike application frameworks that target a specific domain (e.g., web routing, ORM, UI rendering), it prescribes no concrete scenario; <strong>its sole responsibility is to supply universal dynamic composition semantics</strong>”——它唯一的职责是提供通用的动态组合语义。</p>
+<p>这句话的分量需要用排除法来读：Cordis 自身不含任何 agent 能力、不含 web 能力、不含聊天能力，它甚至不规定“插件应该长什么样”之外的一切。模型适配、工具管线、会话日志这些“Agent 之所以是 Agent”的东西，全部以插件形式由上层提供。那么“动态组合语义”具体保证什么？通俗地说只有两条：插件做的每件事都能被完整撤销（插件能真正拔掉），插件之间的依赖由运行时自动接线（依赖齐了才激活、提供者要走消费者先退）。这两条语义有严格的理论定义与形式化定理支撑，这是下一章的主题，此处先不展开。</p>
+<h4 id="232-乐高类比">
+    <a href="#232-%e4%b9%90%e9%ab%98%e7%b1%bb%e6%af%94" class="header-anchor">#</a>
+    2.3.2 乐高类比
+</h4><p>理解 Cordis 与 dsh 的关系，最省力的画面是乐高。Cordis 是那块凸点底板：它不提供任何车或房子的形状，只提供凸点——也就是“积木如何咬合、如何拆下”的组合规则。dsh 的核心包（<code>core/session</code>、<code>core/agent-loop</code> 等）是官方生产的积木件，而你从社区安装的插件与它们是同一种积木，咬在同一块底板上。官方发行的 Coding Agent，则是官方自己拼好的一辆“预置汽车”。</p>
+<p>这个类比不是本文的发明，而是社区一手观察者的原话。Multica CEO Jiayuan Zhang（提前一个月进入仓库的内测者）在发布当天的 X 原帖中写道：官方 Coding Agent 只是官方拼出的预置方案，“你完全可以把里面的零件换成自己喜欢的：换引擎、换轮胎、换挡风玻璃……甚至最后拼出来的东西，也不一定还是一辆汽车”。这句话的后半句值得划重点：换零件的终点可以不是“改装车”，而是完全不同的东西——因为底板不关心你拼的是什么。元框架与框架的区别就在这里：框架给你一个领域的半成品，元框架只给你组合的物理定律。也意味着评估 dsh 的正确姿势不是“这辆预置汽车好不好开”，而是“这块底板的咬合规则是否可靠”——前者是插件集的产品问题，后者才是 dsh 真正押注的架构命题。这套咬合规则为什么值得信任、它的数学保证强到哪里、边界又在哪里，是第 3 章要回答的问题。</p>
+<h2 id="3-理论根基cordis-论文与时空可组合性">
+    <a href="#3-%e7%90%86%e8%ae%ba%e6%a0%b9%e5%9f%bacordis-%e8%ae%ba%e6%96%87%e4%b8%8e%e6%97%b6%e7%a9%ba%e5%8f%af%e7%bb%84%e5%90%88%e6%80%a7" class="header-anchor">#</a>
+    3. 理论根基：Cordis 论文与“时空可组合性”
+</h2><p>dsh 官方 README 把自己的架构思想明确指向两件东西：一个名为 Cordis 的框架，和一篇描述其设计的论文《A Programming Paradigm for Spatiotemporal Composability》。第 2 章讲了“一切皆插件、无特权核心”的工程形态，本章回答它背后的理论问题：这套插件系统凭什么敢承诺“任何组件都能在运行时装上、换掉、拔掉”？先把答案压缩成一句话——<strong>空间可组合性 = 插件之间自动接线；时间可组合性 = 插件能真正拔掉</strong>。全章其余内容都是对这两句话的展开与证明。</p>
+<h3 id="31-论文概况与作者谱系">
+    <a href="#31-%e8%ae%ba%e6%96%87%e6%a6%82%e5%86%b5%e4%b8%8e%e4%bd%9c%e8%80%85%e8%b0%b1%e7%b3%bb" class="header-anchor">#</a>
+    3.1 论文概况与作者谱系
+</h3><h4 id="311-论文与作者">
+    <a href="#311-%e8%ae%ba%e6%96%87%e4%b8%8e%e4%bd%9c%e8%80%85" class="header-anchor">#</a>
+    3.1.1 论文与作者
+</h4><p>《A Programming Paradigm for Spatiotemporal Composability》是一篇 88 页的 preprint，以 GitHub 仓库 cordiverse/paper 的 <code>paper.pdf</code> 形式发布，标注“Draft of August 13, 2026”，未检索到 arXiv 或会议版本。仓库 README 自述“preprint under active revision, the content may change substantially”，也就是说它尚未经过同行评审，本章引用的形式化结论目前只有论文自己的证明作背书。作者三人：一作 Yifan Shi（北京大学 + DeepSeek-AI 双署名，GitHub 账号 Shigma，公司字段为 @deepseek-ai）；二作 Wei Zhang（张伟，北京大学计算机学院软件研究所副教授，程序设计语言方向）；三作 Tianyi Cui（崔添翼，DeepSeek Harness 团队负责人，曾在 Jane Street 工作九年，同时是 <code>@deepseek-ai/cordis</code> 的 npm maintainer）。</p>
+<h4 id="312-cordis-溯源从聊天机器人到-deepseek">
+    <a href="#312-cordis-%e6%ba%af%e6%ba%90%e4%bb%8e%e8%81%8a%e5%a4%a9%e6%9c%ba%e5%99%a8%e4%ba%ba%e5%88%b0-deepseek" class="header-anchor">#</a>
+    3.1.2 Cordis 溯源：从聊天机器人到 DeepSeek
+</h4><p>Cordis 不是为 dsh 从零发明的。其 LICENSE 起始行为“Copyright (c) 2021-present Shigma”，npm 包 <code>cordis</code> 创建于 2022-04-21，此后约四年一直作为 Koishi 聊天机器人框架的底层插件运行时；按论文口径，Koishi 生态在 Cordis v3 上积累了 4000+ 社区插件。这里先纠正一个流传甚广的说法：部分社区文章称仓库位于“koishijs/cordis”，但 npm 历史版本的 repository 字段从未指向 koishijs——真实迁移路径是 <strong>shigma/cordis（个人仓库）→ cordiverse/cordis（组织仓库）</strong>，koishijs/cordis 目前 404。思想的直接前身是 Shigma 2023 年为 Koishi 官方文档撰写的《可逆的插件系统》，其中已出现“副作用纯化→变换幺半群→effect 同态→restore”的完整雏形，可视作论文 §3.1 的草稿。</p>
+<p>2026 年 8 月，DeepSeek 将 cordis v4（上游 4.0.0-rc.7，commit <code>56b3d4f</code>）以<strong>源码 vendor</strong> 方式收进 dsh monorepo，整体 rescope 为 <code>@deepseek-ai/cordis</code>——作者字段仍是 Shigma，并附带 18 项记录在案的本地修改，其中包括 fiber 生命周期的三处重入处置缺口修复；vendor 理由的官方原话是让 harness“fully owns its framework layer (auditable, patchable, pinned)”。这段谱系的意味在于：dsh 的地基不是真空里的“球形鸡”，而是一个在真实插件生态里被反复捶打四年的机制，连人带码进入 DeepSeek。但也要加一个限定——论文脚注明确说明 Koishi 生产环境跑的是 v3，论文与 dsh 用的是重构过效应/余效应语义与 Loader 的 v4，“核心组合模型两版共享”，但 v4 的新实现本身的生产验证尚浅。</p>
+<h3 id="32-空间可组合性插件之间自动接线">
+    <a href="#32-%e7%a9%ba%e9%97%b4%e5%8f%af%e7%bb%84%e5%90%88%e6%80%a7%e6%8f%92%e4%bb%b6%e4%b9%8b%e9%97%b4%e8%87%aa%e5%8a%a8%e6%8e%a5%e7%ba%bf" class="header-anchor">#</a>
+    3.2 空间可组合性：插件之间自动接线
+</h3><h4 id="321-定义与机制">
+    <a href="#321-%e5%ae%9a%e4%b9%89%e4%b8%8e%e6%9c%ba%e5%88%b6" class="header-anchor">#</a>
+    3.2.1 定义与机制
+</h4><p>论文 §1.1 的定义是：空间可组合性即“the ability to declare and reactively manage inter-component dependencies”——组件只需<strong>声明</strong>依赖（“我需要 sessions 服务”），由运行时负责发现、解析并<strong>反应式</strong>地管理：依赖出现即激活、消失即停用、被替换即平滑重启，组件自己不写任何检测逻辑。用电器打比方：电器只声明“我要 220V 插座”，插上即通电、断电即停机、换发电机时平滑切换——电器内部没有一行“轮询电网状态”的代码。其代数基础是论文的 reactive coeffects（反应式余效应）：由于一切上下文变更都流经统一的效应原语，每次变化都能按各组件的依赖声明被分类为 activating / deactivating / neutral，从而驱动生命周期——反应性不是事件总线上的补丁，而是从“变更必经同一通道”这一结构性事实中免费得到的。</p>
+<h3 id="33-时间可组合性插件能真正拔掉">
+    <a href="#33-%e6%97%b6%e9%97%b4%e5%8f%af%e7%bb%84%e5%90%88%e6%80%a7%e6%8f%92%e4%bb%b6%e8%83%bd%e7%9c%9f%e6%ad%a3%e6%8b%94%e6%8e%89" class="header-anchor">#</a>
+    3.3 时间可组合性：插件能真正拔掉
+</h3><h4 id="331-定义与纠偏">
+    <a href="#331-%e5%ae%9a%e4%b9%89%e4%b8%8e%e7%ba%a0%e5%81%8f" class="header-anchor">#</a>
+    3.3.1 定义与纠偏
+</h4><p>论文 §1.1 的定义是：时间可组合性即“the ability to completely revert a component&rsquo;s side effects upon removal”——组件被移除时，它对共享环境造成的一切修改（资源分配、事件注册、状态变更）能被<strong>完全且安全地撤销</strong>，系统回到“仿佛它从未来过”的状态，且不用重启进程。这里得先纠个偏：社区部分通俗解读把“时间可组合性”说成“会话事件流可回放”，这与论文原义不符。论文的时间维度是<strong>运行时层面插件副作用的可撤销性</strong>；会话事件溯源（append-only 日志 + 重放投射）是 dsh 在应用层搭建的另一根支柱，两者互补但不应混为一谈。</p>
+<h4 id="332-为什么传统插件做不到">
+    <a href="#332-%e4%b8%ba%e4%bb%80%e4%b9%88%e4%bc%a0%e7%bb%9f%e6%8f%92%e4%bb%b6%e5%81%9a%e4%b8%8d%e5%88%b0" class="header-anchor">#</a>
+    3.3.2 为什么传统插件做不到
+</h4><p>论文 §1.2.1 以 VSCode 为靶子给出实证（数据取自 2026-06-09 的 Marketplace）：按安装量排序的 Top 100 扩展中，<strong>87 个</strong>含可执行代码，卸载必须重启整个扩展宿主；<code>deactivate</code> 钩子只在进程终止时被调用，且把“回收”与“注册”分离在两处代码里，违反 locality of concern（关注点就近原则）；Top 100 中仅 <strong>7 个</strong>声明了非内置的 <code>extensionDependencies</code>；跨扩展交互的 <code>exports</code> 返回值是无类型的 <code>any</code>。这组数字说明的是同一件事：主流插件系统把“撤销”当作开发者的事后义务而非运行机制——注册一行、清理另写一行，漏写就是泄漏；依赖靠文档约定而非运行时管理，卸载只能靠重启进程这把“大锤”。Cordis 的对策正是把逆操作与操作写在同一处（<code>ctx.effect</code> 的回调就地返回 disposer），让组合自动派生撤销。</p>
+<h3 id="34-范畴论符号的大白话翻译">
+    <a href="#34-%e8%8c%83%e7%95%b4%e8%ae%ba%e7%ac%a6%e5%8f%b7%e7%9a%84%e5%a4%a7%e7%99%bd%e8%af%9d%e7%bf%bb%e8%af%91" class="header-anchor">#</a>
+    3.4 范畴论符号的大白话翻译
+</h3><p>论文 §3 的符号劝退了不少读者，但它们其实是一套<strong>记账规则</strong>。下面逐条翻译。</p>
+<h4 id="341-γ--环境状态--撤销账本">
+    <a href="#341-%ce%b3--%e7%8e%af%e5%a2%83%e7%8a%b6%e6%80%81--%e6%92%a4%e9%94%80%e8%b4%a6%e6%9c%ac" class="header-anchor">#</a>
+    3.4.1 ∂Γ = 环境状态 + 撤销账本
+</h4><p>论文定义 2 给出 <code>∂Γ ≔ Γ × (Γ → Γ)</code>：在环境状态 Γ 旁边挂一本“撤销账本”——每做一个操作 $f$，同时在账本里登记它的逆操作 $g$，系统状态因此是“（当前状态，恢复累积器 φ）”的二元组。类比会计里的复式记账：每记一笔支出，同时记一笔对应的冲销凭证。账本不是附加文档，而是状态的<strong>组成部分</strong>——这是后面一切保证的地基。</p>
+<h4 id="342-twisted-composition-与-track-同态">
+    <a href="#342-twisted-composition-%e4%b8%8e-track-%e5%90%8c%e6%80%81" class="header-anchor">#</a>
+    3.4.2 twisted composition 与 track 同态
+</h4><p>组合两笔账时，论文定义 1 给出 twisted composition：</p>
+<p>$$(f_1, g_1) \circ (f_2, g_2) = (f_1 \circ f_2,\ g_2 \circ g_1)$$</p>
+<p>正向操作按正序执行，逆操作按<strong>相反顺序</strong>累积——后进先出（LIFO），像一叠盘子：正着摞上去，倒着取下来。定理 5 证明 <code>track</code> 是 monoid homomorphism（幺半群同态），翻译成大白话：<strong>账本记账的方式与操作组合的方式严格一致</strong>——先组合操作再查账，和边做边记账，结果相同。由此定理 16 保证按 LIFO 顺序撤销无需任何额外假设即可精确恢复；换言之，“完整恢复”是<strong>结构性保证</strong>，不依赖开发者自觉写 cleanup。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">flowchart LR
+</span></span><span class="line"><span class="cl">    subgraph 正向执行[&#34;正向执行（正序）&#34;]
+</span></span><span class="line"><span class="cl">        A[&#34;操作 f₁&#34;] --&gt; B[&#34;操作 f₂&#34;] --&gt; C[&#34;操作 f₃&#34;]
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">    subgraph 撤销[&#34;撤销（LIFO 逆序）&#34;]
+</span></span><span class="line"><span class="cl">        F[&#34;g₃ 先撤&#34;] --&gt; E[&#34;再撤 g₂&#34;] --&gt; D[&#34;最后撤 g₁&#34;]
+</span></span><span class="line"><span class="cl">    end
+</span></span><span class="line"><span class="cl">    正向执行 -.-&gt;|&#34;每步登记逆操作&#34;| 撤销
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="343-观测等价恢复到什么程度算恢复">
+    <a href="#343-%e8%a7%82%e6%b5%8b%e7%ad%89%e4%bb%b7%e6%81%a2%e5%a4%8d%e5%88%b0%e4%bb%80%e4%b9%88%e7%a8%8b%e5%ba%a6%e7%ae%97%e6%81%a2%e5%a4%8d" class="header-anchor">#</a>
+    3.4.3 观测等价：恢复到什么程度算恢复
+</h4><p>物理状态不可能真正复原——malloc/free 之后堆布局已经改变，生成的名字不会复用。论文 §3.3.2 的答案是观测等价 $\simeq$：恢复的判定标准是<strong>任何观察者通过合法操作都分不出差别</strong>，而不要求内存逐字节复原。这类似忒修斯之船：船板全换过一遍不要紧，只要它对外的行为与原来那艘不可区分，就“是”原来那艘。这个定义把“恢复”从不可能完成的物理任务，变成可证明的行为学命题。</p>
+<h4 id="344-四大元定理通俗版">
+    <a href="#344-%e5%9b%9b%e5%a4%a7%e5%85%83%e5%ae%9a%e7%90%86%e9%80%9a%e4%bf%97%e7%89%88" class="header-anchor">#</a>
+    3.4.4 四大元定理通俗版
+</h4><p>论文 §4.4 把单组件的可撤销性推广到整个系统，得到四条元定理：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>元定理</th>
+<th>形式化含义</th>
+<th>大白话</th>
+<th>工程意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>恢复精确性（Th.61/62）</td>
+<td>交错执行下，fiber 的累积器只撤销自己的贡献；离去 fiber 对状态的贡献为零</td>
+<td>退房只退自己的押金，不动别人的</td>
+<td>插件可以放心热拔，卸载不伤及无辜组件</td>
+</tr>
+<tr>
+<td>顺序性（Th.63）</td>
+<td>消费者激活必在 provider 之后；provider 的撤回等所有消费者 teardown 完成才生效（<code>relied</code> guard）</td>
+<td>启动时先供电再开机；停机时先关机再断电</td>
+<td>依赖方拆解时把连接归还给提供方，此刻提供方的连接池仍然可用</td>
+</tr>
+<tr>
+<td>进展性（Th.66）</td>
+<td>依赖图无环且迭代有限，则系统必然到达 quiescent（稳定态），guard 必释放</td>
+<td>只要依赖不成环，就不会死锁</td>
+<td>循环依赖可从声明静态预测，加载期直接报错</td>
+</tr>
+<tr>
+<td>汇合性（Th.73）</td>
+<td>同一编排动作序列的任何交错执行，最终状态与“按最终配置静态装配”一致（精确到重命名与 ≃）</td>
+<td>无论中间怎么增删，终态殊途同归</td>
+<td>可以把动态系统当静态系统来推理</td>
+</tr>
+</tbody>
+</table></div>
+<p>四条定理有清晰分工：前两条管“单个组件的来去”（不害人、不乱序），后两条管“全系统的行为”（不卡死、可归约）。其中<strong>汇合性是工程杠杆最大的一条</strong>——论文称它是“把 Cordis 应用当静态装配系统推理的许可证”，dsh 的 HMR 与配置增量协调的正确性正是逐条背靠这组定理。但请记住这些保证的前提：论文 §5.1.1 明示，逆操作是否真的能撤销其效应，是<strong>组件作者的义务</strong>，运行时不做语义验证——Cordis 提供的是“不漏调、不乱序、级联有序”的结构性保障，不是魔法。</p>
+<p>至此，理论层面承诺了什么已经清楚：空间维度给“自动接线”，时间维度给“可逆撤销”，四条元定理把两者从单组件扩到全系统。承诺如何在社区拆解出的约 2000 行 TypeScript 里兑现——disposer 如何入栈、Fiber 状态机如何驱动、<code>relied</code> guard 落在哪一行——是第 4 章的源码之旅。</p>
+<h2 id="4-实现原理-i可逆插件拔掉一个插件影响如何全部恢复">
+    <a href="#4-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86-i%e5%8f%af%e9%80%86%e6%8f%92%e4%bb%b6%e6%8b%94%e6%8e%89%e4%b8%80%e4%b8%aa%e6%8f%92%e4%bb%b6%e5%bd%b1%e5%93%8d%e5%a6%82%e4%bd%95%e5%85%a8%e9%83%a8%e6%81%a2%e5%a4%8d" class="header-anchor">#</a>
+    4. 实现原理 I：可逆插件——拔掉一个插件，影响如何全部恢复
+</h2><p>第 3 章在理论层面承诺了“完整恢复”：每一次上下文变换都必须携带一个逆操作，由运行时追踪，恢复是结构性保证而非开发者的自觉。本章回答那个最直观的问题——“一个插件把系统改得乱七八糟，它造成的所有影响怎么就能恢复？”——先把一句话版答案放在这里：<strong>dsh 并不是记录插件运行期间的所有内存改动再逆向回放（那不现实），而是要求每个插件在注册每一项功能的同时，上交一份“撤销说明书”（disposer，即逆操作函数）；系统把这些说明书按插件记账，插件被拔掉时，逆序执行它自己的全部说明书</strong>。影响的恢复是“事前约定”，不是“事后追踪”。下面用 dsh 内置的 vendored Cordis 源码（<code>vendor/cordis/</code>，上游为 cordiverse/cordis 4.0.0-rc.7）逐层兑现这句话。</p>
+<h3 id="41-核心机制注册时配对登记逆操作">
+    <a href="#41-%e6%a0%b8%e5%bf%83%e6%9c%ba%e5%88%b6%e6%b3%a8%e5%86%8c%e6%97%b6%e9%85%8d%e5%af%b9%e7%99%bb%e8%ae%b0%e9%80%86%e6%93%8d%e4%bd%9c" class="header-anchor">#</a>
+    4.1 核心机制：注册时配对登记逆操作
+</h3><h4 id="411-一切经-ctx-的注册内部都走-ctxeffect">
+    <a href="#411-%e4%b8%80%e5%88%87%e7%bb%8f-ctx-%e7%9a%84%e6%b3%a8%e5%86%8c%e5%86%85%e9%83%a8%e9%83%bd%e8%b5%b0-ctxeffect" class="header-anchor">#</a>
+    4.1.1 一切经 ctx 的注册内部都走 ctx.effect()
+</h4><p>插件与系统的所有交互都要经过上下文对象 <code>ctx</code>：监听事件用 <code>ctx.on</code>，提供服务用 <code>ctx.provide</code>，挂载子插件用 <code>ctx.plugin</code>，修改上下文行为用 <code>ctx.mixin</code>/<code>ctx.accessor</code>。这些 API 形态各异，但源码上它们内部全部归约到同一个原语 <code>ctx.effect(execute)</code>：<code>execute</code> 立即执行、完成“正向”注册，同时必须返回一个 disposer——也就是这项注册的撤销说明书；这个 disposer 随即被推进当前插件 fiber 的 <code>_disposables</code> 总账。论文将此形式化为 revertible effects：每次上下文变换都携带一个逆操作，且记账方式与操作组合方式严格同构，因此“完整恢复”是结构性结论。</p>
+<p>这不是理论修辞，可以直接验证。以最常见的两个 API 为例：<code>ctx.on</code> 的实现（<code>vendor/cordis/src/events.ts</code> L254–260）是 <code>register()</code> 内部调用 <code>ctx.fiber.effect</code>，正向把钩子 push 进事件队列，返回的 disposer 负责卸载时把它 splice 摘除；<code>ctx.provide</code>（<code>vendor/cordis/src/reflect.ts</code> L277–305）同样走 <code>fiber.effect</code>，正向把实现写入服务仓库，返回的 disposer 负责删除并唤醒所有依赖者。换句话说，“经 ctx 介导的注册”与“被记账、可撤销的注册”在实现上是同一集合——这是理解全章的第一块基石。</p>
+<h4 id="412-卸载--逆序启动并发回收总账中的全部-disposer">
+    <a href="#412-%e5%8d%b8%e8%bd%bd--%e9%80%86%e5%ba%8f%e5%90%af%e5%8a%a8%e5%b9%b6%e5%8f%91%e5%9b%9e%e6%94%b6%e6%80%bb%e8%b4%a6%e4%b8%ad%e7%9a%84%e5%85%a8%e9%83%a8-disposer" class="header-anchor">#</a>
+    4.1.2 卸载 = 逆序启动、并发回收总账中的全部 disposer
+</h4><p>核心的登记与撤销逻辑在 <code>vendor/cordis/src/fiber.ts</code> L415–561，节选如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="nx">effect</span><span class="p">(</span><span class="nx">execute</span><span class="o">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">Effect</span><span class="p">,</span> <span class="nx">label</span> <span class="o">=</span> <span class="s1">&#39;anonymous&#39;</span><span class="p">)</span><span class="o">:</span> <span class="kt">any</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">this</span><span class="p">.</span><span class="nx">assertActive</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">FiberState</span><span class="p">.</span><span class="nx">UNLOADING</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">throw</span> <span class="k">new</span> <span class="nx">CordisError</span><span class="p">(</span><span class="s1">&#39;INACTIVE_EFFECT&#39;</span><span class="p">)</span>   <span class="c1">// dsh 加固：卸载中禁止再登记
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">disposables</span>: <span class="kt">Disposable</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">dispose</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">disposing</span><span class="p">)</span> <span class="k">return</span> <span class="nx">disposalTask</span>          <span class="c1">// 幂等：重复调用返回同一任务
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">disposing</span> <span class="o">=</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nx">task</span><span class="o">!:</span> <span class="k">void</span> <span class="o">|</span> <span class="nx">Promise</span><span class="p">&lt;</span><span class="nt">void</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kr">const</span> <span class="nx">disposable</span> <span class="k">of</span> <span class="nx">disposables</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nx">reverse</span><span class="p">())</span> <span class="p">{</span>   <span class="c1">// ← LIFO
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">if</span> <span class="p">(</span><span class="nx">task</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">task</span> <span class="o">=</span> <span class="nx">task</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">runDisposable</span><span class="p">(</span><span class="nx">disposable</span><span class="p">))</span>         <span class="c1">// ← 单条链内串行 await
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">disposalTask</span> <span class="o">=</span> <span class="nx">task</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">removeWrapper</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_disposables</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">wrapper</span><span class="p">)</span>  <span class="c1">// 包装器登记到 fiber 总账
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">task</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_execute</span><span class="p">(</span><span class="nx">runner</span><span class="p">)</span>                     <span class="c1">// 正向注册立即执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>逐行用大白话读：<code>effect()</code> 一被调用，正向动作<strong>立刻发生</strong>（<code>this._execute(runner)</code>），插件注册的功能当场生效；与此同时，执行过程中返回的每一个 disposer 被收集进 <code>disposables</code>，并由一个 wrapper 统一推进 fiber 的 <code>_disposables</code> 总账。撤销时，<code>splice(0).reverse()</code> 把收集到的 disposer 按<strong>注册的相反顺序</strong>取出，遇到异步 disposer 就 <code>await</code> 串行执行——后进先出，正像撤销一本账时从最后一笔记账往回抹。<code>disposing</code> 标志保证这份说明书的执行是幂等的，重复触发不会二次撤销。</p>
+<p>fiber 整体卸载的入口在 L675–696，是全章第二段必读的代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="kr">private</span> <span class="kr">async</span> <span class="nx">_unload() {</span>
+</span></span><span class="line"><span class="cl">  <span class="k">await</span> <span class="nx">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_disposables</span><span class="p">.</span><span class="nx">clear</span><span class="p">().</span><span class="nx">map</span><span class="p">(</span><span class="kr">async</span> <span class="p">(</span><span class="nx">dispose</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span> <span class="p">...</span> <span class="k">await</span> <span class="nx">runDisposable</span><span class="p">(</span><span class="nx">dispose</span><span class="p">)</span> <span class="p">...</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">catch</span> <span class="p">(</span><span class="nx">reason</span><span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">reason</span><span class="p">)</span> <span class="p">}</span>   <span class="c1">// 单个失败不中断整体
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}))</span>
+</span></span><span class="line"><span class="cl">  <span class="k">this</span><span class="p">.</span><span class="nx">store</span> <span class="o">=</span> <span class="kc">undefined</span>
+</span></span><span class="line"><span class="cl">  <span class="k">this</span><span class="p">.</span><span class="nx">_updateState</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_runner</span><span class="p">.</span><span class="nx">epoch</span> <span class="o">===</span> <span class="nx">INACTIVE</span><span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">inertia</span> <span class="o">=</span> <span class="kc">undefined</span> <span class="p">}</span>   <span class="c1">// → PENDING/DISPOSED
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">else</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">inertia</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_reload</span><span class="p">();</span> <span class="k">return</span> <span class="nx">FiberState</span><span class="p">.</span><span class="nx">LOADING</span> <span class="p">}</span>   <span class="c1">// 依赖仍在 → 立即重载
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里有两个容易读错的精确语义，也是对社区流行误读的两处纠偏。其一，<code>_disposables.clear()</code> 返回逆序排列的总账，顶层 disposer 按<strong>逆序启动</strong>清理，但多个异步 disposer 之间是 <code>Promise.all</code> <strong>并发</strong>执行的；严格的串行 LIFO 只在单个 <code>ctx.effect</code> 收集的 disposer 链内部成立。官方教程的原话是：“disposers start in reverse registration order, but multiple async disposers run concurrently. If teardown steps must run in sequence, keep them in one disposer.”——有顺序要求的清理必须合并进同一个 disposer 内部自行 await。不少社区文章笼统宣称“卸载严格逆序执行所有 disposer”，这只说对了一半。其二，每个 disposer 包在 try/catch 里，<strong>单个说明书执行失败只记日志，不中断其余回收</strong>——宁可带伤完成卸载，也不让系统卡在半拆状态。</p>
+<h4 id="413-父子级联父卸载递归卸载子树">
+    <a href="#413-%e7%88%b6%e5%ad%90%e7%ba%a7%e8%81%94%e7%88%b6%e5%8d%b8%e8%bd%bd%e9%80%92%e5%bd%92%e5%8d%b8%e8%bd%bd%e5%ad%90%e6%a0%91" class="header-anchor">#</a>
+    4.1.3 父子级联：父卸载递归卸载子树
+</h4><p>记账是按 fiber 分户的，但账户之间有嵌套。<code>ctx.plugin()</code> 挂载子插件时，子 fiber 的 <code>dispose</code> 本身被作为一个 effect 登记在<strong>父</strong> fiber 的总账上（fiber.ts 构造函数 L265–297：<code>this.dispose = parent.fiber.effect(() =&gt; {...}, 'ctx.plugin()')</code>）。于是级联是自然推论而非特殊逻辑：父插件卸载 → 逆序触发到“卸载子插件”这条 disposer → 子 fiber 清空自己的总账 → 孙插件再被递归触发。官方教程明确 <code>fiber.dispose()</code> 的语义是“resolves after all of the plugin&rsquo;s cleanup — including async disposers — has finished, and recursively unloads any child plugins it mounted”。这就是“拔掉一个插件，它带进来的一整棵子树的影响都恢复”的实现方式：不需要全局扫描，因为挂载行为本身早就把级联关系写进了账本。</p>
+<h3 id="42-fiber-状态机依赖驱动的六态生命周期">
+    <a href="#42-fiber-%e7%8a%b6%e6%80%81%e6%9c%ba%e4%be%9d%e8%b5%96%e9%a9%b1%e5%8a%a8%e7%9a%84%e5%85%ad%e6%80%81%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f" class="header-anchor">#</a>
+    4.2 Fiber 状态机：依赖驱动的六态生命周期
+</h3><h4 id="421-六态与-epoch状态迁移由依赖指纹驱动">
+    <a href="#421-%e5%85%ad%e6%80%81%e4%b8%8e-epoch%e7%8a%b6%e6%80%81%e8%bf%81%e7%a7%bb%e7%94%b1%e4%be%9d%e8%b5%96%e6%8c%87%e7%ba%b9%e9%a9%b1%e5%8a%a8" class="header-anchor">#</a>
+    4.2.1 六态与 epoch：状态迁移由依赖指纹驱动
+</h4><p>每个 fiber 携带一个六态状态机，枚举定义在 fiber.ts L147–154：<code>PENDING, LOADING, ACTIVE, FAILED, DISPOSED, UNLOADING</code>。先纠个偏：部分社区文章把状态写成 <code>DISPOSING</code> 并画出“DISPOSED 后自动回到 PENDING”的回边——源码中不存在 <code>DISPOSING</code>，<code>DISPOSED</code> 是不可逆转的终态（uid 置 null、从 registry 摘除）。</p>
+<p>状态迁移不靠命令式调用，而靠“依赖纪元”（epoch）驱动。<code>_refresh()</code>（fiber.ts L611–639）遍历插件声明的 <code>inject</code> 依赖：任一服务缺失，epoch 置为 <code>INACTIVE</code>；全部就绪，则把每个服务的<strong>提供者 fiber 的 uid</strong> 拼进 epoch 字符串。uid 是身份而非值——这意味着即使新旧提供者提供的服务内容一模一样，只要提供者被替换（uid 变化），epoch 就变，所有依赖者都会被强制先卸载再重载。<code>_setEpoch</code> 的迁移规则很简洁：epoch 从 <code>INACTIVE</code> 变为有效 → <code>_reload()</code> 进入 LOADING；从有效变为 <code>INACTIVE</code> 或发生变化 → <code>_unload()</code> 进入 UNLOADING。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">stateDiagram-v2
+</span></span><span class="line"><span class="cl">    [*] --&gt; PENDING : 插件挂载（inject 未就绪，合法静默等待）
+</span></span><span class="line"><span class="cl">    PENDING --&gt; LOADING : 依赖全部出现（epoch 由 INACTIVE 变有效）
+</span></span><span class="line"><span class="cl">    LOADING --&gt; ACTIVE : apply 执行成功
+</span></span><span class="line"><span class="cl">    LOADING --&gt; FAILED : apply 或配置校验抛错（已收集的 effect 逆序回滚，等待依赖/配置变化重试）
+</span></span><span class="line"><span class="cl">    ACTIVE --&gt; UNLOADING : 依赖消失或被替换（epoch 变 INACTIVE 或 uid 变化）
+</span></span><span class="line"><span class="cl">    FAILED --&gt; UNLOADING : 依赖变化触发重算
+</span></span><span class="line"><span class="cl">    FAILED --&gt; LOADING : 依赖/配置就绪重试
+</span></span><span class="line"><span class="cl">    UNLOADING --&gt; PENDING : 总账清空且依赖仍缺失（fiber 存活，可复活）
+</span></span><span class="line"><span class="cl">    UNLOADING --&gt; LOADING : 总账清空但依赖已恢复（立即重载）
+</span></span><span class="line"><span class="cl">    UNLOADING --&gt; DISPOSED : 显式 fiber.dispose() 或配置移除
+</span></span><span class="line"><span class="cl">    PENDING --&gt; DISPOSED : 显式 fiber.dispose() 或配置移除
+</span></span><span class="line"><span class="cl">    DISPOSED --&gt; [*] : 终态，不可重启
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="422-依赖消失回-pendingfiber-活着可以复活">
+    <a href="#422-%e4%be%9d%e8%b5%96%e6%b6%88%e5%a4%b1%e5%9b%9e-pendingfiber-%e6%b4%bb%e7%9d%80%e5%8f%af%e4%bb%a5%e5%a4%8d%e6%b4%bb" class="header-anchor">#</a>
+    4.2.2 依赖消失回 PENDING：fiber 活着，可以复活
+</h4><p>上图中语义最重的一条边是 <code>UNLOADING --&gt; PENDING</code>：依赖消失导致的卸载<strong>不销毁 fiber</strong>，只是把它打回等待室。它的全部注册已被逆序撤销（系统回到了“仿佛它没激活过”的状态），但 fiber 对象本身存活，随时可在依赖恢复时重新走 LOADING→ACTIVE——官方教程描述的对应现象是“inject 指向无人提供的服务时，插件永远等待且什么都不打印”，PENDING 是合法静默态而非错误。这与 <code>DISPOSED</code> 形成明确对照：后者只在显式 <code>fiber.dispose()</code> 或配置移除时进入，是 uid 作废、不可重启的终态。“拔掉再插回还能活”和“彻底删除”在状态机层面就是两条不同的出边。</p>
+<h4 id="423-级联语义notify-重算依赖relied-guard-保证有序退场">
+    <a href="#423-%e7%ba%a7%e8%81%94%e8%af%ad%e4%b9%89notify-%e9%87%8d%e7%ae%97%e4%be%9d%e8%b5%96relied-guard-%e4%bf%9d%e8%af%81%e6%9c%89%e5%ba%8f%e9%80%80%e5%9c%ba" class="header-anchor">#</a>
+    4.2.3 级联语义：notify 重算依赖，relied guard 保证有序退场
+</h4><p>依赖变化如何传遍全系统？答案是 <code>reflect.notify()</code>（reflect.ts L314–336）：任何服务的 provide/注销都会遍历 registry 中全部 fiber，对 <code>inject</code> 命中该服务名的 fiber 重新检查实现并 <code>_refresh</code>，依赖者随即卸载或加载。更精细的是退场顺序：<code>ctx.provide</code> 返回的 disposer 在删除服务后，会 <code>await Promise.allSettled(fibers.map(f =&gt; f.await()))</code>——<strong>等服务消失引发的全部级联卸载都落地，这次注销才算完成</strong>。论文 §4.3 的 <code>relied</code> guard 说的就是这个：提供者必须等所有消费者的 teardown 结束后才真正离场，因此消费者在拆解自己的过程中仍能读到提供者的绑定（例如把数据库连接归还给连接池之后，池本身才被销毁）。至此，单个 fiber 的可逆性被提升为整张依赖图的全局有序性——这部分的协作语义（服务、事件、配置）是下一章的主题，此处只需记住：可逆不是孤岛机制，它被依赖解析反向驱动。</p>
+<h3 id="43-能撤销什么不能撤销什么边界得划清楚">
+    <a href="#43-%e8%83%bd%e6%92%a4%e9%94%80%e4%bb%80%e4%b9%88%e4%b8%8d%e8%83%bd%e6%92%a4%e9%94%80%e4%bb%80%e4%b9%88%e8%be%b9%e7%95%8c%e5%be%97%e5%88%92%e6%b8%85%e6%a5%9a" class="header-anchor">#</a>
+    4.3 能撤销什么、不能撤销什么——边界得划清楚
+</h3><h4 id="431-自动可撤一切经-ctx-介导的注册">
+    <a href="#431-%e8%87%aa%e5%8a%a8%e5%8f%af%e6%92%a4%e4%b8%80%e5%88%87%e7%bb%8f-ctx-%e4%bb%8b%e5%af%bc%e7%9a%84%e6%b3%a8%e5%86%8c" class="header-anchor">#</a>
+    4.3.1 自动可撤：一切经 ctx 介导的注册
+</h4><p>自动撤销的覆盖范围可以一句话划界：<strong>凡是经过 <code>ctx</code> 介导的注册型影响，全部自动可撤</strong>。具体清单包括：事件监听（<code>ctx.on</code>）、服务提供（<code>ctx.provide</code>）、accessor/mixin 对上下文行为的修改、子插件挂载（<code>ctx.plugin</code>）、以及 dsh 各注册表如 <code>ctx.tools.register</code>——它们内部都把 disposer 挂到调用方 fiber 的总账上，卸载时统一回收。官方教程的表述是本章边界问题的权威锚点，值得原文引用：“Registrations made through Cordis APIs are effects and are undone when their owning plugin unloads; resources managed outside those APIs must be wrapped in <code>ctx.effect()</code>.”</p>
+<h4 id="432-不可回滚越过-ctx-边界的外部副作用">
+    <a href="#432-%e4%b8%8d%e5%8f%af%e5%9b%9e%e6%bb%9a%e8%b6%8a%e8%bf%87-ctx-%e8%be%b9%e7%95%8c%e7%9a%84%e5%a4%96%e9%83%a8%e5%89%af%e4%bd%9c%e7%94%a8" class="header-anchor">#</a>
+    4.3.2 不可回滚：越过 ctx 边界的外部副作用
+</h4><p>另一面同样要摆出来：<strong>凡是不经 <code>ctx</code> 的外部副作用，框架一概无法回滚</strong>。已写盘的文件、已发出的网络请求、已提交的数据库事务、已 spawn 的进程——这些影响发生在框架管辖之外，拔掉插件不会撤销它们。定时器、文件 watcher、长连接、HTTP server 这类“可释放但不归 Cordis 管”的资源，必须由插件作者自己用 <code>ctx.effect</code> 登记清理逻辑，否则就是泄漏。社区解读对此的概括与官方口径一致：“effect 的能力止于声明边界……已提交到外部系统的事务也不会因 Fiber 卸载而撤销。它提供结构化资源管理，不提供事务级回滚。”因此用户那句“所有影响都能恢复”，精确读法应是“所有<strong>经框架介导的注册型影响</strong>都能恢复”——把边界讲透，读者才不会高估这个机制，也不会在生产环境误信“插件卸载等于系统还原”。</p>
+<h4 id="433-理论划界acquisition-可逆emission-需补偿">
+    <a href="#433-%e7%90%86%e8%ae%ba%e5%88%92%e7%95%8cacquisition-%e5%8f%af%e9%80%86emission-%e9%9c%80%e8%a1%a5%e5%81%bf" class="header-anchor">#</a>
+    4.3.3 理论划界：acquisition 可逆，emission 需补偿
+</h4><p>论文 §6.1 给出了这个边界的理论版本：操作分为两类——<strong>acquisition</strong>（获取型，如 open/malloc/fork，发生在系统边界内，可逆、被跟踪）与 <strong>emission</strong>（发射型，如 write/send，跨越系统边界，不可逆）。撤销机制保证的是 acquisition 一侧；emission 一旦越过边界，在框架视角下视同恒等操作、不再跟踪。对外部副作用的正确工程做法不是回滚，而是 saga 模式的<strong>补偿</strong>（compensation）：为每个跨边界动作预写一个语义对冲操作（发了邮件就再发一封撤回通知，而非假装邮件没发过），且补偿的组合顺序与撤销账本同样是 LIFO，但论文明确其元理论需要在更粗的等价关系上重建。acquisition/emission 之分，实际上就是“可逆”一词在该体系中的严格定义域。</p>
+<h3 id="44-hmr-与创造模式可逆性的两个高光应用">
+    <a href="#44-hmr-%e4%b8%8e%e5%88%9b%e9%80%a0%e6%a8%a1%e5%bc%8f%e5%8f%af%e9%80%86%e6%80%a7%e7%9a%84%e4%b8%a4%e4%b8%aa%e9%ab%98%e5%85%89%e5%ba%94%e7%94%a8" class="header-anchor">#</a>
+    4.4 HMR 与创造模式：可逆性的两个高光应用
+</h3><h4 id="441-hmr事务性热替换绝不进入半重载状态">
+    <a href="#441-hmr%e4%ba%8b%e5%8a%a1%e6%80%a7%e7%83%ad%e6%9b%bf%e6%8d%a2%e7%bb%9d%e4%b8%8d%e8%bf%9b%e5%85%a5%e5%8d%8a%e9%87%8d%e8%bd%bd%e7%8a%b6%e6%80%81" class="header-anchor">#</a>
+    4.4.1 HMR：事务性热替换，绝不进入半重载状态
+</h4><p>热模块替换（HMR）是可逆机制最直接的高光应用。<code>@deepseek-ai/cordis-plugin-hmr</code>（<code>vendor/hmr/src/index.ts</code>）的流程是一个精心设计的事务：先清 ESM loadCache 与 CJS require.cache 两级模块缓存（<strong>清之前各留一份备份</strong>）→ 重新 <code>import()</code> 新代码 → <code>registry.delete(oldPlugin)</code>（dispose 全部旧 fiber，其全部 effect 逆序撤销）→ 用旧 fiber 的原配置挂载新 fiber 并保留 entry 关联。关键在失败路径：任一环节出错就执行 <code>rollback()</code>——恢复模块缓存备份并重新注册旧插件，系统<strong>绝不进入“旧插件撤了一半、新插件没装上”的半重载状态</strong>。dsh 本地另把 Loader 的配置协调做成了同样的事务式：“imports a changed entry name before disposal…restores the previous plugin or config when candidate application fails”。需要注意 HMR 回滚的粒度：它恢复的是<strong>模块缓存与插件重注册</strong>这个加载事务，并非对旧插件已产生的外部副作用的回滚——两者容易被混为一谈，按 4.3 的边界划分，前者在界内、后者在界外。同一套 fiber/effect 机制加上 <code>node:vm</code> 沙箱门面，也支撑了创造模式的现场挂载：<code>cordis_unmount</code> 会等到插件名下的 tool/listener/service/timer/effect 全部静止才返回。</p>
+<h4 id="442-与相近概念的关系定位">
+    <a href="#442-%e4%b8%8e%e7%9b%b8%e8%bf%91%e6%a6%82%e5%bf%b5%e7%9a%84%e5%85%b3%e7%b3%bb%e5%ae%9a%e4%bd%8d" class="header-anchor">#</a>
+    4.4.2 与相近概念的关系定位
+</h4><p>这套机制并不孤立，它有几个形态相近的前辈，但定位差异清晰：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>React <code>useEffect</code></th>
+<th>Vue 3 <code>effectScope</code></th>
+<th>Cordis <code>ctx.effect</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>执行时机</td>
+<td>渲染之后</td>
+<td>scope 内收集、手动 run</td>
+<td>注册即执行</td>
+</tr>
+<tr>
+<td>回收粒度</td>
+<td>组件级，随 deps 重建</td>
+<td>scope 级，<code>scope.stop()</code> 统一回收</td>
+<td>整个应用/框架级，fiber 卸载统一回收</td>
+</tr>
+<tr>
+<td>清理顺序</td>
+<td>无跨 effect 顺序保证</td>
+<td>登记顺序</td>
+<td>LIFO（顶层逆序启动，单链内串行）</td>
+</tr>
+<tr>
+<td>异步清理</td>
+<td>不支持（清理函数须同步）</td>
+<td>间接支持</td>
+<td>原生支持 async disposer</td>
+</tr>
+<tr>
+<td>父子级联</td>
+<td>组件树渲染驱动</td>
+<td>需手动嵌套 scope</td>
+<td>挂载即记账，自动递归</td>
+</tr>
+<tr>
+<td>依赖反应</td>
+<td>无（deps 是值）</td>
+<td>无</td>
+<td>有（inject epoch 驱动六态迁移）</td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表反映的趋势是“作用域回收”这一思想在不断扩大管辖半径：React 把它限定在组件渲染周期内，Vue 3 将其抽象为可手动控制的作用域对象，Cordis 则把它推到整个应用框架级——一个 fiber 可以是一个插件、一个子系统乃至 agent 的某个能力模块，回收单位与生命周期完全由运行时依赖关系决定。社区另有 Git staging 与 C++ RAII 的类比，其洞见在于：RAII 把回收绑定在<strong>词法作用域</strong>（离开大括号即析构），Cordis 绑定在<strong>运行时生命周期</strong>上，“可撤销”由此从代码纪律变成运行时保证。最后要澄清一个术语陷阱：Cordis 的 Fiber <strong>不是</strong>协程意义上的轻量执行单元，它是“一个插件实例的运行时句柄”，更像 Vue effectScope 与结构化并发中 Job 的合体——作用域记账加上父子级联取消。理解了这一点，下一章的协作机制就有了着落：正因为每个 fiber 的影响都可逆、状态都由依赖驱动，插件之间才敢于放心地互相提供和消费服务。</p>
+<h2 id="5-实现原理-ii插件如何协作服务事件与配置叠加">
+    <a href="#5-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86-ii%e6%8f%92%e4%bb%b6%e5%a6%82%e4%bd%95%e5%8d%8f%e4%bd%9c%e6%9c%8d%e5%8a%a1%e4%ba%8b%e4%bb%b6%e4%b8%8e%e9%85%8d%e7%bd%ae%e5%8f%a0%e5%8a%a0" class="header-anchor">#</a>
+    5. 实现原理 II：插件如何协作——服务、事件与配置叠加
+</h2><p>上一章解决了“单个插件如何被干净地卸载”。但运行中的 harness 装着几十个插件——模型适配器、工具注册表、审批管线、会话存储——它们如何发现彼此、如何对话、用户如何不碰源码就把系统重新拼装？本章依次给出三件机制：服务与依赖注入、类型化事件、配置叠加。先用一个场景把它们串起来：<strong>把模型从 DeepSeek 换成 Anthropic</strong>，在 dsh 里意味着提供 <code>llm</code> 服务的模型适配器插件被另一个实现替换（5.1）；替换瞬间，所有声明依赖 <code>llm</code> 的插件自动卸载并重载——第 4 章 fiber 机制的运行时表现；若想在请求发出前改写法，挂一个 waterfall 监听器（5.2）；而触发这一切的用户动作只是改一行配置（5.3）。</p>
+<h3 id="51-服务与依赖注入">
+    <a href="#51-%e6%9c%8d%e5%8a%a1%e4%b8%8e%e4%be%9d%e8%b5%96%e6%b3%a8%e5%85%a5" class="header-anchor">#</a>
+    5.1 服务与依赖注入
+</h3><h4 id="511-服务注册--service-基类-superctxname-或-ctxprovide消费方-inject-声明硬依赖未就绪则静默-pending">
+    <a href="#511-%e6%9c%8d%e5%8a%a1%e6%b3%a8%e5%86%8c--service-%e5%9f%ba%e7%b1%bb-superctxname-%e6%88%96-ctxprovide%e6%b6%88%e8%b4%b9%e6%96%b9-inject-%e5%a3%b0%e6%98%8e%e7%a1%ac%e4%be%9d%e8%b5%96%e6%9c%aa%e5%b0%b1%e7%bb%aa%e5%88%99%e9%9d%99%e9%bb%98-pending" class="header-anchor">#</a>
+    5.1.1 服务注册 = Service 基类 super(ctx,name) 或 ctx.provide；消费方 inject 声明硬依赖，未就绪则静默 PENDING
+</h4><p>服务就是“挂载在 <code>ctx</code> 上的命名能力”：注册之后，任何拿到同一 context 的插件都能以 <code>ctx.&lt;name&gt;</code> 访问它。注册有三条路径（源码事实）：继承 <code>Service</code> 基类并在构造器里调用 <code>super(ctx, 'name')</code>，类插件加载即注册为 <code>ctx.name</code>，随 fiber 卸载自动注销；或调用底层 API <code>ctx.provide(name, value)</code>，返回一个 disposer，同名重复 provide 直接抛错；或在 <code>ctx.plugin()</code> 加载时用 <code>provide</code> 元数据声明服务名。官方教程的取舍建议很直白：“大多数情况下，函数形式足够了。当插件需要向其他插件提供服务时，可使用类形式。”</p>
+<p>消费端就是上一章已见的 <code>inject</code>。<code>export const inject = ['tools']</code> 是一句<strong>硬依赖声明</strong>：Cordis 让该插件保持在 PENDING 态直到全部服务就绪——官方文档特别强调这是合法的静默状态，“不报错、不部分运行”，配置文件里的书写顺序对启动时机没有任何影响。更关键的是，<code>inject</code> <strong>不是一次性的启动检查</strong>：运行期服务消失，依赖它的每个插件都会被级联卸载回 PENDING；服务回归后自动重载。源码层面，这一级联由 <code>reflect.notify()</code> 驱动：服务注销时遍历全部 fiber，对 inject 命中者重新计算依赖纪元并触发卸载，且注销方会 <code>await</code> 到所有依赖者的清理全部落地才算完成（vendor <code>cordis/src/reflect.ts</code> 的 <code>provide</code>/<code>notify</code> 实现）。这就是“换一个 provider 即替换一种能力”的运行时基础——换模型不是改配置文本那么静态，而是一次活的系统重组。只需要“有则用之”的可选依赖则不写 <code>inject</code>，在使用点 <code>ctx.get('name')</code> 探测。</p>
+<h4 id="512-类型安全通过对-cordis-contextevents-接口的-typescript-声明合并实现">
+    <a href="#512-%e7%b1%bb%e5%9e%8b%e5%ae%89%e5%85%a8%e9%80%9a%e8%bf%87%e5%af%b9-cordis-contextevents-%e6%8e%a5%e5%8f%a3%e7%9a%84-typescript-%e5%a3%b0%e6%98%8e%e5%90%88%e5%b9%b6%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    5.1.2 类型安全通过对 Cordis Context/Events 接口的 TypeScript 声明合并实现
+</h4><p>服务名是字符串，<code>ctx.metrics</code> 凭什么有类型？答案是 TypeScript 的<strong>声明合并</strong>（declaration merging）：服务方在自己的包里写 <code>declare module '@deepseek-ai/cordis' { interface Context { metrics: MetricsService } }</code>，等于向 Cordis 的 <code>Context</code> 接口“追加条款”；消费方只需 <code>import type {} from '&lt;pkg&gt;'</code> 做纯类型导入，声明合并即生效，此后 <code>ctx.metrics</code> 的每次调用都有完整类型推导。同一手法也用于事件：向 <code>Events</code> 接口合并 <code>'stats/report'(name: string, count: number): void</code> 之后，<code>ctx.emit('stats/report', …)</code> 的参数与返回值全部受检。这意味着“插件之间互不认识”与“调用全程类型安全”两个看似冲突的目标被同时满足：耦合只发生在类型层面，运行时可以完全不知道对方包的存在。</p>
+<h3 id="52-类型化事件每个事件都是扩展点">
+    <a href="#52-%e7%b1%bb%e5%9e%8b%e5%8c%96%e4%ba%8b%e4%bb%b6%e6%af%8f%e4%b8%aa%e4%ba%8b%e4%bb%b6%e9%83%bd%e6%98%af%e6%89%a9%e5%b1%95%e7%82%b9" class="header-anchor">#</a>
+    5.2 类型化事件：每个事件都是扩展点
+</h3><p>如果说服务回答“谁有什么能力”，事件回答的就是“行为在哪里可以被改变”。官方架构文档把这一点写成原文原则：“<strong>Events are the extension points</strong>——选对事件域是多数改动要做的第一个决定”。想改行为，不打补丁改内核，挂一个插件监听或拦截对应事件即可——这是“无需修改源码”承诺的机制基础。</p>
+<h4 id="521-三类事件会话事件持久事实重启仍在agent-事件观察拦截进行中的工作能力事件给文件系统工具遥测附加策略与适配器">
+    <a href="#521-%e4%b8%89%e7%b1%bb%e4%ba%8b%e4%bb%b6%e4%bc%9a%e8%af%9d%e4%ba%8b%e4%bb%b6%e6%8c%81%e4%b9%85%e4%ba%8b%e5%ae%9e%e9%87%8d%e5%90%af%e4%bb%8d%e5%9c%a8agent-%e4%ba%8b%e4%bb%b6%e8%a7%82%e5%af%9f%e6%8b%a6%e6%88%aa%e8%bf%9b%e8%a1%8c%e4%b8%ad%e7%9a%84%e5%b7%a5%e4%bd%9c%e8%83%bd%e5%8a%9b%e4%ba%8b%e4%bb%b6%e7%bb%99%e6%96%87%e4%bb%b6%e7%b3%bb%e7%bb%9f%e5%b7%a5%e5%85%b7%e9%81%a5%e6%b5%8b%e9%99%84%e5%8a%a0%e7%ad%96%e7%95%a5%e4%b8%8e%e9%80%82%e9%85%8d%e5%99%a8" class="header-anchor">#</a>
+    5.2.1 三类事件：会话事件（持久事实，重启仍在）、Agent 事件（观察/拦截进行中的工作）、能力事件（给文件系统/工具/遥测附加策略与适配器）
+</h4><p>架构文档把全部事件按主导域分为三类：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>事件类别</th>
+<th>持久性</th>
+<th>用途</th>
+<th>典型例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会话事件</td>
+<td>持久：追加到 append-only 日志，重启仍在</td>
+<td>记录“必须在重载后仍然存在”的事实</td>
+<td><code>turn/*</code>、<code>step/*</code>、<code>user/message</code>、<code>assistant/*</code>、<code>tool/call</code>、<code>tool/result</code>、<code>compaction/*</code></td>
+</tr>
+<tr>
+<td>Agent 事件</td>
+<td>瞬时：携带活跃 <code>Agent</code> 对象</td>
+<td>观察或拦截<strong>进行中</strong>的工作</td>
+<td><code>agent/*</code>：inbox、step、status、request、validation、continuation</td>
+</tr>
+<tr>
+<td>能力事件</td>
+<td>瞬时</td>
+<td>无需 import 循环，向某个 seam 附加策略与适配器</td>
+<td><code>fs/*</code>、<code>tools/*</code>、<code>telemetry/*</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表的一个易错点值得点破：<code>turn/*</code> 等并非同名的 Cordis 事件，而是持久化的 <code>SessionEvent</code> 类型——要观察它们，得监听广播事件 <code>session/event</code> 再判别 <code>event.type</code>；该广播是 post-commit、fire-and-forget 的，观察者失败只会被记录而不影响已提交的追加。三类划分应理解为“归谁管”的主导域划分而非互斥类型系统：<code>tools/*</code> 的拦截事件常带 agent 作用域过滤，与 Agent 事件在语义上有交叠。会话事件的完整机制（日志、投射、不变量校验）是第 6 章的主题，本章只确立其定位：它是三类事件中唯一“重启仍在”的一类，也是唯一受“model-visible means logged——凡进入模型请求的内容必须能从日志重建”这条硬约束管辖的一类。</p>
+<h4 id="522-五种发射模式emitparallelserialbailwaterfallwaterfall-可逐棒改写值如拦截改写模型请求">
+    <a href="#522-%e4%ba%94%e7%a7%8d%e5%8f%91%e5%b0%84%e6%a8%a1%e5%bc%8femitparallelserialbailwaterfallwaterfall-%e5%8f%af%e9%80%90%e6%a3%92%e6%94%b9%e5%86%99%e5%80%bc%e5%a6%82%e6%8b%a6%e6%88%aa%e6%94%b9%e5%86%99%e6%a8%a1%e5%9e%8b%e8%af%b7%e6%b1%82" class="header-anchor">#</a>
+    5.2.2 五种发射模式：emit/parallel/serial/bail/waterfall（waterfall 可逐棒改写值，如拦截改写模型请求）
+</h4><p>每个事件选择哪种分发模式<strong>是契约的一部分</strong>，不由监听器决定：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>模式</th>
+<th>执行语义</th>
+<th>结果处理</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emit</code></td>
+<td>同步广播</td>
+<td>不收集返回值</td>
+<td>纯通知（如 <code>session/event</code>）</td>
+</tr>
+<tr>
+<td><code>parallel</code></td>
+<td>并发发射并 await 全部</td>
+<td>聚合所有结果</td>
+<td>多来源收集</td>
+</tr>
+<tr>
+<td><code>serial</code></td>
+<td>有序逐个 await</td>
+<td>首个非空结果即短路</td>
+<td>责任链式回退</td>
+</tr>
+<tr>
+<td><code>bail</code></td>
+<td>serial 的同步版</td>
+<td>同上，同步完成</td>
+<td>轻量决策点</td>
+</tr>
+<tr>
+<td><code>waterfall</code></td>
+<td>中间件式包裹传递</td>
+<td>值被逐棒改写</td>
+<td>拦截与改写</td>
+</tr>
+</tbody>
+</table></div>
+<p>waterfall 是最有“代理味儿”的一种：监听器收到值与 <code>next()</code>，必须调用 <code>next()</code> 才把接力棒传下去；官方规则明示，“只观察或标注的 waterfall 监听器必须调用 <code>next()</code>；不调用而直接返回，是<strong>蓄意短路</strong>”。harness 用它做拦截：<code>agent/request</code> 可整体替换冻结的模型调用配置，<code>approval/request</code> 可由策略插件代替用户应答，<code>tools/pre|post-execute</code> 可改写或拦截工具执行。回到开头的场景：换完 Anthropic 适配器后若想给所有请求注入额外的 system 前缀，不必动适配器源码，挂一个 <code>agent/request</code> 的 waterfall 监听器改写参数即可。另有一种更精细的用法——在 <code>llm/stream</code> 上以 prepend 监听器对<strong>每次模型调用即将发出的请求</strong>（模型输入侧）做逐字节不变量校验：把 <code>options.messages</code> 与日志投射结果逐字节比对，并核对 model、system、temperature、tools 与 request/header 快照的一致性；对模型输出本身并没有逐字节校验机制——它属于会话一致性保障，第 6 章展开，此处只标记其存在。监听器同样是 effect：<code>ctx.on()</code> 注册的监听随所属插件卸载自动移除，“挂一个拦截器”也是可逆操作。</p>
+<h3 id="53-配置叠加模型profile--bundle--patch">
+    <a href="#53-%e9%85%8d%e7%bd%ae%e5%8f%a0%e5%8a%a0%e6%a8%a1%e5%9e%8bprofile--bundle--patch" class="header-anchor">#</a>
+    5.3 配置叠加模型：profile → bundle → patch
+</h3><h4 id="531-三层叠加实际顺序与反直觉点home-patch-优先级高于-profile-patch按-id-整段替换而非深合并">
+    <a href="#531-%e4%b8%89%e5%b1%82%e5%8f%a0%e5%8a%a0%e5%ae%9e%e9%99%85%e9%a1%ba%e5%ba%8f%e4%b8%8e%e5%8f%8d%e7%9b%b4%e8%a7%89%e7%82%b9home-patch-%e4%bc%98%e5%85%88%e7%ba%a7%e9%ab%98%e4%ba%8e-profile-patch%e6%8c%89-id-%e6%95%b4%e6%ae%b5%e6%9b%bf%e6%8d%a2%e8%80%8c%e9%9d%9e%e6%b7%b1%e5%90%88%e5%b9%b6" class="header-anchor">#</a>
+    5.3.1 三层叠加实际顺序与反直觉点：home patch 优先级高于 profile patch；按 id 整段替换而非深合并
+</h4><p>媒体流行的说法是“profile → bundle → 用户层”三层叠加，<strong>这一转述与源码不符</strong>。官方文档与 app-boot README 确认的实际模型是四层外加启动器 override：从空条目列表开始，依次应用 ① profile 的 <code>dsh.profile.bundles</code> 列出的各 bundle patch（按列表顺序，<code>@deepseek-ai/dsh-base</code> 恒为第一层）→ ② profile 自己的 <code>cordis.patch.yml</code> → ③ home 级 <code>$DSH_HOME/cordis.patch.yml</code> → ④ 各 <code>--patch &lt;path&gt;</code> overlay → ⑤ 启动器衍生的 override。<strong>反直觉点在于：home 级 patch 的优先级高于 profile 自己的 patch</strong>——直觉上“越具体越优先”，实际却是全局的 home 文件后应用，反而压过 profile。这是本次源码核实纠正媒体转述的一个典型案例，引用社区文章的“三层”图示时应修正。</p>
+<p>合并语义同样反直觉：patch <strong>按 id 定位行、整段替换 <code>config</code> 或 <code>insert</code> 新行，不做深合并</strong>——“Later layers win per row, and a patch replaces a row&rsquo;s whole config value rather than deep-merging keys”，后层覆盖前层时必须重述该行需要的全部字段，只写改动的那一个键会把其余键抹掉。配套细节：patch 支持挂载期求值的 <code>!!js</code> 表达式；命中不存在 id 只是 stderr 警告；<code>dsh --profile web --dump-config</code> 可离线打印最终配置树。还有一个与第 4 章呼应的设计：条目<strong>并发挂载</strong>，“行序不承担启动语义（activation is service-availability driven）”——谁先激活完全由 5.1 的 inject 服务可用性决定，与文件顺序无关（dsh-base patch 文件头注释原文）。用户 patch 文件由 <code>watchUserPatches</code> 持续监听，变更时按既有层序事务式热重组，失败则保留最后一份可用配置树。于是换模型的完整画面是：改一行配置 → 事务式重组 → <code>llm</code> 服务换供 → 依赖级联重载，全程不重启进程。</p>
+<h4 id="532-agent-preset-与-scope-父链agentpresetglobal同一系统为不同会话装不同提示词工具规则scope-是路由原语而非沙箱">
+    <a href="#532-agent-preset-%e4%b8%8e-scope-%e7%88%b6%e9%93%beagentpresetglobal%e5%90%8c%e4%b8%80%e7%b3%bb%e7%bb%9f%e4%b8%ba%e4%b8%8d%e5%90%8c%e4%bc%9a%e8%af%9d%e8%a3%85%e4%b8%8d%e5%90%8c%e6%8f%90%e7%a4%ba%e8%af%8d%e5%b7%a5%e5%85%b7%e8%a7%84%e5%88%99scope-%e6%98%af%e8%b7%af%e7%94%b1%e5%8e%9f%e8%af%ad%e8%80%8c%e9%9d%9e%e6%b2%99%e7%ae%b1" class="header-anchor">#</a>
+    5.3.2 Agent Preset 与 scope 父链（agent→preset→global）：同一系统为不同会话装不同提示词/工具/规则；scope 是路由原语而非沙箱
+</h4><p>profile 决定<strong>整个进程</strong>的形态（内置 <code>web</code> 与 <code>headless</code>），而 Agent Preset 是与它正交的第二条组合轴：<strong>每个会话</strong>可以有不同的一套提示词、工具与运行规则（内置 <code>standard</code>、<code>code</code>、<code>minimal</code>、<code>cordis</code> 四种）。preset 就是一个含 <code>agent.cordis.yml</code> 的目录；roster 服务每进程只对它做一次 standing mount，会话创建时把该 agent 的 scope key 挂到这个 mount 的父链之下——于是同一个 Web 进程可以同时承载使用不同 preset 的多个会话。媒体常把四种模式说成“四种启动方案”，源码裁决是：四者共享同一个 ReactLoopAgent，只是加载的插件集不同。</p>
+<p>支撑“互不串味”的底层原语是 <code>core/scope</code> 包——一个零依赖库、不是 Cordis 服务、不占用 ctx 键。ScopeKey 构成可选父链，规则是双向的：<strong>注册视图沿链向下继承</strong>（agent → preset → global，近处遮蔽远处），<strong>事件准入沿链向上扩展</strong>（祖先标签的 listener 收得到后代 key 的事件，反之不行）。官方对边界的表述必须原样保留：“Scopes route trusted same-process plugins; they are not sandboxes or authority boundaries”——scope 是路由原语而非沙箱，它保证可见性与生命周期的一致，不提供任何安全隔离（安全定级问题留待后续章节）。至此，会话事件这条“唯一持久”的事件线、以及它如何成为整个系统的真相源，交给第 6 章。</p>
+<h2 id="6-实现原理-iii事件溯源会话模型可见即已记录">
+    <a href="#6-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86-iii%e4%ba%8b%e4%bb%b6%e6%ba%af%e6%ba%90%e4%bc%9a%e8%af%9d%e6%a8%a1%e5%9e%8b%e5%8f%af%e8%a7%81%e5%8d%b3%e5%b7%b2%e8%ae%b0%e5%bd%95" class="header-anchor">#</a>
+    6. 实现原理 III：事件溯源会话——“模型可见即已记录”
+</h2><p>第 4 章回答了“插件的影响如何撤销”，本章回答它的姊妹问题：“系统如何记住发生过的一切”。dsh 的答案是：不记状态，只记事件。这在软件架构里有个成熟的名字——<strong>事件溯源（Event Sourcing）</strong>：系统的当前状态不直接存储，而是由一条 append-only（只追加、不覆写）的事件日志重放出来。类比银行账务：银行不存“你的余额”，而是存下每一笔存取款流水，余额是流水累加的结果——流水一旦落账永不涂改，对不上账时可以逐笔重放核查。dsh 把这套会计学原封不动地搬进了 Agent 会话。</p>
+<h3 id="61-官方自认的事件溯源架构">
+    <a href="#61-%e5%ae%98%e6%96%b9%e8%87%aa%e8%ae%a4%e7%9a%84%e4%ba%8b%e4%bb%b6%e6%ba%af%e6%ba%90%e6%9e%b6%e6%9e%84" class="header-anchor">#</a>
+    6.1 官方自认的事件溯源架构
+</h3><h4 id="611-session--append-only-的-sessionevent-日志唯一真相源模型消息历史由-derivemessages-从日志投射不单独存储">
+    <a href="#611-session--append-only-%e7%9a%84-sessionevent-%e6%97%a5%e5%bf%97%e5%94%af%e4%b8%80%e7%9c%9f%e7%9b%b8%e6%ba%90%e6%a8%a1%e5%9e%8b%e6%b6%88%e6%81%af%e5%8e%86%e5%8f%b2%e7%94%b1-derivemessages-%e4%bb%8e%e6%97%a5%e5%bf%97%e6%8a%95%e5%b0%84%e4%b8%8d%e5%8d%95%e7%8b%ac%e5%ad%98%e5%82%a8" class="header-anchor">#</a>
+    6.1.1 Session = append-only 的 SessionEvent 日志，唯一真相源；模型消息历史由 deriveMessages() 从日志投射，不单独存储
+</h4><p>这不是社区的事后概括，而是官方文档的自我定性。<code>docs/subsystems/session.md</code> 开篇写道：</p>
+<blockquote>
+<p>“The in-memory, <strong>event-sourced</strong> model of dsh-session. A <code>Session</code> is an <strong>append-only log</strong> of typed <code>SessionEvent</code>s — the single source of truth for an agent&rsquo;s whole interaction history. The LLM message history is <em>derived</em> from the log, never stored separately; replay is re-derivation from the same events.”</p>
+</blockquote>
+<p>拆开看，这句话命中了事件溯源的两个标志：<strong>事件日志是唯一真相源</strong>（single source of truth），<strong>读侧状态是日志的重放投射</strong>——模型看到的 messages 数组不是一份独立维护的副本，而是每次需要时由 <code>deriveMessages()</code> 从日志现场推导出来的。换句话说，“模型的记忆”这个状态在 dsh 里根本不存在，存在的只有历史本身。架构文档进一步挑明了这一设计的红利：“Fork, resume, transcripts, telemetry, and persistence all derive from this stream”——分叉、恢复、转写、遥测、持久化全部从同一条事件流派生，无需为任何一项单独维护状态快照逻辑。</p>
+<p>还得加个限定（这是笔者的分析，官方没展开）：dsh 并非经典事件溯源的全部——它没有显式的 command（命令）对象，事件语义以“消息记录”而非“领域事件”为主，且存在 surface <code>replace</code> 投射层（压缩时摘要遮蔽旧条目但原始日志永不删除）这种经典范式没有的“读侧重写”。更准确的说法是<strong>带投射层（surface）的会话级事件溯源</strong>。</p>
+<h4 id="612-事件信封与核心词汇turnstartendstepstartendusermessage带-source-区分真人合成注入assistantchunktoken-级保真toolcall存未解析原文requestheader完整快照">
+    <a href="#612-%e4%ba%8b%e4%bb%b6%e4%bf%a1%e5%b0%81%e4%b8%8e%e6%a0%b8%e5%bf%83%e8%af%8d%e6%b1%87turnstartendstepstartendusermessage%e5%b8%a6-source-%e5%8c%ba%e5%88%86%e7%9c%9f%e4%ba%ba%e5%90%88%e6%88%90%e6%b3%a8%e5%85%a5assistantchunktoken-%e7%ba%a7%e4%bf%9d%e7%9c%9ftoolcall%e5%ad%98%e6%9c%aa%e8%a7%a3%e6%9e%90%e5%8e%9f%e6%96%87requestheader%e5%ae%8c%e6%95%b4%e5%bf%ab%e7%85%a7" class="header-anchor">#</a>
+    6.1.2 事件信封与核心词汇：turn/start|end、step/start|end、user/message（带 source 区分真人/合成注入）、assistant/chunk（token 级保真）、tool/call（存未解析原文）、request/header（完整快照）
+</h4><p>每个事件的信封（envelope）结构在 <code>packages/core/session/src/types.ts</code> 中定义：<code>{ type, seq, time, data, ignorable?, surfaceOp?, sourceEventSeqs? }</code>——<code>seq</code> 是会话内单调连续的序号，<code>time</code> 是 epoch 毫秒时间戳，<code>data</code> 必须是 lossless JSON（append 时运行时校验并深冻结），<code>ignorable</code> 决定未知事件类型能否安全跳过（缺省拒绝重建，防止新版日志被旧版静默误读），<code>sourceEventSeqs</code> 记录本事件引用了哪些上游事件的 seq（溯源链），<code>surfaceOp</code> 支持 <code>append</code> 或 <code>replace</code>（压缩遮蔽）。核心词汇表如下：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>事件类型</th>
+<th>语义</th>
+<th>关键设计点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>turn/start</code>、<code>turn/end</code></td>
+<td>轮次边界</td>
+<td><code>TurnEndReason</code> 含 completed/aborted/blocked/error/max-tokens/interrupted</td>
+</tr>
+<tr>
+<td><code>step/start</code>、<code>step/end</code></td>
+<td>单步（一次模型调用 + 工具执行）边界</td>
+<td>轮内可有多步</td>
+</tr>
+<tr>
+<td><code>user/message</code></td>
+<td>用户消息</td>
+<td>typed <code>source</code> 字段区分真人输入、合成注入、目标续轮</td>
+</tr>
+<tr>
+<td><code>assistant/chunk</code></td>
+<td>原始流式 chunk</td>
+<td>“token-level replay fidelity”，逐 token 回放保真</td>
+</tr>
+<tr>
+<td><code>assistant/message</code></td>
+<td>组装后的完整模型消息</td>
+<td>记录 provider、model、token usage，经 <code>sourceEventSeqs</code> 锚定其 chunk</td>
+</tr>
+<tr>
+<td><code>tool/call</code>、<code>tool/result</code></td>
+<td>工具调用与结果</td>
+<td><code>arguments</code> 存模型产出的<strong>未解析</strong> JSON 原文</td>
+</tr>
+<tr>
+<td><code>request/header</code>、<code>request/context</code></td>
+<td>请求头快照与上下文注入</td>
+<td>系统提示词 + 工具 schema+ 调用配置的完整快照，reason: initial/resume/change</td>
+</tr>
+</tbody>
+</table></div>
+<p>（依据 <code>SessionEventMap</code> 与 types.ts 注释整理；插件可通过 TypeScript declaration merging 合入自有事件类型，如 <code>compaction/*</code>、<code>llm/retry</code>。）</p>
+<p>这张表里有三个不显眼但关键的工程决策。其一，<code>assistant/chunk</code> 记录的是<strong>原始流式 chunk</strong> 而非最终文本——模型吐出的每个 token 都写入事件日志，这让“重放一次模型调用”精确到逐 token 级别，也是 6.3 中 llm-replay 能无 API key 重建模型行为的物理基础。其二，<code>tool/call</code> 存<strong>未解析的 arguments 原文</strong>：解析 - 再序列化可能引入键序、空白、数字精度的漂移，而漂移意味着重放出来的请求与真实历史不一致，因此 dsh 选择把模型的原始输出当作不可变证据保存。其三，<code>request/header</code> 把每次请求的系统提示词、工具 schema、温度等配置整体快照下来并标注原因（initial/resume/change）——这意味着“模型当时是在什么配置下工作的”也成为可审计的历史事实，而不是散落在各插件内存里的易变状态。</p>
+<h3 id="62-运行时强制不变量">
+    <a href="#62-%e8%bf%90%e8%a1%8c%e6%97%b6%e5%bc%ba%e5%88%b6%e4%b8%8d%e5%8f%98%e9%87%8f" class="header-anchor">#</a>
+    6.2 运行时强制不变量
+</h3><h4 id="621model-visible-means-loggedinvariantts-在每次-llm-调用前把请求-messages-与日志投射做-json-逐字节比对不一致即报-desync可观测性从约定升级为强制">
+    <a href="#621model-visible-means-loggedinvariantts-%e5%9c%a8%e6%af%8f%e6%ac%a1-llm-%e8%b0%83%e7%94%a8%e5%89%8d%e6%8a%8a%e8%af%b7%e6%b1%82-messages-%e4%b8%8e%e6%97%a5%e5%bf%97%e6%8a%95%e5%b0%84%e5%81%9a-json-%e9%80%90%e5%ad%97%e8%8a%82%e6%af%94%e5%af%b9%e4%b8%8d%e4%b8%80%e8%87%b4%e5%8d%b3%e6%8a%a5-desync%e5%8f%af%e8%a7%82%e6%b5%8b%e6%80%a7%e4%bb%8e%e7%ba%a6%e5%ae%9a%e5%8d%87%e7%ba%a7%e4%b8%ba%e5%bc%ba%e5%88%b6" class="header-anchor">#</a>
+    6.2.1“Model-visible means logged”：invariant.ts 在每次 LLM 调用前把请求 messages 与日志投射做 JSON 逐字节比对，不一致即报 desync——可观测性从约定升级为强制
+</h4><p>架构文档把这条原则命名为 <strong>“Model-visible means logged”</strong>：“Anything that reaches a model request must be reconstructable from the log, and a runtime invariant asserts it.”关键在于后半句——这不是“请大家自觉先写日志再发请求”的编码约定，而是一个<strong>运行时断言</strong>。<code>packages/core/agent-loop/src/invariant.ts</code> 在 <code>llm/stream</code> 的 waterfall 上 prepend 了一个全局监听器，每次模型调用发出前执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="c1">// agent-loop/src/invariant.ts（llm/stream 上的 prepend 全局监听）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">messages</span><span class="p">)</span> <span class="o">!==</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">expected</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">fail</span><span class="p">(</span><span class="sb">`llm request for session ... diverges from the dispatch-time durable
+</span></span></span><span class="line"><span class="cl"><span class="sb">       derivation (log-reconstruction desync)`</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">headerMatches</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">model</span> <span class="o">===</span> <span class="nx">header</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">model</span>
+</span></span><span class="line"><span class="cl">  <span class="o">&amp;&amp;</span> <span class="nx">options</span><span class="p">.</span><span class="nx">system</span> <span class="o">===</span> <span class="nx">header</span><span class="p">.</span><span class="nx">system</span>
+</span></span><span class="line"><span class="cl">  <span class="o">&amp;&amp;</span> <span class="nx">options</span><span class="p">.</span><span class="nx">temperature</span> <span class="o">===</span> <span class="nx">header</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">temperature</span>
+</span></span><span class="line"><span class="cl">  <span class="o">&amp;&amp;</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">tools</span> <span class="o">??</span> <span class="p">[])</span> <span class="o">===</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nx">tools</span> <span class="o">??</span> <span class="p">[])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>expected</code> 就是 <code>session.deriveMessages()</code> 从日志现场投射出的消息历史。也就是说：系统把“即将发给模型的 messages”与“日志重放出来的 messages”做 <strong>JSON 逐字节相等</strong>比对，同时把 model/system/temperature/tools 与日志里最新 <code>request/header</code> 的折叠结果逐一比对；任何一项不一致，直接 <code>fail</code> 报“log-reconstruction desync”，本次调用中止。</p>
+<p>类比来说，一般系统的日志像“建议大家记账，月底对账”；dsh 是<strong>每次出货前强制对账，账货不符直接锁死流水线</strong>。这一强制的工程含义有两层：一是任何插件想绕过日志、偷偷往模型请求里塞内容，得到的不是静默的日志漂移，而是一次响亮且即时的崩溃——fail-fast 把“日志不可信”这类最隐蔽的故障变成了最显眼的故障；二是它把可观测性从“尽力而为”升级为“结构性保证”，下游所有依赖日志的功能（回放、审计、分叉）由此可以无条件信任日志的完整性。代价同样明确：每次调用前对两份消息历史做全量 <code>JSON.stringify</code> 序列化与比对，是随历史长度增长的 CPU 开销；且该不变量约束了所有 loop 实现——任何替换 Agent Loop 的插件（见第 7 章）都必须维持“先落日志、再发请求”的次序，否则立刻触发 desync。这是一个有意为之的硬约束，而非可关掉的调试开关。</p>
+<h3 id="63-一条事件流喂所有操作">
+    <a href="#63-%e4%b8%80%e6%9d%a1%e4%ba%8b%e4%bb%b6%e6%b5%81%e5%96%82%e6%89%80%e6%9c%89%e6%93%8d%e4%bd%9c" class="header-anchor">#</a>
+    6.3 一条事件流喂所有操作
+</h3><h4 id="631-resume重放重建--崩溃合成-interrupted-闭合fork事件前缀--谱系-header检索ftstraceevent-溯源链回放llm-replay-无-api-key-逐-chunk-重建模型行为共享同一份事件流">
+    <a href="#631-resume%e9%87%8d%e6%94%be%e9%87%8d%e5%bb%ba--%e5%b4%a9%e6%ba%83%e5%90%88%e6%88%90-interrupted-%e9%97%ad%e5%90%88fork%e4%ba%8b%e4%bb%b6%e5%89%8d%e7%bc%80--%e8%b0%b1%e7%b3%bb-header%e6%a3%80%e7%b4%a2ftstraceevent-%e6%ba%af%e6%ba%90%e9%93%be%e5%9b%9e%e6%94%bellm-replay-%e6%97%a0-api-key-%e9%80%90-chunk-%e9%87%8d%e5%bb%ba%e6%a8%a1%e5%9e%8b%e8%a1%8c%e4%b8%ba%e5%85%b1%e4%ba%ab%e5%90%8c%e4%b8%80%e4%bb%bd%e4%ba%8b%e4%bb%b6%e6%b5%81" class="header-anchor">#</a>
+    6.3.1 resume（重放重建 + 崩溃合成 interrupted 闭合）、fork（事件前缀 + 谱系 header）、检索（FTS+traceEvent 溯源链）、回放（llm-replay 无 API key 逐 chunk 重建模型行为）共享同一份事件流
+</h4><p>事件溯源的经典红利是：只要日志足够完整，所有“消费历史”的功能都是日志上的不同视图。dsh 把这红利吃得很干净：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">flowchart LR
+</span></span><span class="line"><span class="cl">    L[&#34;SessionEvent 日志&lt;br/&gt;append-only · 唯一真相源&#34;]
+</span></span><span class="line"><span class="cl">    L --&gt;|&#34;重放重建 + 崩溃合成&lt;br/&gt;interrupted 闭合&#34;| R[&#34;resume 恢复&#34;]
+</span></span><span class="line"><span class="cl">    L --&gt;|&#34;事件前缀 +&lt;br/&gt;谱系 header&#34;| F[&#34;fork 分叉&#34;]
+</span></span><span class="line"><span class="cl">    L --&gt;|&#34;SQLite FTS +&lt;br/&gt;traceEvent 溯源链&#34;| S[&#34;session-query 检索&#34;]
+</span></span><span class="line"><span class="cl">    L --&gt;|&#34;按 (turn,step) 分组&lt;br/&gt;逐 chunk 重建&#34;| P[&#34;llm-replay 回放&#34;]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>resume</strong>：持久层 <code>load</code> 用 <code>create(id, { seed })</code> 重放整条日志重建 Session 与 surface。崩溃恢复的策略是“保现场”而非“截断”——官方明确不截断中断的 turn（长任务里一个 turn 可能非常大），而是追加一个合成的 <code>turn/end { kind: 'interrupted' }</code> 把孤儿轮次闭合，并为没有结果的工具调用补 <code>TOOL_NOT_STARTED</code> / <code>TOOL_OUTCOME_UNKNOWN</code> 合成结果，后者明确告诫模型“有副作用的操作先核实外部状态或问用户，不要盲目重试”。持久化侧同样是 append-only：默认后端 <code>dsh-session-persistence-jsonl</code> 每会话一个 <code>.jsonl.zstd</code> 文件，首行为不可变 <code>SessionHeader</code>，其后每行一个事件，“Flushed events are never rewritten”，写失败回滚到原字节长度。</p>
+<p><strong>fork</strong> 的实现集中体现了 append-only 结构的工程美感。<code>SessionStore.fork(source, boundary?, childSessionId?)</code>（index.ts:1081）的实现核心只有两步：取源会话 <code>[0..boundary]</code> 的<strong>事件前缀</strong>作为子会话的 seed（<code>events.slice(0, boundary+1)</code>），再在新会话的 <code>SessionHeader</code> 里记录 <code>parentSession</code> 与 <code>seedLength</code> 谱系：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="nx">fork</span><span class="p">(</span><span class="nx">source</span><span class="p">,</span> <span class="nx">boundary</span><span class="o">?</span><span class="p">,</span> <span class="nx">childSessionId</span><span class="o">?</span><span class="p">)</span><span class="o">:</span> <span class="nx">Session</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">seed</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_forkSeed</span><span class="p">(</span><span class="nx">liveSource</span><span class="p">,</span> <span class="nx">boundary</span><span class="p">)</span>   <span class="c1">// events.slice(0, boundary+1)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">childSessionId</span><span class="p">,</span> <span class="p">{</span> <span class="nx">seed</span><span class="p">,</span> <span class="nx">meta</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">cwd</span><span class="p">,</span> <span class="nx">parentSession</span>: <span class="kt">liveSource.id</span><span class="p">,</span> <span class="nx">seedLength</span>: <span class="kt">seed.length</span> <span class="p">}</span> <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 校验：boundary 不得落在开放 turn 内，否则抛 OPEN_TURN
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这就是 git 分支语义在会话层的复刻：因为历史永不覆写，“分叉”不需要复制或改写任何旧数据，只需声明“从第 N 个事件开始，这是我的新分支”。校验逻辑要求切点必须落在 turn 边界（否则抛 <code>OPEN_TURN</code>），保证子会话继承的是一段语义完整的历史。当前限制也得交代（README Known Limitations）：<code>fork()</code> 只对**存活（live）**会话可用，已持久化但未加载的会话不能直接分叉；会话分支树浏览功能明确 deferred。</p>
+<p><strong>检索</strong>：<code>dsh-session-query</code> 提供 <code>filterEvents</code>/<code>searchSessions</code>（SQLite FTS 全文检索）/<code>traceSession</code>（父子谱系树）/<code>traceEvent</code>（沿 <code>sourceEventSeqs</code> 的事件级溯源链），<code>listEvents()</code> 还能把每个事件分类为 current/shadowed/log-only。<strong>回放</strong>：<code>dsh-llm-replay</code> 直接把持久化的 <code>session.jsonl</code> 当作回放脚本——“Its <code>assistant/chunk</code> events carry every <code>StreamChunk</code>, so grouping them by <code>(turn, step)</code> reconstructs each agent-loop <code>stream()</code> call&rsquo;s chunk sequence”，无需 API key 即可做逐 chunk 保真的快照测试。四种操作零共享状态、零独立事实源（SQLite FTS 索引仅为派生物，可随时从日志重建），全部从同一份日志读出来——6.1 那句“all derive from this stream”在这里逐一兑现。</p>
+<h4 id="632-多-agent子-agent-独立日志经-parentsessiondelegationdepth-关联主会话trajectory-视图按来源徽标systemusercontextassistanttool呈现">
+    <a href="#632-%e5%a4%9a-agent%e5%ad%90-agent-%e7%8b%ac%e7%ab%8b%e6%97%a5%e5%bf%97%e7%bb%8f-parentsessiondelegationdepth-%e5%85%b3%e8%81%94%e4%b8%bb%e4%bc%9a%e8%af%9dtrajectory-%e8%a7%86%e5%9b%be%e6%8c%89%e6%9d%a5%e6%ba%90%e5%be%bd%e6%a0%87systemusercontextassistanttool%e5%91%88%e7%8e%b0" class="header-anchor">#</a>
+    6.3.2 多 Agent：子 agent 独立日志经 parentSession/delegationDepth 关联主会话；Trajectory 视图按来源徽标（SYSTEM/USER/CONTEXT/ASSISTANT/TOOL）呈现
+</h4><p>多 agent 场景下，dsh 选择<strong>独立日志 + 元数据关联</strong>而非共享日志：每个子 agent 拥有自己的 Session 与事件流，通过 <code>SessionHeader</code> 挂到主会话——<code>parentSession</code> 记录谱系、<code>origin: 'subagent'</code> 标记来源、<code>delegationDepth</code> 持久化委托深度（types.ts 注释解释了为什么必须持久化：“a runtime-only depth would reset a resumed child to top-level”——重启恢复后递归预算不丢）、<code>agentPreset</code> 持久化预设组合（“resume 若恢复出不同组合，会重放模型已无法行动的历史”）。<code>traceSession()</code> 可从 session store 读出祖先与后代树，子 agent 调度本身也是父会话事件流里的记录项。</p>
+<p>呈现层是 <code>ui-trajectory</code> 包的 Trajectory 视图：一个 turn 感知的事件账本，每条记录带来源徽标 <code>SYSTEM / USER / CONTEXT / ASSISTANT / TOOL</code>（子 agent 记录嵌套为 Subtool），顶部是 Input/Model/Tools 着色的时间轴 Overview，点选记录可查看 token usage、Payload、Timing 的检查器。“按来源”在这里有双重含义：UI 按记录类别拆解；而 <code>user/message.source</code> 字段在消息级别区分真人输入与 <code>agent.inject()</code> 的合成注入（文件变更通知、skill 内容等）——<strong>包括用户不知道被加进去的上下文，也带来源标记</strong>。这对调试“模型为什么突然知道这件事”类问题价值直接。</p>
+<h3 id="64-与可逆插件的合流">
+    <a href="#64-%e4%b8%8e%e5%8f%af%e9%80%86%e6%8f%92%e4%bb%b6%e7%9a%84%e5%90%88%e6%b5%81" class="header-anchor">#</a>
+    6.4 与可逆插件的合流
+</h3><h4 id="641-插件可逆性管空间中的现在影响可回滚事件溯源管时间上的过去历史可重建合起来全系统状态可撤销可重建可分叉可审计同时校正时间可组合性事件流的社区误读">
+    <a href="#641-%e6%8f%92%e4%bb%b6%e5%8f%af%e9%80%86%e6%80%a7%e7%ae%a1%e7%a9%ba%e9%97%b4%e4%b8%ad%e7%9a%84%e7%8e%b0%e5%9c%a8%e5%bd%b1%e5%93%8d%e5%8f%af%e5%9b%9e%e6%bb%9a%e4%ba%8b%e4%bb%b6%e6%ba%af%e6%ba%90%e7%ae%a1%e6%97%b6%e9%97%b4%e4%b8%8a%e7%9a%84%e8%bf%87%e5%8e%bb%e5%8e%86%e5%8f%b2%e5%8f%af%e9%87%8d%e5%bb%ba%e5%90%88%e8%b5%b7%e6%9d%a5%e5%85%a8%e7%b3%bb%e7%bb%9f%e7%8a%b6%e6%80%81%e5%8f%af%e6%92%a4%e9%94%80%e5%8f%af%e9%87%8d%e5%bb%ba%e5%8f%af%e5%88%86%e5%8f%89%e5%8f%af%e5%ae%a1%e8%ae%a1%e5%90%8c%e6%97%b6%e6%a0%a1%e6%ad%a3%e6%97%b6%e9%97%b4%e5%8f%af%e7%bb%84%e5%90%88%e6%80%a7%e4%ba%8b%e4%bb%b6%e6%b5%81%e7%9a%84%e7%a4%be%e5%8c%ba%e8%af%af%e8%af%bb" class="header-anchor">#</a>
+    6.4.1 插件可逆性管“空间中的现在”（影响可回滚），事件溯源管“时间上的过去”（历史可重建）；合起来全系统状态可撤销/可重建/可分叉/可审计——同时校正“时间可组合性=事件流”的社区误读
+</h4><p>读到这里需要做一次明确的概念校正。社区流行一种解读：“Cordis 论文的时间可组合性 = 会话事件流可回放”。<strong>对照论文原文，这是误读</strong>：《A Programming Paradigm for Spatiotemporal Composability》中，时间可组合性的原义是<strong>组件卸载后其副作用可被完整撤销</strong>（reversible effects，卸载即逆序回滚副作用栈），空间可组合性是依赖的声明式响应式管理——论文的“时间”指插件副作用的可撤销性，发生在运行时内存层；而本章讲的会话事件溯源是 dsh 应用层的<strong>另一根支柱</strong>，发生在磁盘持久层。两者常被混为一谈，但合流并非巧合，也不能说成巧合：可逆插件管“空间中的现在”（任何注册的影响可回滚），事件溯源管“时间上的过去”（任何历史可重建），合起来的结果是全系统状态<strong>可撤销、可重建、可分叉、可审计</strong>。社区分析（如 tonybai）对“会话日志是唯一真相源、一切由事件流派生”的复述与源码一致，其进一步指出的“每个插件产生的会话事件都落在同一条事件流上，插件换得再勤，历史也不会断”是对两根支柱关系的准确概括——<strong>插件在空间上可换，其运行痕迹在时间上不可断</strong>。可重建性正是可审计与可进化共同的地基：审计要求“模型当时看到了什么”可逐字节还原，进化要求轨迹数据可无损回放与筛选，两者都预设了一份不可篡改、保真到 token 的历史。</p>
+<p>这份“历史先于控制流”的设计还埋着一个通向第 7 章的钩子：dsh 中 <code>agent.id === session.id</code>，agent 的身份就是其会话日志的身份，resume 后“Turn numbering and derived history continue from the loaded log”——轮次编号与派生历史从日志无缝延续。记忆不在 Agent Loop 的内存里，而在 session log 里。这意味着“换一个 loop，agent 还是不是原来的 agent”这个看似哲学的问题，在 dsh 里有一个工程答案的雏形：只要日志延续，agent 就延续。第 7 章将以此为第一块基石，论证“换 loop 还是 agent”的完整命题。</p>
+<h2 id="7-agent-loop-插件化换掉-loop它还是-agent-吗">
+    <a href="#7-agent-loop-%e6%8f%92%e4%bb%b6%e5%8c%96%e6%8d%a2%e6%8e%89-loop%e5%ae%83%e8%bf%98%e6%98%af-agent-%e5%90%97" class="header-anchor">#</a>
+    7. Agent Loop 插件化：换掉 loop，它还是 agent 吗
+</h2><p>这个疑问是合理的，而且它的前提在绝大多数系统里成立。在主流的 agent harness 中，“请求模型→解析响应→执行工具→再请求”的循环是写死在核心代码里的固定流程，它就是 agent 的心脏——抽掉循环，剩下的只是一堆不会自己动起来的工具。所以当 dsh 宣称“连 agent loop 都是一个插件”时，直觉上的不安是真实的：如果任何人都能换一个 loop 进去，被换过之后的东西还是原来那个 agent 吗？本章给出一个工程化的完整回答：dsh 通过一次架构手术，把“心脏”拆成了“身份”与“驱动器”两部分，换 loop 换的是后者；而“是不是 agent”的判定标准，由四层不随 loop 走的不变量给出。</p>
+<h3 id="71-架构分离agent-是什么与agent-怎么跑">
+    <a href="#71-%e6%9e%b6%e6%9e%84%e5%88%86%e7%a6%bbagent-%e6%98%af%e4%bb%80%e4%b9%88%e4%b8%8eagent-%e6%80%8e%e4%b9%88%e8%b7%91" class="header-anchor">#</a>
+    7.1 架构分离：“agent 是什么”与“agent 怎么跑”
+</h3><h4 id="711-coreagent-定义不变契约coreagent-loop-只是默认实现">
+    <a href="#711-coreagent-%e5%ae%9a%e4%b9%89%e4%b8%8d%e5%8f%98%e5%a5%91%e7%ba%a6coreagent-loop-%e5%8f%aa%e6%98%af%e9%bb%98%e8%ae%a4%e5%ae%9e%e7%8e%b0" class="header-anchor">#</a>
+    7.1.1 core/agent 定义不变契约，core/agent-loop 只是默认实现
+</h4><p>dsh 的关键设计是把“agent 是什么”和“agent 怎么跑”拆进了两个包。<code>core/agent</code> 只定义三样不变的东西：<code>Agent</code> 接口、存活的 agent 注册表、以及 <code>agent/*</code> 事件词汇表；它不包含任何循环逻辑。该包 README 开宗明义：每个插件（UI、hooks、编排器）都针对这里定义的 <code>Agent</code> 句柄编程——“it has zero loop dependency, so the loop is swappable”（它对 loop 零依赖，因此 loop 是可替换的）。真正的循环逻辑在另一个包 <code>core/agent-loop</code> 里，官方架构文档对两者的定位措辞极为直白：前者是“The Agent interface, live registry, and agent/* events”，后者是“The default driver implementing that interface”——“实现该接口的默认驱动器”。“default”（默认）这个词本身就是答案的一半：loop 在 dsh 里从第一天起就被定位为一个实现，而不是一个公理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">graph</span> <span class="n">TD</span>
+</span></span><span class="line"><span class="cl">    <span class="n">UI</span><span class="p">[</span><span class="n">UI</span> <span class="o">/</span> <span class="n">ACP</span> <span class="err">桥</span> <span class="o">/</span> <span class="n">subagent</span> <span class="o">/</span> <span class="n">hooks</span><span class="p">]</span> <span class="o">--&gt;|</span><span class="s2">&#34;只对接口编程&#34;</span><span class="o">|</span> <span class="n">AGENT</span><span class="p">[</span><span class="s2">&#34;core/agent&lt;br/&gt;Agent 接口 + 注册表 + agent/* 事件&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LOOP</span><span class="p">[</span><span class="s2">&#34;core/agent-loop（默认插件）&lt;br/&gt;ReactLoopAgent：turn/step 调度&#34;</span><span class="p">]</span> <span class="o">--&gt;|</span><span class="s2">&#34;setFactory 注册为 agent 工厂&#34;</span><span class="o">|</span> <span class="n">AGENT</span>
+</span></span><span class="line"><span class="cl">    <span class="n">AGENT</span> <span class="o">--&gt;</span> <span class="n">SESSION</span><span class="p">[</span><span class="s2">&#34;core/session&lt;br/&gt;append-only 事件日志&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LOOP</span> <span class="o">--&gt;</span> <span class="n">SERVICES</span><span class="p">[</span><span class="s2">&#34;ctx.llm / ctx.tools / ctx.systemPrompt&lt;br/&gt;（独立服务，不随 loop 走）&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CUSTOM</span><span class="p">[</span><span class="s2">&#34;第三方 loop 插件（理论上）&#34;</span><span class="p">]</span> <span class="o">-.-&gt;|</span><span class="s2">&#34;提供同一接口 + setFactory&#34;</span><span class="o">|</span> <span class="n">AGENT</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="712-默认-loop-是普通插件的证据agentloop-extends-service">
+    <a href="#712-%e9%bb%98%e8%ae%a4-loop-%e6%98%af%e6%99%ae%e9%80%9a%e6%8f%92%e4%bb%b6%e7%9a%84%e8%af%81%e6%8d%aeagentloop-extends-service" class="header-anchor">#</a>
+    7.1.2 默认 loop 是普通插件的证据：AgentLoop extends Service
+</h4><p>“loop 是插件”不是宣传话术，而是可以直接在源码里指认的事实。<code>packages/core/agent-loop/src/index.ts</code> 第 296-297 行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="cm">/** Concrete agent factory and driver service. */</span>
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="kr">class</span> <span class="nx">AgentLoop</span> <span class="kr">extends</span> <span class="nx">Service</span> <span class="kr">implements</span> <span class="nx">AgentFactory</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">static</span> <span class="nx">inject</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;agents&#39;</span><span class="p">,</span> <span class="s1">&#39;sessions&#39;</span><span class="p">,</span> <span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;tools&#39;</span><span class="p">,</span> <span class="s1">&#39;systemPrompt&#39;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">ctx</span><span class="p">.</span><span class="nx">effect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">agents</span><span class="p">.</span><span class="nx">setFactory</span><span class="p">(</span><span class="k">this</span><span class="p">),</span> <span class="s1">&#39;agentLoop.setFactory()&#39;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>用通俗的话读这段代码：<code>AgentLoop</code> 继承自 Cordis 的 <code>Service</code> 基类——它和 dsh 里任何一个普通服务插件遵循同一套装载/卸载规则；<code>static inject</code> 声明它依赖五个<strong>接口</strong>（agent 注册表、会话、模型适配、工具、系统提示组装），而不是任何具体实现；构造之后，它通过 <code>ctx.effect</code> 把自己注册为 agent 工厂，<code>ctx.effect</code> 同时把这次注册记入撤销账本——插件被卸载时，这个工厂注册会被自动撤销（第 4 章的 fiber/disposer 机制）。工厂槽位是独占的：第二个工厂注册会直接抛错。因此“换一个 loop”的路径非常具体：写一个提供 <code>ctx.agentLoop</code> 服务、实现 <code>Agent</code> 接口并调用 <code>setFactory</code> 的 Cordis 插件，在配置里替换默认的那一行即可。loop 没有任何特权；它唯一的特殊性只在于它是默认出厂的那个插件。</p>
+<h3 id="72agent-性的四层不变量">
+    <a href="#72agent-%e6%80%a7%e7%9a%84%e5%9b%9b%e5%b1%82%e4%b8%8d%e5%8f%98%e9%87%8f" class="header-anchor">#</a>
+    7.2“agent 性”的四层不变量
+</h3><p>回答“还是不是 agent”，需要先回答“什么定义了 agent”。dsh 的架构隐含了一个判定标准：四层不随 loop 变化的机制。只要它们保持，loop 换成什么样，外部世界面对的仍是同一个 agent。</p>
+<h4 id="721-会话连续性agentid--sessionidresume-后历史延续">
+    <a href="#721-%e4%bc%9a%e8%af%9d%e8%bf%9e%e7%bb%ad%e6%80%a7agentid--sessionidresume-%e5%90%8e%e5%8e%86%e5%8f%b2%e5%bb%b6%e7%bb%ad" class="header-anchor">#</a>
+    7.2.1 会话连续性：agent.id === session.id，resume 后历史延续
+</h4><p>第一层是身份与记忆的连续性。在 dsh 中，agent 与其会话共享同一个 ID——<code>agent.id === session.id</code>，身份不在 loop 的内存里，而在 append-only 的 <code>SessionEvent</code> 日志里；这条日志是官方明确定义的“single source of truth”，模型消息历史由日志投射（<code>deriveMessages()</code>）而来，从不单独存储（第 6 章已详述）。其直接后果是：换一个 loop 后 <code>resume()</code> 一个持久化会话，“turn 编号与派生历史从加载的日志继续”（“Turn numbering and derived history continue from the loaded log”）。新 loop 接手的是完整的轮次编号、完整的历史、同一个身份——就像一个新司机拿到的是同一本完整的行车日志，而不是从一张白纸开始。</p>
+<h4 id="722-agent-接口契约uisubagentacp-只对接口编程">
+    <a href="#722-agent-%e6%8e%a5%e5%8f%a3%e5%a5%91%e7%ba%a6uisubagentacp-%e5%8f%aa%e5%af%b9%e6%8e%a5%e5%8f%a3%e7%bc%96%e7%a8%8b" class="header-anchor">#</a>
+    7.2.2 Agent 接口契约：UI/subagent/ACP 只对接口编程
+</h4><p>第二层是外部可观察的行为契约。<code>Agent</code> 接口（<code>core/agent/src/runtime-types.ts:64</code>）由六个只读属性——<code>id</code>、<code>options</code>、<code>session</code>、<code>inbox</code>、<code>status</code>、<code>ctx</code>——加一组方法——<code>send/followup/steer/inject/cancel/whenIdle/runMaintenance</code>——构成。有意思的是接口里<strong>没有</strong>任何 turn/step 编排细节：它规定的是“你能对 agent 做什么”（发消息、追加轮次、注入 steering、取消、等待空闲），而不是“agent 内部怎么排班”。UI、ACP 桥、subagent、hooks 全部只针对这个接口编程。因此任何替代 loop 只要满足同一接口，对所有这些消费者而言就是“同一个 agent”——这是接口替换的经典里氏替换逻辑，只是被用在了“agent 身份”这个哲学负载更重的对象上。</p>
+<h4 id="723-工具守卫管线与模型路由不随-loop-走">
+    <a href="#723-%e5%b7%a5%e5%85%b7%e5%ae%88%e5%8d%ab%e7%ae%a1%e7%ba%bf%e4%b8%8e%e6%a8%a1%e5%9e%8b%e8%b7%af%e7%94%b1%e4%b8%8d%e9%9a%8f-loop-%e8%b5%b0" class="header-anchor">#</a>
+    7.2.3 工具守卫管线与模型路由不随 loop 走
+</h4><p>第三、四层是约束与资源。工具调用的守卫管线——<code>tools/pre-execute → tools/execute → tools/post-execute → tools/result</code>——位于 <code>core/tools</code>，权限、沙箱、审批全在这条管线上，与 loop 无关：无论哪个 loop 触发工具调用，都必须走同一套守卫。模型侧同样如此：<code>ctx.llm</code> 适配器接缝与 <code>ctx.systemPrompt</code> 提示组装服务是独立存在的；更关键的是“Model-visible means logged”（模型可见即已记录）这条不变式——任何进入模型请求的内容必须能从日志逐字节重建，且有运行时断言强制执行——它是<strong>跨 loop 的硬约束</strong>，任何替代 loop 违反它都会在运行时直接报错。换句话说，一个“新 loop”或许可以改变请求的节奏，但它无法绕过日志、无法绕过工具守卫、无法绕过模型路由——交通规则不因换司机而改变。</p>
+<h3 id="73-默认-loop-的轮次结构源码级">
+    <a href="#73-%e9%bb%98%e8%ae%a4-loop-%e7%9a%84%e8%bd%ae%e6%ac%a1%e7%bb%93%e6%9e%84%e6%ba%90%e7%a0%81%e7%ba%a7" class="header-anchor">#</a>
+    7.3 默认 loop 的轮次结构（源码级）
+</h3><h4 id="731-step--一次模型请求--其工具调用turn--零或多个-step">
+    <a href="#731-step--%e4%b8%80%e6%ac%a1%e6%a8%a1%e5%9e%8b%e8%af%b7%e6%b1%82--%e5%85%b6%e5%b7%a5%e5%85%b7%e8%b0%83%e7%94%a8turn--%e9%9b%b6%e6%88%96%e5%a4%9a%e4%b8%aa-step" class="header-anchor">#</a>
+    7.3.1 step = 一次模型请求 + 其工具调用，turn = 零或多个 step
+</h4><p>理解了什么是不可换的，才能看清默认 loop 究竟贡献了什么。官方架构文档给出术语定义：<strong>一个 step 是一次模型请求加上它调用的工具；一个 turn 是零或多个 step</strong>，在第一次认领输入前开启，在没有欠账时关闭。默认实现 <code>ReactLoopAgent</code>（<code>packages/core/agent-loop/src/agent.ts</code>，包私有、不导出）的主循环是 <code>kick()</code> 驱动的 <code>while (await this.turn()) {}</code>（agent.ts:210-212）。一个 turn 的内部流程按源码顺序是：先 <code>session.append('turn/start')</code> 持久化轮次边界；然后 <code>preStep()</code> 认领 inbox 中排队的输入，逐条发出 <code>agent/inbox/claimed</code> 事件，并经过 <code>agent/pre-step</code> waterfall 拦截点——插件可以改写消息，甚至整体拒绝这个 step（拒绝时 turn 以 <code>blocked</code> 关闭，不消耗一次模型调用）；进入 <code>step()</code> 后，loop 组装请求（渲染系统提示、从日志投射消息历史、冻结适配器默认值），发起流式调用，把每个原始 chunk 实时落入日志（<code>assistant/chunk</code>，保证可回放），出错时走 <code>agent/request-error</code> 让监听者接管重试；响应组装完成后，若无工具调用则 step 标记 <code>completed</code> 结束本轮，若有工具调用则进入执行器——独占型调用形成屏障，并行安全的调用进入有界滚动池（<code>maxParallelToolCalls</code> 默认 10），派发可重叠但结果按模型原始顺序定稿；工具若标记 <code>concludesTurn</code> 则收尾，否则继续下一个 step。turn 结束前还有最后一个串行拦截点 <code>agent/turn-stopping</code>；<code>finally</code> 块保证 <code>turn/end</code>（含 completed/blocked/max-tokens/aborted/error 五种原因）必然落日志。</p>
+<p>这段结构里最值得注意的是“什么不属于 loop”：压缩是监听 <code>agent/pre-step</code> 的插件，重试是监听 <code>agent/request-error</code> 的插件，权限沙箱在 <code>tools/*</code> 管线，subagent 在 loop 之外用 <code>ctx.agents.create()</code> 创建。agent-loop 的 README 把话说绝了：“This is the only package in the harness that contains concrete loop logic. Everything else is an abstract service or a plugin against extension points.”（这是整个 harness 中唯一包含具体 loop 逻辑的包，其余一切都是抽象服务或挂在扩展点上的插件）。loop 的职责被压缩到一句：“call the model, run the tools, repeat”。</p>
+<h3 id="74-直接回答用户之问">
+    <a href="#74-%e7%9b%b4%e6%8e%a5%e5%9b%9e%e7%ad%94%e7%94%a8%e6%88%b7%e4%b9%8b%e9%97%ae" class="header-anchor">#</a>
+    7.4 直接回答用户之问
+</h3><h4 id="741-换-loop-换的是控制流骨架变与不变的对照">
+    <a href="#741-%e6%8d%a2-loop-%e6%8d%a2%e7%9a%84%e6%98%af%e6%8e%a7%e5%88%b6%e6%b5%81%e9%aa%a8%e6%9e%b6%e5%8f%98%e4%b8%8e%e4%b8%8d%e5%8f%98%e7%9a%84%e5%af%b9%e7%85%a7" class="header-anchor">#</a>
+    7.4.1 换 loop 换的是“控制流骨架”：变与不变的对照
+</h4><p>现在可以正面回答了。换一个 loop，真正能改变的东西只有一类：<strong>控制流骨架</strong>——turn/step 如何调度、工具串行还是并行、何时压缩、单 agent 还是多 agent 协调、请求→响应→执行的编排顺序。而四层不变量原封不动。下表把“变与不变”并排列出：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>层次</th>
+<th>内容</th>
+<th>换 loop 时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会话连续性</td>
+<td><code>agent.id === session.id</code>，append-only 日志，resume 后轮次编号延续</td>
+<td>不变</td>
+</tr>
+<tr>
+<td>Agent 接口契约</td>
+<td>六属性 + <code>send/followup/steer/inject/cancel</code> 等方法</td>
+<td>不变（替代 loop 必须实现）</td>
+</tr>
+<tr>
+<td>工具守卫管线</td>
+<td><code>tools/pre-execute→execute→post-execute→result</code>，权限/沙箱/审批</td>
+<td>不变（位于 core/tools）</td>
+</tr>
+<tr>
+<td>模型路由与不变式</td>
+<td><code>ctx.llm</code>、<code>ctx.systemPrompt</code>、“model-visible means logged”运行时断言</td>
+<td>不变（独立服务 + 跨 loop 硬约束）</td>
+</tr>
+<tr>
+<td>turn/step 调度</td>
+<td>轮次开启/关闭时机、step 划分、拦截点语义</td>
+<td>可变</td>
+</tr>
+<tr>
+<td>工具执行策略</td>
+<td>串行屏障 vs 并行池、并发上限</td>
+<td>可变</td>
+</tr>
+<tr>
+<td>压缩与恢复时机</td>
+<td>何时压缩上下文、出错后谁接管</td>
+<td>可变</td>
+</tr>
+<tr>
+<td>编排拓扑</td>
+<td>单 agent 循环 vs 多 agent 协作式驱动</td>
+<td>可变</td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表揭示了一个不对称：可变的一栏全部是“时间与顺序”的决策——属于调度；不变的一栏全部是“身份、契约与约束”——属于存在。这就是“还是 agent”的工程论据：一个 agent 的外部可观察身份（它是谁、记得什么、能被怎样操作、受什么规则约束）没有任何一项被 loop 替换触及；被替换的只是它的“驾驶风格”。这正是忒修斯之船悖论的工程答案：船的身份不绑定于任何一块特定的木板，而绑定于一组维持不变的关系——龙骨编号（session.id）、航海日志（事件流）、船级规范（Agent 接口与守卫管线）。只要不变量集合保持，换掉驱动器这块“木板”，船还是那艘船，agent 还是那个 agent。当然，这是对 dsh 架构设计意图的解读，社区也存在反方观点：loop 承载了 agent 的“行为性格”（何时停、如何恢复），换 loop 等于换灵魂——这一争议目前并无官方裁决，但 dsh 的代码组织方式明确站在了“身份=不变量集合”一边。</p>
+<h4 id="742-两个必须纠正的流行误读">
+    <a href="#742-%e4%b8%a4%e4%b8%aa%e5%bf%85%e9%a1%bb%e7%ba%a0%e6%ad%a3%e7%9a%84%e6%b5%81%e8%a1%8c%e8%af%af%e8%af%bb" class="header-anchor">#</a>
+    7.4.2 两个必须纠正的流行误读
+</h4><p>第一个误读来自媒体传播中“四种模式=四种 loop”的暗示。源码事实恰恰相反：四种官方 preset（<code>standard / code / minimal / cordis</code>）<strong>共享同一个 ReactLoopAgent</strong>，只是各自加载不同的插件集合。被广泛宣传为“程序化工具调用（PTC）”的 code 模式，只是加了一个 <code>tool-presentation</code> 插件：让模型只看到 <code>run_code</code> 一个工具和一个生成的 TypeScript SDK，模型写一段程序组合多次工具调用，“五次往返变成一次”；但跑这段程序的 turn/step 语义与标准模式一模一样——PTC 换的是工具的<strong>呈现层</strong>，不是 loop。把“换插件组合”误当成“换 loop”，会让读者低估 loop 替换的深度：那是更深一层的自由度。</p>
+<p>第二个误读是“运行中热替换 loop”的浪漫想象。精确地说，dsh 的过渡语义是<strong>排水—拆卸—从日志重建</strong>，而非热交接：旧 loop provider 卸载时走“stop and drain → unwind scope → detach agent → detach session”的静止边界，新 agent 通过 <code>ctx.agents.resume()</code> 从持久化日志重建，“turn 编号与派生历史从加载的日志继续”。会话历史无损（这得益于事件溯源设计），但内存中的 inbox 与未持久化的中间态会丢失——更准确的表述是“不重启进程、不丢会话历史地替换”，而不是“任务跑到一半无缝换手”。“非热交接”这个说法部分来自源码推断而非官方明示，置信度中高。</p>
+<h4 id="743-对照组loop-写死是行业常态">
+    <a href="#743-%e5%af%b9%e7%85%a7%e7%bb%84loop-%e5%86%99%e6%ad%bb%e6%98%af%e8%a1%8c%e4%b8%9a%e5%b8%b8%e6%80%81" class="header-anchor">#</a>
+    7.4.3 对照组：loop 写死是行业常态
+</h4><p>把视线移出 dsh，会更清楚地看到这次架构手术的独特性。OpenAI Codex 的外层循环是 <code>codex-rs/core/src/tasks/regular.rs:76</code> 里一段裸的 <code>loop { run_turn(...) }</code>，单轮逻辑在 <code>session/turn.rs</code> 约 2757 行的 <code>run_turn()</code> 中硬编码，编译进 Rust 二进制，要换 loop 只能 fork 重编译；OpenCode 在 <code>packages/opencode/src/session/prompt.ts</code> 里硬编码 <code>let step = 0; while (true) { ... }</code>，插件只能通过 hook 事件影响行为；Kimi Code CLI 的轮次控制写在核心包 <code>packages/agent-core-v2/src/agent/loop/loop.ts</code> 内，可扩展点是 error handler 和 hooks，不是 loop 本体；Claude Code 闭源无法逐行核查，但第三方逆向显示其循环在打包后的 <code>query.ts</code> 中，同样没有任何替换接口。换言之，“loop 写死”不是某家的缺陷，而是整个行业的默认形态；dsh 是目前唯一在架构上为 loop 留出“物理插槽”的 harness——深度分析者 yage.ai 的概括一针见血：“Codex 的 agent loop 编译死在 Rust 代码里，哪怕模型进化出了编写全新 loop 的能力，系统里也没有任何一个接口能把它装上去。DSH 恰好补上了这个物理插槽。”</p>
+<p>但最后得说实话：截至目前，社区还没有出现第二个生产级的 loop 实现，官方仓库里也没有替换 loop 的端到端示例插件——“可以换”是源码可证的架构事实，“换了跑得好的例子”尚缺；同一篇深度分析也承认，在日常开发场景中它没能找到 loop 可替换带来实际收益的例子，其价值当前更多是“架构上的可能性”而非“生态现实”。那么，这个物理插槽是为谁留的？当一个系统里唯一读得到（TypeScript 插件而非 Rust 二进制）、装得上（setFactory 插槽）、出错还能回滚（事务性 HMR）的改写对象是 loop 本身时，最自然的“改写者”其实不是人类插件作者——下一章“自进化”要回答的就是这个问题。</p>
+<h2 id="8-四种模式与创造模式为自进化铺设的跑道">
+    <a href="#8-%e5%9b%9b%e7%a7%8d%e6%a8%a1%e5%bc%8f%e4%b8%8e%e5%88%9b%e9%80%a0%e6%a8%a1%e5%bc%8f%e4%b8%ba%e8%87%aa%e8%bf%9b%e5%8c%96%e9%93%ba%e8%ae%be%e7%9a%84%e8%b7%91%e9%81%93" class="header-anchor">#</a>
+    8. 四种模式与创造模式：为自进化铺设的跑道
+</h2><p>第 7 章留下一个悬念：dsh 把 agent loop 做成了可动态装卸的插件，但这个能力至今没有实战价值。本章回答那个自然的问题：**这个能力是替谁准备的？**答案藏在第四种运行模式里。</p>
+<h3 id="81-四种运行模式对照">
+    <a href="#81-%e5%9b%9b%e7%a7%8d%e8%bf%90%e8%a1%8c%e6%a8%a1%e5%bc%8f%e5%af%b9%e7%85%a7" class="header-anchor">#</a>
+    8.1 四种运行模式对照
+</h3><h4 id="811-同一插件集的四种-preset">
+    <a href="#811-%e5%90%8c%e4%b8%80%e6%8f%92%e4%bb%b6%e9%9b%86%e7%9a%84%e5%9b%9b%e7%a7%8d-preset" class="header-anchor">#</a>
+    8.1.1 同一插件集的四种 preset
+</h4><p>首先要纠正“四种模式 = 四套内核”的流行误读。源码事实是：四种官方 preset——<code>standard</code>、<code>code</code>、<code>minimal</code>、<code>cordis</code>——全部定义在 <code>apps/cli/config/agent-presets/</code> 目录下，每个 preset 只是一份插件清单加上提示词与运行时配置，<strong>四者共享同一个 ReactLoopAgent</strong>。模式不是被特判的代码分支，而是“一组特定的插件行组合”——所以用户复制一个 preset 改一改，就能造出第五种模式，自定义 preset 落在 <code>~/.dsh/.agent-presets/&lt;id&gt;/</code>。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>standard（标准）</th>
+<th>code（PTC）</th>
+<th>minimal（极简）</th>
+<th>cordis（创造）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>定位</strong></td>
+<td>完整 Coding Agent，默认档</td>
+<td>标准能力 + 程序化工具调用</td>
+<td>最小工具集的对照组</td>
+<td>运行时自省与插件实验场</td>
+</tr>
+<tr>
+<td><strong>默认插件集</strong></td>
+<td>文件编辑、shell、搜索、skills、计划、目标、子 agent、workflow、后台任务</td>
+<td>同 standard，仅多一行 <code>tool-presentation</code></td>
+<td>仅 bash + <code>str_replace_editor</code> 两个工具</td>
+<td>标准全套 + cordis 自指工具集 + preset 创作指导 skill</td>
+</tr>
+<tr>
+<td><strong>工具呈现</strong></td>
+<td>每个工具作为独立 function call 暴露</td>
+<td>模型只看到 <code>run_code</code> + 生成的 TypeScript SDK</td>
+<td>两个原生 function call</td>
+<td>同 standard，外加 <code>cordis_inspect</code>/<code>cordis_mount</code>/<code>cordis_unmount</code></td>
+</tr>
+<tr>
+<td><strong>面向场景</strong></td>
+<td>日常写码、重构、项目管理</td>
+<td>步骤事先可知的长流程机械任务</td>
+<td>模型基准评测、教学</td>
+<td>harness/插件开发、内存插件实验、“先试后固化”</td>
+</tr>
+</tbody>
+</table></div>
+<p>来源：官方公告、官方仓库 presets 目录与设计笔记。</p>
+<p>表里有两个细节值得停顿。其一，<strong>minimal 不是阉割版而是测量仪器</strong>：它剥掉一切脚手架，只留 bash 和按绝对路径改文件的 <code>str_replace_editor</code>，目的是控制评测变量——DeepSeek 官方 V4 系列的 Code Agent 评测（DeepSWE 等）用的正是这个模式。harness 同时是模型评测环境，这是 8.4 节战略闭环的第一个支点。其二，<strong>创造模式是唯一能让 agent 修改自身运行时的模式</strong>：其余三种模式里模型是运行时的“用户”，只有在这里模型拿到运行时的“钥匙”——本章主题的全部伏笔在此。</p>
+<h4 id="812-ptc-实质一段-ts-程序一次组合多次工具调用">
+    <a href="#812-ptc-%e5%ae%9e%e8%b4%a8%e4%b8%80%e6%ae%b5-ts-%e7%a8%8b%e5%ba%8f%e4%b8%80%e6%ac%a1%e7%bb%84%e5%90%88%e5%a4%9a%e6%ac%a1%e5%b7%a5%e5%85%b7%e8%b0%83%e7%94%a8" class="header-anchor">#</a>
+    8.1.2 PTC 实质：一段 TS 程序一次组合多次工具调用
+</h4><p>PTC（Programmatic Tool Calling，程序化工具调用）常被误认为更强的执行内核，实际它只改动了<strong>工具到达模型的方式</strong>：<code>tool-presentation</code> 插件把全部工具收进 Code Mode SDK 生成一份 TypeScript API，模型不再逐个发起 function call，而是写一段程序由 <code>run_code</code> 一次执行——官方描述是“原本五次模型↔工具往返的序列，一次调用跑完”。loop 本身没有任何变化，调度器与 turn/step 语义和 standard 完全一致。收益与代价同源：把多步决策从“逐轮与模型商量”改为“一次性提交程序”，机械流程省往返 token，但出错后的调试复杂度由模型一肩挑。PTC 是工程权衡选项，不是能力升级。</p>
+<h3 id="82-创造模式机制全解">
+    <a href="#82-%e5%88%9b%e9%80%a0%e6%a8%a1%e5%bc%8f%e6%9c%ba%e5%88%b6%e5%85%a8%e8%a7%a3" class="header-anchor">#</a>
+    8.2 创造模式机制全解
+</h3><h4 id="821-自指工具链一次完整的自我扩展循环">
+    <a href="#821-%e8%87%aa%e6%8c%87%e5%b7%a5%e5%85%b7%e9%93%be%e4%b8%80%e6%ac%a1%e5%ae%8c%e6%95%b4%e7%9a%84%e8%87%aa%e6%88%91%e6%89%a9%e5%b1%95%e5%be%aa%e7%8e%af" class="header-anchor">#</a>
+    8.2.1 自指工具链：一次完整的自我扩展循环
+</h4><p>创造模式对应官方包 <code>@deepseek-ai/dsh-tool-cordis</code>，其核心是官方设计笔记（2026 年 7 月 8 日，状态 implemented）定义的自指工具链。“agent 检查自己的运行时”没有玄学成分，它就是一次机械循环：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">flowchart LR
+</span></span><span class="line"><span class="cl">    A[&#34;发现缺能力&#34;] --&gt; B[&#34;cordis_inspect&lt;br/&gt;枚举活 fiber / 服务 / 事件 / API 签名&#34;]
+</span></span><span class="line"><span class="cl">    B --&gt; C[&#34;模型现场写插件代码&#34;]
+</span></span><span class="line"><span class="cl">    C --&gt; D[&#34;cordis_mount&lt;br/&gt;node:vm realm 求值&lt;br/&gt;挂为 dyn-N 内存插件&#34;]
+</span></span><span class="line"><span class="cl">    D --&gt; E[&#34;后续轮次直接调用&#34;]
+</span></span><span class="line"><span class="cl">    E --&gt; F{&#34;任务结束&#34;}
+</span></span><span class="line"><span class="cl">    F --&gt; G[&#34;cordis_unmount&lt;br/&gt;等到全部 effect 静止&#34;]
+</span></span><span class="line"><span class="cl">    F --&gt; H[&#34;自然消亡&lt;br/&gt;重启即消失&#34;]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>逐环节看。<code>cordis_inspect</code> 对当前进程的<strong>活体运行时</strong>输出只读报告，分区列出全部服务及所属 fiber、活体插件纤维、可调工具、临时插件状态、API 签名与事件表；API 目录由 AST 扫描生成并有 CI 门禁保证与代码同步，解决“模型要调用从未见过源码的服务”这一正确性难题，避免盲猜签名浪费 turn。<code>cordis_mount</code> 把模型提交的代码作为 async JavaScript 函数体在新的 <code>node:vm</code> realm 求值，返回的 Plugin 挂到内部 <code>cordis-dynamic</code> 组，编号 dyn-1、dyn-2……挂载完成后，插件立即进入普通 Cordis 语义——经 <code>provide</code>/<code>inject</code> 与其他插件组合，其工具在后续轮次可被直接调用。<code>cordis_unmount</code> 则<strong>等到该插件全部工具、监听器、服务、定时器与 effect 都静止才返回</strong>——前几章所述 disposer 逆序撤销与级联通知机制，在这里找到了直接的消费者。</p>
+<p>这就是内测用户 JY Zhang 那句“聊两句功能就做好了”的机械实现。有个存疑点：官方设计笔记与 D3 源码记录的是三工具（inspect/mount/unmount），而 <code>tool-cordis</code> 的 README 记录的是五工具（inspect/define/run/stop/undefine），两边对不上，本文按设计笔记来。</p>
+<h4 id="822重启即消失是设计选择安全定级--bash-等价信任">
+    <a href="#822%e9%87%8d%e5%90%af%e5%8d%b3%e6%b6%88%e5%a4%b1%e6%98%af%e8%ae%be%e8%ae%a1%e9%80%89%e6%8b%a9%e5%ae%89%e5%85%a8%e5%ae%9a%e7%ba%a7--bash-%e7%ad%89%e4%bb%b7%e4%bf%a1%e4%bb%bb" class="header-anchor">#</a>
+    8.2.2“重启即消失”是设计选择；安全定级 = bash 等价信任
+</h4><p>两个最易被误读为“半成品”的特征，都是写进 Decision 的显式取舍。其一是<strong>易失性</strong>：设计笔记原文写明 <code>cordis_mount</code> 求值代码后“saves it nowhere”——不创建插件文件、不改 <code>cordis.yml</code>、不装包，“没有任何自动保存、提升或安装路径”；会话恢复也只重建对话历史，绝不重建临时插件。这不是来不及做持久化，而是与“一切必须可完全处置”的正确性目标配套的决定：内存态意味着不存在最难回滚的“半持久中间态”。想保留成果，官方路径是让 agent 走正常开发流程实现为正式插件——先试后固化。其二是<strong>安全定级</strong>：官方原话是“an opt-in development tool with bash-equivalent trust, not a security boundary or product default”——<code>node:vm</code> 只隔离意外的全局污染，临时插件可用宿主权限调 <code>ctx.shell</code>、触达真实文件系统与网络、影响同进程其他会话；加固沙箱被明确列为“考虑过但拒绝”，理由是那会“违背把活体运行时交给模型的整个目的”。发布次日社区即出现实证：dsh-external 组织下存在名为 <code>dsh-security</code> 的“攻击链 demo”仓库。正确的心智模型是官方警告：把创造模式当成“有 Shell 的会话”。</p>
+<h3 id="83-自进化叙事的正反双方">
+    <a href="#83-%e8%87%aa%e8%bf%9b%e5%8c%96%e5%8f%99%e4%ba%8b%e7%9a%84%e6%ad%a3%e5%8f%8d%e5%8f%8c%e6%96%b9" class="header-anchor">#</a>
+    8.3 自进化叙事的正反双方
+</h3><h4 id="831-正方jy-zhang-的六点论述">
+    <a href="#831-%e6%ad%a3%e6%96%b9jy-zhang-%e7%9a%84%e5%85%ad%e7%82%b9%e8%ae%ba%e8%bf%b0" class="header-anchor">#</a>
+    8.3.1 正方：JY Zhang 的六点论述
+</h4><p>发布当天，Multica 创始人 &amp; CEO Jiayuan (JY) Zhang——提前一个月被 dsh 负责人崔添翼拉进仓库的内测用户——发表了一篇阅读量 32 万 + 的 X 长帖。要点可归纳为：dsh 既是可直接运行的 Coding Agent 也是开发框架；以 Coding Agent 标准衡量，当前体验尚不如 Claude Code/Codex；官方 agent 只是一套预置拼法，他用乐高汽车作比——“你完全可以把里面的零件换成自己喜欢的：换引擎、换轮胎……甚至最后拼出来的东西也不一定还是一辆汽车”；一切皆插件，<strong>甚至 Agent Loop 本身</strong>；以及最关键的第五点——“DSH 现在已经可以让 Agent 检查自己的 runtime，现场写一个插件并挂载上去，然后在后续的任务里直接使用这个刚刚获得的能力”，他认为这是“自进化软件的雏形”。值得注意的是他自己保留了限定：这部分“还比较实验性：动态生成的插件只存在于内存里，重启就没了，也还不能自动沉淀成一个永久插件”。另一位内测用户 Anionex 更进一步：“未来和现在的 Agent 也许只是 Agent Runtime 上不同的一套 Preset/Composition”。</p>
+<h4 id="832-反方宝玉自进化伪命题论">
+    <a href="#832-%e5%8f%8d%e6%96%b9%e5%ae%9d%e7%8e%89%e8%87%aa%e8%bf%9b%e5%8c%96%e4%bc%aa%e5%91%bd%e9%a2%98%e8%ae%ba" class="header-anchor">#</a>
+    8.3.2 反方：宝玉“自进化伪命题”论
+</h4><p>同日，中文圈 AI 科普作者宝玉（@dotey）给出针锋相对的判断：“软件自进化可能是个伪命题，只会带来更大的混乱。插件要么是一次性用完就扔的，要么就得要设计、验证和维护的，不是现在模型能力可以‘自进化’的。”他援引 OpenClaw 那“一坨能自进化的 Skills”作为负面示范，结论“还是等模型自学习自进化更靠谱点”。跟进者论点分两层：工程层，自我生成的代码缺乏设计、验证与维护，持久化自我修改的同时也会持久化错误与坏策略；产品层，Node.js 工具链门槛与生态冷启动悖论（“插件生态的繁荣必须以大量普通用户为前提”）都让自进化离普通用户很远。叠加 8.2.2 的两个硬事实——动态插件仅内存态、vm 非安全边界——反方指出的实质是：<strong>当前实现距“自进化”一词的日常含义，还隔着持久化、验证、安全三道未填的鸿沟</strong>。公平地说，双方分歧比标题党呈现的更小：正方无人声称已实现持久自进化，反方质疑的是自进化作为当下产品价值，而非这套基础设施的方向。</p>
+<h4 id="833-yageai-论证链整套-cordis-机制皆为自进化的物理插槽">
+    <a href="#833-yageai-%e8%ae%ba%e8%af%81%e9%93%be%e6%95%b4%e5%a5%97-cordis-%e6%9c%ba%e5%88%b6%e7%9a%86%e4%b8%ba%e8%87%aa%e8%bf%9b%e5%8c%96%e7%9a%84%e7%89%a9%e7%90%86%e6%8f%92%e6%a7%bd" class="header-anchor">#</a>
+    8.3.3 yage.ai 论证链：整套 Cordis 机制皆为自进化的“物理插槽”
+</h4><p>缝合正反双方的是鸭哥（yage.ai）对照 Codex 源码逐行比较的长文《为了自进化这盘醋包了一整盘饺子》。论证链分五步。第一步，两种插件世界观分野：Codex 是声明式——插件是磁盘上的文件加配置，换插件等于改配置重启三秒；dsh 是命令式——插件在 harness 进程内带状态运行。第二步，命令式模型的一切复杂度（撤销账本、依赖通知、fiber 生命周期、事务性 HMR）都来自运行时热替换的需要。第三步，<strong>日常场景找不到非用它不可的理由</strong>：鸭哥自述“花了不少时间试图找出一个场景证明 dsh 命令式模型比 Codex 声明式模型有明显优势，但说实话并没有找到”。第四步，唯一 Codex 补代码也追不上的结构性差异是 <strong>agent loop 可热替换</strong>：Codex 的 <code>run_turn()</code> 编译死在 Rust 二进制里，“哪怕模型进化出了写全新 loop 的能力，系统里也没有任何接口能把它装上去”；dsh 的 loop 是写在外面、可读可改的 TypeScript 插件，“DSH 恰好补上了这个物理插槽”（精确的过渡语义见 7.4.2：排水—重建而非热交接）。第五步，整套 Cordis 重机制的存在理由因此是为“loop 可热替换”一个目标服务——回滚用于卸载 loop 时拆干净脚手架，依赖通知用于换版后提醒重载。</p>
+<p>此论证有论文原文佐证：Cordis 论文（与 dsh 同日发布、未经同行评审的 preprint）§8（结论与未来方向）明确写道，目标是“an AI agent generates and replaces its own harness components continuously and with little human oversight”。鸭哥的结论克制：“为了自进化这碟醋，DSH 包了一整盘饺子。饺子好不好吃另说，但醋目前确实只有这里有”。当然，这是<strong>社区分析者的推断性解读</strong>——虽有论文呼应，DeepSeek 官方从未以第一人称宣布“整套架构为自进化服务”。</p>
+<h3 id="84-战略闭环的蛛丝马迹">
+    <a href="#84-%e6%88%98%e7%95%a5%e9%97%ad%e7%8e%af%e7%9a%84%e8%9b%9b%e4%b8%9d%e9%a9%ac%e8%bf%b9" class="header-anchor">#</a>
+    8.4 战略闭环的蛛丝马迹
+</h3><h4 id="841-崔添翼转发翁荔轨迹基础设施齐备rl-闭环属社区推断">
+    <a href="#841-%e5%b4%94%e6%b7%bb%e7%bf%bc%e8%bd%ac%e5%8f%91%e7%bf%81%e8%8d%94%e8%bd%a8%e8%bf%b9%e5%9f%ba%e7%a1%80%e8%ae%be%e6%96%bd%e9%bd%90%e5%a4%87rl-%e9%97%ad%e7%8e%af%e5%b1%9e%e7%a4%be%e5%8c%ba%e6%8e%a8%e6%96%ad" class="header-anchor">#</a>
+    8.4.1 崔添翼转发翁荔；轨迹基础设施齐备；RL 闭环属社区推断
+</h4><p>最后一圈证据来自 DeepSeek 内部人员的行为。2026 年 7 月，翁荔（Lilian Weng）发表博文提出“自进化先从 Harness 开始”的三层论（Weakness Mining → Harness Proposal → Proposal Validation）；<strong>dsh 项目负责人崔添翼（前 Jane Street）转发附议</strong>。一个月后 dsh 开源——可替换 loop、创造模式、全量轨迹日志恰好构成这类 harness 自改进实验的理想载体。基础设施侧确已齐备：append-only 会话日志记录模型看到的一切，支持 resume/fork/search/replay，“fork 一个会话、换个模型重跑，两条轨迹完全可比”；事件流内置不可变的 <code>feedback/record</code> 人类反馈事件与 telemetry；minimal 模式本身就是官方模型评测环境——harness 与模型评测的闭环在内部已实际运转。但有一条要说清：<strong>“dsh 会话数据回流 RL 训练”只有间接证据与社区推断，DeepSeek 未公开声明过这一闭环</strong>——这是个有强旁证的开放问题，不是既定事实。</p>
+<p>三条线并在一起看：论文 §8 写下自进化 harness 的未来方向，负责人公开附议“自进化先从 Harness 开始”，产品里交付了唯一能让 agent 在运行时改写自身的“物理插槽”。单看任何一条都可是巧合，三条同向则构成一个足以解释整个架构重投入的假说。若假说成立，dsh 今天呈给用户的所有“难用”与“过度设计”，都只是为尚未发生的事预付的跑道成本——真正值得观察的信号，不是插件生态有多繁荣，而是第一个由 agent 自己写出来、并且活过重启的 loop 何时出现。</p>
+<h2 id="9-谱系与横评dsh-在插件架构史与-harness-竞争中的位置">
+    <a href="#9-%e8%b0%b1%e7%b3%bb%e4%b8%8e%e6%a8%aa%e8%af%84dsh-%e5%9c%a8%e6%8f%92%e4%bb%b6%e6%9e%b6%e6%9e%84%e5%8f%b2%e4%b8%8e-harness-%e7%ab%9e%e4%ba%89%e4%b8%ad%e7%9a%84%e4%bd%8d%e7%bd%ae" class="header-anchor">#</a>
+    9. 谱系与横评：dsh 在插件架构史与 harness 竞争中的位置
+</h2><p>前面八章沿“理念—理论—机制—战略”完成了纵向解剖，本章只做横向定位：把 dsh 放进两张坐标系——一张是软件工程四十年的插件架构史，一张是 2025–2026 年的 agent harness 竞争格局——以此坐实许多读者的直觉：“它虽然也叫插件，但跟我们原来说的插件系统不太一样。”这个直觉是准确的，但需要精确的谱系语言才能说清它到底不一样在哪。</p>
+<h3 id="91-插件架构谱系对照">
+    <a href="#91-%e6%8f%92%e4%bb%b6%e6%9e%b6%e6%9e%84%e8%b0%b1%e7%b3%bb%e5%af%b9%e7%85%a7" class="header-anchor">#</a>
+    9.1 插件架构谱系对照
+</h3><p>先纠正一个最容易产生的误读：“注册即可撤销”不是 Cordis 的发明。在软件史上，这一思想至少有四条彼此独立的血统：OSGi 规范早在 2000 年代就规定 bundle 停止时框架必须自动注销其注册的全部服务与监听器，开发者“无需在 stop 方法里手动注销任何东西”；VS Code 要求扩展把一切注册产物（命令、监听、状态栏）push 进 <code>context.subscriptions</code>，在 deactivate 时统一 dispose；React 的 <code>useEffect</code> 以“effect 返回清理函数”的形态把这一模式普及给了整整一代前端开发者；Effect-TS 的 Scope 则规定 scope 关闭时其内全部资源的 finalizer 按逆序执行，与结构化并发“子任务不得越出父 scope、scope 退出前等待全部子任务”的律条一脉相承。Cordis 的论文摘要对此相当克制：它只说动态组合的“形式化基础尚不完善”（formal foundations remain underdeveloped），把自身创新定位在形式化而非机制发明。</p>
+<h4 id="911-对比表cordis-vs-osgi-vs-vscode-disposable-vs-webpack-vs-微内核-vs-effect-ts卸载语义依赖管理可逆性保证核心可否替换四个维度">
+    <a href="#911-%e5%af%b9%e6%af%94%e8%a1%a8cordis-vs-osgi-vs-vscode-disposable-vs-webpack-vs-%e5%be%ae%e5%86%85%e6%a0%b8-vs-effect-ts%e5%8d%b8%e8%bd%bd%e8%af%ad%e4%b9%89%e4%be%9d%e8%b5%96%e7%ae%a1%e7%90%86%e5%8f%af%e9%80%86%e6%80%a7%e4%bf%9d%e8%af%81%e6%a0%b8%e5%bf%83%e5%8f%af%e5%90%a6%e6%9b%bf%e6%8d%a2%e5%9b%9b%e4%b8%aa%e7%bb%b4%e5%ba%a6" class="header-anchor">#</a>
+    9.1.1 对比表：Cordis vs OSGi vs VSCode Disposable vs webpack vs 微内核 vs Effect-TS——卸载语义、依赖管理、可逆性保证、核心可否替换四个维度
+</h4><p>下表沿卸载语义、依赖管理、可逆性保证、核心可否替换四个维度做横向对照。凡涉及规范原文的表述均以官方文档为准，涉及 Cordis 的表述以论文预印本与 dsh 官方架构文档为准。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Cordis (dsh)</th>
+<th>OSGi</th>
+<th>VS Code Disposable</th>
+<th>webpack/Tapable</th>
+<th>微内核（POSA）</th>
+<th>Effect-TS Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>卸载语义</td>
+<td>Fiber 六态状态机；disposer 逆序回收并递归卸载子插件；全部异步清理完成才算卸载结束</td>
+<td>bundle 停止即自动注销服务/监听器；但导出 package 代码留存 JVM 可被继续执行，线程、连接等资源需在 stop() 中手写释放</td>
+<td>deactivate 时统一 dispose；但多数扩展的安装/更新需 reload window，热替换不是设计目标</td>
+<td>无运行时卸载概念——构建期 tap 上去就永远在那里</td>
+<td>内核本体常驻不可卸载，仅外围服务可插拔</td>
+<td>scope 关闭时 finalizer 逆序执行</td>
+</tr>
+<tr>
+<td>依赖管理</td>
+<td><code>inject</code> 声明式、响应式：缺依赖则停在 PENDING；提供者要走，消费者先级联退出</td>
+<td>Import-Package/Require-Bundle 静态解析 + Declarative Services 动态 bind/unbind</td>
+<td>extensionDependencies 弱语义 + activationEvents 懒激活</td>
+<td>无，插件互不感知，经 hook 间接交互</td>
+<td>服务定位器/注册表，多为静态装配</td>
+<td>无服务依赖概念，只有父子 scope 生命周期关系</td>
+</tr>
+<tr>
+<td>可逆性保证</td>
+<td>一等设计目标：revertible effect + 元定理（论文预印本，未经同行评审）；框架只保证“不漏调、不乱序”，语义正确性归插件作者</td>
+<td>部分：注册项自动回收，代码与资源不可逆——classloader 泄漏是 OSGi 著名的老问题</td>
+<td>机制具备但场景弱：“有撤销机制、无热卸载场景”</td>
+<td>零</td>
+<td>零（内核即系统本体）</td>
+<td>高（资源安全是其存在理由），但仅限资源/任务，不含服务注册表</td>
+</tr>
+<tr>
+<td>核心可否替换</td>
+<td><strong>无特权核心</strong>：agent loop、模型适配器、会话日志全是插件，拆掉所有插件什么都不剩</td>
+<td>不可：规范强制 system bundle 不可卸载，<code>uninstall()</code> 必须抛 BundleException</td>
+<td>不可：编辑器内核离开插件仍是可用产品</td>
+<td>不可：Compiler 核心不可替换</td>
+<td>不可：薄内核 middleware 是永久中心</td>
+<td>不适用：它是库而非系统，无“核心”概念</td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表最能说明问题的是最后一行：前五个系统无论卸载语义做得多早、多完善，都共享同一个结构预设——存在一个享有特权、不可替换的中心，插件永远是“客人”。Cordis 的差异不在任何单一格子里，而在三个格子的交集：运行时级的可逆性（OSGi 早有其形但语义不彻底）、无处不在的热卸载场景（VS Code 有机制而无场景）、以及无特权核心（微内核明确保留了中心）。还有两点对照细节：其一，OSGi 的动态性其实相当早熟，其短板在 JVM classloader 层面的代码残留，而 Cordis 跑在 JS 动态模块之上，天然绕开了这个特定问题；其二，Effect-TS 的 Scope 与 Cordis 的 fiber/disposer 栈在语义上几乎同构，但 Scope 是库级资源安全原语、要求业务代码写进 effect 类型里，Cordis 则把同一思想做成了插件系统的内核，并叠加了服务依赖（coeffect）维度。</p>
+<h4 id="912-结论cordis-未发明可撤销真正创新是形式化与升格">
+    <a href="#912-%e7%bb%93%e8%ae%bacordis-%e6%9c%aa%e5%8f%91%e6%98%8e%e5%8f%af%e6%92%a4%e9%94%80%e7%9c%9f%e6%ad%a3%e5%88%9b%e6%96%b0%e6%98%af%e5%bd%a2%e5%bc%8f%e5%8c%96%e4%b8%8e%e5%8d%87%e6%a0%bc" class="header-anchor">#</a>
+    9.1.2 结论：Cordis 未发明“可撤销”，真正创新是形式化与升格
+</h4><p>可以用一个类比收拢上表：所有人都知道饭前要洗手，OSGi、VS Code、Effect-TS 都“会洗手”，但洗手只是贴在厨房墙上的一条卫生建议——做不做、做到什么程度，看各道菜的自觉。Cordis 是第一个把“洗手步骤写进每一道菜的菜谱”的体系：任何经 <code>ctx</code> 的注册必须当场附带逆操作，没有任何组件享有豁免权，连 agent loop 也不例外。官方架构文档的表述是：“There is no privileged core to patch”——扩展 dsh 的方式是在其他插件旁边再挂一个插件，注册即 effect，卸载即回滚。</p>
+<p>由此，Cordis 的真正创新是两条。其一是形式化：把 revertible effect 与 reactive coeffect 提升为带元定理（Recovery Exactness、Progress、Confluence）的演算，要求“组件移除后系统回到它从未启动过的状态”。这种“把限制写进理论”的做法在谱系上有先例可寻——软件事务内存（STM）当年正是用类型系统禁止“在事务里发射导弹”，来划清可回滚与不可回滚的边界；Cordis 论文同样自划边界：已逃逸到外部世界的副作用（已发出的邮件、已提交的订单）不在恢复范围内。其二是升格：可逆性从“资源管理的最佳实践”变为“系统唯一的组织原则”，微内核思想被推到极限——中心被削减为纯粹的接线与调度元框架，所有组件付同样的代价。</p>
+<p>还有两个限定要交代。第一，Koishi 生态“4000+ 社区插件、四年生产验证”跑的是 Cordis v3，而论文与 dsh 使用的是重构过 effect/coeffect 语义的 v4，社区论文解读明确指出“四千个插件不能直接替 v4 的每一处新实现作证”。第二，配套论文目前是 88 页预印本，元定理未经独立同行评审。因此更准确的谱系定位是：Cordis 是第一个把这套思想（a）形式化为带元定理的演算、（b）应用于 LLM agent harness 这一新领域的系统——而不是“可撤销”本身的发明者。</p>
+<h3 id="92-主流-harness-架构横评">
+    <a href="#92-%e4%b8%bb%e6%b5%81-harness-%e6%9e%b6%e6%9e%84%e6%a8%aa%e8%af%84" class="header-anchor">#</a>
+    9.2 主流 harness 架构横评
+</h3><p>如果说 9.1 回答“思想从哪来”，9.2 回答“与同代产品分叉在哪”。本节以 Codex 为主要对照组——理由很务实：Claude Code 闭源无法核查，Codex 源码公开、可以逐行比较。</p>
+<h4 id="921-对比矩阵dsh-vs-codex-vs-claude-code-vs-opencode-vs-kimi语言核心形态loop-可否替换扩展机制会话持久化开源度">
+    <a href="#921-%e5%af%b9%e6%af%94%e7%9f%a9%e9%98%b5dsh-vs-codex-vs-claude-code-vs-opencode-vs-kimi%e8%af%ad%e8%a8%80%e6%a0%b8%e5%bf%83%e5%bd%a2%e6%80%81loop-%e5%8f%af%e5%90%a6%e6%9b%bf%e6%8d%a2%e6%89%a9%e5%b1%95%e6%9c%ba%e5%88%b6%e4%bc%9a%e8%af%9d%e6%8c%81%e4%b9%85%e5%8c%96%e5%bc%80%e6%ba%90%e5%ba%a6" class="header-anchor">#</a>
+    9.2.1 对比矩阵：dsh vs Codex vs Claude Code vs OpenCode vs Kimi——语言/核心形态/loop 可否替换/扩展机制/会话持久化/开源度
+</h4><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>dsh (DeepSeek)</th>
+<th>Codex (OpenAI)</th>
+<th>Claude Code (Anthropic)</th>
+<th>OpenCode</th>
+<th>Kimi Code CLI (Moonshot)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>语言/运行时</td>
+<td>TypeScript，Node.js 22+，pnpm monorepo</td>
+<td>Rust（约 96.2%），单二进制分发</td>
+<td>闭源；逆向显示为 TS 打包产物</td>
+<td>TypeScript，Bun 运行时，内部大量使用 Effect-TS</td>
+<td>原 Python，重写为 Bun+TS 单二进制</td>
+</tr>
+<tr>
+<td>核心形态</td>
+<td>Cordis 元框架内核（只管装载/卸载/依赖），无特权核心</td>
+<td>Rust 单体核心 + 预设扩展插槽</td>
+<td>闭源单体 + 文件/配置扩展槽</td>
+<td>server/worker 架构，loop 在 session 模块</td>
+<td>单体 CLI，内置 3 个子 agent</td>
+</tr>
+<tr>
+<td>loop 可否替换</td>
+<td><strong>可替换</strong>（排水—拆卸—从日志重建；不重启进程、不丢会话历史，非无缝热交接，见 7.4.2；agent-loop 是普通插件，对外提供 <code>ctx.agentLoop</code> 服务）</td>
+<td>不可：<code>run_turn()</code> 为约 2757 行的硬编码控制流，要换只能 fork 重编译</td>
+<td>不可：闭源，无任何 loop 替换接口</td>
+<td>不可：V1 <code>prompt.ts</code> while(true) / V2 <code>llm.ts</code> 双 while 写死，插件仅有 hook 事件</td>
+<td>不可（未见 loop 插件化机制）</td>
+</tr>
+<tr>
+<td>扩展机制</td>
+<td>一切皆插件：服务 + 类型化事件 + 可逆副作用 + 事务性 HMR</td>
+<td>声明式插件包（.codex-plugin/plugin.json 打包 skills/apps/MCP/hooks）+ contributor trait + 生命周期 hooks</td>
+<td>skills/hooks/subagents/MCP/plugins（2025-10-09 公测）</td>
+<td>进程内 TS 插件，但只能挂 chat.params、tool.execute.before/after 等 hook 事件</td>
+<td>MCP、生命周期 hooks、ACP 接 IDE</td>
+</tr>
+<tr>
+<td>会话持久化</td>
+<td>append-only 事件日志为唯一真相源，支持 fork/回放/检索</td>
+<td>rollout.rs，turn 级回放</td>
+<td>TUI 内管理 + 子 agent 隔离</td>
+<td>SQLite（Drizzle），prompt 先落库再执行</td>
+<td>本地会话</td>
+</tr>
+<tr>
+<td>开源度</td>
+<td>MIT，全源码（含多家模型适配器）</td>
+<td>Apache-2.0，全源码</td>
+<td><strong>闭源</strong>（仓库仅 issue tracker 与文档）</td>
+<td>MIT</td>
+<td>MIT 或 Apache-2.0，各来源说法不一，存疑</td>
+</tr>
+</tbody>
+</table></div>
+<p>矩阵中最刺眼的是“loop 可否替换”一行：一家 yes、其余全 no。这不是巧合，而是 dsh 全部架构复杂度的指向——这一点 9.2.2 展开。其余维度各家互有胜负：会话持久化上，dsh 的事件溯源与 OpenCode 的“prompt 先落库”都把可恢复性当作一等公民；开源度上 Claude Code 是唯一闭源者，其内部结构（<code>src/query.ts</code> 约 1729 行、四策略压缩）只能依赖第三方逆向拆解，是全表置信度最低的一列。时效性也说一下：dsh 是官方明示“将有破坏性变更”的开发者预览，Codex 迭代极快（2026 年 Q2 单季 26 个 release），表中基于 2026-08 当前 main 分支的源码事实随时可能位移。</p>
+<h4 id="922-声明式-vs-命令式插件两种世界观的理性分叉">
+    <a href="#922-%e5%a3%b0%e6%98%8e%e5%bc%8f-vs-%e5%91%bd%e4%bb%a4%e5%bc%8f%e6%8f%92%e4%bb%b6%e4%b8%a4%e7%a7%8d%e4%b8%96%e7%95%8c%e8%a7%82%e7%9a%84%e7%90%86%e6%80%a7%e5%88%86%e5%8f%89" class="header-anchor">#</a>
+    9.2.2 声明式 vs 命令式插件：两种世界观的理性分叉
+</h4><p>yage.ai 的深度分析给出了本节剩余部分的分析骨架：两家代表两种插件世界观。Codex/Claude Code 的插件是<strong>声明式</strong>的——磁盘上的文件与配置（SKILL.md、.mcp.json、hooks 脚本），不在 harness 进程里跑代码，进程生死由操作系统管，改完重启两三秒生效；门槛低，但改不了 harness 自身行为。dsh/Cordis 的插件是<strong>命令式</strong>的——进程内带状态的代码，注册“我提供什么”服务、声明“我需要什么”依赖、携带可逆副作用，由框架撮合；换来的是热替换时的引用悬空问题，Cordis 的撤销账本、依赖通知、事务性 HMR 要替你踩的就是这些坑。</p>
+<p>yage 的关键判断是“上限相同、下限不同”。上限相同：抛开 loop 不谈，两种模型能做到的事一样——Codex 插件作者自己加一个 reload 端点也能热更 MCP server，Cordis 也只负责调度、业务清理仍要自己写；作者甚至诚实承认，他“花了不少时间试图找出一个命令式模型明显优于声明式模型的场景，但说实话没找到”，真正必须运行时热替换的组件须同时满足“进程内持有跨 turn 状态”且“状态未持久化进 session log”，这样的组件极少（上下文管理器算一个）。下限不同：Cordis 把撤销账本管理、依赖通知、事务回滚这些边缘坑全部替你踩完（fiber.ts 单文件约 750 行），Codex 则把这份自由度连同踩坑风险留给插件作者。</p>
+<p>唯一追不上的点是 agent loop。Codex 的 <code>run_turn()</code> 是硬编码骨架——采样前压缩、构建上下文、流式请求、工具执行、中途 auto-compact、stop hooks——contributor trait 只允许在预设插槽注入内容；想把单 agent loop 换成多 agent 协作、把“请求→等响应→执行工具”换成“流式解析→并行执行”，只能 fork。而 dsh 的 loop 是写在外面、可读可改的 TS 普通插件——yage.ai 由此给出著名判断：DSH 补上了“物理插槽”（完整论证链见 8.3.3）。</p>
+<p>对 Codex 的 Rust 单体要说句公道话：OpenAI 官方给出的重写理由是零依赖安装、内核级沙箱绑定（Landlock/seccomp/Seatbelt）、无 GC 低内存、wire protocol 扩展。这是“性能与分发 vs 热插拔组合”之间的理性权衡分叉，不是优劣评判——Codex 经 MCP/wire protocol 获得的是进程边界之外更粗粒度但隔离更强的可组合性，dsh 的进程内热插拔更灵活但隔离更弱（其 GitHub Discussion 中已出现一条坏插件拖垮整个插件树的实际案例）。</p>
+<h3 id="93-为什么模型厂商必须自研-harness">
+    <a href="#93-%e4%b8%ba%e4%bb%80%e4%b9%88%e6%a8%a1%e5%9e%8b%e5%8e%82%e5%95%86%e5%bf%85%e9%a1%bb%e8%87%aa%e7%a0%94-harness" class="header-anchor">#</a>
+    9.3 为什么模型厂商必须自研 harness
+</h3><h4 id="931-基准分数对-harness-敏感掌握-harness掌握评测话语权与轨迹数据管道">
+    <a href="#931-%e5%9f%ba%e5%87%86%e5%88%86%e6%95%b0%e5%af%b9-harness-%e6%95%8f%e6%84%9f%e6%8e%8c%e6%8f%a1-harness%e6%8e%8c%e6%8f%a1%e8%af%84%e6%b5%8b%e8%af%9d%e8%af%ad%e6%9d%83%e4%b8%8e%e8%bd%a8%e8%bf%b9%e6%95%b0%e6%8d%ae%e7%ae%a1%e9%81%93" class="header-anchor">#</a>
+    9.3.1 基准分数对 harness 敏感：掌握 harness=掌握评测话语权与轨迹数据管道
+</h4><p>先看事实层。DeepSeek 官方披露 V4 系列的 agent 基准（DeepSWE、Cybergym、Terminal Bench 2.1 等）全部使用 dsh minimal 模式——只保留 bash 与 str_replace_editor 两个工具——在 max 档位、top_p=0.95、temperature=1.0 下测得；其中 V4-Pro-0813 的 DeepSWE 从前代的 12.8 跃升至 62.7，Cybergym 从 52.7 升至 83.3。再看限定层：这些数字均为厂商自测，LM Studio 模型卡明确加注“agent 分数对 harness 极度敏感，应视为厂商自报、待第三方复现”；外界无法分离这 +49.9 分中 post-training 与 harness 协同优化各自的贡献。独立旁证来自 SWE-bench Pro 的实验：同一模型仅更换 scaffold，分数可从 38% 摆动到 60%——22 个百分点的差距，量级超过许多模型代际提升。</p>
+<p>当同一模型换一套 harness 就能产生如此幅度的分数摆动时，harness 便不再是中性的测量工具，而是度量本身的组成部分——它是称量模型能力的那杆秤，谁掌握秤，谁定义分数。模型厂商自研 harness 的动机由此清晰为三层。其一，评测话语权：官方以 minimal 模式“最小化 harness 加成”，被社区解读为提供公平对比模型的最干净脚手架——脚手架的定义权本身即是权力。其二，模型—harness 协同迭代：V4-Flash 0731 仅靠重跑 post-training、同尺寸模型便把 DeepSWE 从 7.3 拉到 54.4，这种迭代要求 harness 行为完全可控、可复现，借别人之手无法完成。其三，轨迹数据管道：dsh 的 append-only 会话事件日志天然是高质量 agent 轨迹的采集器，但“session log 用作模型训练数据”目前只有间接证据与社区推断，官方从未明说，本章只把它当开放问题看，不当事实。</p>
+<p>由此回看 dsh 的架构选择，其激进之处便有了战略语境：当“秤”本身也变成一个无特权核心、连称量逻辑（loop）都可热替换的插件系统时，harness 竞争的下半场将不取决于谁的默认 loop 更优雅，而取决于谁定义了基准、谁掌握了轨迹、谁的系统允许度量工具随模型一起演化——这是第 10 章社区定性“战略大于产品”的架构注脚。</p>
+<h2 id="10-社区生态与风险">
+    <a href="#10-%e7%a4%be%e5%8c%ba%e7%94%9f%e6%80%81%e4%b8%8e%e9%a3%8e%e9%99%a9" class="header-anchor">#</a>
+    10. 社区、生态与风险
+</h2><p>前面九章讲的是 dsh“被设计成这样”；本章换一个视角，陈列它在发布 48 小时内遭遇的真实世界：热度、赞誉、批评、安全评审与早期生态。本章只陈列事实并附简评，判断留给第 11 章。</p>
+<h3 id="101-赞誉与批评">
+    <a href="#101-%e8%b5%9e%e8%aa%89%e4%b8%8e%e6%89%b9%e8%af%84" class="header-anchor">#</a>
+    10.1 赞誉与批评
+</h3><h4 id="1011-赞誉hn-登顶-555-分armin-ronacher-好评乐高自进化讨论热度">
+    <a href="#1011-%e8%b5%9e%e8%aa%89hn-%e7%99%bb%e9%a1%b6-555-%e5%88%86armin-ronacher-%e5%a5%bd%e8%af%84%e4%b9%90%e9%ab%98%e8%87%aa%e8%bf%9b%e5%8c%96%e8%ae%a8%e8%ae%ba%e7%83%ad%e5%ba%a6" class="header-anchor">#</a>
+    10.1.1 赞誉：HN 登顶 555 分、Armin Ronacher 好评、乐高/自进化讨论热度
+</h4><p>热度本身是第一个事实。dsh 发布 1.5 小时 GitHub Star 突破 2.4 万，被快科技称为“GitHub 史上涨星速度最快的项目”；24 小时内超过 7 万星。Hacker News 讨论帖以 555 分、241 条评论登顶，DSH 团队负责人崔添翼（tianyicui）亲自回帖，承认“会有大量 rough edges 和兼容性破坏变更”并征集反馈。</p>
+<p>赞誉的内容值得细看——它几乎全部指向架构哲学而非产品体验。Flask 创始人 Armin Ronacher 公开表示 dsh“确实让我重新思考了一下我们在产品中进行 Harness 重构的方式”。流传最广的解读来自内测用户 Jiayuan Zhang：他把官方 Coding Agent 比作一辆预置拼法的乐高汽车，零件可任意替换，“甚至最后拼出来的东西也不一定还是一辆汽车”；他同时提出 dsh 已具“自进化软件”雏形——Agent 能检查自己的运行时、现场写插件并挂载使用。这条“乐高 + 自进化”叙事在社区持续发酵，极客公园据此定性“Agent 界的 Android 来了”。但注意一个共性：一手实测者几乎异口同声承认它“是毛坯、不是成品”——赞誉押注的是方向，不是当下体验。</p>
+<h4 id="1012-批评nodejs-门槛不知能做什么的学习成本兼容性警告引发观望">
+    <a href="#1012-%e6%89%b9%e8%af%84nodejs-%e9%97%a8%e6%a7%9b%e4%b8%8d%e7%9f%a5%e8%83%bd%e5%81%9a%e4%bb%80%e4%b9%88%e7%9a%84%e5%ad%a6%e4%b9%a0%e6%88%90%e6%9c%ac%e5%85%bc%e5%ae%b9%e6%80%a7%e8%ad%a6%e5%91%8a%e5%bc%95%e5%8f%91%e8%a7%82%e6%9c%9b" class="header-anchor">#</a>
+    10.1.2 批评：Node.js 门槛、“不知能做什么”的学习成本、兼容性警告引发观望
+</h4><p>批评同样具体，且集中在三个有实质的点上。其一是<strong>上手门槛</strong>：dsh 依赖 Node.js 工具链启动、无桌面客户端，宝玉（@dotey）的批评流传最广——“普通用户几乎无从运行”，安装门槛远高于可双击安装的竞品。其二是<strong>学习成本</strong>：快科技汇总网友反馈指出，dsh 与 Claude Code、Codex 差异很大，“用户不熟悉、不了解 dsh 能做什么也是个问题”。这并非抱怨界面，而是概念负担：web UI 之外还有 profile、bundle、patch、plugin 四层配置与扩展概念叠加（详见第 5 章 5.3 与第 2 章），对第一次打开的用户而言“这到底给谁用的”是真实困惑。其三是<strong>兼容性警告引发的观望</strong>：README 用全大写写明“THERE WILL BE COMPATIBILITY-BREAKING CHANGES”，而 36 氪/硅星人引用的社区兼容性追踪实测显示“运行级实测 5 个插件，可用 0 个，失败 5 个”——该实测为单一来源，样本极小，但它精确地量化了“破坏性变更警告”在社区心理上的分量。</p>
+<p>下表将两端观点并置，便于对照其实质而非情绪：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>阵营</th>
+<th>观点</th>
+<th>代表人物/来源</th>
+<th>实质内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>赞誉</td>
+<td>乐高式可重组架构</td>
+<td>Jiayuan Zhang（内测用户）</td>
+<td>一切皆插件，官方 Agent 只是一种预置拼法，零件可换、形态可变</td>
+</tr>
+<tr>
+<td>赞誉</td>
+<td>自进化软件雏形</td>
+<td>Jiayuan Zhang</td>
+<td>Agent 可自省运行时、现场写插件挂载；但承认重启即消失、尚实验性</td>
+</tr>
+<tr>
+<td>赞誉</td>
+<td>重新思考 Harness 重构</td>
+<td>Armin Ronacher（Flask 创始人）</td>
+<td>架构思想对从业者有真实的启发价值</td>
+</tr>
+<tr>
+<td>赞誉</td>
+<td>Agent 界的 Android</td>
+<td>极客公园</td>
+<td>战略意义大于产品完成度，给的是“待组装的零件”</td>
+</tr>
+<tr>
+<td>批评</td>
+<td>普通用户无从运行</td>
+<td>宝玉 @dotey</td>
+<td>Node.js 工具链 + 无桌面客户端，安装即劝退</td>
+</tr>
+<tr>
+<td>批评</td>
+<td>不知能做什么</td>
+<td>快科技汇总网友反馈</td>
+<td>与主流 Coding Agent 交互范式差异大，四层概念叠加学习成本高</td>
+</tr>
+<tr>
+<td>批评</td>
+<td>自进化可能是伪命题</td>
+<td>宝玉 @dotey</td>
+<td>插件要么用完即弃、要么需要设计验证维护，非当前模型能力可“自进化”</td>
+</tr>
+<tr>
+<td>批评</td>
+<td>兼容性警告引发观望</td>
+<td>36 氪/硅星人 Pro</td>
+<td>官方预警破坏性变更；社区实测 5 插件 0 可用（单一来源、小样本）</td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表透露的结构性信息比任何单条观点都重要：赞誉方与批评方谈论的几乎不是同一个对象。赞誉方谈论的是“作为架构与战略标本的 dsh”，批评方谈论的是“作为今天就要用的产品的 dsh”。两者可以同时为真——一手实测普遍承认毛坯状态，恰好说明社区对“方向正确、当下难用”这一组合有着罕见的一致。真正未决的分歧只有一条：自进化究竟是雏形还是伪命题，这一争议的技术细节已在第 8 章展开。</p>
+<h3 id="102-安全讨论">
+    <a href="#102-%e5%ae%89%e5%85%a8%e8%ae%a8%e8%ae%ba" class="header-anchor">#</a>
+    10.2 安全讨论
+</h3><h4 id="1021-腾讯新闻刊发安全评审4-个-poc-证实攻击链默认可达官方审批管线存在但未默认接线">
+    <a href="#1021-%e8%85%be%e8%ae%af%e6%96%b0%e9%97%bb%e5%88%8a%e5%8f%91%e5%ae%89%e5%85%a8%e8%af%84%e5%ae%a14-%e4%b8%aa-poc-%e8%af%81%e5%ae%9e%e6%94%bb%e5%87%bb%e9%93%be%e9%bb%98%e8%ae%a4%e5%8f%af%e8%be%be%e5%ae%98%e6%96%b9%e5%ae%a1%e6%89%b9%e7%ae%a1%e7%ba%bf%e5%ad%98%e5%9c%a8%e4%bd%86%e6%9c%aa%e9%bb%98%e8%ae%a4%e6%8e%a5%e7%ba%bf" class="header-anchor">#</a>
+    10.2.1 腾讯新闻刊发安全评审：4 个 PoC 证实攻击链默认可达；官方审批管线存在但未默认接线
+</h4><p>发布当天，腾讯新闻专栏刊发了一篇针对 0.1.0-rc.5 的专业安全评审《沙箱与一个总钥匙》，以 4 个附 file:line 证据的 PoC 实证了 3 条独立漏洞加 1 条链式利用：<strong>prompt injection → 动态插件 → vm 沙箱逃逸 → 裸 subprocess → 宿主机远程代码执行（RCE）</strong>，且场景 A 在默认部署下即可达、不依赖任何配置失误。评审同时指出：官方并非没有安全设计——权限三档、bash 沙箱、凭据脱敏俱在——但审批管线（dsh-user-approval）作为服务存在却<strong>未默认接线</strong>，tool-bash 源码中留有 TODO(permissions)。36 氪/硅星人另发现 dsh-external 组织下存在名为 dsh-security 的仓库，简介为“DSH 现有的可行的攻击链 demo”。</p>
+<p>这篇评审的分量要交代：它由媒体专栏刊发、内容专业自洽，其结论方向与官方自认一致，但<strong>漏洞细节未经本文独立复核</strong>；评审针对的是发布前一天的 rc.5 预发布版，是否适用于后续版本尚无跟进验证；dsh-security 仓库的归属（官方红队还是社区）亦未核实。与之互证的是官方自己的定级：第 8 章已引述创造模式设计笔记的原话——创造模式是“bash 等价信任的 opt-in 开发工具，不是安全边界”。官方自认与外部评审指向同一结论：vm 沙箱挡的是意外污染，挡不住有意攻击。</p>
+<p>把两层事实合起来，一个结构性问题浮现出来（这是本文的推理，非任何一方的原话）：dsh 的北极星是自我修改——Agent 读自己的运行时、写代码、挂进自己的进程。而自我修改的前提是回答“凭什么信任模型此刻写出的这段代码”。目前的答案是 bash 等价信任，即“像信任一个有 Shell 的人类一样信任它”。这在单人开发机上或可接受，但 prompt injection 的存在意味着“模型写代码”这个动作本身可能被第三方内容劫持。翁荔（Lilian Weng）在 dsh 发布前一个月的框架讨论中恰好预警过同一件事：“一旦允许程序自己修改系统层代码，……权限控制和安全层必须留在这个循环之外”。dsh 目前的现状是：循环已经建成，而站在循环之外的那道闸门——审批管线——存在但没有接线。</p>
+<h3 id="103-早期生态速览">
+    <a href="#103-%e6%97%a9%e6%9c%9f%e7%94%9f%e6%80%81%e9%80%9f%e8%a7%88" class="header-anchor">#</a>
+    10.3 早期生态速览
+</h3><h4 id="1031-两天-700-插件仓库腾讯-qq-bot-官宣三步接入dsh-deck-桌面端3-款-tuiglm-53-人格插件">
+    <a href="#1031-%e4%b8%a4%e5%a4%a9-700-%e6%8f%92%e4%bb%b6%e4%bb%93%e5%ba%93%e8%85%be%e8%ae%af-qq-bot-%e5%ae%98%e5%ae%a3%e4%b8%89%e6%ad%a5%e6%8e%a5%e5%85%a5dsh-deck-%e6%a1%8c%e9%9d%a2%e7%ab%af3-%e6%ac%be-tuiglm-53-%e4%ba%ba%e6%a0%bc%e6%8f%92%e4%bb%b6" class="header-anchor">#</a>
+    10.3.1 两天 700+ 插件仓库、腾讯 QQ Bot 官宣三步接入、DSH-Deck 桌面端、3 款 TUI、GLM-5.3 人格插件
+</h4><p>生态的爆发速度是罕见的。以 GitHub topic <code>dsh-plugin</code> 计，公开仓库两天内超过 700 个（此为发布 48 小时内的早期观察口径，另有“内测约 300 个”“社区六百多个”等不同统计并存，存在灌水与 fork 充数的可能）。几个有代表性的案例：腾讯官方发布 QQ Bot 插件，三步接入（一条 npx 命令添加插件、启动、扫码绑定），支持单聊群聊独立会话记忆与聊天中切换模型；社区一天内产出至少 5 款桌面客户端（如开源的 DSH-Deck，覆盖 Windows/macOS）；至少 3 款 TUI 终端界面，其中 dsh-TUI 被官方公众号作为内测精选插件收录；36 氪则用第三方模型 GLM-5.3 读懂 dsh 超 7000 个文件后，连夜生成了一款“人格插件”，28 项文档门禁全数通过——这个案例本身就是“模型为 harness 写插件”叙事的第一份实战样本。</p>
+<p>但数量与质量必须并置。与 700+ 仓库同在的，是 10.1.2 中那条“实测 5 个插件 0 个可用”的记录。生态数量的繁荣证明的是“写 dsh 插件这件事门槛足够低、吸引力足够大”，而兼容性的实测落差说明的是另一回事：在一个官方已预警破坏性变更的 rc 阶段内核上，插件生态的成熟注定滞后于插件生态的热闹。这一点将列入第 11 章的开放问题讨论。</p>
+<h2 id="11-总结dsh-到底是一个什么样的系统">
+    <a href="#11-%e6%80%bb%e7%bb%93dsh-%e5%88%b0%e5%ba%95%e6%98%af%e4%b8%80%e4%b8%aa%e4%bb%80%e4%b9%88%e6%a0%b7%e7%9a%84%e7%b3%bb%e7%bb%9f" class="header-anchor">#</a>
+    11. 总结：dsh 到底是一个什么样的系统
+</h2><p>前十章沿“理念—理论—机制—战略—风险”完成了对 dsh 的解剖，本章回到读者最初的五个疑问逐条清算，再给出本质判断与开放问题清单。</p>
+<h3 id="111-五个疑问的逐条清算">
+    <a href="#111-%e4%ba%94%e4%b8%aa%e7%96%91%e9%97%ae%e7%9a%84%e9%80%90%e6%9d%a1%e6%b8%85%e7%ae%97" class="header-anchor">#</a>
+    11.1 五个疑问的逐条清算
+</h3><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>疑问</th>
+<th>一句话答案</th>
+<th>详解章节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设计理念与独特模式？</td>
+<td>一切皆插件 + 无特权核心 + 时空可组合性；本质差异是 100% 组件付“可逆税”</td>
+<td>第 2、3、9 章（11.1.1）</td>
+</tr>
+<tr>
+<td>“插件拿走，影响全恢复”？</td>
+<td>注册时配对登记逆操作（disposer），卸载时 fiber 总账 LIFO 逆序撤销；边界是经 ctx 介导的注册</td>
+<td>第 4 章（11.1.2）</td>
+</tr>
+<tr>
+<td>实现原理？</td>
+<td>三支柱：可逆 effect + 反应式依赖注入/类型化事件 + 事件溯源会话</td>
+<td>第 4、5、6 章（11.1.3）</td>
+</tr>
+<tr>
+<td>与旧插件系统不一样在哪？</td>
+<td>不在机制本身而在覆盖率：传统是“特权核心 + 边缘挂件”，dsh 连 agent loop 都是插件</td>
+<td>第 2、9 章（已在 11.1.1 合并清算）</td>
+</tr>
+<tr>
+<td>loop 可换，还是 agent 吗？</td>
+<td>是。agent 身份 = 不变量集合（会话日志 + 接口契约 + 守卫管线），loop 只是可换的控制流策略</td>
+<td>第 7 章（11.1.4）</td>
+</tr>
+<tr>
+<td>第一性原理总结？</td>
+<td>把“可撤销/可重建”从开发者纪律升格为运行时结构性保证，为 agent 自我修改铺设物理基础</td>
+<td>综合 11.1.1–11.1.4（11.1.5）</td>
+</tr>
+</tbody>
+</table></div>
+<p>这张表的结构本身透露一个信息：五个疑问不是孤立的——它们恰好沿“理念→机制→哲学”排成一条链，前三个问“它造了什么、怎么运转”，第四个问“与旧世界差在哪”，第五个问“这样造出来的东西还是不是原来以为的那个东西”，最后一行把五者拧成一句总判断。不理解覆盖率，就会把 dsh 误读成又一个插件市场；不理解不变量集合，就会在“loop 可换”上卡壳。</p>
+<h4 id="1111-设计理念一切皆插件--无特权核心--时空可组合性覆盖率100-组件付可逆税才是与旧插件系统的本质差异">
+    <a href="#1111-%e8%ae%be%e8%ae%a1%e7%90%86%e5%bf%b5%e4%b8%80%e5%88%87%e7%9a%86%e6%8f%92%e4%bb%b6--%e6%97%a0%e7%89%b9%e6%9d%83%e6%a0%b8%e5%bf%83--%e6%97%b6%e7%a9%ba%e5%8f%af%e7%bb%84%e5%90%88%e6%80%a7%e8%a6%86%e7%9b%96%e7%8e%87100-%e7%bb%84%e4%bb%b6%e4%bb%98%e5%8f%af%e9%80%86%e7%a8%8e%e6%89%8d%e6%98%af%e4%b8%8e%e6%97%a7%e6%8f%92%e4%bb%b6%e7%b3%bb%e7%bb%9f%e7%9a%84%e6%9c%ac%e8%b4%a8%e5%b7%ae%e5%bc%82" class="header-anchor">#</a>
+    11.1.1 设计理念：一切皆插件 + 无特权核心 + 时空可组合性——覆盖率（100% 组件付可逆税）才是与旧插件系统的本质差异
+</h4><p>困惑是“读了很多分析，仍说不清它的设计理念到底是什么”。答案：dsh 的理念是“一切皆插件”叠加“没有特权核心”——模型、工具、会话、存储、循环、UI 全部由插件组合，不存在任何一行插件够不到的代码，官方架构文档原话是“There is no privileged core to patch”；理论名称是时空可组合性：空间维度指插件依赖由运行时反应式自动接线，时间维度指插件卸载时其副作用可被完整撤销。而“与旧插件系统不一样在哪”：差异不在机制——动态可卸载 2000 年代的 OSGi 就有，Disposable 模式 VSCode 也有——而在覆盖率与保证级别：OSGi 规范强制 system bundle 不可卸载，微内核永远保留特权中心，dsh 则把“注册必须附带逆操作”这笔可逆税推广到 100% 组件，连 agent loop 都不豁免，且由运行时结构性征收而非开发者自觉。收束：正确类比不是“VSCode 插件市场”，而是“连内核都可以热插拔的操作系统”。</p>
+<h4 id="1112插件拿走影响全恢复-注册时配对登记逆操作--fiber-总账-lifo-撤销边界是经-ctx-介导的注册外部副作用不在其内">
+    <a href="#1112%e6%8f%92%e4%bb%b6%e6%8b%bf%e8%b5%b0%e5%bd%b1%e5%93%8d%e5%85%a8%e6%81%a2%e5%a4%8d-%e6%b3%a8%e5%86%8c%e6%97%b6%e9%85%8d%e5%af%b9%e7%99%bb%e8%ae%b0%e9%80%86%e6%93%8d%e4%bd%9c--fiber-%e6%80%bb%e8%b4%a6-lifo-%e6%92%a4%e9%94%80%e8%be%b9%e7%95%8c%e6%98%af%e7%bb%8f-ctx-%e4%bb%8b%e5%af%bc%e7%9a%84%e6%b3%a8%e5%86%8c%e5%a4%96%e9%83%a8%e5%89%af%e4%bd%9c%e7%94%a8%e4%b8%8d%e5%9c%a8%e5%85%b6%e5%86%85" class="header-anchor">#</a>
+    11.1.2“插件拿走影响全恢复”= 注册时配对登记逆操作 + fiber 总账 LIFO 撤销；边界是经 ctx 介导的注册，外部副作用不在其内
+</h4><p>困惑是“这话听着像魔法，到底啥意思”。答案：不是事后追踪内存改动再逆向回放，而是事前约定——每个插件注册每项功能时必须同时上交一份“撤销说明书”（disposer）：一切经 <code>ctx</code> 的注册内部都归约到 <code>ctx.effect()</code>，正向注册立即执行，返回的 disposer 推进该插件 fiber 的 <code>_disposables</code> 总账，卸载时按后进先出（LIFO）逆序执行（fiber 级并发回收、单 effect 链内严格串行，详见第 4 章；<code>vendor/cordis/src/fiber.ts</code> L415–561 登记、L675–696 卸载）。但“所有影响”必须打折：只有经 ctx 介导的注册型影响自动可撤；已写盘文件、已发出的网络请求、已提交的数据库事务等外部副作用一概无法回滚，论文以 acquisition（边界内，可逆）与 emission（跨边界，不可逆、只能补偿）划界。收束：精确读法是“所有经框架介导的注册型影响都能恢复”，不是“插件卸载等于系统还原”。</p>
+<h4 id="1113-实现原理三支柱可逆-effect-机制--反应式依赖注入事件--事件溯源会话">
+    <a href="#1113-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86%e4%b8%89%e6%94%af%e6%9f%b1%e5%8f%af%e9%80%86-effect-%e6%9c%ba%e5%88%b6--%e5%8f%8d%e5%ba%94%e5%bc%8f%e4%be%9d%e8%b5%96%e6%b3%a8%e5%85%a5%e4%ba%8b%e4%bb%b6--%e4%ba%8b%e4%bb%b6%e6%ba%af%e6%ba%90%e4%bc%9a%e8%af%9d" class="header-anchor">#</a>
+    11.1.3 实现原理三支柱：可逆 effect 机制 + 反应式依赖注入/事件 + 事件溯源会话
+</h4><p>困惑是“原理层面它到底怎么实现的”。答案是三根支柱：<strong>可逆 effect 机制</strong>（第 4 章）——注册即记账、卸载即回滚，fiber 六态状态机由依赖纪元驱动，依赖消失则级联卸载回 PENDING、恢复则自动重载；<strong>反应式依赖注入与类型化事件</strong>（第 5 章）——<code>inject</code> 硬依赖声明决定插件何时激活退场，waterfall 等分发模式让每个事件成为行为扩展点，“换个 provider 即替换一种能力”；<strong>事件溯源会话</strong>（第 6 章）——append-only <code>SessionEvent</code> 日志是官方自认的“event-sourced”唯一真相源，消息历史由 <code>deriveMessages()</code> 投射，“model-visible means logged”由 <code>invariant.ts</code> 在每次模型调用前逐字节强制比对。收束：三支柱共用一条暗线——把一切“做过的事”变成“记了账的事”，由运行时而非纪律来保证可撤、可接线、可重放。</p>
+<h4 id="1114loop-是插件还是-agent-吗-是agent-身份不变量集合会话日志--接口契约--守卫管线loop-只是可换的控制流策略">
+    <a href="#1114loop-%e6%98%af%e6%8f%92%e4%bb%b6%e8%bf%98%e6%98%af-agent-%e5%90%97-%e6%98%afagent-%e8%ba%ab%e4%bb%bd%e4%b8%8d%e5%8f%98%e9%87%8f%e9%9b%86%e5%90%88%e4%bc%9a%e8%af%9d%e6%97%a5%e5%bf%97--%e6%8e%a5%e5%8f%a3%e5%a5%91%e7%ba%a6--%e5%ae%88%e5%8d%ab%e7%ae%a1%e7%ba%bfloop-%e5%8f%aa%e6%98%af%e5%8f%af%e6%8d%a2%e7%9a%84%e6%8e%a7%e5%88%b6%e6%b5%81%e7%ad%96%e7%95%a5" class="header-anchor">#</a>
+    11.1.4“loop 是插件还是 agent 吗”= 是。agent 身份=不变量集合（会话日志 + 接口契约 + 守卫管线），loop 只是可换的控制流策略
+</h4><p>困惑是“别人随便放一个 loop 进去，这还叫 agent 吗”。答案：叫。源码事实是 <code>core/agent</code> 只定义不变契约，README 明言“it has zero loop dependency, so the loop is swappable”；默认 loop 的 <code>AgentLoop extends Service</code>、<code>inject</code> 五个接口、经 <code>ctx.effect</code> 注册 <code>setFactory</code>，与任何普通插件遵循同一套装载/卸载规则。换 loop 时不可换的是三样东西：append-only 会话日志（<code>agent.id === session.id</code>，身份与记忆的连续性）、<code>Agent</code> 接口契约（UI/subagent/ACP 只对接口编程的外部可观察行为）、工具守卫管线与“model-visible means logged”跨 loop 硬约束；loop 被显式降级为可替换的控制流策略。收束：这是忒修斯之船的工程答案——船的身份不绑定任何一块木板，而绑定一组维持不变的关系，<code>invariant.ts</code> 就是这条边界的执法者。“身份=不变量集合”是本文读源码得出的解读，社区也有“换 loop 等于换灵魂”的反方观点，尚无官方裁决。</p>
+<h4 id="1115-第一性原理总结dsh-把可撤销可重建从开发者纪律升格为运行时结构性保证并以此为-agent-自我修改铺设物理基础">
+    <a href="#1115-%e7%ac%ac%e4%b8%80%e6%80%a7%e5%8e%9f%e7%90%86%e6%80%bb%e7%bb%93dsh-%e6%8a%8a%e5%8f%af%e6%92%a4%e9%94%80%e5%8f%af%e9%87%8d%e5%bb%ba%e4%bb%8e%e5%bc%80%e5%8f%91%e8%80%85%e7%ba%aa%e5%be%8b%e5%8d%87%e6%a0%bc%e4%b8%ba%e8%bf%90%e8%a1%8c%e6%97%b6%e7%bb%93%e6%9e%84%e6%80%a7%e4%bf%9d%e8%af%81%e5%b9%b6%e4%bb%a5%e6%ad%a4%e4%b8%ba-agent-%e8%87%aa%e6%88%91%e4%bf%ae%e6%94%b9%e9%93%ba%e8%ae%be%e7%89%a9%e7%90%86%e5%9f%ba%e7%a1%80" class="header-anchor">#</a>
+    11.1.5 第一性原理总结：dsh 把“可撤销/可重建”从开发者纪律升格为运行时结构性保证，并以此为 agent 自我修改铺设物理基础
+</h4><p>把三条跨章洞察拧成一句。<strong>覆盖率</strong>：可逆税无一组件豁免，“可撤销”从贴在墙上的卫生建议变成写进每道菜谱的强制步骤。<strong>两面一体的可重建性</strong>：插件可逆性管“空间中的现在”（注册影响可回滚到“仿佛从未来过”），事件溯源管“时间上的过去”（历史可从 append-only 事件流重放、分叉、审计），“model-visible means logged”是把两者焊在一起的铆钉——任意时刻的全部状态要么可撤销、要么可重建、要么可分叉。<strong>身份=不变量集合</strong>：可重建性反过来给“agent 是什么”一个可机器检查的定义——agent 可以改写自己的任何部件，只要不破坏不变量集合。合读即：<strong>dsh 把“可撤销、可重建”从开发者纪律升格为运行时结构性保证，而这份保证正是 agent 自我修改的物理前提——改自己可以试错回滚（插件层），做过什么可以完整复盘（日志层）</strong>。再点一句：此综合是本文的分析性结论，不是官方说法。</p>
+<h3 id="112-本质判断与开放问题">
+    <a href="#112-%e6%9c%ac%e8%b4%a8%e5%88%a4%e6%96%ad%e4%b8%8e%e5%bc%80%e6%94%be%e9%97%ae%e9%a2%98" class="header-anchor">#</a>
+    11.2 本质判断与开放问题
+</h3><h4 id="1121-本质为模型改写自己的-harness准备的跑道coding-agent-是第一个载荷而非终点媒体定性战略产品成立">
+    <a href="#1121-%e6%9c%ac%e8%b4%a8%e4%b8%ba%e6%a8%a1%e5%9e%8b%e6%94%b9%e5%86%99%e8%87%aa%e5%b7%b1%e7%9a%84-harness%e5%87%86%e5%a4%87%e7%9a%84%e8%b7%91%e9%81%93coding-agent-%e6%98%af%e7%ac%ac%e4%b8%80%e4%b8%aa%e8%bd%bd%e8%8d%b7%e8%80%8c%e9%9d%9e%e7%bb%88%e7%82%b9%e5%aa%92%e4%bd%93%e5%ae%9a%e6%80%a7%e6%88%98%e7%95%a5%e4%ba%a7%e5%93%81%e6%88%90%e7%ab%8b" class="header-anchor">#</a>
+    11.2.1 本质：为“模型改写自己的 harness”准备的跑道；coding agent 是第一个载荷而非终点；媒体定性“战略&gt;产品”成立
+</h4><p>本文的本质判断：dsh 是为“模型持续改写自己的 harness”铺设的跑道，coding agent 只是跑道上的第一个载荷。三条独立证据链：论文 §8 未来方向写明目标是“an AI agent generates and replaces its own harness components continuously and with little human oversight”；yage.ai 逐行对照 Codex 源码后指出，日常场景中 dsh 命令式插件“上限相同、下限不同”，唯一追不上的结构性差异是 loop 这个“物理插槽”——Codex 的 loop 编译死在 Rust 二进制里，“哪怕模型进化出写全新 loop 的能力，系统里也没有任何接口能把它装上去”；dsh 负责人崔添翼转发过翁荔“自进化先从 Harness 开始”的表态。限定还是要说的：这是有论文原文与官方行为旁证的社区推断，DeepSeek 从未以第一人称宣布“整套架构为自进化服务”。在此判断下，媒体“战略大于产品”的定性成立——第 10 章已显示，赞誉方谈论的是“作为战略标本的 dsh”，批评方谈论的是“作为今日产品的 dsh”，两者可以同时为真。</p>
+<h4 id="1122-开放问题清单无第二个生产级-loop-实现动态插件持久化无路线图rl-闭环无官方承认安全信任模型空缺v4-生产验证尚浅论文未经同行评议">
+    <a href="#1122-%e5%bc%80%e6%94%be%e9%97%ae%e9%a2%98%e6%b8%85%e5%8d%95%e6%97%a0%e7%ac%ac%e4%ba%8c%e4%b8%aa%e7%94%9f%e4%ba%a7%e7%ba%a7-loop-%e5%ae%9e%e7%8e%b0%e5%8a%a8%e6%80%81%e6%8f%92%e4%bb%b6%e6%8c%81%e4%b9%85%e5%8c%96%e6%97%a0%e8%b7%af%e7%ba%bf%e5%9b%berl-%e9%97%ad%e7%8e%af%e6%97%a0%e5%ae%98%e6%96%b9%e6%89%bf%e8%ae%a4%e5%ae%89%e5%85%a8%e4%bf%a1%e4%bb%bb%e6%a8%a1%e5%9e%8b%e7%a9%ba%e7%bc%bav4-%e7%94%9f%e4%ba%a7%e9%aa%8c%e8%af%81%e5%b0%9a%e6%b5%85%e8%ae%ba%e6%96%87%e6%9c%aa%e7%bb%8f%e5%90%8c%e8%a1%8c%e8%af%84%e8%ae%ae" class="header-anchor">#</a>
+    11.2.2 开放问题清单：无第二个生产级 loop 实现、动态插件持久化无路线图、RL 闭环无官方承认、安全信任模型空缺、v4 生产验证尚浅、论文未经同行评议
+</h4><p>六条开放问题照录如下，别被前文任何精巧设计冲淡。<strong>其一，无第二个生产级 loop 实现</strong>：可换是源码事实，但官方无替换 loop 的端到端示例，“可以换”尚未被“换了跑得好”检验。<strong>其二，动态插件持久化无路线图</strong>：创造模式“重启即消失”（<code>cordis_mount</code> 求值代码“saves it nowhere”）是设计选择，官方未公布持久化计划。<strong>其三，RL 闭环无官方承认</strong>：会话日志用作训练数据只有间接证据（<code>feedback/record</code> 事件、telemetry、llm-replay 保真度）与社区推断。<strong>其四，安全信任模型空缺</strong>：创造模式官方定级“bash 等价信任、非安全边界”；腾讯新闻安全评审以 4 个 PoC 证实 prompt injection→vm 逃逸→宿主 RCE 链默认可达，审批管线存在但未默认接线——以自我修改为北极星的系统，其自我修改的信任模型尚未建立。<strong>其五，Cordis v4 生产验证尚浅</strong>：Koishi 4000+ 插件四年验证跑的是 v3，dsh 用的 v4 重构了 effect/coeffect 语义与 Loader。<strong>其六，论文未经同行评议</strong>：88 页 preprint，四大元定理只有论文自身的证明作背书。</p>
+<h4 id="1123-对读者的行动建议现在该怎么看待使用观望-dsh分层成熟度组合机制层4-年陈agent-应用层2-天大">
+    <a href="#1123-%e5%af%b9%e8%af%bb%e8%80%85%e7%9a%84%e8%a1%8c%e5%8a%a8%e5%bb%ba%e8%ae%ae%e7%8e%b0%e5%9c%a8%e8%af%a5%e6%80%8e%e4%b9%88%e7%9c%8b%e5%be%85%e4%bd%bf%e7%94%a8%e8%a7%82%e6%9c%9b-dsh%e5%88%86%e5%b1%82%e6%88%90%e7%86%9f%e5%ba%a6%e7%bb%84%e5%90%88%e6%9c%ba%e5%88%b6%e5%b1%824-%e5%b9%b4%e9%99%88agent-%e5%ba%94%e7%94%a8%e5%b1%822-%e5%a4%a9%e5%a4%a7" class="header-anchor">#</a>
+    11.2.3 对读者的行动建议：现在该怎么看待/使用/观望 dsh（分层成熟度：组合机制层≈4 年陈，agent 应用层=2 天大）
+</h4><p>先做分层成熟度校准：组合机制层≈4 年陈（Cordis 自 2022 年 npm 发布起在 Koishi 生态被捶打，连作者带代码进入 DeepSeek），agent 应用层只有 2 天大——npm 实际版本 0.1.0-rc.x，README 全大写警告将有破坏性变更。据此分人群：<strong>架构爱好者</strong>——现在就是最佳时机，逐行读 fiber.ts 与 session 子系统；AGENTS.md 的“优先正确的地基而非兼容垫片”意味着此刻的架构决策最可能原样进入正式版。<strong>生产团队</strong>——观望，等两个信号：首个带 git tag 的正式版、默认接线的审批管线；在此之前锁进生产是在 rc 地基上盖楼。<strong>插件开发者</strong>——从配置层 patch 与工具插件入手，把“一切副作用经 ctx 介导、外部资源用 <code>ctx.effect</code> 登记清理”当第一原则，生态现在最缺的就是这种供给。<strong>观望者</strong>——不必盯插件数量与星数，只盯一个信号：第一个由 agent 自己写出、且活过重启的 loop 何时出现。那一天之前，dsh 是一条修好的跑道；那一天之后，跑道上跑的将不再只是人写的代码。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai/">Ai</a>
+        
+            <a href="/tags/deepseek/">Deepseek</a>
+        
+            <a href="/tags/harness/">Harness</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/herdr-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Herdr 操作手册</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E-vibe-coding-%E5%88%B0%E8%BD%AF%E4%BB%B6%E5%B7%A5%E5%8E%82%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E6%AD%A3%E5%9C%A8%E7%BB%8F%E5%8E%86%E4%BB%80%E4%B9%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从 Vibe Coding 到软件工厂，软件工程正在经历什么</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/claude-code--%E6%99%BA%E8%B0%B1-ai-%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Claude Code &#43; 智谱 AI 配置使用指南</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%89%8B%E5%8A%A8%E5%88%9B%E5%BB%BA-kprobe-%E4%BA%8B%E4%BB%B6%E8%BF%BD%E8%B8%AA-bind-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">手动创建 kprobe 事件追踪 bind 系统调用</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8-dwarf-%E8%BF%98%E5%8E%9F%E5%AE%8C%E6%95%B4%E7%9A%84-glibc-%E8%B0%83%E7%94%A8%E5%A0%86%E6%A0%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用 DWARF 还原完整的 glibc 调用堆栈</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2026 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
