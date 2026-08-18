@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mazhen.tech/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,11 +15,14 @@
                 href="https://mazhen.tech/"
                 />
   </url><url>
+    <loc>https://mazhen.tech/tags/agent/</loc>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
+  </url><url>
     <loc>https://mazhen.tech/tags/ai/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/categories/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -31,20 +34,14 @@
                 href="https://mazhen.tech/categories/"
                 />
   </url><url>
-    <loc>https://mazhen.tech/tags/deepseek/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/p/deepseek-harness-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E7%9A%84-agent-%E8%BF%90%E8%A1%8C%E6%97%B6/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
-  </url><url>
-    <loc>https://mazhen.tech/tags/harness/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+    <loc>https://mazhen.tech/tags/herdr/</loc>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/post/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/tags/</loc>
-    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -57,6 +54,18 @@
                 />
   </url><url>
     <loc>https://mazhen.tech/categories/tech/</loc>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/%E6%88%91%E5%A6%82%E4%BD%95%E7%94%A8-herdr-%E7%AE%A1%E7%90%86%E6%9C%AC%E5%9C%B0%E4%B8%8E%E8%BF%9C%E7%A8%8B%E7%9A%84%E5%A4%9A%E4%B8%AA%E7%BC%96%E7%A0%81-agent/</loc>
+    <lastmod>2026-08-18T15:52:13+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/deepseek/</loc>
+    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/p/deepseek-harness-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E7%9A%84-agent-%E8%BF%90%E8%A1%8C%E6%97%B6/</loc>
+    <lastmod>2026-08-16T21:33:03+08:00</lastmod>
+  </url><url>
+    <loc>https://mazhen.tech/tags/harness/</loc>
     <lastmod>2026-08-16T21:33:03+08:00</lastmod>
   </url><url>
     <loc>https://mazhen.tech/p/herdr-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C/</loc>

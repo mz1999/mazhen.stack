@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="有一次，我的 macOS 重启了。当时 Claude Code 和 Codex 都跑在一台远程 Linux 服务器上，一个负责改代码，一个负责审查，旁边还有个终端留着看日志和文件。 电脑重新开机以后，">
+<title>我如何用 Herdr 管理本地与远程的多个编码 Agent</title>
+
+<link rel='canonical' href='https://mazhen.tech/p/%E6%88%91%E5%A6%82%E4%BD%95%E7%94%A8-herdr-%E7%AE%A1%E7%90%86%E6%9C%AC%E5%9C%B0%E4%B8%8E%E8%BF%9C%E7%A8%8B%E7%9A%84%E5%A4%9A%E4%B8%AA%E7%BC%96%E7%A0%81-agent/'>
+
+<link rel="stylesheet" href="/scss/style.min.760e3dabc1e140d2e6abd27a8ca0aabb60e568829b29f67d2df12024136eff37.css"><meta property='og:title' content="我如何用 Herdr 管理本地与远程的多个编码 Agent">
+<meta property='og:description' content="有一次，我的 macOS 重启了。当时 Claude Code 和 Codex 都跑在一台远程 Linux 服务器上，一个负责改代码，一个负责审查，旁边还有个终端留着看日志和文件。 电脑重新开机以后，">
+<meta property='og:url' content='https://mazhen.tech/p/%E6%88%91%E5%A6%82%E4%BD%95%E7%94%A8-herdr-%E7%AE%A1%E7%90%86%E6%9C%AC%E5%9C%B0%E4%B8%8E%E8%BF%9C%E7%A8%8B%E7%9A%84%E5%A4%9A%E4%B8%AA%E7%BC%96%E7%A0%81-agent/'>
+<meta property='og:site_name' content='mazhen.tech'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ai' /><meta property='article:tag' content='herdr' /><meta property='article:tag' content='agent' /><meta property='article:published_time' content='2026-08-18T15:52:13&#43;08:00'/><meta property='article:modified_time' content='2026-08-18T15:52:13&#43;08:00'/>
+<meta name="twitter:site" content="@rootletmistake">
+    <meta name="twitter:creator" content="@rootletmistake"><meta name="twitter:title" content="我如何用 Herdr 管理本地与远程的多个编码 Agent">
+<meta name="twitter:description" content="有一次，我的 macOS 重启了。当时 Claude Code 和 Codex 都跑在一台远程 Linux 服务器上，一个负责改代码，一个负责审查，旁边还有个终端留着看日志和文件。 电脑重新开机以后，">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBEVB8TRX2"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LBEVB8TRX2');
+        }
+      </script>
+    
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/mazhen_hu6e56901738cd7f8ddabbbe3def51a5b4_111611_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">mazhen.tech</a></h1>
+            <h2 class="site-description">Stay hungry. Stay foolish.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='mailto:me@mazhen.tech'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/mz1999'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/clippercongo/'
+                        target="_blank"
+                        title="instagram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-instagram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <rect x="4" y="4" width="16" height="16" rx="4" />
+  <circle cx="12" cy="12" r="3" />
+  <line x1="16.5" y1="7.5" x2="16.5" y2="7.501" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://t.me/crownrecount'
+                        target="_blank"
+                        title="telegram"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-telegram" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/rootletmistake'
+                        target="_blank"
+                        title="twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://mazhen.tech/" selected>中文</option>
+                                
+                                    <option value="https://mazhen.tech/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#以前我盯着三个-ghostty-tab">以前我盯着三个 Ghostty Tab</a></li>
+    <li><a href="#先让它在本地活过一次">先让它在本地活过一次</a></li>
+    <li><a href="#我的规则是一个-ghostty-tab-对应一台机器">我的规则是一个 Ghostty Tab 对应一台机器</a></li>
+    <li><a href="#侧边栏告诉我该去看谁">侧边栏告诉我该去看谁</a></li>
+    <li><a href="#claude-code-叫来-codex-审查">Claude Code 叫来 Codex 审查</a></li>
+    <li><a href="#ssh-断了任务还在">SSH 断了，任务还在</a>
+      <ol>
+        <li><a href="#手机上临时看一眼">手机上临时看一眼</a></li>
+      </ol>
+    </li>
+    <li><a href="#升级这件事我不敢赌">升级这件事我不敢赌</a></li>
+    <li><a href="#herdr-管到哪里">Herdr 管到哪里</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E6%88%91%E5%A6%82%E4%BD%95%E7%94%A8-herdr-%E7%AE%A1%E7%90%86%E6%9C%AC%E5%9C%B0%E4%B8%8E%E8%BF%9C%E7%A8%8B%E7%9A%84%E5%A4%9A%E4%B8%AA%E7%BC%96%E7%A0%81-agent/">我如何用 Herdr 管理本地与远程的多个编码 Agent</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-08-18</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 11 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>有一次，我的 macOS 重启了。当时 Claude Code 和 Codex 都跑在一台远程 Linux 服务器上，一个负责改代码，一个负责审查，旁边还有个终端留着看日志和文件。</p>
+<p>电脑重新开机以后，我打开 Ghostty，运行 <code>herdr --remote &lt;host&gt;</code>。原来的 workspace、Tab 和 pane 都回来了，两个 Agent 还在继续工作。刚才消失的只是 Mac 上的 Herdr 客户端，持有终端进程的 server 一直待在 Linux 上。</p>
+<p>这件事把 Herdr 的作用说得很直白。现在一个开发任务很少只有一段 Agent 对话。旁边往往还挂着 shell、日志、测试和开发服务器。Agent 多起来以后，我花精力的地方也跟着变了。我得知道哪个还在跑，哪个需要确认，审查走到了哪里。SSH 一旦断开，还要确认哪些进程活着。</p>
+<p>Herdr 管的就是这圈事情。它把终端放进一个可以重新连接的环境，顺手识别里面的编码 Agent。任务仍然由我分配，两个 Agent 同时改文件的问题也要另行处理。</p>
+<h2 id="以前我盯着三个-ghostty-tab">
+    <a href="#%e4%bb%a5%e5%89%8d%e6%88%91%e7%9b%af%e7%9d%80%e4%b8%89%e4%b8%aa-ghostty-tab" class="header-anchor">#</a>
+    以前我盯着三个 Ghostty Tab
+</h2><p>使用 Herdr 以前，连接一台 Linux 服务器，我至少会开三个 Ghostty Tab。</p>
+<p>第一个通过 SSH 进去跑 Claude Code，第二个也连到同一台机器，跑 Codex。它们轮流负责实现和审查。第三个留给普通 shell，看日志、查文件，偶尔跑点别的命令。</p>
+<p>三个 Tab 还能应付，Agent 的状态却散在各自的终端里。工作开始以后，我会在前两个 Tab 之间来回切换。看到一个停下来，还得看清它是做完了、在等输入，还是卡在权限确认。这样切得多了，巡视终端很快就成了一个下意识动作。</p>
+<p>SSH 断线以后，事情更碎。我先重新连服务器，再进入 Claude Code 或 Codex，恢复会话，查看进度，最后让 Agent 接着做。Agent 自己的 resume 能找回对话，那组三个终端的位置和运行状态仍要重新拼。</p>
+<p>Herdr 保留了我原来使用的终端，只在外面加了一层。后台 server 持有 pane 和其中的进程，Ghostty 里显示的是可以随时离开的 client。熟悉 tmux 的人对这一半不会陌生。Herdr 还会识别 pane 里的 Agent，把状态集中放在侧边栏。</p>
+<p>只开一个 shell 时，直接开 shell 就够了。需要同时照看 Agent、日志和远程进程，Herdr 才开始省事。</p>
+<h2 id="先让它在本地活过一次">
+    <a href="#%e5%85%88%e8%ae%a9%e5%ae%83%e5%9c%a8%e6%9c%ac%e5%9c%b0%e6%b4%bb%e8%bf%87%e4%b8%80%e6%ac%a1" class="header-anchor">#</a>
+    先让它在本地活过一次
+</h2><p>Herdr 的稳定版支持 Linux 和 macOS。使用官方安装器时，可以这样安装。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -fsSL https://herdr.dev/install.sh <span class="p">|</span> sh
+</span></span><span class="line"><span class="cl">herdr --version
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Homebrew、mise 和 Nix 也能安装。后续升级要继续使用原来的安装方式，<code>herdr update</code> 只服务于官方安装器管理的版本。</p>
+<p>第一次启动不用准备 socket 或配置文件。进入一个项目目录，运行 <code>herdr</code>，后台 server 和终端 client 会一起起来。空 session 会自动创建第一个 workspace、Herdr Tab 和 pane。在 pane 里照常运行 <code>claude</code> 或 <code>codex</code>，Herdr 会根据前台进程识别 Agent。</p>
+<p>我建议顺手安装 Claude Code 和 Codex 的官方 integration。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr integration install claude
+</span></span><span class="line"><span class="cl">herdr integration install codex
+</span></span><span class="line"><span class="cl">herdr integration status
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这两个 integration 会把 Agent 自己的会话标识报告给 Herdr。server 重启以后，Herdr 才有机会调用 Agent 原生的 resume 命令。Claude Code 和 Codex 的工作状态目前仍由 screen manifest 判断。<a class="link" href="https://herdr.dev/docs/integrations/#how-herdr-uses-integrations"  target="_blank" rel="noopener"
+    >官方 integration 文档</a>列出了两类 integration 的区别。</p>
+<p>integration 到这里就做完了自己的事。它负责会话标识与恢复，不会教 Claude Code 怎样打开 pane、启动 Codex 或收回审查结果。要让 Claude Code 主动操作 Herdr，还要安装官方 Herdr Skill。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">npx skills add herdrdev/herdr --skill herdr -g
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Skill 是一份给 Agent 阅读的 Markdown 操作说明，不是另一个后台服务。命令都由 Claude Code 执行。Claude Code 运行在 Herdr pane 中时会拿到 <code>HERDR_ENV=1</code>，随后才能通过本地 socket 控制当前 session。<code>herdr --skill</code> 可以打印与已安装二进制版本匹配的 Skill 内容。<a class="link" href="https://herdr.dev/docs/agent-skill/"  target="_blank" rel="noopener"
+    >官方 Agent Skill 文档</a>说明了安装方式和这条安全边界。</p>
+<p>第一次试用不用忙着搭复杂布局。启动一个 Agent，让它跑起来，按 <code>ctrl+b q</code> detach，再执行一次 <code>herdr</code>。回来以后如果还是原来的 Agent 进程，client 和 server 的关系也就明白了。</p>
+<h2 id="我的规则是一个-ghostty-tab-对应一台机器">
+    <a href="#%e6%88%91%e7%9a%84%e8%a7%84%e5%88%99%e6%98%af%e4%b8%80%e4%b8%aa-ghostty-tab-%e5%af%b9%e5%ba%94%e4%b8%80%e5%8f%b0%e6%9c%ba%e5%99%a8" class="header-anchor">#</a>
+    我的规则是一个 Ghostty Tab 对应一台机器
+</h2><p>我现在给 Ghostty 和 Herdr 的分工很简单。Ghostty Tab 用来选机器，进入哪台机器以后，再让 Herdr 管里面的项目和进程。</p>
+<p>本地开发时，我在项目目录运行</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>远程开发时，我在 Mac 上运行</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr --remote &lt;host&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>&lt;host&gt;</code> 通常是 <code>~/.ssh/config</code> 里的主机名。此时本地 Herdr 是个薄客户端，通过 SSH 连接远程 server。Agent、shell 和开发进程都留在 Linux 上，我继续使用 Mac 上的终端和快捷键。Mac 剪贴板里的图片也能由 Herdr 复制成远程临时文件，再把路径粘贴进 pane。<a class="link" href="https://herdr.dev/docs/how-to-work/#remote-work-from-your-local-terminal"  target="_blank" rel="noopener"
+    >官方远程工作说明</a>对这条路径有更完整的解释。</p>
+<p>还有一种走法。先 <code>ssh &lt;host&gt;</code>，登录后在服务器上运行 <code>herdr</code>。client 和 server 都在 Linux 上，本地 Ghostty 只负责显示 SSH 终端。这条路配置少，也适合手机 SSH 客户端，代价是远程 Herdr 读不到 Mac 的图片剪贴板。</p>
+<p>我在 Mac 上日常使用 <code>herdr --remote &lt;host&gt;</code>。它少了一次进入 shell 的动作，也保留了本地快捷键和图片粘贴。两条路径连接的是同一种远程 session，可以随设备切换。</p>
+<p><img src="https://cdn.mazhen.tech/2026/20260818184445807.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="我使用 Herdr 时的本地与远程层级"
+	
+	
+></p>
+<p>进入一台机器以后，我通常给一个项目建一个 workspace。里面可以开三个 Herdr Tab，分别放 Claude Code、Codex 和日志；也可以把两个 Agent 放进同一个 <code>agents</code> Tab 的两个 pane，再把日志和普通 shell 放进 <code>logs</code> Tab。布局会变，层级不会。</p>
+<p>workspace 装项目，Herdr Tab 区分几组工作，pane 才是实际运行进程的终端。session 则是 server 管理的整套运行环境。这样分完以后，Ghostty 的 Tab 和 Herdr 的 Tab 就不容易混在一起了。</p>
+<p>Herdr 的鼠标操作已经够用。点击可以切换 workspace、Tab 和 pane，右键可以分割 pane，拖动边界可以调整大小。等用顺了再记 <code>ctrl+b</code> 前缀，没必要在第一次启动前背快捷键表。</p>
+<h2 id="侧边栏告诉我该去看谁">
+    <a href="#%e4%be%a7%e8%be%b9%e6%a0%8f%e5%91%8a%e8%af%89%e6%88%91%e8%af%a5%e5%8e%bb%e7%9c%8b%e8%b0%81" class="header-anchor">#</a>
+    侧边栏告诉我该去看谁
+</h2><p>终端各自归位以后，我最常看的地方成了侧边栏。</p>
+<p>它会识别 pane 里的前台进程，为编码 Agent 显示 <code>working</code>、<code>blocked</code>、<code>done</code>、<code>idle</code> 或 <code>unknown</code>。这些状态会向上汇总到 Herdr Tab 和 workspace。后台 Agent 等待审批时，我不用逐个打开终端确认，直接去看被标出来的 workspace。</p>
+<p><code>done</code> 这个名字刚开始容易让人多想一步。它表示 Agent 在后台回到可用状态，而我还没有看过它。切到对应位置以后，状态会变成 <code>idle</code>。所以 <code>done</code> 只能说明那里有结果待看，任务做得对不对还得进去检查。<a class="link" href="https://herdr.dev/docs/agents/#state-rollups"  target="_blank" rel="noopener"
+    >官方 Agent 文档</a>把这种状态汇总作为主要工作方式。</p>
+<p>Claude Code 和 Codex 的状态主要依赖前台进程与 screen manifest。Herdr 读取终端底部的实时画面，再用规则判断 Agent 正在运行、等待输入还是已经空闲。Agent 界面更新、包装程序和 pane 里嵌套的 tmux 都可能影响判断。</p>
+<p>状态拿不准时，我会先打开 pane 看一眼。还可以运行</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr agent explain &lt;target&gt; --verbose
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>它会列出检测来源和匹配规则。<code>unknown</code> 只说明 Herdr 现在分不清，任务究竟怎样，仍要以 pane 里的内容为准。</p>
+<h2 id="claude-code-叫来-codex-审查">
+    <a href="#claude-code-%e5%8f%ab%e6%9d%a5-codex-%e5%ae%a1%e6%9f%a5" class="header-anchor">#</a>
+    Claude Code 叫来 Codex 审查
+</h2><p>装好 Herdr Skill 以后，我不需要自己切到另一个 pane，再把审查结果搬回来。我留在 Claude Code 里，明确告诉它使用 Herdr，让 Codex 审查当前 diff。人不用搬运结果。</p>
+<p>Claude Code 会先确认自己位于 Herdr pane 中，再查看当前布局。它在同一个 Herdr Tab 中创建 sibling pane，沿用当前工作目录。焦点不会被抢走。接下来由 Herdr 在新 pane 中启动 Codex，Claude Code 把审查任务交给它，等待状态稳定，最后读回终端输出。</p>
+<p>整条流程可以分成五步。</p>
+<ol>
+<li>我在 Claude Code 中要求它使用 Herdr，让 Codex 审查当前 diff。</li>
+<li>Claude Code 按 Skill 调用 <code>pane split</code>，Herdr 创建同目录的 sibling pane。</li>
+<li>Claude Code 调用 <code>agent start</code> 启动 Codex reviewer，再用 <code>agent prompt --wait</code> 发送任务。</li>
+<li>Codex 读取同一个 Git 工作目录中的 diff 和测试，完成后回到 <code>idle</code>、<code>done</code> 或 <code>blocked</code>。</li>
+<li>Claude Code 调用 <code>agent read</code> 取得审查文本，在原会话里核对发现，再决定修改或向我汇报。</li>
+</ol>
+<p><img src="https://cdn.mazhen.tech/2026/20260818184525492.svg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Claude Code 通过 Herdr 让 Codex 审查当前 diff"
+	
+	
+></p>
+<p>从使用者的角度看，结果自动回到了 Claude Code。底下的动作仍然很具体。Herdr CLI 通过本地 socket 操作 Codex 所在的 PTY，写入提示，等待生命周期状态，再把 <code>agent read</code> 读到的终端文本交回 Claude Code。Codex 没有直接向 Claude Code 推送结构化消息，两个 Agent 也没有自动共享上下文。</p>
+<p>这套流程对应的命令并不神秘。下面这段通常由 Claude Code 按 Skill 执行，系统需要安装 <code>jq</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">split</span><span class="o">=</span><span class="k">$(</span>herdr pane split --current <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --direction right <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --cwd <span class="s2">&#34;</span><span class="nv">$PWD</span><span class="s2">&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --no-focus<span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">review_pane</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="nv">$split</span><span class="s2">&#34;</span> <span class="p">|</span>
+</span></span><span class="line"><span class="cl">  jq -r <span class="s1">&#39;.result.pane.pane_id&#39;</span><span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">herdr agent start reviewer <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --kind codex <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --pane <span class="s2">&#34;</span><span class="nv">$review_pane</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">herdr agent prompt reviewer <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="s2">&#34;Review the current diff. Do not edit files. Report only actionable findings.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --wait <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --timeout <span class="m">120000</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">herdr agent <span class="nb">read</span> reviewer <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --source recent-unwrapped <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --lines <span class="m">120</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>agent start</code> 不会创建 pane。它只负责在已有的空闲 pane 中启动 Agent，所以前面的 <code>pane split</code> 不能省。<code>agent prompt --wait</code> 等待的是生命周期状态。Codex 如果进入 <code>blocked</code>，Claude Code 还要先读状态和输出，遇到权限或产品判断时仍可能回来问我。</p>
+<p>两个 Agent 在这里使用同一个 Git 工作目录。我给自己的规则是 Claude Code 写，Codex 只读审查。只读要求要写进给 Codex 的提示，Herdr 本身不会强制执行。我还没有在这套工作流里使用 worktree，以后真要让两个 Agent 同时写，再用独立 worktree 隔开。</p>
+<p>这里没有一场值得渲染的审查事故。它就是我每天会重复的流程。Claude Code 干完以后叫来 Codex，等它看完，再把结果带回原来的会话。旁边的 pane 一直可见，我随时可以切过去看，但不必手工在两个 Agent 之间传话。</p>
+<h2 id="ssh-断了任务还在">
+    <a href="#ssh-%e6%96%ad%e4%ba%86%e4%bb%bb%e5%8a%a1%e8%bf%98%e5%9c%a8" class="header-anchor">#</a>
+    SSH 断了，任务还在
+</h2><p>远程模式里，server 运行在 Linux 上，Mac 只是 client。只要远程 server 还活着，<code>ctrl+b q</code> detach、关闭 Ghostty 和 SSH 断线都不会结束 pane 中的进程。Mac 重启也是同样的结果，因为被重启的是客户端那台机器。</p>
+<p>重新运行 <code>herdr --remote &lt;host&gt;</code>，我会回到同一个远程 session。开头那次 macOS 重启以后，两个远程 Agent 还在工作，靠的就是这条边界。</p>
+<p><code>herdr server stop</code> 是另一回事。server 持有的 shell、Agent、测试和开发服务器都会结束。下次启动时，Herdr 可以恢复 workspace、Tab、pane、工作目录和布局，普通进程已经不在。当前官方 integration 如果保存过 Agent 的原生会话标识，Herdr 可以调用 Claude Code 或 Codex 自己的 resume 能力恢复对话。这属于重新启动进程，和 detach 以后原进程一直活着有区别。<a class="link" href="https://herdr.dev/docs/session-state/#what-survives"  target="_blank" rel="noopener"
+    >官方 session 状态表</a>列出了几种恢复方式。</p>
+<p>本地工作也遵循这条规则。本地 server 跑在 Mac 上，关掉 Ghostty 不会结束任务，重启 macOS 会结束本机进程。远程任务能跨过 Mac 重启，只因为 server 位于 Linux。</p>
+<h3 id="手机上临时看一眼">
+    <a href="#%e6%89%8b%e6%9c%ba%e4%b8%8a%e4%b8%b4%e6%97%b6%e7%9c%8b%e4%b8%80%e7%9c%bc" class="header-anchor">#</a>
+    手机上临时看一眼
+</h3><p>这部分我还没有亲自用过。根据<a class="link" href="https://herdr.dev/docs/how-to-work/#work-from-your-phone"  target="_blank" rel="noopener"
+    >官方手机工作流</a>，手机不需要 Herdr App。用 SSH 客户端登录运行 Agent 的服务器，再执行 <code>herdr</code>，就能打开同一个持久 session。Herdr 会在窄终端中换成单列布局，可以查看 Agent、切换 workspace，也可以进入 pane。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ssh you@server
+</span></span><span class="line"><span class="cl">herdr
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这条路径适合临时查看状态和回答问题。官方没有提供移动端推送、专用审批界面或网页控制台，它也不等于一套完整的移动开发环境。</p>
+<h2 id="升级这件事我不敢赌">
+    <a href="#%e5%8d%87%e7%ba%a7%e8%bf%99%e4%bb%b6%e4%ba%8b%e6%88%91%e4%b8%8d%e6%95%a2%e8%b5%8c" class="header-anchor">#</a>
+    升级这件事我不敢赌
+</h2><p>我以前升级 Herdr，会先把它完全退出，再安装新版本。这个办法最稳，内部任务也会一起结束。写这篇文章时，我特意查了有没有不中断任务的升级方式。</p>
+<p>官方安装器管理的版本可以运行</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr update
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>官方文档说明，协议兼容的旧 server 可以继续运行；需要更换 server 时，升级程序会询问是否停止 session。只要确认停止，pane 里的进程就会结束。重要任务还在运行时，更稳妥的选择是拒绝停止，等 Agent 做完或者走到容易恢复的位置再升级。</p>
+<p>Herdr 还提供了一条实验路径。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr update --handoff
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>live handoff 会尝试把 pane PTY、进程、Agent 标识和 session 状态交给新 server。它只适用于 Herdr 自带 updater 管理的安装，结果属于 best effort。正在进行的 CLI 或 API 请求、<code>wait</code>、订阅和 pane 间消息仍可能中断。Homebrew、mise 和 Nix 安装也不能走这条更新路径。<a class="link" href="https://herdr.dev/docs/session-state/#live-handoff"  target="_blank" rel="noopener"
+    >官方 live handoff 说明</a>列出了这些限制。</p>
+<p>升级前，可以先在 Herdr 外层运行</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">herdr status --json
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里能看到 client、server、protocol、<code>restart_needed</code> 和 <code>live_handoff</code> 能力。我目前还是按保守方式处理。任务不能断就延后重启 server；能接受实验风险时再试 handoff，完成以后重新检查版本、pane 输出和 Agent 状态。</p>
+<h2 id="herdr-管到哪里">
+    <a href="#herdr-%e7%ae%a1%e5%88%b0%e5%93%aa%e9%87%8c" class="header-anchor">#</a>
+    Herdr 管到哪里
+</h2><p>Herdr 管终端和 Agent 状态，项目里的协作关系仍留在 Git 与任务说明里。</p>
+<p>两个 pane 指向同一目录时，它们看到同一份文件。Herdr 允许两个 Agent 同时写，也不会自动合并改动。我目前保留一个写入者，审查者只读。以后需要同时写入，再用独立 worktree、分支和文件所有权把范围划开。</p>
+<p>同一个 workspace 也不会让 Agent 自动共享上下文。Codex 能看到文件、Git diff、测试结果和我交给它的任务。Claude Code 为什么做出某项设计，仍要靠项目文档、提交信息或审查说明传下去。</p>
+<p>状态只能引导人去哪里看。<code>done</code> 说明有结果待看，没有证明结果正确。<code>blocked</code> 说明界面像是在等待输入，批准什么仍要读上下文。碰到删除、部署、凭据和高风险修改，仍然需要进入 pane 确认。</p>
+<p>远程连接沿用 OpenSSH 的身份验证。<code>herdr --remote</code> 不要求在 SSH 配置中启用 <code>ForwardAgent yes</code>。远程 Agent 如果需要借用本地密钥访问 Git，再单独判断是否接受 agent forwarding 的风险。</p>
+<p>Herdr 的适用范围因此很清楚。一个 shell 用不上它。项目里同时跑着两个 Agent，旁边还有日志或测试，或者工作全在远程 Linux 上，就可以让 Herdr 接手终端的寿命和状态。</p>
+<p>Mac 重启以后，我重新打开 Ghostty，敲下 <code>herdr --remote &lt;host&gt;</code>。原来的位置还在，任务也还在，不用再把三个 SSH Tab 从头拼一遍。对我来说，这已经够了。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai/">Ai</a>
+        
+            <a href="/tags/herdr/">Herdr</a>
+        
+            <a href="/tags/agent/">Agent</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/deepseek-harness-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E7%9A%84-agent-%E8%BF%90%E8%A1%8C%E6%97%B6/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">DeepSeek Harness 深度解析：“一切皆插件”的 Agent 运行时</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/herdr-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Herdr 操作手册</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BB%8E-vibe-coding-%E5%88%B0%E8%BD%AF%E4%BB%B6%E5%B7%A5%E5%8E%82%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E6%AD%A3%E5%9C%A8%E7%BB%8F%E5%8E%86%E4%BB%80%E4%B9%88/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">从 Vibe Coding 到软件工厂，软件工程正在经历什么</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/claude-code--%E6%99%BA%E8%B0%B1-ai-%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Claude Code &#43; 智谱 AI 配置使用指南</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E6%89%8B%E5%8A%A8%E5%88%9B%E5%BB%BA-kprobe-%E4%BA%8B%E4%BB%B6%E8%BF%BD%E8%B8%AA-bind-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">手动创建 kprobe 事件追踪 bind 系统调用</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "mazhen-tech" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2014 - 
+        
+        2026 mazhen.tech
+    </section>
+    
+    <section class="powerby">
+        
+            <a target="_blank" href="https://beian.miit.gov.cn">粤 ICP 备 2022085181 号 -1</a> <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.25.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
