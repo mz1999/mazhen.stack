@@ -369,7 +369,11 @@
     <li><a href="#先让它在本地活过一次">先让它在本地活过一次</a></li>
     <li><a href="#我的规则是一个-ghostty-tab-对应一台机器">我的规则是一个 Ghostty Tab 对应一台机器</a></li>
     <li><a href="#侧边栏告诉我该去看谁">侧边栏告诉我该去看谁</a></li>
-    <li><a href="#claude-code-叫来-codex-审查">Claude Code 叫来 Codex 审查</a></li>
+    <li><a href="#claude-code-叫来-codex-审查">Claude Code 叫来 Codex 审查</a>
+      <ol>
+        <li><a href="#一次实际的文档事实核查">一次实际的文档事实核查</a></li>
+      </ol>
+    </li>
     <li><a href="#ssh-断了任务还在">SSH 断了，任务还在</a>
       <ol>
         <li><a href="#手机上临时看一眼">手机上临时看一眼</a></li>
@@ -441,7 +445,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 11 分钟
+                    阅读时长: 12 分钟
                 </time>
             </div>
         
@@ -592,7 +596,28 @@
 	
 	
 ></p>
-<p>从使用者的角度看，结果自动回到了 Claude Code。底下的动作仍然很具体。Herdr CLI 通过本地 socket 操作 Codex 所在的 PTY，写入提示，等待生命周期状态，再把 <code>agent read</code> 读到的终端文本交回 Claude Code。Codex 没有直接向 Claude Code 推送结构化消息，两个 Agent 也没有自动共享上下文。</p>
+<h3 id="一次实际的文档事实核查">
+    <a href="#%e4%b8%80%e6%ac%a1%e5%ae%9e%e9%99%85%e7%9a%84%e6%96%87%e6%a1%a3%e4%ba%8b%e5%ae%9e%e6%a0%b8%e6%9f%a5" class="header-anchor">#</a>
+    一次实际的文档事实核查
+</h3><p>我最近在远程机器 <code>hp-linux</code> 上跑过一次实际委派。Claude Code 位于 <code>apusic-jdk-build</code> workspace 的左侧 pane，我让它使用 Herdr，叫一个 Codex 对 <code>apusic-jdk-site</code> 仓库的标准版产品文档做独立事实核查，检查错误、遗漏和前后不一致，全程不改文件。</p>
+<p>我在 Claude Code 里输入的原话很短。</p>
+<blockquote>
+<p><code>/herdr 我希望你用 codex 对前面的文档进行一次全面 review</code></p>
+</blockquote>
+<p>然后流程就开始了。</p>
+<p><img src="https://cdn.mazhen.tech/2026/20260819145717768.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Claude Code 通过 Herdr 启动 Codex 做文档事实核查"
+	
+	
+></p>
+<p>Claude Code 先执行 <code>pane split --current --direction right --cwd &quot;$PWD&quot; --no-focus</code>，从返回结果里拿到新 pane ID。接着它用 <code>agent start</code> 启动名为 <code>docreviewer</code> 的 Codex，再通过 <code>agent prompt</code> 送入核查范围和只读要求。左侧 Claude Code 没有失去焦点，右侧 Codex 已经开始工作，侧边栏同时列出了 <code>claude</code> 和 <code>docreviewer</code>。</p>
+<p>Codex 收到任务后，先读取文档审查范围和 <code>tech-doc-style-chinese</code> Skill，随后建立基准清单，准备逐项核查特性、参数、路径和版本信息。我保存画面时，<code>docreviewer</code> 仍处于 <code>working</code>，最终缺陷清单还没有返回。这次操作能证明 Claude Code 已经完成创建、启动和派发，后面的结果回收仍要等 <code>agent read</code>。</p>
+<p>等 Codex 完成、Claude Code 执行 <code>agent read</code> 以后，结果才会回到原会话。使用者看起来像是 Claude Code 自动拿到了审查意见，底下的动作仍然很具体。Herdr CLI 通过本地 socket 操作 Codex 所在的 PTY，写入提示，等待生命周期状态，再把终端文本交回 Claude Code。Codex 没有直接向 Claude Code 推送结构化消息，两个 Agent 也没有自动共享上下文。</p>
 <p>这套流程对应的命令并不神秘。下面这段通常由 Claude Code 按 Skill 执行，系统需要安装 <code>jq</code>。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -641,8 +666,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>agent start</code> 不会创建 pane。它只负责在已有的空闲 pane 中启动 Agent，所以前面的 <code>pane split</code> 不能省。<code>agent prompt --wait</code> 等待的是生命周期状态。Codex 如果进入 <code>blocked</code>，Claude Code 还要先读状态和输出，遇到权限或产品判断时仍可能回来问我。</p>
-<p>两个 Agent 在这里使用同一个 Git 工作目录。我给自己的规则是 Claude Code 写，Codex 只读审查。只读要求要写进给 Codex 的提示，Herdr 本身不会强制执行。我还没有在这套工作流里使用 worktree，以后真要让两个 Agent 同时写，再用独立 worktree 隔开。</p>
-<p>这里没有一场值得渲染的审查事故。它就是我每天会重复的流程。Claude Code 干完以后叫来 Codex，等它看完，再把结果带回原来的会话。旁边的 pane 一直可见，我随时可以切过去看，但不必手工在两个 Agent 之间传话。</p>
+<p>Herdr Skill 默认让 sibling pane 沿用当前 cwd，这不等于 Codex 只能审查当前仓库。上面的文档核查里，两个 pane 都从 <code>apusic-jdk-build</code> 启动，Claude Code 在提示中把 <code>apusic-jdk-site</code> 的绝对路径交给了 <code>docreviewer</code>。审查范围最终由任务提示和文件权限决定。</p>
+<p>我给自己的规则仍然是 Claude Code 写，Codex 只读审查。只读要求要写进给 Codex 的提示，Herdr 本身不会强制执行。我还没有在这套工作流里使用 worktree，以后真要让两个 Agent 同时写，再用独立 worktree 隔开。旁边的 pane 一直可见，我随时可以切过去看，但不必手工在两个 Agent 之间传话。</p>
 <h2 id="ssh-断了任务还在">
     <a href="#ssh-%e6%96%ad%e4%ba%86%e4%bb%bb%e5%8a%a1%e8%bf%98%e5%9c%a8" class="header-anchor">#</a>
     SSH 断了，任务还在
